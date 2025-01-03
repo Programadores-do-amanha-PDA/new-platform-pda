@@ -37,7 +37,7 @@ export const LoginForm: React.FC = () => {
 
       if (response.status === 200) {
         toast.success(response.data.message);
-        router.push("/");
+        router.push("/dashboard");
       }
     } catch (error) {
       toast.error("Erro ao fazer o login. Verifique suas credenciais.");
