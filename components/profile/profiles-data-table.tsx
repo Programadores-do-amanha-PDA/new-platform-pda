@@ -88,7 +88,6 @@ export const columns: ColumnDef<Profiles>[] = [
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <ProfilesSheetData profile={profile} />
-            <DropdownMenuItem></DropdownMenuItem>
             <DropdownMenuItem>Deletar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
