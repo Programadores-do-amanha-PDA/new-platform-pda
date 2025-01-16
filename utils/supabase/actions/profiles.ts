@@ -6,6 +6,8 @@ export const getAllProfiles = async () => {
     const supabase = await createClient();
 
     const { data, error } = await supabase.from("profiles").select();
+
+    console.log(data, error)
     if (error) throw error;
 
     return data;

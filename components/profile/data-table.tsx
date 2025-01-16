@@ -13,15 +13,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -32,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "../ui/skeleton";
+import NewProfileSheetData from "./new-profile-sheet-data";
 
 export function DataTable({
   data,
@@ -71,7 +65,7 @@ export function DataTable({
 
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
+      <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Busque um email..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
@@ -80,7 +74,7 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        {/* new user */}
+        <NewProfileSheetData />
       </div>
 
       <div className="rounded-md border">

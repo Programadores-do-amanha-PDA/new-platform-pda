@@ -1,36 +1,49 @@
 "use server";
-
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
-export async function login(data: { email: string; password: string }) {
+type UserAuth = {
+  email: string;
+  password: string;
+  options?: {
+    data?: {
+      full_name?: string;
+      email?: string;
+      roles?: string[];
+    };
+  };
+};
+
+type UserAuthLogin = {
+  email: string;
+  password: string;
+};
+
+export async function login(userCredentials: UserAuthLogin) {
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword(data);
+  const { data, error } = await supabase.auth.signInWithPassword(
+    userCredentials
+  );
 
-  if (error) {
+  console.log(data, error)
+
+  if (error || !data.user) {
     return false;
   }
 
   return true;
 }
-export async function signup(formData: FormData) {
-  const supabase = await createClient();
+export async function makeSingUpWithEmailProvider(userData: UserAuth) {
+  try {
+    const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+    const { data, error } = await supabase.auth.signUp(userData);
 
-  const { error } = await supabase.auth.signUp(data);
+    if (error || !data || !data.user) throw error;
 
-  if (error) {
-    redirect("/error");
+    return data.user.id;
+  } catch (e) {
+    console.error(e);
+    return false;
   }
-
-  revalidatePath("/", "layout");
-  redirect("/account");
 }

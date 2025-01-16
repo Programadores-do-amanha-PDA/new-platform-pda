@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import ProfilesSheetData from "./profiles-sheet-data";
+import EditProfileSheetData from "./edit-profile-sheet-data";
 
 export type Profiles = {
   id: string;
@@ -87,7 +87,7 @@ export const columns: ColumnDef<Profiles>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <ProfilesSheetData profile={profile} />
+            <EditProfileSheetData profile={profile} />
             <DropdownMenuItem>Deletar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

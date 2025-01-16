@@ -33,9 +33,10 @@ export const LoginForm: React.FC = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/supabase", data);
+      const response = await axios.post("/api/auth/singin", data);
 
       if (response.status === 200) {
+        console.log(response.data)
         toast.success(response.data.message);
         router.push("/dashboard");
       }

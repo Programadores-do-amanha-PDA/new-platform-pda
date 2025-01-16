@@ -16,13 +16,16 @@ import {
 import { Profiles } from "./profiles-data-table";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
+import { Plus } from "lucide-react";
 type UserRoleType = {
   id: number;
   role: string;
   user_id: string;
 };
 
-function ProfilesSheetData({ profile }: { profile: Profiles }) {
+function EditProfileSheetData({ profile }: { profile: Profiles }) {
+  const [fullName, setFullName] = useState(profile.full_name);
+  const [email, setEmail] = useState(profile.email);
   const [userRoles, setUserRoles] = useState<UserRoleType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -55,9 +58,9 @@ function ProfilesSheetData({ profile }: { profile: Profiles }) {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Editar Dados de Perfil</SheetTitle>
+          <SheetTitle>Editar Dados do Usuário</SheetTitle>
           <SheetDescription>
-            Atualize os dados de perfil e os cargos de um usuário
+            Atualize os dados de perfil e os cargos do usuário
           </SheetDescription>
         </SheetHeader>
         <form className="grid gap-4 my-8" onSubmit={(e) => e.preventDefault()}>
@@ -67,7 +70,8 @@ function ProfilesSheetData({ profile }: { profile: Profiles }) {
             </Label>
             <Input
               id="name"
-              value={profile?.full_name}
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
               className="col-span-3"
             />
           </div>
@@ -75,24 +79,41 @@ function ProfilesSheetData({ profile }: { profile: Profiles }) {
             <Label htmlFor="email" className="text-left">
               Email
             </Label>
-            <Input
-              id="email"
-              value={profile?.email}
-              readOnly
-              className="col-span-3"
-            />
+            <Input id="email" value={email} readOnly className="col-span-3" />
           </div>
           <Separator className="my-4" />
           <div className="grid grid-cols-4 items-center gap-4">
             <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
               Cargo
             </p>
+            {!loading ? (
+              <div className="col-span-3">
+                {userRoles.map((r, i) => (
+                  <Badge variant="outline" key={i}>
+                    {r.role}
+                  </Badge>
+                ))}
+                <Badge variant="outline" className="ml-2">
+                  <Plus />
+                </Badge>
+              </div>
+            ) : (
+              <div className="col-span-3">
+                {Array(3).map((_, i) => (
+                  <Badge variant="outline" key={i}>
+                  </Badge>
+                ))}
+              </div>
+            )}
             <div className="col-span-3">
               {userRoles.map((r, i) => (
                 <Badge variant="outline" key={i}>
                   {r.role}
                 </Badge>
               ))}
+              <Badge variant="outline" className="ml-2">
+                <Plus />
+              </Badge>
             </div>
           </div>
         </form>
@@ -106,4 +127,4 @@ function ProfilesSheetData({ profile }: { profile: Profiles }) {
   );
 }
 
-export default ProfilesSheetData;
+export default EditProfileSheetData;
