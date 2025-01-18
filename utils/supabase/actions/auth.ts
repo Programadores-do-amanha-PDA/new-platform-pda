@@ -6,8 +6,8 @@ type UserAuth = {
   password: string;
   options?: {
     data?: {
+      user_email?: string;
       full_name?: string;
-      email?: string;
       roles?: string[];
     };
   };
@@ -25,7 +25,7 @@ export async function login(userCredentials: UserAuthLogin) {
     userCredentials
   );
 
-  console.log(data, error)
+  console.log(data, error);
 
   if (error || !data.user) {
     return false;
@@ -33,6 +33,7 @@ export async function login(userCredentials: UserAuthLogin) {
 
   return true;
 }
+
 export async function makeSingUpWithEmailProvider(userData: UserAuth) {
   try {
     const supabase = await createClient();
@@ -47,3 +48,50 @@ export async function makeSingUpWithEmailProvider(userData: UserAuth) {
     return false;
   }
 }
+
+export const singOut = async () => {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error(error);
+
+    return false;
+  }
+};
+
+export const clientGetAuthUser = async () => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error) throw error;
+
+    return data.user;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+      redirectTo: "https://example.com/update-password",
+    });
+
+    if (error) throw error;
+
+    return true;
+  } catch (error) {
+    console.error(error);
+
+    return false;
+  }
+};

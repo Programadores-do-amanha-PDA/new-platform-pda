@@ -1,5 +1,3 @@
-import * as React from "react";
-
 import {
   Select,
   SelectContent,
@@ -9,19 +7,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/selectRoles";
-import { UserRoleType } from "@/types/auth";
+import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
 
 export function RoleSelector({
   placeholder,
   label,
-  itens,
+  excludeItens,
   value,
   onChange,
 }: {
   placeholder?: string;
   label: string;
-  itens: UserRoleType[];
   value?: string;
+  excludeItens?: string[];
   onChange: (value: string) => void;
 }) {
   return (
@@ -32,9 +30,9 @@ export function RoleSelector({
       <SelectContent>
         <SelectGroup>
           <SelectLabel>{label}</SelectLabel>
-          {itens.map((item, i) => (
-            <SelectItem key={i} value={String(item.id)}>
-              {item.role}
+          {app_role.filter((role) => !excludeItens?.includes(role)).map((item, i) => (
+            <SelectItem key={i} value={item}>
+              {item}
             </SelectItem>
           ))}
         </SelectGroup>

@@ -7,7 +7,15 @@ export interface User {
   email?: string;
 }
 
-export interface UserRoleType {
+export type UserRoleType = {
   id: number;
   role: string;
-}
+  user_id?: string;
+};
+
+export type Profiles = {
+  id: string;
+  email: string;
+  full_name: string;
+  user_roles?: UserRoleType[];
+};

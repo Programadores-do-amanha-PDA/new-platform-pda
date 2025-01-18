@@ -16,11 +16,9 @@ import {
 import { useEffect, useState } from "react";
 import EditProfileSheetData from "./edit-profile-sheet-data";
 
-export type Profiles = {
-  id: string;
-  email: string;
-  full_name: string;
-};
+import { Profiles } from "@/types/auth";
+import axios from "axios";
+import { Badge } from "../ui/badge";
 
 export const columns: ColumnDef<Profiles>[] = [
   {
@@ -35,6 +33,7 @@ export const columns: ColumnDef<Profiles>[] = [
           table.toggleAllPageRowsSelected(!!value)
         }
         aria-label="Select all"
+        className="mx-2"
       />
     ),
     cell: ({ row }) => (
@@ -49,7 +48,18 @@ export const columns: ColumnDef<Profiles>[] = [
   },
   {
     accessorKey: "full_name",
-    header: () => <div className="text-left">Nome completo</div>,
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="text-left px-2"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Nome
+          <ArrowUpDown />
+        </Button>
+      );
+    },
     cell: ({ row }) => (
       <div className="lowercase">{row.getValue("full_name")}</div>
     ),
@@ -60,6 +70,7 @@ export const columns: ColumnDef<Profiles>[] = [
       return (
         <Button
           variant="ghost"
+          className="px-2"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Email
@@ -68,6 +79,16 @@ export const columns: ColumnDef<Profiles>[] = [
       );
     },
     cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+  },
+  {
+    accessorKey: "user_roles",
+    header: () => <div className="px-2 text-left">Cargos</div>,
+
+    cell: ({ row }) => {
+      return row
+        .getValue("user_roles")
+        ?.map((userRole) => <Badge variant="outline">{userRole.role}</Badge>);
+    },
   },
   {
     id: "actions",
@@ -97,27 +118,26 @@ export const columns: ColumnDef<Profiles>[] = [
 ];
 
 const ProfilesDataTable = () => {
-  const [data, setData] = useState<Profiles[]>([]);
+  const [profiles, setProfiles] = useState<Profiles[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfiles = async () => {
       setLoading(true);
       try {
-        const response = await fetch("/api/profiles");
-        const profiles = await response.json();
-        setData(profiles.results);
+        const response = await axios.get("/api/profiles");
+        setProfiles(response.data.results);
       } catch (error) {
         console.error(error);
-      } finally {
-        setLoading(false);
       }
+
+      setLoading(false);
     };
 
-    fetchData();
+    fetchProfiles();
   }, []);
 
-  return <DataTable columns={columns} data={data} loading={loading} />;
+  return <DataTable columns={columns} data={profiles} loading={loading} />;
 };
 
 export default ProfilesDataTable;

@@ -13,11 +13,11 @@ export default function Home() {
           <Separator orientation="vertical" className="!mx-3" />
           <div className="truncate text-muted-foreground">Inicio</div>
           <ChevronRight className="h-3.5 w-3.5" />
-          <div className="text-foreground">Usuários</div>
+          <div className="text-foreground">Vagas</div>
         </div>
         <div className="space-y-2">
           <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-            Usuários
+            Todas as vagas
           </h1>
         </div>
         <div className="space-y-2">

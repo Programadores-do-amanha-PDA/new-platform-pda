@@ -16,7 +16,7 @@ export async function POST(req: Request) {
       password: password,
       options: {
         data: {
-          email: email,
+          user_email: email,
           full_name: full_name,
         },
       },
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { message: "Sucesso ao criar o usuário!", userId },
+      { message: "Sucesso ao criar o usuário!", user_id: userId },
       { status: 201 }
     );
   } catch (error) {

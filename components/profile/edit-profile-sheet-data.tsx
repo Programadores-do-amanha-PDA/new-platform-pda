@@ -13,38 +13,19 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Profiles } from "./profiles-data-table";
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
-import { Plus } from "lucide-react";
-type UserRoleType = {
-  id: number;
-  role: string;
-  user_id: string;
-};
 
-function EditProfileSheetData({ profile }: { profile: Profiles }) {
+import { Profiles } from "@/types/auth";
+
+function EditProfileSheetData({
+  profile,
+}: {
+  profile: Profiles;
+}) {
   const [fullName, setFullName] = useState(profile.full_name);
   const [email, setEmail] = useState(profile.email);
-  const [userRoles, setUserRoles] = useState<UserRoleType[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/roles?user_id=${profile.id}`);
-        const profiles = await response.json();
-        console.log("[ROLES]", profiles.results);
-        setUserRoles(profiles.results);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [profile]);
 
   return (
     <Sheet>
@@ -88,33 +69,20 @@ function EditProfileSheetData({ profile }: { profile: Profiles }) {
             </p>
             {!loading ? (
               <div className="col-span-3">
-                {userRoles.map((r, i) => (
+                {profile.user_roles?.map((r, i) => (
                   <Badge variant="outline" key={i}>
                     {r.role}
                   </Badge>
                 ))}
-                <Badge variant="outline" className="ml-2">
-                  <Plus />
-                </Badge>
+                {/* <RoleSelector /> */}
               </div>
             ) : (
               <div className="col-span-3">
                 {Array(3).map((_, i) => (
-                  <Badge variant="outline" key={i}>
-                  </Badge>
+                  <Badge variant="outline" key={i}></Badge>
                 ))}
               </div>
             )}
-            <div className="col-span-3">
-              {userRoles.map((r, i) => (
-                <Badge variant="outline" key={i}>
-                  {r.role}
-                </Badge>
-              ))}
-              <Badge variant="outline" className="ml-2">
-                <Plus />
-              </Badge>
-            </div>
           </div>
         </form>
         <SheetFooter>

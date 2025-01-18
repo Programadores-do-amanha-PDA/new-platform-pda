@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "../ui/skeleton";
 import NewProfileSheetData from "./new-profile-sheet-data";
+import { Profiles } from "@/types/auth";
 
 export function DataTable({
   data,
@@ -33,7 +34,7 @@ export function DataTable({
   loading,
 }: {
   data: unknown[];
-  columns: ColumnDef<unknown>[];
+  columns: ColumnDef<Profiles>[];
   loading: boolean;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -84,7 +85,7 @@ export function DataTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="!px-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

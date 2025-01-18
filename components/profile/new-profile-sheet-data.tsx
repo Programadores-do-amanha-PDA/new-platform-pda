@@ -1,11 +1,10 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sheet,
-  SheetClose,
   SheetContent,
   SheetDescription,
   SheetFooter,
@@ -17,21 +16,16 @@ import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
 import axios from "axios";
-import { UserRoleType } from "@/types/auth";
 import { RoleSelector } from "./RoleSelector";
 import { X } from "lucide-react";
 
-const roles: UserRoleType[] = [
-  { id: 1, role: "Admin" },
-  { id: 2, role: "employer" },
-  { id: 3, role: "Alumni" },
-];
+import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
 
 function NewProfileSheetData() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userRoles, setUserRoles] = useState<UserRoleType[]>([]);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -42,13 +36,13 @@ function NewProfileSheetData() {
     setUserRoles([]);
   };
 
-  const handleSetUserRoles = (newRoleId: string) => {
-    const newRole = roles.find((role) => String(role.id) === newRoleId);
+  const handleSetUserRoles = (newRoleName: string) => {
+    const newRole = app_role.find((role) => role === newRoleName);
 
     if (newRole && !userRoles.includes(newRole)) {
       setUserRoles([...userRoles, newRole]);
     } else if (newRole && userRoles.includes(newRole)) {
-      setUserRoles(userRoles.filter((role) => role.id !== newRole.id));
+      setUserRoles(userRoles.filter((role) => role !== newRole));
     }
   };
 
@@ -68,17 +62,29 @@ function NewProfileSheetData() {
       if (!validateEmail(email)) throw new Error("Invalid email");
 
       const data = {
-        full_name: fullName,
         email: email,
         password: password,
-        roles: userRoles.map((role) => role.role),
+        full_name: fullName,
       };
 
-      const response = await axios.post("/api/auth/singup", data);
+      const singUpResponse = await axios.post("/api/auth/singup", data);
 
-      if (response.status !== 201 && !response.data.user_id) throw new Error();
+      if (singUpResponse.status !== 201 || !singUpResponse.data.user_id)
+        throw "no sing up response";
 
-      toast.success(response.data.message);
+      console.log(userRoles.length);
+      console.log(singUpResponse.data.user_id);
+      if (userRoles.length > 0) {
+        for (let i = 0; i < userRoles.length; i++) {
+          const role = userRoles[i];
+          console.log(role);
+          const data = { userId: singUpResponse.data.user_id, role: role };
+          const roleAssignerResponse = await axios.post("/api/roles", data);
+          if (roleAssignerResponse.status !== 201) throw "role assign error";
+        }
+      }
+
+      toast.success(singUpResponse.data.message);
       handleClearInputs();
       setLoading(false);
     } catch (error) {
@@ -93,6 +99,14 @@ function NewProfileSheetData() {
 
         case "Invalid email":
           toast.error("E-mail inválido!");
+          break;
+
+        case "no sing up response":
+          toast.error("Erro ao criar usuário! Tente novamente mais tarde.");
+          break;
+
+        case "role assign error":
+          toast.error("Erro ao atribuir permissões!");
           break;
 
         default:
@@ -165,47 +179,28 @@ function NewProfileSheetData() {
             <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
               Cargo
             </p>
-            {!loading ? (
-              <div className="col-span-3 flex gap-1">
-                {userRoles.map((r, i) => (
-                  <Badge variant="outline" key={i}>
-                    {r.role}
-                    <X
-                      onClick={() => handleSetUserRoles(String(r.id))}
-                      className="size-3 ml-1 cursor-pointer"
-                    />
-                  </Badge>
-                ))}
-                {roles.filter(
-                  (role) =>
-                    !userRoles
-                      .map((ur) => String(ur.id))
-                      .includes(String(role.id))
-                ).length > 0 && (
+
+            <div className="col-span-3 flex gap-1">
+              {userRoles.map((r, i) => (
+                <Badge variant="outline" key={i}>
+                  {r}
+                  <X
+                    onClick={() => handleSetUserRoles(r)}
+                    className="size-3 ml-1 cursor-pointer"
+                  />
+                </Badge>
+              ))}
+              {userRoles.length < 1 &&
+                app_role.filter((role) => !userRoles.includes(role)).length >
+                  0 && (
                   <RoleSelector
-                    itens={roles.filter(
-                      (role) =>
-                        !userRoles
-                          .map((ur) => String(ur.id))
-                          .includes(String(role.id))
-                    )}
+                    excludeItens={userRoles}
                     label="Adicionar cargo"
                     value="0"
                     onChange={handleSetUserRoles}
                   />
                 )}
-              </div>
-            ) : (
-              <div className="col-span-3 ">
-                {Array(3).map((_, i) => (
-                  <Badge
-                    variant="outline"
-                    className="animate-pulse"
-                    key={i}
-                  ></Badge>
-                ))}
-              </div>
-            )}
+            </div>
           </div>
         </form>
         <SheetFooter>
