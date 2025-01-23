@@ -1,22 +1,6 @@
 "use client";
-
 import * as React from "react";
-import {
-  AudioWaveform,
-  BookOpen,
-  GraduationCap,
-  Briefcase,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-} from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -24,109 +8,71 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { TeamSwitcher } from "@/components/team-switcher";
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavUser } from "@/components/nav-user";
+import { LucideIcon } from "lucide-react";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Empregabilidade Já",
-      logo: GalleryVerticalEnd,
-      plan: "Time PdA",
-    },
-    {
-      name: "Empregabilidade Já",
-      logo: AudioWaveform,
-      plan: "Alumni",
-    },
-    {
-      name: "Administrador",
-      logo: Command,
-      plan: "Time PdA",
-    },
-  ],
-  navMain: [
-    {
-      title: "Vagas",
-      url: "#",
-      icon: Briefcase,
-      isActive: true,
-      items: [
-        {
-          title: "Todas as vagas",
-          url: "#",
-        },
-        {
-          title: "Buscar vagas",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Alumni",
-      url: "#",
-      icon: GraduationCap,
-      items: [
-        {
-          title: "Todos os alumni",
-          url: "#",
-        },
-        {
-          title: "Adicionar alumni",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Apostilas",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Todas as apostilas",
-          url: "#",
-        },
-        {
-          title: "Criar nova",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
-};
+interface AppSidebarProps {
+  data: {
+    teams: {
+      name: string;
+      logo: React.ElementType;
+      plan: string;
+    }[];
+    navMain: {
+      title: string;
+      url: string;
+      icon?: LucideIcon;
+      isActive?: boolean;
+      items?: {
+        title: string;
+        url: string;
+      }[];
+    }[];
+    projects: {
+      name: string;
+      url: string;
+      icon: LucideIcon;
+    }[];
+    user: {
+      name: string;
+      email: string;
+      avatar: string;
+    };
+  };
+  loading: boolean;
+}
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: AppSidebarProps) {
+  if (props.loading) {
+    return (
+      <Sidebar
+        collapsible="icon"
+        {...props}
+        className="animate-pulse flex flex-col"
+      >
+        <SidebarHeader className="animate-pulse bg-primary/15 h-12 rounded-sm"></SidebarHeader>
+        <SidebarContent className="animate-pulse bg-primary/15 h-full rounded-sm my-4"></SidebarContent>
+        <SidebarFooter className="animate-pulse bg-primary/15 h-12 rounded-sm"></SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+    );
+  }
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        {props.data.teams && <TeamSwitcher teams={props.data.teams} />}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {props.data.navMain && <NavMain items={props.data.navMain} />}
+        {props.data.projects && props.data.projects.length > 0 && (
+          <NavProjects projects={props.data?.projects} />
+        )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={props.data.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
