@@ -1,14 +1,13 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTable } from "./data-table";
+import { DataTable } from "../data-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -19,7 +18,7 @@ import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { JobDetailsType, JobType } from "@/types/jobs";
 import { toast } from "sonner";
-import JobSheetData from "./job-sheet-data";
+import JobSheetData from "../job-sheet-data";
 
 const JobsDataTable = () => {
   const [jobs, setJobs] = useState<JobType[]>([]);

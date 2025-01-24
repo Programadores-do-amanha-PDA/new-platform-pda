@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { TechnologyCombobox } from "./TechnologyCombobox";
+import { TechnologyCombobox } from "./curated/TechnologyCombobox";
 import { Textarea } from "@/components/ui/textarea";
 
 import { LoaderCircle, X } from "lucide-react";
-import { Selector } from "./Selector";
+import { Selector } from "./curated/Selector";
 import { JobType } from "@/types/jobs";
 
 const technologies = [

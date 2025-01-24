@@ -1,5 +1,5 @@
 "use client";
-import JobsDataTable from "@/components/jobs/all/jobs-data-table";
+import JobsDataTable from "@/components/jobs/curated/jobs-data-table";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,7 @@ export default function Home() {
         <ChevronRight className="h-3.5 w-3.5" />
         <div className="text-muted-foreground">Vagas</div>
         <ChevronRight className="h-3.5 w-3.5" />
-        <div className="text-foreground">Todas as vagas</div>
+        <div className="text-foreground">Vagas curadas</div>
       </div>
 
       <div className="flex flex-col gap-4">

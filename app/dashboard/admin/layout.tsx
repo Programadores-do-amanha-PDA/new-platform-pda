@@ -75,8 +75,8 @@ export default function RootLayout({
         isActive: true,
         items: [
           {
-            title: "Todas as vagas",
-            url: "/dashboard/admin/jobs/all",
+            title: "Vagas curadas",
+            url: "/dashboard/admin/jobs/curated",
           },
           {
             title: "Curadoria de vagas",
