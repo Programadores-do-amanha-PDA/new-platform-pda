@@ -22,7 +22,7 @@ export default function Home() {
         <div className="flex justify-between items-center">
           <div className="space-y-2 flex flex-col gap-1">
             <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-              Todas as vagas
+              Vagas curadas
             </h1>
           </div>
         </div>

@@ -46,13 +46,39 @@ const JobsDataTable = () => {
       const response = await axios.delete(`/api/jobs?id=${jobId}`);
       if (response.status === 200) {
         toast.success("Vaga deletada com sucesso!");
-        const filteredProfiles = jobs.filter((profile) => profile.id !== jobId);
+        const filteredProfiles = jobs.filter((job) => job.id !== jobId);
         setJobs(filteredProfiles);
         return true;
       }
     } catch (error) {
       console.error("Error deleting job:", error);
       toast.error("Erro ao deletar a vaga");
+      return false;
+    }
+  };
+
+  const handleResendJobToCuration = async (jobId: string) => {
+    try {
+      const data = {
+        jobId: jobId,
+        updates: {
+          curated: false,
+        },
+      };
+
+      const response = await axios.put(`/api/jobs`, data);
+      if (response.status === 200) {
+        const filteredProfiles = jobs.map((job) =>
+          job.id === jobId ? { ...job, curated: false } : job
+        );
+        setJobs(filteredProfiles);
+
+        toast.success("Vaga reenviada para curadoria com sucesso!");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error resend to curation job:", error);
+      toast.error("Erro ao reenviar a vaga para a curadoria.");
       return false;
     }
   };
@@ -192,23 +218,33 @@ const JobsDataTable = () => {
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent
+              align="end"
+              className="max-w-52 flex flex-col gap-1"
+            >
+              <div>
+                <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+              </div>
               <JobSheetData
                 mode="edit"
                 currentJob={job}
                 handleUpdateJobs={handleUpdateJob}
               />
-              <DropdownMenuItem>
-                <Button
-                  onClick={() => handleDeleteJob(job.id)}
-                  variant="ghost"
-                  className="!p-0 w-full h-max items-start justify-start text-start"
-                >
-                  Deletar
-                </Button>
-              </DropdownMenuItem>
+              <Button
+                onClick={() => handleResendJobToCuration(job.id)}
+                variant="ghost"
+                className="!px-2 w-full h-max items-start justify-start text-start"
+              >
+                Reenviar para a curadoria
+              </Button>
+              <Button
+                onClick={() => handleDeleteJob(job.id)}
+                variant="destructive"
+                className="!px-2 w-full h-max items-start justify-start text-start"
+              >
+                Deletar Vaga
+              </Button>
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -219,7 +255,7 @@ const JobsDataTable = () => {
   return (
     <DataTable
       columns={columns}
-      data={jobs}
+      data={jobs.filter((job) => job.curated === true)}
       loading={loading}
       handleSetNewJob={handleSetNewJob}
     />

@@ -6,6 +6,8 @@ export type JobType = {
   link: string;
   details?: JobDetailsType;
   created_at?: string;
+  updated_at?: string;
+  curated?: boolean;
 };
 
 export type JobDetailsType = {

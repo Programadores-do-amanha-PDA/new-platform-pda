@@ -8,7 +8,7 @@ export const getAllJobs = async () => {
 
     const { data, error } = await supabase
       .from("jobs")
-      .select("id, title, company, description, details, link, created_at");
+      .select();
 
     if (error) throw error;
 
