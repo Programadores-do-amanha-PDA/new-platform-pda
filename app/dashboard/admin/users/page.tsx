@@ -1,5 +1,5 @@
 "use client";
-import ProfilesDataTable from "@/components/profile/profiles-data-table";
+import ProfilesDataTable from "@/components/users/profiles-data-table";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
@@ -14,13 +14,17 @@ export default function Home() {
           <Separator orientation="vertical" className="!mx-3" />
           <div className="truncate text-muted-foreground">Inicio</div>
           <ChevronRight className="h-3.5 w-3.5" />
-          <div className="text-foreground">Usuários</div>
+          <div className="truncate text-muted-foreground">Usuários</div>
+          <ChevronRight className="h-3.5 w-3.5" />
+          <div className="text-foreground">Todos os usuários</div>
         </div>
+
         <div className="space-y-2">
           <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-            Usuários
+            Todos os usuários
           </h1>
         </div>
+
         <div className="space-y-2">
           <ProfilesDataTable />
         </div>

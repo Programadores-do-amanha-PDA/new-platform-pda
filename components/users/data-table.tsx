@@ -1,6 +1,6 @@
 "use client";
-
 import * as React from "react";
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,8 +14,10 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import { ProfileType } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -24,9 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "../ui/skeleton";
-import NewProfileSheetData from "./new-profile-sheet-data";
-import { Profiles } from "@/types/auth";
+import UserSheetData from "./user-sheet-data";
 
 export function DataTable({
   data,
@@ -34,7 +34,7 @@ export function DataTable({
   loading,
 }: {
   data: unknown[];
-  columns: ColumnDef<Profiles>[];
+  columns: ColumnDef<ProfileType>[];
   loading: boolean;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -75,7 +75,7 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        <NewProfileSheetData />
+        <UserSheetData mode="new" />
       </div>
 
       <div className="rounded-md border">

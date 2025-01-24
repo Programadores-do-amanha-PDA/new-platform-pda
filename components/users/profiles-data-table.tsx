@@ -16,11 +16,12 @@ import {
 import { useEffect, useState } from "react";
 import EditProfileSheetData from "./edit-profile-sheet-data";
 
-import { Profiles } from "@/types/auth";
+import { ProfileType, UserRoleType } from "@/types/auth";
 import axios from "axios";
 import { Badge } from "../ui/badge";
+import UserSheetData from "./user-sheet-data";
 
-export const columns: ColumnDef<Profiles>[] = [
+export const columns: ColumnDef<ProfileType>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -85,17 +86,18 @@ export const columns: ColumnDef<Profiles>[] = [
     header: () => <div className="px-2 text-left">Cargos</div>,
 
     cell: ({ row }) => {
-      return row
-        .getValue("user_roles")
-        ?.map((userRole) => <Badge variant="outline">{userRole.role}</Badge>);
+      return row.getValue<UserRoleType[]>("user_roles")?.map((userRole, i) => (
+        <Badge variant="outline" key={i}>
+          {userRole.role}
+        </Badge>
+      ));
     },
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const profile = row.original;
-      console.log(profile);
+      const user = row.original;
 
       return (
         <DropdownMenu>
@@ -108,7 +110,7 @@ export const columns: ColumnDef<Profiles>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <EditProfileSheetData profile={profile} />
+            <UserSheetData mode="edit" currentUser={user} />
             <DropdownMenuItem>Deletar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -118,7 +120,7 @@ export const columns: ColumnDef<Profiles>[] = [
 ];
 
 const ProfilesDataTable = () => {
-  const [profiles, setProfiles] = useState<Profiles[]>([]);
+  const [profiles, setProfiles] = useState<ProfileType[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

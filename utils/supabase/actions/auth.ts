@@ -81,9 +81,12 @@ export const clientGetAuthUser = async () => {
 export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
   try {
     const supabase = await createClient();
+    const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_BASE_URL;
+
+    if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
     const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-      redirectTo: "https://example.com/update-password",
+      redirectTo: PLATFORM_BASE_URL.concat("/login/reset"),
     });
 
     if (error) throw error;

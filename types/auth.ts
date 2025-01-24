@@ -13,7 +13,7 @@ export type UserRoleType = {
   user_id?: string;
 };
 
-export type Profiles = {
+export type ProfileType = {
   id: string;
   email: string;
   full_name: string;

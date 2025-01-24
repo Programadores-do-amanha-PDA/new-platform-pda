@@ -1,4 +1,4 @@
-import ProfilesDataTable from "@/components/profile/profiles-data-table";
+import ProfilesDataTable from "@/components/users/profiles-data-table";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
