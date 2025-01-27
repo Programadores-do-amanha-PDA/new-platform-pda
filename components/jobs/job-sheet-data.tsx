@@ -344,7 +344,7 @@ const JobSheetData = ({
             </Label>
             <Input
               id="announcementDate"
-              type="datetime-local"
+              type="date"
               value={announcementDate}
               onChange={(e) => setAnnouncementDate(e.target.value)}
               className="row-span-2"
