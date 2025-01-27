@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import JobSheetData from "../job-sheet-data";
 import JobCard from "./JobCard";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
 
 const JobsDataTable = () => {
   const [jobs, setJobs] = useState<JobType[]>([]);
@@ -91,13 +90,6 @@ const JobsDataTable = () => {
             job={job}
             cardFooter={
               <>
-                <Button
-                  variant={"default"}
-                  onClick={() => window.open(job.link)}
-                  className="w-max"
-                >
-                  <Send />
-                </Button>
                 <JobSheetData
                   mode="edit"
                   currentJob={job}
