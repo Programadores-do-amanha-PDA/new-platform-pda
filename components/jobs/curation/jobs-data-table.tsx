@@ -156,7 +156,7 @@ const JobsDataTable = () => {
       ),
     },
     {
-      accessorKey: "details",
+      accessorKey: "created_at",
       header: ({ column }) => {
         return (
           <Button
@@ -164,26 +164,32 @@ const JobsDataTable = () => {
             className="px-2"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Localização
+            Criada em
             <ArrowUpDown />
           </Button>
         );
       },
-      cell: ({ row }) => (
-        <div className="lowercase">
-          {row.getValue<JobDetailsType>("details").locale[0]}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const createdAt = row.getValue("created_at") as string;
+        console.log(createdAt)
+        const date = new Date(createdAt);
+        const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
+          date.getMonth() + 1
+        )
+          .toString()
+          .padStart(2, "0")}/${date.getFullYear()}`;
+        return <div className="lowercase">{formattedDate}</div>;
+      },
     },
     {
-      accessorKey: "languages",
+      accessorKey: "details",
       header: () => <div className="px-2 text-left">Tecnologias</div>,
 
       cell: ({ row }) => {
         return row
           .getValue<JobDetailsType>("details")
           .languages?.map((language, i) => (
-            <Badge variant="outline" key={i}>
+            <Badge variant="outline" className="!m-1" key={i}>
               {language}
             </Badge>
           ));
@@ -197,7 +203,7 @@ const JobsDataTable = () => {
         return row
           .getValue<JobDetailsType>("details")
           .workplace_type?.map((w, i) => (
-            <Badge variant="outline" key={i}>
+            <Badge variant="outline" className="!m-1" key={i}>
               {w}
             </Badge>
           ));

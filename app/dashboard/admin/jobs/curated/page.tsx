@@ -26,11 +26,9 @@ export default function Home() {
         <div className="text-foreground">Vagas curadas</div>
       </div>
 
-      <div className="flex flex-col gap-4">
         <div className="space-y-2">
           <JobsDataTable />
         </div>
-      </div>
     </main>
   );
 }
