@@ -41,7 +41,7 @@ export const getAllProfiles = async () => {
   }
 };
 
-export const getProfileById = async (id: number) => {
+export const getProfileById = async (id: string) => {
   try {
     const supabase = await createClient();
 

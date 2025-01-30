@@ -39,7 +39,10 @@ export const adminCreateUser = async (userData: Partial<AuthUser>) => {
   try {
     const supabase = await createClientAdmin();
 
-    const { data: user, error } = await supabase.auth.admin.createUser(userData);
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.admin.createUser(userData);
 
     if (error) throw error;
 
@@ -55,11 +58,12 @@ export const adminUpdateUser = async (
   updates: Partial<AuthUser>
 ) => {
   try {
+    console.log("updates ---", updates);
     const supabase = await createClientAdmin();
-    const { data: user, error } = await supabase.auth.admin.updateUserById(
-      userId,
-      updates
-    );
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.admin.updateUserById(userId, { ...updates });
 
     if (error || !user) throw error;
 

@@ -24,20 +24,21 @@ export const insertUserRoleWithUserId = async (
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase
+    const {data, error } = await supabase
       .from("user_roles")
-      .insert({ user_id: user_id, role: role });
+      .insert({ user_id: user_id, role: role })
+      .select()
 
     if (error) throw error;
 
-    return true;
+    return data;
   } catch (error) {
     console.error("INSERT -> user_roles", error);
     return false;
   }
 };
 
-export const updateUserROleWIthUserId = async (
+export const updateUserRoleWIthUserId = async (
   user_id: string,
   newRole: string
 ) => {
@@ -47,7 +48,8 @@ export const updateUserROleWIthUserId = async (
     const { data, error } = await supabase
       .from("user_roles")
       .update({ role: newRole })
-      .eq("user_id", user_id);
+      .eq("user_id", user_id)
+      .select();
 
     if (error) throw error;
 

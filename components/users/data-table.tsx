@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,10 +32,17 @@ export function DataTable({
   data,
   columns,
   loading,
+  onInsertNewUser,
+  onUpdateUser,
 }: {
   data: unknown[];
   columns: ColumnDef<unknown>[];
   loading: boolean;
+  onInsertNewUser: (newUser: AuthUserWithProfileType) => void;
+  onUpdateUser: (
+    userID: string | undefined,
+    user: Partial<AuthUserWithProfileType>
+  ) => void;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -75,7 +82,11 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        <UserSheetData mode="new" />
+        <UserSheetData
+          mode="new"
+          onInsertNewUser={onInsertNewUser}
+          onUpdateUser={onUpdateUser}
+        />
       </div>
 
       <div className="rounded-md border">

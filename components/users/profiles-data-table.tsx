@@ -43,16 +43,17 @@ const ProfilesDataTable = () => {
   }, []);
 
   const handleUpdateUser = (
-    userID: string,
-    updates: AuthUserWithProfileType
+    userID: string | undefined,
+    userUpdated: AuthUserWithProfileType
   ) => {
-    const updatedUsers = users.map((user) =>
-      user.id === userID ? { ...user, ...updates } : user
+    console.log("userUpdated", userUpdated);
+    setUsers((users) =>
+      users.map((user) => (user.id === userID ? { ...userUpdated } : user))
     );
-    setUsers(updatedUsers);
   };
 
   const handleInsertNewUser = (newUser: AuthUserWithProfileType) => {
+    console.log("handleInsertNewUser", newUser);
     const isUserExist = users.map((user) => user.id).includes(newUser.id);
     if (!isUserExist) {
       setUsers((users) => [...users, newUser]);
@@ -214,7 +215,7 @@ const ProfilesDataTable = () => {
 
       cell: ({ row }) => (
         <Badge variant="outline" className="!m-1 truncate">
-          {row.getValue<UserMetadata>("user_metadata").email_verified === true
+          {row.getValue<UserMetadata>("user_metadata")?.email_verified === true
             ? "Confirmado"
             : "Não confirmado"}
         </Badge>
@@ -254,7 +255,6 @@ const ProfilesDataTable = () => {
       enableHiding: false,
       cell: ({ row }) => {
         const user: AuthUserWithProfileType = row.original;
-
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -269,8 +269,8 @@ const ProfilesDataTable = () => {
               <UserSheetData
                 mode="edit"
                 currentUser={user}
-                handleInsertNewUser={handleInsertNewUser}
-                handleUpdateUser={handleUpdateUser}
+                onInsertNewUser={handleInsertNewUser}
+                onUpdateUser={handleUpdateUser}
               />
               {user.id && (
                 <Button
@@ -288,7 +288,15 @@ const ProfilesDataTable = () => {
     },
   ];
 
-  return <DataTable columns={columns} data={users} loading={loading} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={users}
+      loading={loading}
+      onInsertNewUser={handleInsertNewUser}
+      onUpdateUser={handleUpdateUser}
+    />
+  );
 };
 
 export default ProfilesDataTable;
