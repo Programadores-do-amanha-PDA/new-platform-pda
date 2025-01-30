@@ -34,7 +34,7 @@ export function DataTable({
   loading,
 }: {
   data: unknown[];
-  columns: ColumnDef<ProfileType>[];
+  columns: ColumnDef<unknown>[];
   loading: boolean;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -68,7 +68,7 @@ export function DataTable({
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
         <Input
-          placeholder="Busque um email..."
+          placeholder="Busque por um email..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("email")?.setFilterValue(event.target.value)

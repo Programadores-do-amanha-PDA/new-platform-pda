@@ -7,27 +7,27 @@ import { ChevronRight } from "lucide-react";
 
 export default function Home() {
   return (
-    <main className="relative p-6 lg:gap-10 lg:p-8 xl:grid xl:grid-cols-[1fr_300px]">
-      <div className="w-full min-w-0 max-w-2xl">
-        <div className="mb-4 flex h-5 items-center space-x-1 text-sm leading-none">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="!mx-3" />
-          <div className="truncate text-muted-foreground">Inicio</div>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <div className="truncate text-muted-foreground">Usuários</div>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <div className="text-foreground">Todos os usuários</div>
-        </div>
-
-        <div className="space-y-2">
+    <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2 flex flex-col gap-1">
           <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-            Todos os usuários
+            Todos os Usuários
           </h1>
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <ProfilesDataTable />
-        </div>
+      <div className="flex h-5 items-center space-x-1 text-sm leading-none">
+        <SidebarTrigger />
+        <Separator orientation="vertical" className="!mx-3" />
+        <div className="truncate text-muted-foreground">Inicio</div>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <div className="text-muted-foreground">Usuários</div>
+        <ChevronRight className="h-3.5 w-3.5" />
+        <div className="text-foreground">Todos os Usuários</div>
+      </div>
+
+      <div className="space-y-2">
+        <ProfilesDataTable />
       </div>
     </main>
   );

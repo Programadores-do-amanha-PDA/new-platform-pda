@@ -27,6 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
+    "generate-password": "^1.7.1",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.473.0",
     "next": "14.2.16",

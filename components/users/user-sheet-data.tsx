@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import generatePassword from "generate-password";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,17 +19,25 @@ import { Badge } from "../ui/badge";
 import { toast } from "sonner";
 import axios from "axios";
 import { RoleSelector } from "./RoleSelector";
-import { LoaderCircle, X } from "lucide-react";
+import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
-import { ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth";
+import { UserMetadata } from "@supabase/supabase-js";
 
 const UserSheetData = ({
   mode,
   currentUser,
+  handleInsertNewUser,
+  handleUpdateUser,
 }: {
   mode: "new" | "edit";
-  currentUser?: ProfileType;
+  currentUser?: AuthUserWithProfileType;
+  handleInsertNewUser: (newUser: AuthUserWithProfileType) => void;
+  handleUpdateUser: (
+    userID: string,
+    user: Partial<AuthUserWithProfileType>
+  ) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -39,10 +49,12 @@ const UserSheetData = ({
 
   const handleOpenChange = (open: boolean) => {
     if (mode == "edit" && open && currentUser) {
-      setFullName(currentUser.full_name);
-      setEmail(currentUser.email);
       setPassword("");
-      setUserRoles(currentUser.user_roles?.map((role) => role.role) || []);
+      setEmail(currentUser.email || "");
+      setFullName(currentUser.profile?.full_name || "");
+      setUserRoles(
+        currentUser.profile?.user_roles?.map((role) => role.role) || []
+      );
     } else {
       setFullName("");
       setEmail("");
@@ -63,69 +75,121 @@ const UserSheetData = ({
     }
   };
 
+  const handleGenerateRandomPassword = () => {
+    return generatePassword.generate({
+      length: 12,
+      numbers: true,
+      symbols: true,
+      uppercase: true,
+      lowercase: true,
+      excludeSimilarCharacters: true,
+      strict: true,
+    });
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
 
     try {
-      if (!fullName && !email && !password) throw new Error("fill the fields");
-
       const fullNameRegex = /^[a-zA-Z]{4,}(?: [a-zA-Z]+){0,2}$/gm;
       const emailRegex =
         /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
       const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
 
-      if (!fullNameRegex.test(fullName)) throw new Error("Invalid full name");
-      if (!emailRegex.test(email)) throw new Error("Invalid email");
-      if (!passwordRegex.test(password) && mode === "new")
-        throw new Error("Invalid password");
-
-      const data = {
-        email: email,
-        password: password,
-        full_name: fullName,
-      };
       if (mode === "new") {
-        const response = await axios.post("/api/auth/singup", data);
+        if (!fullName && !email && !password) throw "fill the fields";
 
-        if (response.status !== 201 || !response.data.user_id)
+        if (!fullNameRegex.test(fullName)) throw "Invalid full name";
+        if (!emailRegex.test(email)) throw "Invalid email";
+        if (!passwordRegex.test(password)) throw "Invalid password";
+
+        const data: Partial<AuthUserWithProfileType & { password: string }> = {
+          email: email,
+          password: password,
+          user_metadata: {
+            full_name: fullName,
+            user_email: email,
+          },
+        };
+        const response = await axios.post("/api/auth_users", data);
+        console.log(response);
+        if (response.status !== 201 || !response.data.new_user.id)
           throw "no sing up response";
 
-        console.log(userRoles.length);
-        console.log(response.data.user_id);
+        handleInsertNewUser(response.data.new_user);
         if (userRoles.length > 0) {
           const role = userRoles[0];
-          const data = { userId: response.data.user_id, role: role };
+          const data = { userId: response.data.new_user.id, role: role };
           const roleAssignerResponse = await axios.post("/api/roles", data);
           if (roleAssignerResponse.status !== 201) throw "role assign error";
+          handleUpdateUser(response.data.new_user.id, {
+            profile: {
+              user_roles: [{ role: role }],
+            },
+          });
         }
 
         toast.success("Sucesso ao criar novo usuário!");
       } else if (mode === "edit" && currentUser) {
-        const response = await axios.put("/api/users", {
+        if (!fullName && !email && !password) throw "fill the fields";
+        if (
+          fullName !== currentUser.profile?.full_name &&
+          !fullNameRegex.test(fullName)
+        )
+          throw "Invalid full name";
+        if (email !== currentUser.email && !emailRegex.test(email))
+          throw "Invalid email";
+        if (password && !passwordRegex.test(password)) throw "Invalid password";
+
+        const data: Partial<AuthUserWithProfileType & { password: string }> =
+          {};
+
+        if (email !== currentUser.email) {
+          data.email = email;
+        }
+
+        if (password) {
+          data.password = password;
+        }
+
+        const userMetadata: UserMetadata = {};
+        if (fullName !== currentUser.profile?.full_name) {
+          userMetadata.full_name = fullName;
+        }
+
+        if (email !== currentUser.email) {
+          userMetadata.user_email = email;
+        }
+
+        if (Object.keys(userMetadata).length > 0) {
+          data.user_metadata = userMetadata;
+        }
+
+        const response = await axios.put("/api/auth_users", {
           userId: currentUser.id,
           updates: data,
         });
 
         if (response.status !== 201 || !response.data.user_id)
-          throw new Error("no edit user response");
+          throw "no edit user response";
 
-        if (!currentUser?.user_roles && userRoles.length > 0) {
+        if (!currentUser?.profile?.user_roles && userRoles.length > 0) {
           const role = userRoles[0];
           const data = { userId: response.data.user_id, role: role };
           const roleAssignerResponse = await axios.post("/api/roles", data);
-          if (roleAssignerResponse.status !== 201)
-            throw new Error("role assign error");
+          if (roleAssignerResponse.status !== 201) throw "role assign error";
         } else if (
-          currentUser?.user_roles &&
-          currentUser?.user_roles.map((r) => r.role).includes(userRoles[0])
+          currentUser?.profile?.user_roles &&
+          currentUser?.profile.user_roles
+            .map((r) => r.role)
+            .includes(userRoles[0])
         ) {
           const role = userRoles[0];
           const data = { userId: response.data.user_id, role: role };
           const roleAssignerResponse = await axios.put("/api/roles", data);
-          if (roleAssignerResponse.status !== 201)
-            throw new Error("role assign error");
+          if (roleAssignerResponse.status !== 201) throw "role assign error";
         }
 
         toast.success("Sucesso ao editar o usuário!");
@@ -134,7 +198,8 @@ const UserSheetData = ({
       handleOpenChange(false);
       setLoading(false);
     } catch (error) {
-      switch (error.message) {
+      console.log(error);
+      switch (error) {
         case "fill the fields":
           toast.error("Por favor preencha todos os campos!");
           break;
@@ -234,12 +299,23 @@ const UserSheetData = ({
               Senha
             </Label>
             {mode === "new" ? (
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <div className="flex justify-between gap-2">
+                <Input
+                  id="password"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button
+                  variant="outline"
+                  className="flex items-center justify-center"
+                  title="Gerar senha aleatória"
+                  onClick={() => setPassword(handleGenerateRandomPassword())}
+                >
+                  <Sparkles className="size-5" />
+                </Button>
+              </div>
             ) : (
               <Button variant={"outline"}>Redefinir senha</Button>
             )}

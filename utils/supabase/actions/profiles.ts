@@ -32,7 +32,6 @@ export const getAllProfiles = async () => {
       .select(
         "id, full_name, email, created_at, updated_at, user_roles(id, role)"
       );
-
     if (error) throw error;
 
     return data;

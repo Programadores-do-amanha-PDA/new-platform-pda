@@ -1,3 +1,5 @@
+import { AuthUser } from "@supabase/supabase-js";
+
 export interface JwtPayload {
   user_role: string;
 }
@@ -8,7 +10,7 @@ export interface User {
 }
 
 export type UserRoleType = {
-  id: number;
+  id?: number;
   role: string;
   user_id?: string;
 };
@@ -19,3 +21,7 @@ export type ProfileType = {
   full_name: string;
   user_roles?: UserRoleType[];
 };
+
+export type AuthUserWithProfileType = Partial<
+  AuthUser & { profile?: Partial<ProfileType> }
+>;
