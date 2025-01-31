@@ -4,22 +4,34 @@ import { jwtDecode } from "jwt-decode";
 import { JwtPayload } from "../types/auth";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { usePathname, useRouter } from "next/navigation";
+import LoadingAuth from "@/components/loading-auth";
 
 interface AuthContextProps {
   user: User | null;
   userRole: string | null;
+  loading: boolean;
+  redirectToRoleDashboard: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
   user: null,
   userRole: null,
+  loading: true,
+  redirectToRoleDashboard: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const supabase = createClient();
+  const router = useRouter();
+  const pathname = usePathname();
 
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<
+    "admin" | "employer" | "alumni" | null
+  >(null);
+  const [loading, setLoading] = useState(true);
+  const [isRedirecting, setIsRedirecting] = useState(true);
 
   useEffect(() => {
     const updateAuthState = async (
@@ -36,10 +48,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const fetchSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      updateAuthState(session);
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        if (error) throw error;
+        await updateAuthState(session);
+      } catch (error) {
+        console.error("Error fetching session:", error);
+        setUser(null);
+        setUserRole(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchSession();
@@ -47,16 +69,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      updateAuthState(session);
+      await updateAuthState(session);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
+  const redirectToRoleDashboard = () => {
+    if (!loading) {
+      setIsRedirecting(true);
+
+      // Primeiro verifica confirmação de email
+      if (user?.user_metadata?.email_verified === false) {
+        if (pathname !== "/confirmation") {
+          router.push("/confirmation");
+        }
+      }
+      // Usuário logado com role
+      else if (user && userRole) {
+        const routes = {
+          admin: "/dashboard/admin",
+          employer: "/dashboard/employer",
+          alumni: "/dashboard/alumni",
+        };
+
+        const baseRoute = routes[userRole] || "/";
+
+        // Verifica se está em uma subrota permitida
+        if (!pathname.startsWith(baseRoute)) {
+          router.push(baseRoute);
+        }
+      }
+      // Usuário não logado
+      else if (!user && !["/", "/confirmation"].includes(pathname)) {
+        router.push("/");
+      }
+
+      setIsRedirecting(false);
+    }
+  };
+
+  useEffect(() => {
+    redirectToRoleDashboard();
+  }, [user, userRole, loading, pathname, router]);
+
+  if (loading || isRedirecting) {
+    return <LoadingAuth />;
+  }
+
   return (
-    <AuthContext.Provider value={{ user, userRole }}>
+    <AuthContext.Provider
+      value={{ user, userRole, loading, redirectToRoleDashboard }}
+    >
       {children}
     </AuthContext.Provider>
   );

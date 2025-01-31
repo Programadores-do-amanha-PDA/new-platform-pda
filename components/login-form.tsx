@@ -15,11 +15,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
 
-export const LoginForm: React.FC = () => {
-  const router = useRouter();
-
+export const LoginForm = ({
+  redirectToRoleDashboard,
+}: {
+  redirectToRoleDashboard: () => void;
+}) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -36,9 +37,9 @@ export const LoginForm: React.FC = () => {
       const response = await axios.post("/api/auth/singin", data);
 
       if (response.status === 200) {
-        console.log(response.data)
+        console.log(response.data);
         toast.success(response.data.message);
-        router.push("/dashboard");
+        redirectToRoleDashboard();
       }
     } catch (error) {
       toast.error("Erro ao fazer o login. Verifique suas credenciais.");

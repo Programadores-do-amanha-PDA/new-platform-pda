@@ -1,0 +1,69 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { Fragment } from "react";
+import { ChevronRight } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+
+const pathLabels: { [key: string]: string } = {
+  jobs: "Vagas",
+  curated: "Vagas curadas",
+  curation: "Curadoria de Vagas",
+  applications: "Aplicações",
+};
+
+export function AppBar() {
+  const path = usePathname();
+  const segments = path.split("/").filter(Boolean);
+  const role = segments[1] || "";
+  const parts = segments.slice(2);
+
+  const breadcrumbItems = parts.reduce(
+    (acc, part, index) => {
+      const href = `/dashboard/${role}/${parts.slice(0, index + 1).join("/")}`;
+      const label = pathLabels[part] || part;
+      acc.push({ label, href });
+      return acc;
+    },
+    [{ label: "Inicio", href: `/dashboard/${role}` }]
+  );
+
+  const title = breadcrumbItems[breadcrumbItems.length - 1]?.label;
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex justify-between items-center">
+        <div className="space-y-2 flex flex-col gap-1">
+          <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
+            {title}
+          </h1>
+        </div>
+      </div>
+
+      <div className="flex h-5 items-center space-x-1 text-sm leading-none">
+        <SidebarTrigger className="!p-0 w-max justify-start" />
+        <Separator orientation="vertical" className="!mx-3" />
+        {breadcrumbItems.map((item, index) => (
+          <Fragment key={item.href}>
+            {index < breadcrumbItems.length - 1 ? (
+              <Link
+                href={item.href}
+                className="truncate text-muted-foreground hover:underline"
+              >
+                {item.label}
+              </Link>
+            ) : (
+              <div className="text-foreground">{item.label}</div>
+            )}
+            {index < breadcrumbItems.length - 1 && (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
+          </Fragment>
+        ))}
+      </div>
+    </div>
+  );
+}

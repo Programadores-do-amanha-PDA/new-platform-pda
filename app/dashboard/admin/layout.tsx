@@ -49,7 +49,7 @@ export default function RootLayout({
         name: "Administrador",
         logo: () => (
           <Avatar className="size-8">
-            <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png"  />
+            <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
             <AvatarFallback>PdA</AvatarFallback>
           </Avatar>
         ),
@@ -59,12 +59,12 @@ export default function RootLayout({
     navMain: [
       {
         title: "Usuários",
-        url: "#",
+        url: "/dashboard/admin/users",
         icon: Users,
         items: [
           {
             title: "Todos os usuários",
-            url: "/dashboard/admin/users",
+            url: "/dashboard/admin/users/all",
           },
         ],
       },
