@@ -1,27 +1,43 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { login } from "@/utils/supabase/actions/auth";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { email, password } = await req.json();
 
     if (!email || !password) {
-      throw new Error(
-        "Erro ao fazer o login. O Email e a Senha são obrigatórios!"
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
       );
     }
 
-    const makeLogin = await login({ email, password });
+    const loginResponse = await login({ email, password });
 
-    if (!makeLogin) {
-      throw new Error("Erro ao fazer o login. Verifique suas credenciais.");
+    if (loginResponse === "Email not confirmed") {
+      const response = NextResponse.json(
+        { error: "Email not confirmed" },
+        { status: 403 }
+      );
+      response.cookies.set("user_email", email, { maxAge: 3600 });
+      return response;
     }
 
-    return NextResponse.json(
-      { message: "Sucesso ao fazer o Login!" },
-      { status: 200 }
-    );
+    if (!loginResponse?.user || !loginResponse?.session) {
+      return NextResponse.json(
+        { error: "Invalid login credentials" },
+        { status: 401 }
+      );
+    }
+
+    const response = NextResponse.json(loginResponse, { status: 200 });
+
+    return response;
   } catch (error) {
-    return NextResponse.json({ message: error }, { status: 401 });
+    console.error("Signin error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

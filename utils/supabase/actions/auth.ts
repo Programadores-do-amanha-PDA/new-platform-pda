@@ -7,19 +7,19 @@ type UserAuthLogin = {
 };
 
 export async function login(userCredentials: UserAuthLogin) {
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword(
-    userCredentials
-  );
+    const { data, error } = await supabase.auth.signInWithPassword(
+      userCredentials
+    );
+    if (error) throw error;
 
-  console.log(data, error);
-
-  if (error || !data.user) {
-    return false;
+    return data;
+  } catch (error) {
+    console.error(error);
+    return error.message;
   }
-
-  return true;
 }
 
 export const singOut = async () => {
@@ -68,6 +68,25 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
   } catch (error) {
     console.error(error);
 
+    return false;
+  }
+};
+
+export const resendAnEmailSignupConfirmation = async (email: string) => {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email,
+      options: {
+        emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_BASE_URL,
+      },
+    });
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.error(error);
     return false;
   }
 };

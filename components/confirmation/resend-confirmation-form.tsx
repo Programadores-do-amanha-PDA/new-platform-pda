@@ -1,8 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { setCookie } from 'cookies-next';
 
 import { cn } from "@/lib/utils";
 
@@ -16,15 +15,31 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import { getCookie } from "cookies-next";
 
-export const LoginForm = ({
-  redirectToRoleDashboard,
-}: {
-  redirectToRoleDashboard: () => void;
-}) => {
-  const router = useRouter();
+export const ResendConfirmationForm = () => {
+  const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const INITIAL_COOLDOWN = 120;
+
+  useEffect(() => {
+    const getEmailFromCookie = async () => {
+      const cookieValue = getCookie("user_email");
+      setEmail(cookieValue as string | "");
+    };
+    getEmailFromCookie();
+  }, []);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setInterval(() => {
+        setCooldown((prev) => prev - 1);
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [cooldown]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -32,26 +47,19 @@ export const LoginForm = ({
     const formData = new FormData(event.target as HTMLFormElement);
     const data = {
       email: formData.get("email") as string,
-      password: formData.get("password") as string,
     };
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/singin", data);
+      const response = await axios.post("/api/auth/confirmation", data);
 
       if (response.status === 200) {
-        console.log(response.data);
-        toast.success(response.data.message);
-        redirectToRoleDashboard();
+        toast.success("Confirmação de email enviado com sucesso!");
+        setCooldown(INITIAL_COOLDOWN);
       }
     } catch (error) {
-      if (error.response.status === 403) {
-        toast.error("Confirme seu email para continuar.");
-        router.push("/confirmation");
-      }
-
       toast.error("Erro ao fazer o login. Verifique suas credenciais.");
-      return;
+      return error;
     } finally {
       setLoading(false);
     }
@@ -62,9 +70,12 @@ export const LoginForm = ({
       <div className={cn("flex flex-col gap-6")}>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Bem-vindo de volta!</CardTitle>
+            <CardTitle className="text-xl">
+              Reenviar a confirmação de email
+            </CardTitle>
             <CardDescription>
-              Use suas credenciais para acessar sua conta.
+              Verifique em seu email se você recebeu a confirmação do email ou
+              reenvie a solicitação de confirmação usando seu email.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -76,39 +87,22 @@ export const LoginForm = ({
                     id="email"
                     type="email"
                     name="email"
+                    defaultValue={email}
                     placeholder="m@example.com"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Senha</Label>
-                    <a
-                      href="#"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
-                    >
-                      Esqueceu a senha?
-                    </a>
-                  </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    name="password"
                     required
                   />
                 </div>
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || cooldown > 0}
                   className="w-full font-bold"
                 >
-                  {loading ? "Carregando..." : "Login"}
+                  {loading
+                    ? "Enviando..."
+                    : cooldown > 0
+                    ? `Reenvie novamente em ${cooldown}s`
+                    : "Reenviar solicitação"}
                 </Button>
-              </div>
-              <div className="text-center text-sm">
-                <a href="#" className="underline underline-offset-4">
-                  Ainda não tem uma conta?
-                </a>
               </div>
             </div>
           </CardContent>

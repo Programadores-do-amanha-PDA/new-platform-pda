@@ -79,14 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!loading) {
       setIsRedirecting(true);
 
-      // Primeiro verifica confirmação de email
-      if (user?.user_metadata?.email_verified === false) {
-        if (pathname !== "/confirmation") {
-          router.push("/confirmation");
-        }
-      }
-      // Usuário logado com role
-      else if (user && userRole) {
+      if (user && userRole) {
         const routes = {
           admin: "/dashboard/admin",
           employer: "/dashboard/employer",
@@ -95,13 +88,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const baseRoute = routes[userRole] || "/";
 
-        // Verifica se está em uma subrota permitida
         if (!pathname.startsWith(baseRoute)) {
           router.push(baseRoute);
         }
-      }
-      // Usuário não logado
-      else if (!user && !["/", "/confirmation"].includes(pathname)) {
+      } else if (!user && !["/", "/confirmation"].includes(pathname)) {
         router.push("/");
       }
 
