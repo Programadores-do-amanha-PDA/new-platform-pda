@@ -12,6 +12,8 @@ interface AuthContextProps {
   userRole: string | null;
   loading: boolean;
   redirectToRoleDashboard: () => void;
+  setUser: (user: User) => void;
+  setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -19,6 +21,8 @@ const AuthContext = createContext<AuthContextProps>({
   userRole: null,
   loading: true,
   redirectToRoleDashboard: () => {},
+  setUser: () => {},
+  setUserRole: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -109,7 +113,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, userRole, loading, redirectToRoleDashboard }}
+      value={{
+        user,
+        userRole,
+        loading,
+        setUser,
+        setUserRole,
+        redirectToRoleDashboard,
+      }}
     >
       {children}
     </AuthContext.Provider>

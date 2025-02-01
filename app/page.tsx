@@ -3,10 +3,8 @@ import { LoginForm } from "@/components/login-form";
 import Image from "next/image";
 
 import Logo from "/public/assets/logos/Logo_PDA_Horizontal_FundoBranco.png";
-import { useAuth } from "@/context/auth-context";
 
 export default function LoginPage() {
-  const { redirectToRoleDashboard } = useAuth();
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -21,7 +19,7 @@ export default function LoginPage() {
             />
           </div>
         </a>
-        <LoginForm redirectToRoleDashboard={redirectToRoleDashboard} />
+        <LoginForm/>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { toast } from "sonner";
-import { setCookie } from 'cookies-next';
 
 import { cn } from "@/lib/utils";
 
@@ -17,13 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 
-export const LoginForm = ({
-  redirectToRoleDashboard,
-}: {
-  redirectToRoleDashboard: () => void;
-}) => {
+export const LoginForm = () => {
   const router = useRouter();
+  const { redirectToRoleDashboard, setUser, setUserRole } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -39,9 +37,16 @@ export const LoginForm = ({
     try {
       const response = await axios.post("/api/auth/singin", data);
 
-      if (response.status === 200) {
+      if (
+        response.status === 200 &&
+        response.data.user &&
+        response.data.session
+      ) {
         console.log(response.data);
-        toast.success(response.data.message);
+        const jwt: JwtPayload = jwtDecode(response.data.session.access_token);
+        setUserRole(jwt.user_role);
+        setUser(response.data.user);
+        toast.success("Login feito com sucesso!");
         redirectToRoleDashboard();
       }
     } catch (error) {
