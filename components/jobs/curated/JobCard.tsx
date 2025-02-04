@@ -50,7 +50,7 @@ const JobCard = ({
         </ul>
       </div>
 
-      <div className="flex items-center !mt-2 gap-4 pt-2 border-t">{cardFooter}</div>
+      <div className="flex items-center justify-between !mt-2 gap-4 pt-2 border-t">{cardFooter}</div>
     </div>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { useAdminStackContext } from "@/context/admin-data-context";
+import { useUsersStackContext } from "@/context/users-stack-context";
 
 import { DataTable } from "./data-table";
 import { Checkbox } from "../ui/checkbox";
@@ -26,7 +26,7 @@ const ProfilesDataTable = () => {
     handleInsertNewUser,
     handleUpdateUser,
     usersLoading,
-  } = useAdminStackContext();
+  } = useUsersStackContext();
 
   const columns: ColumnDef<AuthUserWithProfileType>[] = [
     {

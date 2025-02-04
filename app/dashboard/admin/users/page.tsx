@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { AppBar } from "@/components/app-bar";
 import { Button } from "@/components/ui/button";
 import { DonutChart } from "@/components/users/DonutChart";
-import { useAdminStackContext } from "@/context/admin-data-context";
+import { useUsersStackContext } from "@/context/users-stack-context";
 
 export default function UserHomeDashboard() {
   const router = useRouter();
-  const { users } = useAdminStackContext();
+  const { users } = useUsersStackContext();
 
   const chartData = [
     {

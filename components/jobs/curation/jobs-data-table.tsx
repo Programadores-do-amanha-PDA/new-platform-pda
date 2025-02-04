@@ -12,86 +12,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
 
-import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { JobDetailsType, JobType } from "@/types/jobs";
-import { toast } from "sonner";
 import JobSheetData from "../job-sheet-data";
+import { useJobsStackContext } from "@/context/jobs-stack-context";
 
 const JobsDataTable = () => {
-  const [jobs, setJobs] = useState<JobType[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("/api/jobs");
-        setJobs(response.data.results);
-      } catch (error) {
-        console.error(error);
-      }
-
-      setLoading(false);
-    };
-
-    fetchJobs();
-  }, []);
-
-  const handleDeleteJob = async (jobId: string) => {
-    try {
-      const response = await axios.delete(`/api/jobs?id=${jobId}`);
-      if (response.status === 200) {
-        toast.success("Vaga deletada com sucesso!");
-        const filteredProfiles = jobs.filter((job) => job.id !== jobId);
-        setJobs(filteredProfiles);
-        return true;
-      }
-    } catch (error) {
-      console.error("Error deleting job:", error);
-      toast.error("Erro ao deletar a vaga");
-      return false;
-    }
-  };
-
-  const handleCurateJob = async (jobId: string) => {
-    try {
-      const data = {
-        jobId: jobId,
-        updates: {
-          curated: true,
-        },
-      };
-
-      const response = await axios.put(`/api/jobs`, data);
-      if (response.status === 200) {
-        const filteredProfiles = jobs.map((job) =>
-          job.id === jobId ? { ...job, curated: true } : job
-        );
-        setJobs(filteredProfiles);
-
-        toast.success("Vaga aprovada com sucesso!");
-        return true;
-      }
-    } catch (error) {
-      console.error("Error to curate job:", error);
-      toast.error("Erro ao aprovar a vaga.");
-      return false;
-    }
-  };
-
-  const handleSetNewJob = (newJob: JobType) => {
-    setJobs((jobs) => [...jobs, newJob]);
-  };
-
-  const handleUpdateJob = (newJob: JobType) => {
-    const updatedJobs = jobs.map((job) =>
-      job.id === newJob.id ? newJob : job
-    );
-    setJobs(updatedJobs);
-  };
+  const {
+    jobs,
+    handleInsertNewJob,
+    handleUpdateJob,
+    handleDeleteJob,
+    jobsLoading,
+    handleCurateJob,
+  } = useJobsStackContext();
 
   const columns: ColumnDef<JobType>[] = [
     {
@@ -171,7 +106,7 @@ const JobsDataTable = () => {
       },
       cell: ({ row }) => {
         const createdAt = row.getValue("created_at") as string;
-        console.log(createdAt)
+        console.log(createdAt);
         const date = new Date(createdAt);
         const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
           date.getMonth() + 1
@@ -261,8 +196,8 @@ const JobsDataTable = () => {
     <DataTable
       columns={columns}
       data={jobs.filter((job) => job.curated === false)}
-      loading={loading}
-      handleSetNewJob={handleSetNewJob}
+      loading={jobsLoading}
+      handleSetNewJob={handleInsertNewJob}
     />
   );
 };

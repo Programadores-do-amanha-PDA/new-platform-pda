@@ -5,7 +5,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import LoadingComponent from "@/components/loading-component";
 
-interface AdminDataContextProps {
+interface UsersStackContextProps {
   users: AuthUserWithProfileType[];
   usersLoading: boolean;
   setUsersLoading: (loading: boolean) => void;
@@ -17,7 +17,7 @@ interface AdminDataContextProps {
   handleDeleteUser: (userId: string | undefined) => void;
 }
 
-const AdminDataContext = createContext<AdminDataContextProps>({
+const UsersStackContext = createContext<UsersStackContextProps>({
   users: [],
   usersLoading: true,
   setUsersLoading: () => {},
@@ -26,7 +26,7 @@ const AdminDataContext = createContext<AdminDataContextProps>({
   handleDeleteUser: () => {},
 });
 
-export const AdminStackProvider = ({
+export const UsersStackProvider = ({
   children,
 }: {
   children: React.ReactNode;
@@ -89,7 +89,7 @@ export const AdminStackProvider = ({
   }
 
   return (
-    <AdminDataContext.Provider
+    <UsersStackContext.Provider
       value={{
         users,
         usersLoading,
@@ -100,8 +100,8 @@ export const AdminStackProvider = ({
       }}
     >
       {children}
-    </AdminDataContext.Provider>
+    </UsersStackContext.Provider>
   );
 };
 
-export const useAdminStackContext = () => useContext(AdminDataContext);
+export const useUsersStackContext = () => useContext(UsersStackContext);

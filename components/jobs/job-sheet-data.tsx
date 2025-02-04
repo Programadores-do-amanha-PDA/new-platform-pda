@@ -254,7 +254,7 @@ const JobSheetData = ({
           className={
             mode === "new"
               ? "!px-4 w-max items-start justify-start font-semibold"
-              : "!px-2 w-full h-max items-start justify-start text-start"
+              : "!px-2 w-max h-max items-start justify-start text-start"
           }
         >
           {mode === "new" ? "Adicionar Vaga" : "Editar Vaga"}
