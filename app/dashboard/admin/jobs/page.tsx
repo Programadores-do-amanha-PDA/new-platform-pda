@@ -1,14 +1,15 @@
 "use client";
+import { useRouter } from "next/navigation";
+
+import { useAdminStackContext } from "@/context/admin/admin-stack-context";
+
+import { Button } from "@/components/ui/button";
 import { AppBar } from "@/components/app-bar";
 import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
-import { Button } from "@/components/ui/button";
-import { useJobsStackContext } from "@/context/jobs-stack-context";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
-  const { jobs } = useJobsStackContext();
+  const { jobsStack: {jobs} } = useAdminStackContext();
 
   const curatedChartData = [
     {

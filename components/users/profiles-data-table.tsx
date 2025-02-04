@@ -1,6 +1,5 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { useUsersStackContext } from "@/context/users-stack-context";
 
 import { DataTable } from "./data-table";
 import { Checkbox } from "../ui/checkbox";
@@ -18,15 +17,18 @@ import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
 import { Badge } from "../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { UserMetadata } from "@supabase/supabase-js";
+import { useAdminStackContext } from "@/context/admin/admin-stack-context";
 
 const ProfilesDataTable = () => {
   const {
-    users,
-    handleDeleteUser,
-    handleInsertNewUser,
-    handleUpdateUser,
-    usersLoading,
-  } = useUsersStackContext();
+    usersStack: {
+      users,
+      handleDeleteUser,
+      handleInsertNewUser,
+      handleUpdateUser,
+    },
+    loading,
+  } = useAdminStackContext();
 
   const columns: ColumnDef<AuthUserWithProfileType>[] = [
     {
@@ -243,7 +245,7 @@ const ProfilesDataTable = () => {
     <DataTable
       columns={columns}
       data={users}
-      loading={usersLoading}
+      loading={loading}
       onInsertNewUser={handleInsertNewUser}
       onUpdateUser={handleUpdateUser}
     />

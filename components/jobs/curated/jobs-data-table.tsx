@@ -5,11 +5,12 @@ import { useState } from "react";
 import JobSheetData from "../job-sheet-data";
 import JobCard from "./JobCard";
 import { Input } from "@/components/ui/input";
-import { useJobsStackContext } from "@/context/jobs-stack-context";
+import { useAdminStackContext } from "@/context/admin/admin-stack-context";
 
 const JobsDataTable = () => {
-  const { jobs, handleUpdateJob, handleResendJobToCuration } =
-    useJobsStackContext();
+  const {
+    jobsStack: { jobs, handleUpdateJob, handleResendJobToCuration },
+  } = useAdminStackContext();
   const [searchQuery, setSearchQuery] = useState("");
 
   const jobsSearchQuery = searchQuery.length

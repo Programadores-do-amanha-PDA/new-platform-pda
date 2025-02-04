@@ -16,17 +16,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { JobDetailsType, JobType } from "@/types/jobs";
 import JobSheetData from "../job-sheet-data";
-import { useJobsStackContext } from "@/context/jobs-stack-context";
+import { useAdminStackContext } from "@/context/admin/admin-stack-context";
 
 const JobsDataTable = () => {
   const {
-    jobs,
-    handleInsertNewJob,
-    handleUpdateJob,
-    handleDeleteJob,
-    jobsLoading,
-    handleCurateJob,
-  } = useJobsStackContext();
+    jobsStack: {
+      jobs,
+      handleInsertNewJob,
+      handleUpdateJob,
+      handleDeleteJob,
+      handleCurateJob,
+    },
+    loading,
+  } = useAdminStackContext();
 
   const columns: ColumnDef<JobType>[] = [
     {
@@ -196,7 +198,7 @@ const JobsDataTable = () => {
     <DataTable
       columns={columns}
       data={jobs.filter((job) => job.curated === false)}
-      loading={jobsLoading}
+      loading={loading}
       handleSetNewJob={handleInsertNewJob}
     />
   );
