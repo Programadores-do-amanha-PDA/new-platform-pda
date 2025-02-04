@@ -22,7 +22,7 @@ export async function login(userCredentials: UserAuthLogin) {
   }
 }
 
-export const singOut = async () => {
+export const signOut = async () => {
   try {
     const supabase = await createClient();
 

@@ -14,6 +14,7 @@ interface AuthContextProps {
   redirectToRoleDashboard: () => void;
   setUser: (user: User) => void;
   setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
+  handleSignOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -23,6 +24,7 @@ const AuthContext = createContext<AuthContextProps>({
   redirectToRoleDashboard: () => {},
   setUser: () => {},
   setUserRole: () => {},
+  handleSignOut: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -103,6 +105,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const handleSignOut = () => {
+    setUser(null);
+    setUserRole(null);
+    router.push("/");
+  };
+
   useEffect(() => {
     redirectToRoleDashboard();
   }, [user, userRole, loading, pathname, router]);
@@ -120,6 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser,
         setUserRole,
         redirectToRoleDashboard,
+        handleSignOut,
       }}
     >
       {children}

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { login } from "@/utils/supabase/actions/auth";
+import { login, signOut } from "@/utils/supabase/actions/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +35,20 @@ export async function POST(req: NextRequest) {
     return response;
   } catch (error) {
     console.error("Signin error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE() {
+  try {
+    await signOut();
+
+    return NextResponse.json({}, { status: 200 });
+  } catch (error) {
+    console.error("Signout error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

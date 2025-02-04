@@ -35,7 +35,7 @@ export const LoginForm = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth/singin", data);
+      const response = await axios.post("/api/auth", data);
 
       if (
         response.status === 200 &&

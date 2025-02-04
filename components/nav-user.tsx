@@ -1,12 +1,5 @@
 "use client";
-import {
-  BadgeCheck,
-  Bell,
-  CreditCard,
-  EllipsisVertical,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { EllipsisVertical, LogOut, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,6 +16,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import axios from "axios";
+import { toast } from "sonner";
+import { useAuth } from "@/context/auth-context";
+import { useRouter } from "next/navigation";
 export function NavUser({
   user,
 }: {
@@ -32,7 +29,23 @@ export function NavUser({
     avatar: string;
   };
 }) {
+  const router = useRouter();
+  const { handleSignOut } = useAuth();
   const { isMobile } = useSidebar();
+
+  const signOut = async () => {
+    try {
+      const response = await axios.delete("/api/auth");
+      if (response.status === 200) {
+        toast.success("Usuário desconectado com sucesso!");
+        handleSignOut();
+      }
+    } catch (error) {
+      console.error("Error sign out:", error);
+      toast.error("Erro ao desconectar usuário!");
+    }
+  };
+
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -73,30 +86,17 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+              <DropdownMenuItem
+                onClick={() => router.push("/dashboard/admin/profile")}
+              >
+                <User />
+                Perfil
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={signOut}>
               <LogOut />
-              Log out
+              Desconectar
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
