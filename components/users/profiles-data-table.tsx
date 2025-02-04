@@ -1,6 +1,7 @@
 "use client";
-
 import { ColumnDef } from "@tanstack/react-table";
+import { useAdminStackContext } from "@/context/admin-data-context";
+
 import { DataTable } from "./data-table";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
@@ -12,70 +13,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { useEffect, useState } from "react";
 
 import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
-import axios from "axios";
 import { Badge } from "../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { UserMetadata } from "@supabase/supabase-js";
-import { toast } from "sonner";
 
 const ProfilesDataTable = () => {
-  const [users, setUsers] = useState<AuthUserWithProfileType[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get("/api/users");
-        if (response.status !== 200) throw "no GET /api/users response";
-        setUsers(response.data.results);
-      } catch (error) {
-        console.error(error);
-      }
-
-      setLoading(false);
-    };
-
-    fetchProfiles();
-  }, []);
-
-  const handleUpdateUser = (
-    userID: string | undefined,
-    userUpdated: AuthUserWithProfileType
-  ) => {
-    console.log("userUpdated", userUpdated);
-    setUsers((users) =>
-      users.map((user) => (user.id === userID ? { ...userUpdated } : user))
-    );
-  };
-
-  const handleInsertNewUser = (newUser: AuthUserWithProfileType) => {
-    console.log("handleInsertNewUser", newUser);
-    const isUserExist = users.map((user) => user.id).includes(newUser.id);
-    if (!isUserExist) {
-      setUsers((users) => [...users, newUser]);
-    }
-  };
-
-  const handleDeleteUser = async (userId: string | undefined) => {
-    try {
-      if (!userId) throw "user id is required to delete";
-
-      const isUserExist = users.map((user) => user.id).includes(userId);
-      const response = await axios.delete(`/api/auth_users?id=${userId}`);
-      if (response.status !== 200) throw "no DELETE /api/auth_users response";
-
-      if (isUserExist) {
-        setUsers((users) => users.filter((user) => user.id !== userId));
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao deletar usuário. tente novamente mais tarde!");
-    }
-  };
+  const {
+    users,
+    handleDeleteUser,
+    handleInsertNewUser,
+    handleUpdateUser,
+    usersLoading,
+  } = useAdminStackContext();
 
   const columns: ColumnDef<AuthUserWithProfileType>[] = [
     {
@@ -292,7 +243,7 @@ const ProfilesDataTable = () => {
     <DataTable
       columns={columns}
       data={users}
-      loading={loading}
+      loading={usersLoading}
       onInsertNewUser={handleInsertNewUser}
       onUpdateUser={handleUpdateUser}
     />

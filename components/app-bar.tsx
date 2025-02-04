@@ -9,10 +9,18 @@ import { cn } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const pathLabels: { [key: string]: string } = {
+  users: "Usuários",
+  companies: "Empresas",
   jobs: "Vagas",
   curated: "Vagas curadas",
   curation: "Curadoria de Vagas",
   applications: "Aplicações",
+  dashboard: "Dashboard",
+  all_users: "Todos os usuários",
+  all_companies: "Todos as empresas",
+  admin: "Administração",
+  settings: "Configurações",
+  profile: "Perfil",
 };
 
 export function AppBar() {
@@ -24,7 +32,12 @@ export function AppBar() {
   const breadcrumbItems = parts.reduce(
     (acc, part, index) => {
       const href = `/dashboard/${role}/${parts.slice(0, index + 1).join("/")}`;
-      const label = pathLabels[part] || part;
+      let label = "";
+      if (part === "all") {
+        label = pathLabels[part.concat("_", parts[index - 1])] || part;
+      } else if (part !== "all") {
+        label = pathLabels[part] || part;
+      }
       acc.push({ label, href });
       return acc;
     },
@@ -34,7 +47,7 @@ export function AppBar() {
   const title = breadcrumbItems[breadcrumbItems.length - 1]?.label;
 
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <div className="flex justify-between items-center">
         <div className="space-y-2 flex flex-col gap-1">
           <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>

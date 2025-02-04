@@ -1,7 +1,7 @@
 import { AuthUser } from "@supabase/supabase-js";
 
 export interface JwtPayload {
-  user_role: string;
+  user_role: "admin" | "employer" | "alumni" | null;
 }
 
 export interface User {

@@ -29,10 +29,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`w-screen h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <main>{children}</main>
+          <main className="w-full h-full">{children}</main>
         </AuthProvider>
         <Toaster />
       </body>

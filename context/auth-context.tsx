@@ -5,7 +5,7 @@ import { JwtPayload } from "../types/auth";
 import { createClient } from "@/utils/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "next/navigation";
-import LoadingAuth from "@/components/loading-auth";
+import LoadingComponent from "@/components/loading-component";
 
 interface AuthContextProps {
   user: User | null;
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, userRole, loading, pathname, router]);
 
   if (loading || isRedirecting) {
-    return <LoadingAuth />;
+    return <LoadingComponent />;
   }
 
   return (

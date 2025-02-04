@@ -3,5 +3,5 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <main className="border-grid flex flex-1 flex-col">{children}</main>;
+  return <main className="border-grid flex flex-1 flex-col w-full h-full">{children}</main>;
 }

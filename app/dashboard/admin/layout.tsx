@@ -7,6 +7,7 @@ import { Briefcase, Users } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { AdminStackProvider } from "@/context/admin-data-context";
 
 export default function RootLayout({
   children,
@@ -38,7 +39,7 @@ export default function RootLayout({
     );
   }
 
-  const data = {
+  const sidebarData = {
     user: {
       name: user?.user_metadata.email,
       email: user?.user_metadata.full_name,
@@ -90,8 +91,8 @@ export default function RootLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar loading={!user || !userRole} data={data} />
-      {children}
+      <AppSidebar loading={!user || !userRole} data={sidebarData} />
+      <AdminStackProvider>{children}</AdminStackProvider>
     </SidebarProvider>
   );
 }
