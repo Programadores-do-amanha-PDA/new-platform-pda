@@ -13,6 +13,7 @@ import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import { LucideIcon } from "lucide-react";
+import { AuthUserWithProfileType } from "@/types/auth";
 
 interface AppSidebarProps {
   data: {
@@ -36,11 +37,7 @@ interface AppSidebarProps {
       url: string;
       icon: LucideIcon;
     }[];
-    user: {
-      name: string;
-      email: string;
-      avatar: string;
-    };
+    user: AuthUserWithProfileType
   };
   loading: boolean;
 }

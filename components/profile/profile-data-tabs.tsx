@@ -1,4 +1,3 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuthUserWithProfileType } from "@/types/auth";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
@@ -11,6 +10,7 @@ import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
 import { updateAuthUser } from "@/utils/supabase/actions/auth";
+import { ProfileAvatarPicker } from "./profile-avatar-picker";
 
 const ProfileDataTabs = ({
   currentUser,
@@ -153,111 +153,118 @@ const ProfileDataTabs = ({
   };
 
   return (
-    <Tabs
-      defaultValue="account"
-      className="w-full h-full bg-card rounded-lg flex flex-col items-center justify-start p-8"
-    >
-      <TabsList>
-        <TabsTrigger value="account">Dados de perfil</TabsTrigger>
-      </TabsList>
-      <TabsContent
-        value="account"
-        className="max-w-3xl w-full h-full flex flex-col justify-between"
+    <div className="w-full h-full flex flex-col justify-between">
+      <form
+        className="grid grid-cols-2 gap-8 my-8"
+        onSubmit={(e) => e.preventDefault()}
       >
-        <form
-          className="grid grid-cols-2 gap-8 my-8"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-            <Label htmlFor="name" className="text-left">
-              Nome completo
-            </Label>
-            <Input
-              id="name"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-            />
-          </div>
+        <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
+        <Separator className="col-span-2" />
+        <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+          <Label htmlFor="name" className="text-left">
+            Nome completo
+          </Label>
+          <Input
+            id="name"
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+          />
+        </div>
 
-          <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-            <Label htmlFor="email" className="text-left h-max">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
+        <div className="col-span-2 grid grid-rows-[20px_1fr] items-center gap-4">
+          <Label
+            htmlFor="bio"
+            className="row-span-1 w-full flex justify-between items-center"
+          >
+            <p className="w-max">Biografia</p>
+            <p className="w-max text-sm">{bio.length}/190</p>
+          </Label>
+          <Textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            className="row-span-1 resize-none"
+          />
+        </div>
+        <Separator className="col-span-2" />
+        <div className="col-span-2">
+          <p className="text-left h-max text-base">Alterar email</p>
+          <span className="text-sm text-muted-foreground">
+            Para concluir a alteração de email você deve verificar sua caixa de
+            entrada do email atual ou do novo email e aceitar a troca.
+          </span>
+        </div>
+        <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+          <Label htmlFor="email" className="text-left h-max">
+            Email
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="col-span-3"
+          />
+        </div>
+        <Separator className="col-span-2" />
+        <div className="col-span-2">
+          <p className="text-left h-max text-base">Alterar senha</p>
+          <span className="text-sm text-muted-foreground">
+            A senha precisa ter um mínimo de 7 caracteres, incluindo letras
+            minúsculas, letras maiúsculas, números e caracteres especiais.
+          </span>
+        </div>
 
-          <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-            <Label htmlFor="password" className="text-left h-max">
-              Nova senha
-            </Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
+        <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+          <Label htmlFor="password" className="text-left h-max">
+            Nova senha
+          </Label>
+          <Input
+            id="newPassword"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="col-span-3"
+          />
+        </div>
 
-          <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-            <Label htmlFor="password" className="text-left h-max">
-              Confirme nova senha
-            </Label>
-            <Input
-              id="confirmNewPassword"
-              type="password"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              className="col-span-3"
-            />
-          </div>
+        <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+          <Label htmlFor="password" className="text-left h-max">
+            Confirme nova senha
+          </Label>
+          <Input
+            id="confirmNewPassword"
+            type="password"
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            className="col-span-3"
+          />
+        </div>
 
-          <div className="col-span-2 grid grid-rows-[20px_1fr] items-center gap-4">
-            <Label
-              htmlFor="bio"
-              className="row-span-1 w-full flex justify-between items-center"
-            >
-              <p className="w-max">Biografia</p>
-              <p className="w-max text-sm">{bio.length}/190</p>
-            </Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="row-span-1"
-            />
-          </div>
+        <Separator className="col-span-2" />
+        <div className="grid grid-rows-2 items-center gap-4">
+          <Label>Seus cargos</Label>
 
-          <Separator className="col-span-2" />
-          <div className="grid grid-rows-2 items-center gap-4">
-            <Label>Seus cargos</Label>
-
-            <div className="col-span-3 flex gap-1">
-              {currentUser.profile?.user_roles?.map((r, i) => (
-                <Badge variant="outline" key={i}>
-                  {r.role}
-                </Badge>
-              ))}
-            </div>
+          <div className="col-span-3 flex gap-1">
+            {currentUser.profile?.user_roles?.map((r, i) => (
+              <Badge variant="outline" key={i}>
+                {r.role}
+              </Badge>
+            ))}
           </div>
-        </form>
-        <Button
-          type="button"
-          onClick={() => (!loading ? handleSubmit() : null)}
-          className="gap-2 flex font-semibold w-max self-end"
-        >
-          {loading && <LoaderCircle className="size-5 animate-spin" />}
-          Editar dados
-        </Button>
-      </TabsContent>
-    </Tabs>
+        </div>
+      </form>
+
+      <Button
+        type="button"
+        onClick={() => (!loading ? handleSubmit() : null)}
+        className="gap-2 flex font-semibold w-max self-end"
+      >
+        {loading && <LoaderCircle className="size-5 animate-spin" />}
+        Editar dados
+      </Button>
+    </div>
   );
 };
 

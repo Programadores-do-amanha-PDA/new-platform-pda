@@ -48,42 +48,32 @@ const ProfileAvatarCropper = ({
             Ajuste o zoom e a posição de corte de sua imagem de perfil!
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {!loading && (
-          <div className="flex flex-col items-center justify-center rounded-lg overflow-hidden bg-card border">
-            <div className="w-96 h-96 relative">
-              <Cropper
-                image={src}
-                crop={crop}
-                zoom={zoom}
-                aspect={3 / 3}
-                onCropChange={onCropChange}
-                onZoomChange={onZoomChange}
-                onCropComplete={onCropComplete}
-              />
-            </div>
-
-            <div className="flex w-full gap-4 p-4">
-              <ImageUpscale className="stroke-primary" />
-              <Slider
-                value={[zoom]}
-                min={1}
-                max={3}
-                step={0.1}
-                aria-labelledby="Zoom"
-                onValueChange={(value) => onZoomChange(value[0])}
-                className="slider"
-              />
-            </div>
+        <div className="flex flex-col items-center justify-center rounded-lg overflow-hidden bg-card border">
+          <div className="w-96 h-96 relative">
+            <Cropper
+              image={src}
+              crop={crop}
+              zoom={zoom}
+              aspect={3 / 3}
+              onCropChange={onCropChange}
+              onZoomChange={onZoomChange}
+              onCropComplete={onCropComplete}
+            />
           </div>
-        )}
 
-        {loading && (
-          <div className="flex w-96 h-48 items-center justify-center animate-pulse bg-primary/15 rounded-lg overflow-hidden">
-            <p className="text-sm text-muted-foreground">
-              Otimizando imagem...
-            </p>
+          <div className="flex w-full gap-4 p-4">
+            <ImageUpscale className="stroke-primary" />
+            <Slider
+              value={[zoom]}
+              min={1}
+              max={3}
+              step={0.1}
+              aria-labelledby="Zoom"
+              onValueChange={(value) => onZoomChange(value[0])}
+              className="slider"
+            />
           </div>
-        )}
+        </div>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancelar</AlertDialogCancel>
           {!loading && (

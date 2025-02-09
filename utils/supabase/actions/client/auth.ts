@@ -11,7 +11,8 @@ export const getAuthUser = async (jwt: string) => {
 
     if (!user) throw "user not found";
     return user;
-  } catch (_) {
+  } catch (error) {
+    console.error("Error fetching auth user:", error);
     return false;
   }
 };
@@ -23,7 +24,8 @@ export const getSession = async () => {
     if (error) throw error;
 
     return data.session;
-  } catch (_) {
+  } catch (error) {
+    console.error("Error fetching session:", error);
     return false;
   }
 };

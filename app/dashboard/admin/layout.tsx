@@ -40,11 +40,7 @@ export default function RootLayout({
   }
 
   const sidebarData = {
-    user: {
-      name: user?.profile?.email || "",
-      email: user?.profile?.full_name || "",
-      avatar: "",
-    },
+    user: user,
     teams: [
       {
         name: "Administrador",

@@ -20,6 +20,7 @@ export type ProfileType = {
   email: string;
   full_name: string;
   bio?: string;
+  avatarUrl?: string;
   user_roles?: UserRoleType[];
 };
 
