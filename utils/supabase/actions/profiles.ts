@@ -48,10 +48,11 @@ export const getProfileById = async (id: string) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, created_at, updated_at, user_roles(id, role)"
+        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role)"
       )
       .eq("id", id)
       .single();
+      console.log(data)
 
     if (error) throw error;
 

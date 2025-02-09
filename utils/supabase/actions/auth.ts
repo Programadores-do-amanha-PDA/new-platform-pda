@@ -1,5 +1,6 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
+import { AuthUser } from "@supabase/supabase-js";
 
 type UserAuthLogin = {
   email: string;
@@ -22,6 +23,21 @@ export async function login(userCredentials: UserAuthLogin) {
   }
 }
 
+export const updateAuthUser = async (updates: Partial<AuthUser>) => {
+  try {
+    console.log("updates ---", updates);
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.updateUser({ ...updates });
+
+    if (error || !data) throw error;
+
+    return data;
+  } catch (error) {
+    console.log("Error on update auth user", error);
+    return false;
+  }
+};
+
 export const signOut = async () => {
   try {
     const supabase = await createClient();
@@ -34,19 +50,6 @@ export const signOut = async () => {
   } catch (error) {
     console.error(error);
 
-    return false;
-  }
-};
-
-export const clientGetAuthUser = async () => {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.getUser();
-    if (error) throw error;
-
-    return data.user;
-  } catch (error) {
-    console.error(error);
     return false;
   }
 };

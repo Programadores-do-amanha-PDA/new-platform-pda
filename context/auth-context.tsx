@@ -1,20 +1,26 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { JwtPayload } from "../types/auth";
-import { createClient } from "@/utils/supabase/client";
-import { User } from "@supabase/supabase-js";
+import { AuthUserWithProfileType, JwtPayload } from "../types/auth";
 import { usePathname, useRouter } from "next/navigation";
 import LoadingComponent from "@/components/loading-component";
 
+import {
+  getAuthUser,
+  getSession,
+  onAuthStateChange,
+} from "@/utils/supabase/actions/client/auth";
+import { getProfileById } from "@/utils/supabase/actions/profiles";
+
 interface AuthContextProps {
-  user: User | null;
+  user: AuthUserWithProfileType | null;
   userRole: string | null;
   loading: boolean;
   redirectToRoleDashboard: () => void;
-  setUser: (user: User) => void;
+  setUser: (user: AuthUserWithProfileType) => void;
   setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
   handleSignOut: () => void;
+  fetchSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -25,58 +31,73 @@ const AuthContext = createContext<AuthContextProps>({
   setUser: () => {},
   setUserRole: () => {},
   handleSignOut: () => {},
+  fetchSession: () => Promise.resolve(),
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const supabase = createClient();
   const router = useRouter();
   const pathname = usePathname();
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUserWithProfileType | null>(null);
   const [userRole, setUserRole] = useState<
     "admin" | "employer" | "alumni" | null
   >(null);
   const [loading, setLoading] = useState(true);
   const [isRedirecting, setIsRedirecting] = useState(true);
 
-  useEffect(() => {
-    const updateAuthState = async (
-      session: { user: User; access_token: string } | null
-    ) => {
-      if (session) {
-        const jwt: JwtPayload = jwtDecode(session.access_token);
-        setUserRole(jwt.user_role);
-        setUser(session.user);
-      } else {
-        setUserRole(null);
-        setUser(null);
-      }
-    };
-
-    const fetchSession = async () => {
-      try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
-        if (error) throw error;
-        await updateAuthState(session);
-      } catch (error) {
-        console.error("Error fetching session:", error);
-        setUser(null);
-        setUserRole(null);
-      } finally {
+  const getUserProfile = async (jwt: string) => {
+    const user = await getAuthUser(jwt);
+    if (user) {
+      const userProfile = await getProfileById(user.id);
+      if (userProfile) {
+        setUser({ ...user, profile: userProfile });
         setLoading(false);
+      } else if (!userProfile) {
+        setUser(null);
       }
-    };
+    } else if (!user) {
+      setUser(null);
+      setUserRole(null);
+      setIsRedirecting(false);
+    }
+  };
 
+  const updateAuthState = async (session: { access_token: string } | null) => {
+    if (session) {
+      const jwt: JwtPayload = jwtDecode(session.access_token);
+      if (jwt && jwt.user_role) {
+        setUserRole(jwt.user_role);
+        await getUserProfile(session.access_token);
+      } else if (!jwt || !jwt.user_role) {
+        setUser(null);
+        setUserRole(null);
+        setIsRedirecting(false);
+      }
+    } else if (!session) {
+      setUser(null);
+      setUserRole(null);
+      setIsRedirecting(false);
+      return;
+    }
+  };
+
+  const fetchSession = async () => {
+    const session = await getSession();
+    if (session) {
+      await updateAuthState(session);
+    } else if (!session) {
+      setUser(null);
+      setUserRole(null);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchSession();
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      await updateAuthState(session);
-    });
+    } = onAuthStateChange(updateAuthState);
 
     return () => subscription.unsubscribe();
   }, []);
@@ -129,6 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserRole,
         redirectToRoleDashboard,
         handleSignOut,
+        fetchSession,
       }}
     >
       {children}

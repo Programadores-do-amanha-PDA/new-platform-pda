@@ -41,8 +41,8 @@ export default function RootLayout({
 
   const sidebarData = {
     user: {
-      name: user?.user_metadata.email,
-      email: user?.user_metadata.full_name,
+      name: user?.profile?.email || "",
+      email: user?.profile?.full_name || "",
       avatar: "",
     },
     teams: [
