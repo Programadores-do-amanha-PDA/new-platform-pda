@@ -1,5 +1,4 @@
 "use server";
-import { optimizeImage } from "@/utils/optimizeImage";
 import { createClient } from "../server";
 
 export const getAvatarUrl = async (userId: string) => {
@@ -29,21 +28,18 @@ export const uploadAvatar = async (userId: string, base64Image: string) => {
     const byteArray = new Uint8Array(byteNumbers);
     const blob = new Blob([byteArray], { type: "image/png" });
 
-    // Create a File from the Blob
     const file = new File([blob], "avatar.png", { type: "image/png" });
-    const imageOptimized = await optimizeImage(file);
-    if (!imageOptimized) throw new Error("Error on optimizeImage");
 
     const supabase = await createClient();
-    const fileExt = imageOptimized.name.split(".").pop();
+    const fileExt = file.name.split(".").pop();
     const fileName = `${userId}/avatar.${fileExt}`;
 
     const { data, error } = await supabase.storage
-      .from("user_profile")
-      .upload(fileName, imageOptimized, {
+      .from("user_avatar")
+      .upload(fileName, file, {
         cacheControl: "3600",
         upsert: true,
-        contentType: imageOptimized.type,
+        contentType: file.type,
       });
 
     if (error) throw error;
