@@ -41,7 +41,7 @@ export default function HomeAdmin() {
           <Button
             className="underline"
             variant={"ghost"}
-            onClick={() => router.push("/dashboard/employer/alumni/all")}
+            onClick={() => router.push("/dashboard/employer/jobs")}
           >
             <p>Gerenciar Vagas</p>
             <ArrowRight className="size-5 -rotate-6" />
