@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Briefcase, FileUser } from "lucide-react";
+import { AlumniStackProvider } from "@/context/alumni/stack-context";
 
 export default function RootLayout({
   children,
@@ -41,23 +42,17 @@ export default function RootLayout({
   }
 
   const data = {
-    user: {
-      name: user?.user_metadata.email,
-      email: user?.user_metadata.full_name,
-      avatar: "",
+    user: user,
+    team: {
+      name: "Empregabilidade Já",
+      logo: () => (
+        <Avatar>
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      ),
     },
-    teams: [
-      {
-        name: "Empregabilidade Já",
-        logo: () => (
-          <Avatar>
-            <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
-            <AvatarFallback>PdA</AvatarFallback>
-          </Avatar>
-        ),
-        plan: "Alumni",
-      },
-    ],
+    userRole: userRole,
     navMain: [
       {
         title: "Vagas",
@@ -87,7 +82,7 @@ export default function RootLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar loading={!user || !userRole} data={data} />
-      {children}
+      <AlumniStackProvider>{children}</AlumniStackProvider>
     </SidebarProvider>
   );
 }
