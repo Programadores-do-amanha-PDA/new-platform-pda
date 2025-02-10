@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useAuth } from "@/context/auth-context";
 
 const pathLabels: { [key: string]: string } = {
   users: "Usuários",
@@ -30,6 +31,7 @@ export function AppBar() {
   const segments = path.split("/").filter(Boolean);
   const role = segments[1] || "";
   const parts = segments.slice(2);
+  const { user } = useAuth();
 
   const breadcrumbItems = parts.reduce(
     (acc, part, index) => {
@@ -40,13 +42,21 @@ export function AppBar() {
       } else if (part !== "all") {
         label = pathLabels[part] || part;
       }
-      acc.push({ label, href });
+      acc.push({ label, href, title: "" });
       return acc;
     },
-    [{ label: "Inicio", href: `/dashboard/${role}` }]
+    [
+      {
+        label: "Inicio",
+        title: `Olá ${user?.profile?.full_name} 👋🏿`,
+        href: `/dashboard/${role}`,
+      },
+    ]
   );
 
-  const title = breadcrumbItems[breadcrumbItems.length - 1]?.label;
+  const title = breadcrumbItems[breadcrumbItems.length - 1]?.title
+    ? breadcrumbItems[breadcrumbItems.length - 1]?.title
+    : breadcrumbItems[breadcrumbItems.length - 1]?.label;
 
   return (
     <div className="flex flex-col gap-2">
