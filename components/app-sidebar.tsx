@@ -37,7 +37,8 @@ interface AppSidebarProps {
       url: string;
       icon: LucideIcon;
     }[];
-    user: AuthUserWithProfileType
+    user: AuthUserWithProfileType;
+    userRole: string;
   };
   loading: boolean;
 }
@@ -69,7 +70,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={props.data.user} />
+        <NavUser user={props.data.user} userRole={props.data.userRole} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

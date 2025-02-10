@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Briefcase, Users } from "lucide-react";
+import { EmployerStackProvider } from "@/context/employer/stack-context";
 
 export default function RootLayout({
   children,
@@ -17,7 +18,7 @@ export default function RootLayout({
 }>) {
   const { user, userRole } = useAuth();
 
-  if (!user || !userRole || userRole !== "alumni") {
+  if (!user || !userRole || userRole !== "employer") {
     return (
       <div className="relative p-6 lg:gap-10 lg:p-8 w-screen h-screen">
         <div className="w-full h-full flex flex-col gap-8 items-center justify-center space-y-2">
@@ -41,11 +42,8 @@ export default function RootLayout({
   }
 
   const data = {
-    user: {
-      name: user?.user_metadata.email,
-      email: user?.user_metadata.full_name,
-      avatar: "",
-    },
+    user: user,
+    userRole: userRole,
     teams: [
       {
         name: "Empregabilidade Já",
@@ -70,7 +68,7 @@ export default function RootLayout({
           },
           {
             title: "Curadoria",
-            url: "/dashboard/alumni/jobs/curation",
+            url: "/dashboard/employer/jobs/curation",
           },
         ],
       },
@@ -92,7 +90,7 @@ export default function RootLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar loading={!user || !userRole} data={data} />
-      {children}
+      <EmployerStackProvider>{children}</EmployerStackProvider>
     </SidebarProvider>
   );
 }

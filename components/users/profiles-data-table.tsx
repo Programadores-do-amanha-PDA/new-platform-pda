@@ -17,19 +17,25 @@ import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
 import { Badge } from "../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { UserMetadata } from "@supabase/supabase-js";
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
 
-const ProfilesDataTable = () => {
-  const {
-    usersStack: {
-      users,
-      handleDeleteUser,
-      handleInsertNewUser,
-      handleUpdateUser,
-    },
-    loading,
-  } = useAdminStackContext();
-
+const ProfilesDataTable = ({
+  users,
+  handleDeleteUser,
+  handleInsertNewUser,
+  handleUpdateUser,
+  loading,
+  excludeRoles,
+}: {
+  users: AuthUserWithProfileType[];
+  handleDeleteUser: (id?: string) => void;
+  handleInsertNewUser: (user: AuthUserWithProfileType) => void;
+  handleUpdateUser: (
+    userID: string | undefined,
+    user: Partial<AuthUserWithProfileType>
+  ) => void;
+  loading: boolean;
+  excludeRoles?: string[];
+}) => {
   const columns: ColumnDef<AuthUserWithProfileType>[] = [
     {
       id: "select",
@@ -224,12 +230,13 @@ const ProfilesDataTable = () => {
                 currentUser={user}
                 onInsertNewUser={handleInsertNewUser}
                 onUpdateUser={handleUpdateUser}
+                excludeRoles={excludeRoles}
               />
               {user.id && (
                 <Button
                   variant="ghost"
                   className="!px-2 w-full h-max items-start justify-start text-start"
-                  onClick={() => handleDeleteUser(user.id)}
+                  onClick={() => handleDeleteUser(user?.id)}
                 >
                   Deletar
                 </Button>
@@ -248,6 +255,7 @@ const ProfilesDataTable = () => {
       loading={loading}
       onInsertNewUser={handleInsertNewUser}
       onUpdateUser={handleUpdateUser}
+      excludeRoles={excludeRoles}
     />
   );
 };

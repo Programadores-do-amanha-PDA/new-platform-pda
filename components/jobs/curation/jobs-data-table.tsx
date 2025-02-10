@@ -16,20 +16,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { JobDetailsType, JobType } from "@/types/jobs";
 import JobSheetData from "../job-sheet-data";
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
 
-const JobsDataTable = () => {
-  const {
-    jobsStack: {
-      jobs,
-      handleInsertNewJob,
-      handleUpdateJob,
-      handleDeleteJob,
-      handleCurateJob,
-    },
-    loading,
-  } = useAdminStackContext();
-
+const JobsDataTable = ({
+  jobs,
+  handleInsertNewJob,
+  handleUpdateJob,
+  handleDeleteJob,
+  handleCurateJob,
+  loading,
+}: {
+  jobs: JobType[];
+  handleInsertNewJob: (job: JobType) => void;
+  handleUpdateJob: (job: JobType) => void;
+  handleDeleteJob: (jobId: string) => Promise<void>;
+  handleCurateJob: (jobId: string) => Promise<void>;
+  loading: boolean;
+}) => {
   const columns: ColumnDef<JobType>[] = [
     {
       id: "select",

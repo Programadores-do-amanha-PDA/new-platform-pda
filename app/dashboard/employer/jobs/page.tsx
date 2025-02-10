@@ -1,27 +1,87 @@
-import ProfilesDataTable from "@/components/users/profiles-data-table";
-import { Separator } from "@/components/ui/separator";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
-import { ChevronRight } from "lucide-react";
+"use client";
+import { useRouter } from "next/navigation";
+
+import { useEmployerStack } from "@/context/employer/stack-context";
+
+import { Button } from "@/components/ui/button";
+import { AppBar } from "@/components/app-bar";
+import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
 
 export default function Home() {
+  const router = useRouter();
+  const {
+    jobsStack: { jobs },
+  } = useEmployerStack();
+
+  const curatedChartData = [
+    {
+      label: "curated",
+      value: jobs.filter((job) => job.curated === true).length,
+      fill: "var(--color-curated)",
+    },
+  ];
+
+  const notCuratedChartData = [
+    {
+      label: "notCurated",
+      value: jobs.filter((job) => job.curated === false).length,
+      fill: "var(--color-notCurated)",
+    },
+  ];
+
+  const chartConfig = {
+    label: {
+      label: "Vagas",
+    },
+    curated: {
+      label: "Vagas curadas",
+      color: "hsl(var(--chart-1))",
+    },
+    notCurated: {
+      label: "Vagas não curadas",
+      color: "hsl(var(--chart-4))",
+    },
+  };
+
   return (
-    <main className="relative p-6 lg:gap-10 lg:p-8 xl:grid xl:grid-cols-[1fr_300px]">
-      <div className="w-full min-w-0 max-w-2xl">
-        <div className="mb-4 flex h-5 items-center space-x-1 text-sm leading-none">
-          <SidebarTrigger />
-          <Separator orientation="vertical" className="!mx-3" />
-          <div className="truncate text-muted-foreground">Inicio</div>
-          <ChevronRight className="h-3.5 w-3.5" />
-          <div className="text-foreground">Vagas</div>
+    <main className="relative w-full flex flex-col p-6 gap-8 xl:p-8">
+      <AppBar />
+
+      <div className="flex items-center justify-start gap-4">
+        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
+          <div className="h-full flex flex-col gap-6 justify-between items-center">
+            <div className="w-52 overflow-hidden flex items-center justify-center">
+              <RadialShapeChart
+                chartData={curatedChartData}
+                chartConfig={chartConfig}
+                chartLabel="Vagas curadas"
+              />
+            </div>
+            <Button
+              className="font-semibold"
+              onClick={() => router.push("/dashboard/employer/jobs/curated")}
+            >
+              Gerenciar vagas curadas
+            </Button>
+          </div>
         </div>
-        <div className="space-y-2">
-          <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
-            Todas as vagas
-          </h1>
-        </div>
-        <div className="space-y-2">
-          <ProfilesDataTable />
+
+        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
+          <div className="h-full flex flex-col gap-6 justify-between items-center">
+            <div className="w-52 overflow-hidden flex items-center justify-center">
+              <RadialShapeChart
+                chartData={notCuratedChartData}
+                chartConfig={chartConfig}
+                chartLabel="Vagas não curadas"
+              />
+            </div>
+            <Button
+              className="font-semibold"
+              onClick={() => router.push("/dashboard/employer/jobs/curation")}
+            >
+              Gerenciar vagas não curadas
+            </Button>
+          </div>
         </div>
       </div>
     </main>

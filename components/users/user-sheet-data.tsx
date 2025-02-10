@@ -30,6 +30,7 @@ const UserSheetData = ({
   currentUser,
   onInsertNewUser,
   onUpdateUser,
+  excludeRoles,
 }: {
   mode: "new" | "edit";
   currentUser?: AuthUserWithProfileType;
@@ -38,6 +39,7 @@ const UserSheetData = ({
     userID: string | undefined,
     user: Partial<AuthUserWithProfileType>
   ) => void;
+  excludeRoles?: string[];
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -384,7 +386,7 @@ const UserSheetData = ({
                 app_role.filter((role) => !userRoles.includes(role)).length >
                   0 && (
                   <RoleSelector
-                    excludeItens={userRoles}
+                    excludeItens={userRoles.concat(excludeRoles || [])}
                     label="Adicionar cargo"
                     value="0"
                     onChange={handleSetUserRoles}

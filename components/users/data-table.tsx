@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +34,7 @@ export function DataTable({
   loading,
   onInsertNewUser,
   onUpdateUser,
+  excludeRoles,
 }: {
   data: unknown[];
   columns: ColumnDef<unknown>[];
@@ -43,6 +44,7 @@ export function DataTable({
     userID: string | undefined,
     user: Partial<AuthUserWithProfileType>
   ) => void;
+  excludeRoles?: string[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -86,6 +88,7 @@ export function DataTable({
           mode="new"
           onInsertNewUser={onInsertNewUser}
           onUpdateUser={onUpdateUser}
+          excludeRoles={excludeRoles}
         />
       </div>
 

@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { AuthUserWithProfileType } from "@/types/auth";
-export function NavUser({ user }: { user: AuthUserWithProfileType }) {
+export function NavUser({ user, userRole}: { user: AuthUserWithProfileType; userRole: string }) {
   const router = useRouter();
   const { handleSignOut } = useAuth();
   const { isMobile } = useSidebar();
@@ -98,7 +98,7 @@ export function NavUser({ user }: { user: AuthUserWithProfileType }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => router.push("/dashboard/admin/profile")}
+                onClick={() => router.push(`/dashboard/${userRole}/profile`)}
               >
                 <User />
                 Perfil

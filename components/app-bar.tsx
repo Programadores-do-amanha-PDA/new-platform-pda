@@ -17,6 +17,8 @@ const pathLabels: { [key: string]: string } = {
   applications: "Aplicações",
   dashboard: "Dashboard",
   all_users: "Todos os usuários",
+  alumni: "Alumni",
+  all_alumni: "Todos os Alumni",
   all_companies: "Todos as empresas",
   admin: "Administração",
   settings: "Configurações",

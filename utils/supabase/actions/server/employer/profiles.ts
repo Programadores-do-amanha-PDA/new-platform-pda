@@ -23,20 +23,21 @@ export const createProfile = async (profileData: {
   }
 };
 
-export const getAllProfiles = async () => {
+export const getAllAlumniProfiles = async () => {
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, created_at, updated_at, user_roles(id, role)"
-      );
+        "id, full_name, email, created_at, updated_at, user_roles!inner(id, role)"
+      )
+      .eq("user_roles.role", "alumni");
     if (error) throw error;
 
     return data;
   } catch (error) {
-    console.error("Error fetching all profiles:", error);
+    console.error("Error fetching all alumni profiles:", error);
     return null;
   }
 };
@@ -52,6 +53,7 @@ export const getProfileById = async (id: string) => {
       )
       .eq("id", id)
       .single();
+    console.log(data);
 
     if (error) throw error;
 

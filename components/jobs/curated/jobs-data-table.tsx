@@ -5,12 +5,17 @@ import { useState } from "react";
 import JobSheetData from "../job-sheet-data";
 import JobCard from "./JobCard";
 import { Input } from "@/components/ui/input";
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
+import { JobType } from "@/types/jobs";
 
-const JobsDataTable = () => {
-  const {
-    jobsStack: { jobs, handleUpdateJob, handleResendJobToCuration },
-  } = useAdminStackContext();
+const JobsDataTable = ({
+  jobs,
+  handleUpdateJob,
+  handleResendJobToCuration,
+}: {
+  jobs: JobType[];
+  handleUpdateJob: (newJob: JobType) => void;
+  handleResendJobToCuration: (jobId: string) => void;
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const jobsSearchQuery = searchQuery.length
