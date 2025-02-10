@@ -133,7 +133,7 @@ const UserSheetData = ({
 
         toast.success("Sucesso ao criar novo usuário!");
       } else if (mode === "edit" && currentUser) {
-        if (!fullName && !email && !password) throw "fill the fields";
+        if (!fullName && !email) throw "fill the fields";
         if (
           fullName !== currentUser.profile?.full_name &&
           !fullNameRegex.test(fullName)
@@ -340,31 +340,28 @@ const UserSheetData = ({
               className="col-span-3"
             />
           </div>
+
           <div className="grid grid-rows-2 items-center gap-2">
             <Label htmlFor="password" className="text-left">
-              Senha
+              {mode === "new" ? "Senha" : "Nova senha"}
             </Label>
-            {mode === "new" ? (
-              <div className="flex justify-between gap-2">
-                <Input
-                  id="password"
-                  type="password"
-                  name="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <Button
-                  variant="outline"
-                  className="flex items-center justify-center"
-                  title="Gerar senha aleatória"
-                  onClick={() => setPassword(handleGenerateRandomPassword())}
-                >
-                  <Sparkles className="size-5" />
-                </Button>
-              </div>
-            ) : (
-              <Button variant={"outline"}>Redefinir senha</Button>
-            )}
+            <div className="flex justify-between gap-2">
+              <Input
+                id="password"
+                type="password"
+                name="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <Button
+                variant="outline"
+                className="flex items-center justify-center"
+                title="Gerar senha aleatória"
+                onClick={() => setPassword(handleGenerateRandomPassword())}
+              >
+                <Sparkles className="size-5" />
+              </Button>
+            </div>
           </div>
 
           <Separator className="my-4" />
