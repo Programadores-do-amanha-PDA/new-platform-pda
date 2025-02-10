@@ -41,18 +41,16 @@ export default function RootLayout({
 
   const sidebarData = {
     user: user,
-    teams: [
-      {
-        name: "Administrador",
-        logo: () => (
-          <Avatar className="size-8">
-            <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
-            <AvatarFallback>PdA</AvatarFallback>
-          </Avatar>
-        ),
-        plan: "Time PdA",
-      },
-    ],
+    userRole: userRole,
+    team: {
+      name: "Administrador",
+      logo: () => (
+        <Avatar className="size-8">
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      )
+    },
     navMain: [
       {
         title: "Usuários",

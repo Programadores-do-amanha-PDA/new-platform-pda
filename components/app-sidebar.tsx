@@ -17,11 +17,10 @@ import { AuthUserWithProfileType } from "@/types/auth";
 
 interface AppSidebarProps {
   data: {
-    teams: {
+    team: {
       name: string;
       logo: React.ElementType;
-      plan: string;
-    }[];
+    };
     navMain: {
       title: string;
       url: string;
@@ -61,7 +60,9 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        {props.data.teams && <TeamSwitcher teams={props.data.teams} />}
+        {props.data.team && (
+          <TeamSwitcher team={props.data.team} userRole={props.data.userRole} />
+        )}
       </SidebarHeader>
       <SidebarContent>
         {props.data.navMain && <NavMain items={props.data.navMain} />}

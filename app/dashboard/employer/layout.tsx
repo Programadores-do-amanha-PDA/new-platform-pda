@@ -44,18 +44,16 @@ export default function RootLayout({
   const data = {
     user: user,
     userRole: userRole,
-    teams: [
-      {
-        name: "Empregabilidade Já",
-        logo: () => (
-          <Avatar>
-            <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
-            <AvatarFallback>PdA</AvatarFallback>
-          </Avatar>
-        ),
-        plan: "Time Pda",
-      },
-    ],
+    team: {
+      name: "Empregabilidade Já",
+      logo: () => (
+        <Avatar className="size-8">
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      ),
+    },
+
     navMain: [
       {
         title: "Vagas",
