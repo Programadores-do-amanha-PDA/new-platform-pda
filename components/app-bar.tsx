@@ -21,9 +21,13 @@ const pathLabels: { [key: string]: string } = {
   alumni: "Alumni",
   all_alumni: "Todos os Alumni",
   all_companies: "Todos as empresas",
+  all_jobs: "Todas as vagas",
+  all_applications: "Todas as aplicações",
   admin: "Administração",
   settings: "Configurações",
   profile: "Perfil",
+  match: "Match de vagas",
+  curriculum: "Meu currículo"
 };
 
 export function AppBar() {

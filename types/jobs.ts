@@ -15,3 +15,12 @@ export type JobDetailsType = {
   workplace_type: string[];
   languages: string[];
 };
+
+export type JobApplication = {
+  id?: string;
+  job_id: string;
+  user_id?: string;
+  status: "applied" | "pending" | "rejected";
+  created_at?: string;
+  updated_at?: string;
+};

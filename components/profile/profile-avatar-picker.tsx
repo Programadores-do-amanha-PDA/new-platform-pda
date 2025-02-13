@@ -188,10 +188,12 @@ export const ProfileAvatarPicker = ({
             <Camera className="!size-5 !stroke-2 stroke-primary-foreground" />
             {user.profile?.avatarUrl ? "Editar" : "Adicionar"}
           </Label>
-          <Button variant="destructive" onClick={handleDeleteAvatar}>
-            <Trash className="!size-5 !stroke-2" />
-            Deletar
-          </Button>
+          {user.profile?.avatarUrl && (
+            <Button variant="destructive" onClick={handleDeleteAvatar}>
+              <Trash className="!size-5 !stroke-2" />
+              Deletar
+            </Button>
+          )}
         </div>
       </div>
       <ProfileAvatarCropper

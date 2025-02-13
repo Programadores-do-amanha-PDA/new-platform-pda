@@ -46,7 +46,7 @@ export default function RootLayout({
     team: {
       name: "Empregabilidade Já",
       logo: () => (
-        <Avatar>
+        <Avatar className="size-8">
           <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
           <AvatarFallback>PdA</AvatarFallback>
         </Avatar>
@@ -72,7 +72,7 @@ export default function RootLayout({
     ],
     projects: [
       {
-        name: "Currículo",
+        name: "Meu currículo",
         url: "/dashboard/alumni/curriculum",
         icon: FileUser,
       },
@@ -82,7 +82,7 @@ export default function RootLayout({
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar loading={!user || !userRole} data={data} />
-      <AlumniStackProvider>{children}</AlumniStackProvider>
+      <AlumniStackProvider user={user}>{children}</AlumniStackProvider>
     </SidebarProvider>
   );
 }

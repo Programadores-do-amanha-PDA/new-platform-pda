@@ -262,7 +262,7 @@ const ProfileDataTabs = ({
         className="gap-2 flex font-semibold w-max self-end"
       >
         {loading && <LoaderCircle className="size-5 animate-spin" />}
-        Editar dados
+        {loading ? "Salvando mudanças" : "Salvar mudanças"}
       </Button>
     </div>
   );

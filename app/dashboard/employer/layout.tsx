@@ -62,7 +62,7 @@ export default function RootLayout({
         items: [
           {
             title: "Vagas curadas",
-            url: "/dashboard/employer/jobs/all",
+            url: "/dashboard/employer/jobs/curated",
           },
           {
             title: "Curadoria",
