@@ -1,10 +1,9 @@
 "use client";
 
-import { createClient } from "../../client";
+import { supabase } from "../../client";
 
 export const getAuthUser = async (jwt: string) => {
   try {
-    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser(jwt);
@@ -19,7 +18,6 @@ export const getAuthUser = async (jwt: string) => {
 
 export const getSession = async () => {
   try {
-    const supabase = await createClient();
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
 
@@ -31,14 +29,10 @@ export const getSession = async () => {
 };
 
 export const onAuthStateChange = (
-  updateAuthState: (
-    session: {
-      access_token: string;
-    } | null
-  ) => Promise<void>
+  updateAuthState: (session: { access_token: string } | null) => Promise<void>
 ) => {
-  const supabase = createClient();
-  return supabase.auth.onAuthStateChange(async (_, session) => {
+  return supabase.auth.onAuthStateChange(async (e, session) => {
+    console.log(e);
     await updateAuthState(session);
   });
 };

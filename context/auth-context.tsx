@@ -5,11 +5,7 @@ import { AuthUserWithProfileType, JwtPayload } from "../types/auth";
 import { usePathname, useRouter } from "next/navigation";
 import LoadingComponent from "@/components/loading-component";
 
-import {
-  getAuthUser,
-  getSession,
-  onAuthStateChange,
-} from "@/utils/supabase/actions/client/auth";
+import { getAuthUser, getSession } from "@/utils/supabase/actions/client/auth";
 import { getProfileById } from "@/utils/supabase/actions/profiles";
 import { getAvatarUrl } from "@/utils/supabase/actions/user_avatar";
 
@@ -22,6 +18,7 @@ interface AuthContextProps {
   setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
   handleSignOut: () => void;
   fetchSession: () => Promise<void>;
+  updateAuthState: (session: { access_token: string } | null) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextProps>({
@@ -33,6 +30,7 @@ const AuthContext = createContext<AuthContextProps>({
   setUserRole: () => {},
   handleSignOut: () => {},
   fetchSession: () => Promise.resolve(),
+  updateAuthState: () => Promise.resolve(),
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -52,7 +50,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userProfile = await getProfileById(user.id);
       const userAvatarUrl = await getAvatarUrl(user.id);
       if (userProfile) {
-        setUser({ ...user, profile: {...userProfile, avatarUrl: userAvatarUrl || ""} });
+        setUser({
+          ...user,
+          profile: { ...userProfile, avatarUrl: userAvatarUrl || "" },
+        });
         setLoading(false);
       } else if (!userProfile) {
         setUser(null);
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(null);
       setUserRole(null);
       setIsRedirecting(false);
-      return;
+      setLoading(false);
     }
   };
 
@@ -96,12 +97,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     fetchSession();
-
-    const {
-      data: { subscription },
-    } = onAuthStateChange(updateAuthState);
-
-    return () => subscription.unsubscribe();
   }, []);
 
   const redirectToRoleDashboard = () => {
@@ -153,6 +148,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         redirectToRoleDashboard,
         handleSignOut,
         fetchSession,
+        updateAuthState,
       }}
     >
       {children}

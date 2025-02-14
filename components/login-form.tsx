@@ -21,7 +21,8 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 
 export const LoginForm = () => {
   const router = useRouter();
-  const { redirectToRoleDashboard, setUser, setUserRole } = useAuth();
+  const { redirectToRoleDashboard, setUser, setUserRole, updateAuthState } =
+    useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -42,10 +43,7 @@ export const LoginForm = () => {
         response.data.user &&
         response.data.session
       ) {
-        console.log(response.data);
-        const jwt: JwtPayload = jwtDecode(response.data.session.access_token);
-        setUserRole(jwt.user_role);
-        setUser(response.data.user);
+        updateAuthState(response.data.session);
         toast.success("Login feito com sucesso!");
         redirectToRoleDashboard();
       }

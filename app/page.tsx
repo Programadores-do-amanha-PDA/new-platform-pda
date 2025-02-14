@@ -5,7 +5,6 @@ import Image from "next/image";
 import Logo from "/public/assets/logos/Logo_PDA_Horizontal_FundoBranco.png";
 
 export default function LoginPage() {
-
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -19,7 +18,7 @@ export default function LoginPage() {
             />
           </div>
         </a>
-        <LoginForm/>
+        <LoginForm />
       </div>
     </div>
   );
