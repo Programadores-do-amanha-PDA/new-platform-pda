@@ -6,9 +6,7 @@ export const getAllJobs = async () => {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("jobs")
-      .select();
+    const { data, error } = await supabase.from("jobs").select();
 
     if (error) throw error;
 
@@ -42,12 +40,9 @@ export const createJob = async (job: JobType) => {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("jobs")
-      .insert(job)
-      .select();
+    const { data, error } = await supabase.from("jobs").insert(job).select();
 
-      console.log(data, error)
+    console.log(data, error);
 
     if (error) throw error;
 
@@ -56,12 +51,9 @@ export const createJob = async (job: JobType) => {
     console.error("Error creating job:", error);
     return null;
   }
-}
+};
 
-export const updateJob = async (
-  jobId: string,
-  updates: Partial<JobType>
-) => {
+export const updateJob = async (jobId: string, updates: Partial<JobType>) => {
   try {
     const supabase = await createClient();
 

@@ -155,11 +155,11 @@ const ProfileDataTabs = ({
   return (
     <div className="w-full h-full flex flex-col justify-between">
       <form
-        className="grid grid-cols-2 gap-8 my-8"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8"
         onSubmit={(e) => e.preventDefault()}
       >
         <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
-        <Separator className="col-span-2" />
+        <Separator className="col-span-1 lg:col-span-2" />
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
           <Label htmlFor="name" className="text-left">
             Nome completo
@@ -172,7 +172,7 @@ const ProfileDataTabs = ({
           />
         </div>
 
-        <div className="col-span-2 grid grid-rows-[20px_1fr] items-center gap-4">
+        <div className="col-span-1 lg:col-span-2 grid grid-rows-[20px_1fr] items-center gap-4">
           <Label
             htmlFor="bio"
             className="row-span-1 w-full flex justify-between items-center"
@@ -187,8 +187,8 @@ const ProfileDataTabs = ({
             className="row-span-1 resize-none"
           />
         </div>
-        <Separator className="col-span-2" />
-        <div className="col-span-2">
+        <Separator className="col-span-1 lg:col-span-2" />
+        <div className="col-span-1 lg:col-span-2">
           <p className="text-left h-max text-base">Alterar email</p>
           <span className="text-sm text-muted-foreground">
             Para concluir a alteração de email você deve verificar sua caixa de
@@ -207,8 +207,8 @@ const ProfileDataTabs = ({
             className="col-span-3"
           />
         </div>
-        <Separator className="col-span-2" />
-        <div className="col-span-2">
+        <Separator className="col-span-1 lg:col-span-2" />
+        <div className="col-span-1 lg:col-span-2">
           <p className="text-left h-max text-base">Alterar senha</p>
           <span className="text-sm text-muted-foreground">
             A senha precisa ter um mínimo de 7 caracteres, incluindo letras
@@ -242,7 +242,7 @@ const ProfileDataTabs = ({
           />
         </div>
 
-        <Separator className="col-span-2" />
+        <Separator className="col-span-1 lg:col-span-2" />
         <div className="grid grid-rows-2 items-center gap-4">
           <Label>Seus cargos</Label>
 

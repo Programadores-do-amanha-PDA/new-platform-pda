@@ -67,6 +67,10 @@ export default function RootLayout({
             title: "Realizar match",
             url: "/dashboard/alumni/jobs/match",
           },
+          {
+            title: "Minhas Aplicações",
+            url: "/dashboard/alumni/jobs/applications",
+          },
         ],
       },
     ],

@@ -48,7 +48,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       <Sidebar
         collapsible="icon"
         {...props}
-        className="animate-pulse flex flex-col"
+        className="animate-pulse flex flex-col bg-background"
       >
         <SidebarHeader className="animate-pulse bg-primary/15 h-12 rounded-sm"></SidebarHeader>
         <SidebarContent className="animate-pulse bg-primary/15 h-full rounded-sm my-4"></SidebarContent>

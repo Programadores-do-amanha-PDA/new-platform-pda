@@ -9,7 +9,7 @@ import {
   deleteJob,
   getAllJobs,
   updateJob,
-} from "@/utils/supabase/actions/jobs";
+} from "@/app/actions/jobs";
 import { adminDeleteUser } from "@/utils/supabase/actions/auth_admin";
 
 interface EmployerStackContextProps {

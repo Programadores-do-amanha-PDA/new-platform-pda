@@ -1,171 +1,168 @@
 "use client";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { LoaderCircle, Plus, X } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { useEffect, useState } from "react";
+import { validateCurriculumForm } from "./form-data-validations";
 
-const CurriculumFormData = () => {
-  const [location, setLocation] = useState<{ state: string; city: string }>({
+import {
+  CurriculumInterestingAreasType,
+  CurriculumLocationType,
+  CurriculumStudiesType,
+  CurriculumType,
+} from "@/types/curriculum";
+import { StatesCombobox } from "./StatesCombobox";
+import { StateCitiesCombobox } from "./state-cities-combobox";
+import axios from "axios";
+
+const fetchAllBrazilianStates = async (
+  setStates: (states: { id: number; nome: string; sigla: string }[]) => void
+) => {
+  try {
+    const response = await axios.get(
+      "https://servicodados.ibge.gov.br/api/v1/localidades/estados"
+    );
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error("Invalid data received from API");
+    }
+    setStates(response.data);
+  } catch (error) {
+    toast.error("Erro ao buscar os estados brasileiros!");
+  }
+};
+
+const fetchAllStatesCities = async (
+  states: { id: number; nome: string; sigla: string }[],
+  location: CurriculumLocationType,
+  setStateCities: (stateCities: { id: number; nome: string }[]) => void
+) => {
+  try {
+    const response = await axios.get(
+      `https://servicodados.ibge.gov.br/api/v1/localidades/estados/${
+        states.find((state) => state.nome === location.state)?.id
+      }/municipios`
+    );
+
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error("Invalid data received from API");
+    }
+
+    setStateCities(response.data);
+  } catch (error) {
+    toast.error("Erro ao buscar as cidades do estado selecionado!");
+  }
+};
+
+const CurriculumFormData = ({
+  currentCurriculum,
+  handleUpdateCurriculum,
+  handleCreateCurriculum,
+}: {
+  currentCurriculum: CurriculumType | null;
+  handleUpdateCurriculum: (curriculumData: CurriculumType) => Promise<boolean>;
+  handleCreateCurriculum: (curriculumData: CurriculumType) => Promise<boolean>;
+}) => {
+  const [openStateCombobox, setOpenStateCombobox] = useState(false);
+  const [openCityCombobox, setOpenCityCombobox] = useState(false);
+  const [location, setLocation] = useState<CurriculumLocationType>({
     state: "",
     city: "",
   });
 
-  const [interestingAreas, setInterestingAreas] = useState<
-    Array<{
-      area: string;
-      languages: Array<{
-        language: string;
-        language_technologies: string[];
-      }>;
-    }>
-  >([
-    {
-      area: "",
-      languages: [
-        {
-          language: "",
-          language_technologies: [""],
-        },
-      ],
-    },
-  ]);
+  const [states, setStates] = useState<
+    { id: number; nome: string; sigla: string }[]
+  >([]);
+
+  const [stateCities, setStateCities] = useState<
+    { id: number; nome: string }[]
+  >([]);
+
+  const [interestingAreas, setInterestingAreas] =
+    useState<CurriculumInterestingAreasType>([]);
+
+  const [studies, setStudies] = useState<CurriculumStudiesType>([]);
 
   const [loading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   setFullName(currentUser.profile?.full_name || "");
-  //   setEmail(currentUser.email || "");
-  //   setBio(currentUser.profile?.bio || "");
-  // }, [currentUser]);
+  useEffect(() => {
+    setLocation(
+      currentCurriculum?.location || {
+        state: "",
+        city: "",
+      }
+    );
+    setInterestingAreas(currentCurriculum?.interesting_areas || []);
+    setStudies(currentCurriculum?.studies || []);
+  }, [currentCurriculum]);
 
-  // const handleSubmit = async () => {
-  //   setLoading(true);
+  useEffect(() => {
+    fetchAllBrazilianStates(setStates);
+  }, []);
 
-  //   try {
-  //     const fullNameRegex = /^[a-zA-Z]{4,}(?: [a-zA-Z]+){0,2}$/gm;
-  //     const emailRegex =
-  //       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  useEffect(() => {
+    if (states.find((state) => state.nome === location.state)?.id) {
+      fetchAllStatesCities(states, location, setStateCities);
+    }
+  }, [states, location]);
 
-  //     const passwordRegex =
-  //       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
+  const handleSubmit = async () => {
+    setLoading(true);
 
-  //     if (!fullName && !email) throw "fill the fields";
-  //     if (
-  //       fullName !== currentUser.profile?.full_name &&
-  //       !fullNameRegex.test(fullName)
-  //     )
-  //       throw "Invalid full name";
-  //     if (email !== currentUser.email && !emailRegex.test(email))
-  //       throw "Invalid email";
+    try {
+      if (validateCurriculumForm(location, interestingAreas, studies))
+        if (!currentCurriculum?.id) {
+          const curriculumData = {
+            location: Object.prototype.hasOwnProperty.call(location, "state")
+              ? { ...location }
+              : { state: "", city: "" },
+            interesting_areas: [...interestingAreas],
+            studies: [...studies],
+          };
+          const response = await handleCreateCurriculum(curriculumData);
+          if (!response) throw new Error("no curriculum response");
 
-  //     if (
-  //       newPassword.length > 0 &&
-  //       confirmNewPassword.length > 0 &&
-  //       (newPassword !== confirmNewPassword ||
-  //         (!passwordRegex.test(newPassword) &&
-  //           !passwordRegex.test(confirmNewPassword)))
-  //     )
-  //       throw "Invalid password";
-  //     if (bio !== currentUser.profile?.bio && bio.length > 190)
-  //       throw "Invalid bio";
-
-  //     const userData: Partial<UserAttributes & { password: string }> = {};
-
-  //     if (email !== currentUser.email) {
-  //       userData.email = email;
-  //     }
-
-  //     if (
-  //       newPassword === confirmNewPassword &&
-  //       newPassword.length > 0 &&
-  //       confirmNewPassword.length > 0
-  //     ) {
-  //       console.log(
-  //         "password",
-  //         newPassword === confirmNewPassword &&
-  //           newPassword.length > 0 &&
-  //           confirmNewPassword.length > 0
-  //       );
-  //       userData.password = newPassword;
-  //     }
-
-  //     const userMetadata: UserMetadata = {};
-  //     if (fullName !== currentUser.profile?.full_name) {
-  //       userMetadata.full_name = fullName;
-  //     }
-  //     if (bio && bio !== currentUser.profile?.bio) {
-  //       userMetadata.bio = bio;
-  //     }
-
-  //     if (email !== currentUser.email) {
-  //       userMetadata.user_email = email;
-  //     }
-
-  //     if (Object.keys(userMetadata).length > 0) {
-  //       userData.data = userMetadata;
-  //     }
-
-  //     const userUpdateResponse = await updateAuthUser(userData);
-  //     if (!userUpdateResponse || !userUpdateResponse.user.id)
-  //       throw "no edit user response";
-
-  //     toast.success("Sucesso ao editar seus dados!");
-  //     if (email !== currentUser.email) {
-  //       toast.info(
-  //         "Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!"
-  //       );
-  //     }
-  //     onUpdateUser();
-
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.log(error);
-  //     switch (error) {
-  //       case "fill the fields":
-  //         toast.error("Por favor preencha todos os campos!");
-  //         break;
-
-  //       case "Invalid full name":
-  //         toast.error("Nome completo inválido!");
-  //         break;
-
-  //       case "Invalid email":
-  //         toast.error("E-mail inválido!");
-  //         break;
-
-  //       case "Invalid email":
-  //         toast.error("Senha inválida!");
-  //         break;
-
-  //       case "Invalid bio":
-  //         toast.error(
-  //           "Bio inválida! A biografia não pode exceder 190 caracteres."
-  //         );
-  //         break;
-
-  //       case "no edit user response":
-  //         toast.error("Erro ao editar seus dados! Tente novamente mais tarde.");
-  //         break;
-
-  //       default:
-  //         toast.error(
-  //           "Erro ao atualizar seus dados! Tente novamente mais tarde."
-  //         );
-  //         break;
-  //     }
-  //     setLoading(false);
-  //   }
-  // };
+          toast.success("Currículo criado com sucesso!");
+        } else if (currentCurriculum?.id) {
+          const response = await handleUpdateCurriculum({
+            location,
+            interesting_areas: interestingAreas,
+            studies,
+            updated_at: new Date(),
+          });
+          if (!response) throw new Error("no curriculum response");
+          toast.success("Currículo atualizado com sucesso!");
+        } else {
+          toast.error(
+            "Erro ao criar ou atualizar o seu currículo. Tente novamente mais tarde!"
+          );
+        }
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      if (!currentCurriculum?.id) {
+        toast.error(
+          "Erro ao criar o seu currículo. Tente novamente mais tarde!"
+        );
+      } else if (currentCurriculum?.id) {
+        toast.error(
+          "Erro ao atualizar o seu currículo. Tente novamente mais tarde!"
+        );
+      }
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between">
+    <div className="w-full h-max flex flex-col justify-between">
       <form
-        className="grid grid-cols-2 gap-8 my-8"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
         onSubmit={(e) => e.preventDefault()}
       >
-        <div className="col-span-2">
+        <div className="col-span-1 lg:col-span-2">
           <p className="text-left h-max text-base">Localização</p>
           <span className="text-sm text-muted-foreground">
             Os dados de localização são opcionais, porem ao preencher você
@@ -173,20 +170,19 @@ const CurriculumFormData = () => {
             e as vagas disponíveis.
           </span>
         </div>
-        <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-          <Label htmlFor="state" className="text-left h-max">
-            Estado
-          </Label>
-          <Input
-            id="state"
-            type="text"
+        <div className="grid grid-rows-[20px_1fr] items-center gap-4 col-span-1">
+          <Label className="text-left h-max">Estado</Label>
+          <StatesCombobox
+            states={states}
             value={location.state}
-            onChange={(e) =>
+            setValue={(value) =>
               setLocation((s) => ({
                 ...s,
-                state: e.target.value,
+                state: value,
               }))
             }
+            open={openStateCombobox}
+            setOpen={setOpenStateCombobox}
             className="col-span-3"
           />
         </div>
@@ -195,38 +191,43 @@ const CurriculumFormData = () => {
           <Label htmlFor="city" className="text-left h-max">
             Cidade
           </Label>
-          <Input
-            id="city"
-            type="text"
+          <StateCitiesCombobox
+            cities={stateCities}
             value={location.city}
-            onChange={(e) =>
-              setLocation((s) => ({ ...s, city: e.target.value }))
+            setValue={(value) =>
+              setLocation((s) => ({
+                ...s,
+                city: value,
+              }))
             }
+            open={openCityCombobox}
+            setOpen={setOpenCityCombobox}
             className="col-span-3"
           />
         </div>
-        <Separator className="col-span-2" />
+        <Separator className="col-span-1 lg:col-span-2" />
 
-        <div className="col-span-2">
+        <div className="col-span-1 lg:col-span-2">
           <p className="text-left h-max text-base">Areas de interesse</p>
           <span className="text-sm text-muted-foreground">
-            Declare aqui quais areas você tem interesse, quais linguagens da
-            area você domina e quais os frameworks da linguagem você usa para
-            desenvolver.
+            As areas de interesse são opcionais, porem ao declarar, você terá
+            uma melhor experiencia no match entre as vagas e seu currículo!
+            Declare até 3 areas que você tem interesse, e até 3
+            linguagens/tecnologias você usa em cada area.
           </span>
         </div>
         {interestingAreas.map((interestingArea, interestingAreaIndex) => {
           return (
             <div
               key={interestingAreaIndex}
-              className="flex flex-col space-y-4 col-span-2 p-4 "
+              className="flex flex-col space-y-4 col-span-1 lg:col-span-2 p-4"
             >
               <div className="h-10 flex max-w-96 items-start bg-zinc-50 rounded-xl border border-input truncate">
                 <Label
                   htmlFor="area"
                   className="text-left h-full flex items-center p-3 border-r border-input"
                 >
-                  Area:
+                  Area {interestingAreaIndex + 1}:
                 </Label>
                 <Input
                   id="area"
@@ -241,188 +242,325 @@ const CurriculumFormData = () => {
                       ),
                     ])
                   }
+                  placeholder="Desenvolvimento Web..."
                   className="!border-none !ring-0 bg-card !rounded-none w-full h-full"
                 />
+
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="destructive"
+                  onClick={() =>
+                    setInterestingAreas((prev) =>
+                      prev.filter((_, i) => i !== interestingAreaIndex)
+                    )
+                  }
+                  className="h-full rounded-l-none !bg-zinc-100 text-destructive border-l border-input"
+                >
+                  <X className="size-5" />
+                </Button>
               </div>
-              {/* languages */}
-              <ul className="flex flex-col space-y-4">
-                {interestingArea.languages.map((language, languageIndex) => {
-                  return (
-                    <li key={languageIndex}>
-                      <div className="ml-4 w-full p-4 rounded-lg flex flex-col gap-6 bg-card">
-                        <div
-                          className="h-10 flex max-w-96 items-start bg-zinc-50 rounded-xl border border-input truncate
-"
-                        >
-                          <Label
-                            htmlFor={`language-${languageIndex}`}
-                            className="text-left h-full flex items-center p-3 border-r border-input"
-                          >
-                            Linguagem:
-                          </Label>
-                          <Input
-                            id={`language-${languageIndex}`}
-                            type="text"
-                            value={language.language}
-                            onChange={(e) =>
-                              setInterestingAreas((prev) =>
-                                prev.map((item, index) =>
-                                  index === interestingAreaIndex
-                                    ? {
-                                        ...item,
-                                        languages: item.languages.map(
-                                          (lang, i) =>
-                                            i === languageIndex
-                                              ? {
-                                                  ...lang,
-                                                  language: e.target.value,
-                                                }
-                                              : lang
+              {/* technologies */}
+
+              <div className="ml-4 h-max w-60 flex flex-col items-center bg-zinc-50 rounded-xl border border-input truncate space-y-4 pb-4">
+                <Label className="w-full flex items-center p-3 border-b border-input">
+                  Tecnologias
+                </Label>
+
+                {interestingArea.technologies.map(
+                  (technology, technologyIndex) => {
+                    return (
+                      <div
+                        key={technologyIndex}
+                        className="h-10 flex items-start bg-zinc-50 rounded-xl border border-input truncate mx-2"
+                      >
+                        <Input
+                          type="text"
+                          value={technology}
+                          onChange={(e) =>
+                            setInterestingAreas((prev) =>
+                              prev.map((item, index) =>
+                                index === interestingAreaIndex
+                                  ? {
+                                      ...item,
+                                      technologies:
+                                        interestingArea.technologies.map(
+                                          (tech, i) =>
+                                            i === technologyIndex
+                                              ? e.target.value
+                                              : tech
                                         ),
-                                      }
-                                    : item
-                                )
+                                    }
+                                  : item
                               )
-                            }
-                            className="!border-none !ring-0 bg-card !rounded-none !w-full !h-full"
-                          />
-                        </div>
+                            )
+                          }
+                          placeholder="Javascript..."
+                          className="!border-none !ring-0 bg-card !rounded-none w-full h-full"
+                        />
 
-                        <div className="ml-4 h-max w-max flex flex-col items-center bg-zinc-50 rounded-xl border border-input truncate space-y-4 pb-4">
-                          <Label className="w-full flex items-center p-3 border-b border-input">
-                            Tecnologias
-                          </Label>
-
-                          {language.language_technologies.map(
-                            (technology, technologyIndex) => {
-                              return (
-                                <div
-                                  key={technologyIndex}
-                                  className="h-10 flex max-w-96 items-start bg-zinc-50 rounded-xl border border-input truncate mx-2"
-                                >
-                                  <Input
-                                    type="text"
-                                    value={technology}
-                                    onChange={(e) =>
-                                      setInterestingAreas((prev) =>
-                                        prev.map((item, index) =>
-                                          index === interestingAreaIndex
-                                            ? {
-                                                ...item,
-                                                languages: item.languages.map(
-                                                  (lang, langI) =>
-                                                    langI === languageIndex
-                                                      ? {
-                                                          ...lang,
-                                                          language_technologies:
-                                                            lang.language_technologies.map(
-                                                              (tech, i) =>
-                                                                i ===
-                                                                technologyIndex
-                                                                  ? e.target
-                                                                      .value
-                                                                  : tech
-                                                            ),
-                                                        }
-                                                      : lang
-                                                ),
-                                              }
-                                            : item
-                                        )
-                                      )
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          onClick={() =>
+                            setInterestingAreas((prev) =>
+                              prev.map((item, index) =>
+                                index === interestingAreaIndex
+                                  ? {
+                                      ...item,
+                                      technologies:
+                                        interestingArea.technologies.filter(
+                                          (_, techI) =>
+                                            techI !== technologyIndex
+                                        ),
                                     }
-                                    placeholder=""
-                                    className="!border-none !ring-0 bg-card !rounded-none w-full h-full"
-                                  />
-
-                                  <Button
-                                    type="button"
-                                    size="icon"
-                                    variant="destructive"
-                                    onClick={() =>
-                                      setInterestingAreas((prev) =>
-                                        prev.map((item, index) =>
-                                          index === interestingAreaIndex
-                                            ? {
-                                                ...item,
-                                                languages: item.languages.map(
-                                                  (lang, langI) =>
-                                                    langI === languageIndex
-                                                      ? {
-                                                          ...lang,
-                                                          language_technologies:
-                                                            lang.language_technologies.filter(
-                                                              (_, techI) =>
-                                                                techI !==
-                                                                technologyIndex
-                                                            ),
-                                                        }
-                                                      : lang
-                                                ),
-                                              }
-                                            : item
-                                        )
-                                      )
-                                    }
-                                    className="h-full rounded-l-none !bg-zinc-100 text-destructive border-l border-input"
-                                  >
-                                    <X className="size-5" />
-                                  </Button>
-                                </div>
-                              );
-                            }
-                          )}
-                          {language.language_technologies.length < 3 && (
-                            <Button
-                              type="button"
-                              size={"icon"}
-                              className="w-40"
-                              onClick={() =>
-                                setInterestingAreas((prev) =>
-                                  prev.map((item, index) =>
-                                    index === interestingAreaIndex
-                                      ? {
-                                          ...item,
-                                          languages: item.languages.map(
-                                            (lang, langI) =>
-                                              langI === languageIndex
-                                                ? {
-                                                    ...lang,
-                                                    language_technologies:
-                                                      lang.language_technologies.concat(
-                                                        ""
-                                                      ),
-                                                  }
-                                                : lang
-                                          ),
-                                        }
-                                      : item
-                                  )
-                                )
-                              }
-                              variant="outline"
-                            >
-                              <Plus />
-                            </Button>
-                          )}
-                        </div>
+                                  : item
+                              )
+                            )
+                          }
+                          className="h-full rounded-l-none !bg-zinc-100 text-destructive border-l border-input"
+                        >
+                          <X className="size-5" />
+                        </Button>
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
+                    );
+                  }
+                )}
+                {interestingArea.technologies.length < 3 && (
+                  <Button
+                    type="button"
+                    size={"icon"}
+                    className="w-40"
+                    onClick={() =>
+                      setInterestingAreas((prev) =>
+                        prev.map((item, index) =>
+                          index === interestingAreaIndex
+                            ? {
+                                ...item,
+                                technologies:
+                                  interestingArea.technologies.concat(""),
+                              }
+                            : item
+                        )
+                      )
+                    }
+                    variant="outline"
+                  >
+                    <Plus />
+                  </Button>
+                )}
+              </div>
             </div>
           );
         })}
+        {interestingAreas.length < 3 && (
+          <Button
+            type="button"
+            size={"icon"}
+            className="max-w-60 w-full"
+            onClick={() =>
+              setInterestingAreas((prev) => [
+                ...prev,
+                {
+                  area: "",
+                  technologies: [""],
+                },
+              ])
+            }
+            variant="outline"
+          >
+            <Plus /> Adicionar Area de interesse
+          </Button>
+        )}
+        <Separator className="col-span-1 lg:col-span-2" />
+
+        <div className="col-span-1 lg:col-span-2">
+          <p className="text-left h-max text-base">Estudos</p>
+          <span className="text-sm text-muted-foreground">
+            Os dados de estudos são opcionais, porem se você está atualmente
+            estudando em uma universidade ou instituição de ensino, é
+            recomendável fornecer essas informações para que você tenha uma
+            melhor experiência de match entre as vagas e seu currículo.
+          </span>
+        </div>
+
+        {studies.map((study, studyIndex) => (
+          <div
+            key={studyIndex}
+            className="col-span-1 lg:col-span-2 flex flex-col gap-2 border rounded-xl truncate"
+          >
+            <div className="bg-zinc-50 pl-2 h-10 flex justify-between items-center">
+              <p className="text-sm">Estudo {studyIndex + 1}</p>
+              <Button
+                type="button"
+                size="icon"
+                variant="destructive"
+                onClick={() =>
+                  setStudies((prev) => prev.filter((_, i) => i !== studyIndex))
+                }
+                className="h-full !rounded-none !bg-zinc-50 text-destructive border-l border-input"
+              >
+                <X className="size-5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 gap-y-4 p-4">
+              <div className="grid grid-rows-[20px_1fr] items-center gap-4 col-span-1">
+                <Label
+                  htmlFor={`study-institution-${studyIndex}`}
+                  className="text-left h-max"
+                >
+                  Instituição de ensino
+                </Label>
+                <Input
+                  id={`study-institution-${studyIndex}`}
+                  type="text"
+                  value={study.institution}
+                  onChange={(e) =>
+                    setStudies((prev) =>
+                      prev.map((s, i) =>
+                        i === studyIndex
+                          ? { ...s, institution: e.target.value }
+                          : s
+                      )
+                    )
+                  }
+                  placeholder="Programadores do Amanhã"
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+                <Label
+                  htmlFor={`study-field-${studyIndex}`}
+                  className="text-left h-max"
+                >
+                  Curso
+                </Label>
+                <Input
+                  id={`study-field-${studyIndex}`}
+                  type="text"
+                  value={study.study_field}
+                  onChange={(e) =>
+                    setStudies((prev) =>
+                      prev.map((s, i) =>
+                        i === studyIndex
+                          ? { ...s, study_field: e.target.value }
+                          : s
+                      )
+                    )
+                  }
+                  placeholder="Sistemas para Internet..."
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+                <Label
+                  htmlFor={`study-degree-${studyIndex}`}
+                  className="text-left h-max"
+                >
+                  Grau
+                </Label>
+                <Input
+                  id={`study-degree-${studyIndex}`}
+                  type="text"
+                  value={study.degree}
+                  onChange={(e) =>
+                    setStudies((prev) =>
+                      prev.map((s, i) =>
+                        i === studyIndex ? { ...s, degree: e.target.value } : s
+                      )
+                    )
+                  }
+                  placeholder="Ensino Superior..."
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+                <Label
+                  htmlFor={`start-date-${studyIndex}`}
+                  className="text-left h-max"
+                >
+                  Data de inicio
+                </Label>
+                <Input
+                  id={`start-date-${studyIndex}`}
+                  type="date"
+                  value={study.start_date}
+                  onChange={(e) =>
+                    setStudies((prev) =>
+                      prev.map((s, i) =>
+                        i === studyIndex
+                          ? { ...s, start_date: e.target.value }
+                          : s
+                      )
+                    )
+                  }
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-rows-[20px_1fr] items-center gap-4">
+                <Label
+                  htmlFor={`end-date-${studyIndex}`}
+                  className="text-left h-max"
+                >
+                  Data de termino estimada
+                </Label>
+                <Input
+                  id={`end-date-${studyIndex}`}
+                  type="date"
+                  value={study.end_date}
+                  onChange={(e) =>
+                    setStudies((prev) =>
+                      prev.map((s, i) =>
+                        i === studyIndex
+                          ? { ...s, end_date: e.target.value }
+                          : s
+                      )
+                    )
+                  }
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        {studies.length < 3 && (
+          <Button
+            type="button"
+            size={"icon"}
+            className="max-w-60 w-full"
+            onClick={() =>
+              setStudies((prev) => [
+                ...prev,
+                {
+                  institution: "",
+                  study_field: "",
+                  degree: "",
+                  start_date: "",
+                  end_date: "",
+                },
+              ])
+            }
+            variant="outline"
+          >
+            <Plus /> Adicionar Estudo
+          </Button>
+        )}
       </form>
 
       <Button
         type="button"
-        // onClick={() => (!loading ? handleSubmit() : null)}
+        onClick={() => (!loading ? handleSubmit() : null)}
         className="gap-2 flex font-semibold w-max self-end"
       >
         {loading && <LoaderCircle className="size-5 animate-spin" />}
-        {loading ? "Salvando mudanças" : "Salvar mudanças"}
+        {loading
+          ? currentCurriculum?.id
+            ? "Salvando mudanças"
+            : "Criando currículo"
+          : currentCurriculum?.id
+          ? "Salvar mudanças"
+          : "Criar currículo"}
       </Button>
     </div>
   );

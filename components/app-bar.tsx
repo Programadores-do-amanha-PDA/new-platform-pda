@@ -63,10 +63,10 @@ export function AppBar() {
     : breadcrumbItems[breadcrumbItems.length - 1]?.label;
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 sticky top-0 left-0 bg-background py-2 z-50">
       <div className="flex justify-between items-center">
         <div className="space-y-2 flex flex-col gap-1">
-          <h1 className={cn("scroll-m-20 text-3xl font-bold tracking-tight")}>
+          <h1 className={cn("scroll-m-20 text-xl md:text-3xl font-bold tracking-tight")}>
             {title}
           </h1>
         </div>

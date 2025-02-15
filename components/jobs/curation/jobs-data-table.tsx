@@ -110,7 +110,6 @@ const JobsDataTable = ({
       },
       cell: ({ row }) => {
         const createdAt = row.getValue("created_at") as string;
-        console.log(createdAt);
         const date = new Date(createdAt);
         const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
           date.getMonth() + 1

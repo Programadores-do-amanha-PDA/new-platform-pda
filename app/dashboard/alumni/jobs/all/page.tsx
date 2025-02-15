@@ -28,9 +28,8 @@ export default function AllJobsPage() {
       )
     : jobs;
 
-  const handleCreateJobApplicationAndRedirectToJob = async (job: JobType) => {
+  const handleApplyToJob = async (job: JobType) => {
     await handleCreateJobApplication({ job_id: job.id, status: "applied" });
-    window.open(job.link, "_blank");
   };
 
   return (
@@ -59,9 +58,7 @@ export default function AllJobsPage() {
                     <>
                       <Button
                         className="font-semibold"
-                        onClick={() =>
-                          handleCreateJobApplicationAndRedirectToJob(job)
-                        }
+                        onClick={() => handleApplyToJob(job)}
                       >
                         Já me candidatei!
                       </Button>
