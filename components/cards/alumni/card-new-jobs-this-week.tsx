@@ -38,23 +38,25 @@ const CardShowNewJobsThisWeek = ({ jobs }: { jobs: JobType[] }) => {
   const newJobsCount = getNewJobsThisWeek(jobs);
 
   return (
-    <div className="w-full md:max-w-64 h-max bg-card border shadow-card rounded-xl p-6 flex flex-col items-center justify-between gap-4">
-      <BriefcaseBusiness className="size-10 text-card-foreground" />
-      <div className="flex flex-col gap-1 items-center justify-center">
-        <h1 className="text-lg font-bold text-center text-card-foreground">
-          {newJobsCount} vagas adicionada esta semana!
-        </h1>
-        {newJobsCount === 0 ? (
-          <p className="text-sm text-muted-foreground text-center">
-            Ainda não adicionamos vagas esta semana. Mas não se esqueça de
-            verificar periodicamente a nossa página para novas oportunidades!
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground text-center">
-            Temos curadorias de vagas todas as semanas, fique sempre ligado,
-            para não perder nenhuma oportunidade!
-          </p>
-        )}
+    <div className="w-full md:max-w-64 max-h-72 bg-card border shadow-card rounded-xl p-6 flex flex-col items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 items-center justify-start">
+        <BriefcaseBusiness className="size-10 text-card-foreground" />
+        <div className="flex flex-col gap-1 items-center justify-center">
+          <h1 className="text-lg font-bold text-center text-card-foreground">
+            {newJobsCount} vagas adicionada esta semana!
+          </h1>
+          {newJobsCount === 0 ? (
+            <p className="text-sm text-muted-foreground text-center">
+              Ainda não adicionamos vagas esta semana. Mas não se esqueça de
+              verificar periodicamente a nossa página para novas oportunidades!
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center">
+              Temos curadorias de vagas todas as semanas, fique sempre ligado,
+              para não perder nenhuma oportunidade!
+            </p>
+          )}
+        </div>
       </div>
       <Button
         variant="secondary"

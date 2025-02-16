@@ -4,13 +4,7 @@ import * as React from "react";
 import { Label, Pie, PieChart, Sector } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartStyle } from "@/components/ui/chart";
 import {
   Select,
@@ -19,12 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const chartData = [
-  { criterion: "area", points: 30, fill: "var(--color-area)" },
-  { criterion: "technologies", points: 30, fill: "var(--color-technologies)" },
-  { criterion: "studies", points: 30, fill: "var(--color-studies)" },
-  { criterion: "location", points: 10, fill: "var(--color-location)" },
-];
+import { ChartData } from "@/types/charts";
+import { JobType } from "@/types/jobs";
 
 const chartConfig = {
   points: {
@@ -48,37 +38,78 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export function JobMatchChart() {
+export function JobMatchChart({
+  jobsMatch,
+}: {
+  jobsMatch: {
+    job: JobType;
+    matchStatistics: {
+      area: number;
+      language: number;
+      studies: number;
+      local: number;
+      total: number;
+    };
+  }[];
+}) {
   const id = "pie-interactive";
+
+  function calculateAverage(
+    jobs: typeof jobsMatch,
+    key: keyof (typeof jobsMatch)[0]["matchStatistics"]
+  ): number {
+    if (jobs.length === 0) return 0;
+
+    const total = jobs.reduce((acc, job) => acc + job.matchStatistics[key], 0);
+    return Number((((total / jobs.length) * 100) / 4).toFixed());
+  }
+
+  const chartData: ChartData = [
+    {
+      label: "area",
+      value: calculateAverage(jobsMatch, "area"),
+      fill: "var(--color-area)",
+    },
+    {
+      label: "technologies",
+      value: calculateAverage(jobsMatch, "language"),
+      fill: "var(--color-technologies)",
+    },
+    {
+      label: "studies",
+      value: calculateAverage(jobsMatch, "studies"),
+      fill: "var(--color-studies)",
+    },
+    {
+      label: "location",
+      value: calculateAverage(jobsMatch, "local"),
+      fill: "var(--color-location)",
+    },
+  ];
+
   const [activeCriterion, setActiveCriterion] = React.useState(
-    chartData[0].criterion
+    chartData[0].label
   );
 
   const activeIndex = React.useMemo(
-    () => chartData.findIndex((item) => item.criterion === activeCriterion),
+    () => chartData.findIndex((item) => item.label === activeCriterion),
     [activeCriterion]
   );
-  const months = React.useMemo(
-    () => chartData.map((item) => item.criterion),
-    []
-  );
+  const months = React.useMemo(() => chartData.map((item) => item.label), []);
 
   return (
     <Card data-chart={id} className="flex flex-col h-max gap-4">
       <ChartStyle id={id} config={chartConfig} />
       <CardHeader className="flex flex-row items-start space-y-0 pb-0 gap-4">
         <div className="grid gap-1">
-          <CardTitle>Match</CardTitle>
-          <CardDescription>
-            Acompanhe a pontuação de cada critério para seu match de vagas.
-          </CardDescription>
+          <CardTitle>Critérios</CardTitle>
         </div>
         <Select value={activeCriterion} onValueChange={setActiveCriterion}>
           <SelectTrigger
             className="ml-auto h-7 w-[130px] rounded-lg pl-2.5"
             aria-label="Select a value"
           >
-            <SelectValue placeholder="Select month" />
+            <SelectValue placeholder="Selecione um critério" />
           </SelectTrigger>
           <SelectContent align="end" className="rounded-xl">
             {months.map((key) => {
@@ -118,8 +149,8 @@ export function JobMatchChart() {
           <PieChart>
             <Pie
               data={chartData}
-              dataKey="points"
-              nameKey="criterion"
+              dataKey="value"
+              nameKey="label"
               innerRadius={60}
               strokeWidth={5}
               activeIndex={activeIndex}
@@ -152,15 +183,15 @@ export function JobMatchChart() {
                           y={viewBox.cy}
                           className="fill-foreground text-3xl font-bold"
                         >
-                          {chartData[activeIndex].points.toLocaleString()}%
+                          {chartData[activeIndex].value.toLocaleString()}%
                         </tspan>
-                        <tspan
+                        {/* <tspan
                           x={viewBox.cx}
                           y={(viewBox.cy || 0) + 24}
                           className="fill-muted-foreground"
                         >
-                          Match
-                        </tspan>
+                         {chartData[activeIndex].label}
+                        </tspan> */}
                       </text>
                     );
                   }

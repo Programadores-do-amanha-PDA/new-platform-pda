@@ -17,6 +17,24 @@ export const getAllJobs = async () => {
   }
 };
 
+export const getAllCuratedJobs = async () => {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("jobs")
+      .select()
+      .eq("curated", true);
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching all curated jobs search:", error);
+    return null;
+  }
+};
+
 export const getJobByID = async (jobId: string) => {
   try {
     const supabase = await createClient();

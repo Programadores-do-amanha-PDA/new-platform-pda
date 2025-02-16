@@ -76,16 +76,27 @@ export const localeMatch = (student: CurriculumType, job: JobType) => {
 export const calculateMatchPercentage = (
   student: CurriculumType,
   job: JobType
-): number => {
+) => {
+  const area = areaMatch(student, job);
+  const language = languageMatchPercentage(student, job);
+  const studies = studiesMatch(student, job);
+  const local = localeMatch(student, job);
+
   const matchPoints = [
-    areaMatch(student, job) ? 1 : 0,
-    languageMatchPercentage(student, job),
-    studiesMatch(student, job) ? 1 : 0,
-    localeMatch(student, job) ? 0.5 : 0,
+    area ? 1 : 0,
+    language,
+    studies ? 1 : 0,
+    local ? 0.5 : 0,
   ].reduce((sum, points) => sum + points, 0);
 
   const totalPossiblePoints = 5.5;
   const percentage = (matchPoints / totalPossiblePoints) * 100;
 
-  return Math.min(Math.round(percentage * 100) / 100, 100);
+  return {
+    area: area ? 1 : 0,
+    language,
+    studies: studies ? 1 : 0,
+    local: local ? 0.5 : 0,
+    total: Math.min(Math.round(percentage * 100) / 100, 100),
+  };
 };

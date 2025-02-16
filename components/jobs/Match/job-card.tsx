@@ -1,17 +1,24 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { JobType } from "@/types/jobs";
-import { BookOpenText, Cpu, MapPin } from "lucide-react";
+import { BookOpenText, Cpu, MapPin, Target } from "lucide-react";
 import { ReactElement } from "react";
+import JobMatchTable from "./job-match-table";
 
 const JobCard = ({
   job,
   cardFooter,
-  matchPercentage
+  matchStatistics,
 }: {
   job: JobType;
   cardFooter: ReactElement;
-  matchPercentage: number;
+  matchStatistics: {
+    area: number;
+    language: number;
+    studies: number;
+    local: number;
+    total: number;
+  };
 }) => {
   return (
     <div className="flex flex-col box-border w-80 h-max bg-card text-card-foreground rounded-md p-4 border justify-start gap-4 shadow-md">
@@ -70,6 +77,13 @@ const JobCard = ({
               </Badge>
             ))}
           </ul>
+        </div>
+
+        <div className="w-full h-[184px] max-h-72 flex items-center gap-2">
+          <div className="w-7 max-w-7 min-w-7 h-full bg-primary rounded-full flex items-start py-2 justify-center">
+            <Target className="size-5 text-primary-foreground" />
+          </div>
+          <JobMatchTable matchStatistics={matchStatistics} />
         </div>
       </div>
 

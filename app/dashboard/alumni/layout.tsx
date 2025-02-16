@@ -60,7 +60,7 @@ export default function RootLayout({
         icon: Briefcase,
         items: [
           {
-            title: "Todos as vagas",
+            title: "Todas as vagas",
             url: "/dashboard/alumni/jobs/all",
           },
           {

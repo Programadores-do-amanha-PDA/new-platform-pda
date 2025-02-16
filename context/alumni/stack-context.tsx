@@ -7,7 +7,7 @@ import {
   getUserCurriculumByUserId,
   updateUserCurriculumById,
 } from "@/app/actions/curriculum";
-import { getAllJobs } from "@/app/actions/jobs";
+import { getAllCuratedJobs } from "@/app/actions/jobs";
 import {
   getAllJobApplicationsByUserId,
   createJobApplication,
@@ -80,7 +80,7 @@ export const AlumniStackProvider = ({
       try {
         if (!user.id) throw "user id is null";
 
-        const jobResponse = await getAllJobs();
+        const jobResponse = await getAllCuratedJobs();
         if (!jobResponse) throw "get all job response is null";
         setJobs(jobResponse);
 

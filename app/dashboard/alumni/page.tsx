@@ -13,6 +13,7 @@ export default function HomeAdmin() {
   const {
     jobApplicationStack: { jobApplications },
     jobsStack: { jobs },
+    curriculumStack: { curriculum },
   } = useAlumniStack();
   return (
     <main className="relative w-full flex flex-col p-6 gap-10 xl:p-8 bg-background h-max">
@@ -25,7 +26,7 @@ export default function HomeAdmin() {
         />
 
         <div className="w-full flex flex-wrap justify-center md:justify-between gap-4">
-          <AlumniPercentCompletedCurriculumCard />
+          <AlumniPercentCompletedCurriculumCard curriculum={curriculum} />
           <AllAvailableJobsCard jobs={jobs} jobApplications={jobApplications} />
           <JobsMatchCard jobs={jobs} jobApplications={jobApplications} />
           <CardCollectPublicFeedback />

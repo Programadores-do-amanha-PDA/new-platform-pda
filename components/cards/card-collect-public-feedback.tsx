@@ -3,7 +3,9 @@ import { Button } from "../ui/button";
 
 const CardCollectPublicFeedback = () => {
   return (
-    <div className="w-full md:max-w-64 h-max bg-red-100 border border-destructive shadow-card rounded-xl p-6 flex flex-col items-center justify-between gap-4">
+    <div className="w-full md:max-w-64 max-h-72  bg-red-100 border border-destructive shadow-card rounded-xl p-6 flex flex-col items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 items-center justify-start">
+
       <Bug className="size-10 text-destructive" />
       <div className="flex flex-col gap-1 items-center justify-center">
         <h1 className="text-lg font-bold text-center text-card-foreground">
@@ -13,6 +15,7 @@ const CardCollectPublicFeedback = () => {
           Acaso encontrar algum bug ou tiver algum sugestão ou recomendação, por
           favor nos envie através do formulário abaixo!
         </p>
+      </div>
       </div>
       <Button
         variant="ghost"
