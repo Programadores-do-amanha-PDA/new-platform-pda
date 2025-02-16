@@ -1,1 +1,1 @@
-export type ChartData = { label: string; value: number; fill: string }[];
+export type ChartData = { label: string; value: number; fill?: string }[];

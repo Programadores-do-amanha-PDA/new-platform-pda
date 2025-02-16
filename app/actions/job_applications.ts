@@ -2,7 +2,7 @@
 import { JobApplication } from "@/types/jobs";
 import { createClient } from "@/utils/supabase/server";
 
-export const createJobApplication = async (applicationData: JobApplication) => {
+export const createJobApplication = async (applicationData: Partial<JobApplication>) => {
   try {
     const supabase = await createClient();
 
@@ -88,7 +88,7 @@ export const getJobApplicationById = async (id: string) => {
 };
 
 export const updateJobApplicationById = async (
-  id: string,
+  id: number,
   applicationData: Partial<JobApplication>
 ) => {
   try {
@@ -109,7 +109,7 @@ export const updateJobApplicationById = async (
   }
 };
 
-export const deleteApplicationById = async (id: string) => {
+export const deleteJobApplicationById = async (id: number) => {
   try {
     const supabase = await createClient();
 

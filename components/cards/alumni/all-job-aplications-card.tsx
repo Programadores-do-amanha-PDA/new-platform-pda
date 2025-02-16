@@ -12,13 +12,13 @@ import { useRouter } from "next/navigation";
 
 const applicationsStatusLabels = {
   applied: "Aguardando resposta...",
-  pending: "Aceito",
+  accepted: "Aceito",
   rejected: "Rejeitado",
 };
 
 const applicationsStatusIcons = {
   applied: FileUp,
-  pending: FileCheck,
+  accepted: FileCheck,
   rejected: FileX,
 };
 
@@ -27,7 +27,7 @@ const applicationStatusIcon = (status: string | undefined) => {
     case "applied":
       return <applicationsStatusIcons.applied className="size-6 min-w-6" />;
     case "pending":
-      return <applicationsStatusIcons.pending className="size-6 min-w-6" />;
+      return <applicationsStatusIcons.accepted className="size-6 min-w-6" />;
     case "rejected":
       return <applicationsStatusIcons.rejected className="size-6 min-w-6" />;
     default:
@@ -63,10 +63,10 @@ const AlumniAllJobApplicationsCard = ({
         <Target className="size-10 min-w-8 text-card-foreground" />
         <div className="flex flex-col items-start justify-center">
           <h1 className="text-lg font-bold text-card-foreground">
-            Suas aplicações!
+            Minhas candidaturas
           </h1>
           <p className="text-sm text-muted-foreground lg:text-center">
-            Tente sempre manter os status de suas aplicações atualizadas!
+            Tem alguma atualização em suas candidaturas? Atualize-as!
           </p>
         </div>
       </div>
@@ -112,7 +112,7 @@ const AlumniAllJobApplicationsCard = ({
         className="text-card-foreground mt-2"
         onClick={() => router.push("/dashboard/alumni/jobs/applications")}
       >
-        Ver todas as suas aplicações
+        Ver minhas candidaturas
         <ArrowRight className="size-4 text-muted-foreground -rotate-12" />
       </Button>
     </div>

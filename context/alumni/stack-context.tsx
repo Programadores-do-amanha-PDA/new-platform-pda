@@ -11,6 +11,8 @@ import { getAllCuratedJobs } from "@/app/actions/jobs";
 import {
   getAllJobApplicationsByUserId,
   createJobApplication,
+  updateJobApplicationById,
+  deleteJobApplicationById,
 } from "@/app/actions/job_applications";
 
 import LoadingComponent from "@/components/loading-component";
@@ -27,8 +29,13 @@ interface AlumniStackContextProps {
   jobApplicationStack: {
     jobApplications: JobApplication[];
     handleCreateJobApplication: (
-      applicationData: JobApplication
+      applicationData: Partial<JobApplication>
     ) => Promise<boolean>;
+    handleUpdateJobApplicationStatus: (
+      applicationId: number,
+      status: "applied" | "rejected" | "accepted"
+    ) => Promise<boolean>;
+    handleDeleteJobApplication: (applicationId: number) => Promise<boolean>;
   };
 
   curriculumStack: {
@@ -52,6 +59,8 @@ const AlumniStackContext = createContext<AlumniStackContextProps>({
   jobApplicationStack: {
     jobApplications: [],
     handleCreateJobApplication: () => Promise.resolve(false),
+    handleUpdateJobApplicationStatus: () => Promise.resolve(false),
+    handleDeleteJobApplication: () => Promise.resolve(false),
   },
   curriculumStack: {
     curriculum: {},
@@ -105,7 +114,7 @@ export const AlumniStackProvider = ({
   }, [user.id]);
 
   const handleCreateJobApplication = async (
-    applicationData: JobApplication
+    applicationData: Partial<JobApplication>
   ) => {
     try {
       if (!user.id || !applicationData.job_id || !applicationData.status)
@@ -121,7 +130,73 @@ export const AlumniStackProvider = ({
       return true;
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao declarar a aplicação! Tente recarregar a pagina!");
+      toast.error("Erro ao declarar a candidatura! Tente recarregar a pagina!");
+      return false;
+    }
+  };
+
+  const handleUpdateJobApplicationStatus = async (
+    applicationId: number,
+    status: "applied" | "rejected" | "accepted"
+  ): Promise<boolean> => {
+    try {
+      if (!user.id || !applicationId)
+        throw "user id and application id is required";
+
+      const application: JobApplication | undefined = jobApplications.find(
+        (application) => application.id === applicationId
+      );
+      if (!application || !status) throw "job application not found";
+
+      const updatedApplication: JobApplication | undefined =
+        await updateJobApplicationById(applicationId, {
+          status,
+          updated_at: JSON.stringify(new Date()),
+        });
+      if (!updatedApplication) throw "update job application response is null";
+
+      setJobApplications([
+        ...jobApplications.filter(
+          (application) => application.id !== applicationId
+        ),
+        updatedApplication,
+      ]);
+
+      toast.success("Status da candidatura foi atualizado com sucesso!");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar o status da candidatura!");
+      return false;
+    }
+  };
+
+  const handleDeleteJobApplication = async (
+    applicationId: number
+  ): Promise<boolean> => {
+    try {
+      if (!user.id || !applicationId)
+        throw "user id and application id is required";
+
+      const application: JobApplication | undefined = jobApplications.find(
+        (application) => application.id === applicationId
+      );
+      if (!application) throw "job application not found";
+
+      const deletedApplication = await deleteJobApplicationById(applicationId);
+      if (!deletedApplication) throw "delete job application response is null";
+
+      setJobApplications([
+        ...jobApplications.filter(
+          (application) => application.id !== applicationId
+        ),
+      ]);
+
+      toast.success("Candidatura deletada com sucesso!");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao deletar a candidatura!");
       return false;
     }
   };
@@ -202,6 +277,8 @@ export const AlumniStackProvider = ({
         jobApplicationStack: {
           jobApplications,
           handleCreateJobApplication,
+          handleUpdateJobApplicationStatus,
+          handleDeleteJobApplication,
         },
         curriculumStack: {
           curriculum,

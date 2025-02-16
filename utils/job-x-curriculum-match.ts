@@ -61,15 +61,28 @@ export const studiesMatch = (student: CurriculumType, job: JobType) => {
 
 // Locale (0.5 points)
 export const localeMatch = (student: CurriculumType, job: JobType) => {
+  const isRemote = job.details?.workplace_type?.some(
+    (wt) => typeof wt === "string" && wt.toLowerCase() === "remote"
+  );
+
+  if (isRemote) {
+    return true;
+  }
+
   const studentLocation = [
     student.location?.city?.toLowerCase(),
     student.location?.state?.toLowerCase(),
   ].filter(Boolean);
 
-  const jobLocations = job.details?.locale?.map((l) => l.toLowerCase()) || [];
+  const jobLocations =
+    job.details?.locale?.map((l) =>
+      typeof l === "string" ? l.toLowerCase() : ""
+    ) || [];
 
   return studentLocation.some((loc) =>
-    jobLocations.some((jobLoc) => jobLoc.includes(loc || ""))
+    jobLocations.some(
+      (jobLoc) => typeof jobLoc === "string" && jobLoc.includes(loc as string)
+    )
   );
 };
 

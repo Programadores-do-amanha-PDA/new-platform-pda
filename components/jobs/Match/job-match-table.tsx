@@ -13,10 +13,10 @@ const JobMatchTable = ({
   };
 }) => {
   return (
-    <Table className="rounded-md truncate bg-primary">
+    <Table className="rounded-md truncate bg-primary/15">
       <TableBody>
-        <TableRow className="border-primary-foreground">
-          <TableCell className="font-bold text-start w-max border-r">
+        <TableRow className="">
+          <TableCell className="font-bold text-start w-max border-r ">
             Tecnologias
           </TableCell>
           <TableCell className="flex gap-1 text-muted-foreground">
@@ -29,8 +29,8 @@ const JobMatchTable = ({
             / 100
           </TableCell>
         </TableRow>
-        <TableRow className="border-primary-foreground">
-          <TableCell className="font-bold text-start w-max border-r">
+        <TableRow className="">
+          <TableCell className="font-bold text-start w-max border-r ">
             Area
           </TableCell>
           <TableCell>
@@ -41,8 +41,8 @@ const JobMatchTable = ({
             )}
           </TableCell>
         </TableRow>
-        <TableRow className="border-primary-foreground">
-          <TableCell className="font-bold text-start w-max border-r">
+        <TableRow className="">
+          <TableCell className="font-bold text-start w-max border-r ">
             Estudos
           </TableCell>
           <TableCell>
@@ -53,8 +53,8 @@ const JobMatchTable = ({
             )}
           </TableCell>
         </TableRow>
-        <TableRow className="border-primary-foreground">
-          <TableCell className="font-bold text-start w-max border-r">
+        <TableRow className="">
+          <TableCell className="font-bold text-start w-max border-r ">
             Localização
           </TableCell>
           <TableCell>
@@ -65,12 +65,12 @@ const JobMatchTable = ({
             )}
           </TableCell>
         </TableRow>
-        <TableRow className="!bg-primary-foreground">
-          <TableCell className="font-bold text-primary text-start w-max border-r">
+        <TableRow className="!bg-primary/55">
+          <TableCell className="font-bold text-start w-max border-r ">
             Total
           </TableCell>
           <TableCell className="flex gap-1 text-muted-foreground">
-            <p className="font-bold text-primary">{matchStatistics.total.toFixed()}</p>/
+            <p className="font-bold text-primary-foreground">{matchStatistics.total.toFixed()}</p>/
             100
           </TableCell>
         </TableRow>

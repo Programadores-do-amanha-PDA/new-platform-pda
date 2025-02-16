@@ -15,7 +15,6 @@ const pathLabels: { [key: string]: string } = {
   jobs: "Vagas",
   curated: "Vagas curadas",
   curation: "Curadoria de Vagas",
-  applications: "Aplicações",
   dashboard: "Dashboard",
   all_users: "Todos os usuários",
   alumni: "Alumni",
@@ -27,7 +26,8 @@ const pathLabels: { [key: string]: string } = {
   settings: "Configurações",
   profile: "Perfil",
   match: "Match de vagas",
-  curriculum: "Meu currículo"
+  curriculum: "Meu currículo",
+  applications: "Minhas candidaturas",
 };
 
 export function AppBar() {
@@ -66,7 +66,11 @@ export function AppBar() {
     <div className="flex flex-col gap-2 sticky top-0 left-0 bg-background py-2 z-50">
       <div className="flex justify-between items-center">
         <div className="space-y-2 flex flex-col gap-1">
-          <h1 className={cn("scroll-m-20 text-xl md:text-3xl font-bold tracking-tight")}>
+          <h1
+            className={cn(
+              "scroll-m-20 text-xl md:text-3xl font-bold tracking-tight"
+            )}
+          >
             {title}
           </h1>
         </div>

@@ -17,10 +17,12 @@ export type JobDetailsType = {
 };
 
 export type JobApplication = {
-  id?: string;
+  id: number;
   job_id: string;
   user_id?: string;
-  status: "applied" | "pending" | "rejected";
-  created_at?: string;
+  status: "applied" | "rejected" | "accepted";
+  created_at: string;
   updated_at?: string;
 };
+
+export type JobApplicationWithJob = JobApplication & { job?: JobType };

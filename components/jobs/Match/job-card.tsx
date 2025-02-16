@@ -80,7 +80,7 @@ const JobCard = ({
         </div>
 
         <div className="w-full h-[184px] max-h-72 flex items-center gap-2">
-          <div className="w-7 max-w-7 min-w-7 h-full bg-primary rounded-full flex items-start py-2 justify-center">
+          <div className="w-7 max-w-7 min-w-7 h-full bg-primary/55 rounded-full flex items-start py-2 justify-center">
             <Target className="size-5 text-primary-foreground" />
           </div>
           <JobMatchTable matchStatistics={matchStatistics} />

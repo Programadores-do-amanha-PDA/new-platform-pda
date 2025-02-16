@@ -36,7 +36,7 @@ export default function Home() {
   //       <div className="w-full h-full flex items-center justify-center space-y-2 bg-primary/75 rounded-lg">
   //         <h1
   //           className={cn(
-  //             "scroll-m-20 text-3xl font-bold tracking-tight animate-pulse text-primary-foreground"
+  //             "scroll-m-20 text-3xl font-bold tracking-tight animate-pulse"
   //           )}
   //         >
   //           {loadingText}
@@ -53,7 +53,7 @@ export default function Home() {
         <div className="flex flex-col gap-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold text-primary-foreground">
+              <p className="text-lg font-semibold">
                 Estatísticas do Match
               </p>
             </div>
@@ -66,14 +66,13 @@ export default function Home() {
         <div className="flex flex-col gap-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold text-primary-foreground">
+              <p className="text-lg font-semibold">
                 Vagas que deram Match
               </p>
               <p className="text-muted-foreground">
                 Estas são vagas curadas pela equipe da PdA e são as que melhor
-                se encaixam com o seu currículo, para entender melhor visualize
-                o gráfico interativo e lembre-se sempre de manter seu currículo
-                atualizado!
+                se encaixam com o seu currículo, lembre-se sempre de manter seu
+                currículo atualizado!
               </p>
             </div>
           </div>

@@ -14,11 +14,11 @@ const JobCard = ({
   return (
     <div className="flex flex-col box-border w-80 h-max bg-card text-card-foreground rounded-md p-4 border justify-start gap-4 shadow-md">
       <div
-        className="group w-full flex items-center justify-start cursor-pointer overflow-hidden space-x-2 mb-2"
+        className="group w-full h-max min-h-10 flex items-center justify-start cursor-pointer overflow-hidden space-x-2 mb-2"
         onClick={() => window.open(job.link, "_blank")}
       >
-        <div className="w-max flex flex-col justify-between">
-          <Avatar>
+        <div className="size-10 h-max flex flex-col justify-between">
+          <Avatar className="size-10">
             <AvatarImage src="/assets/linkedin.png" />
             <AvatarFallback>in</AvatarFallback>
           </Avatar>
