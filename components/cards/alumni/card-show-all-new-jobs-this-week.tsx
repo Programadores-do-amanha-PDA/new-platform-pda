@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { JobType } from "@/types/jobs";
 import { ArrowRight, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
-import CardShowNewJobsThisWeek from "./card-new-jobs-this-week";
 
 function getUTCWeekRange(date: Date): { start: Date; end: Date } {
   const utcDate = new Date(

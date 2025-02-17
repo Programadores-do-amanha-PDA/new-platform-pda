@@ -1,17 +1,11 @@
 "use client";
-import JobsDataTable from "@/components/jobs/curation/jobs-data-table";
 import { AppBar } from "@/components/app-bar";
+import JobsDataTable from "@/components/jobs/archives/jobs-data-table";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 export default function Home() {
   const {
-    jobsStack: {
-      jobs,
-      handleCurateJob,
-      handleInsertNewJob,
-      handleUpdateJob,
-      handleArchiveJob,
-    },
+    jobsStack: { jobs, handleDeleteJob, handleResendJobToCuration },
     loading,
   } = useEmployerStack();
   return (
@@ -22,12 +16,10 @@ export default function Home() {
         <JobsDataTable
           jobs={jobs
             .filter((job) => job.curated === false)
-            .filter((job) => job.is_archived === false)}
-          handleCurateJob={handleCurateJob}
-          handleInsertNewJob={handleInsertNewJob}
-          handleUpdateJob={handleUpdateJob}
-          handleArchiveJob={handleArchiveJob}
+            .filter((job) => job.is_archived === true)}
+          handleDeleteJob={handleDeleteJob}
           loading={loading}
+          handleResendJobToCuration={handleResendJobToCuration}
         />
       </div>
     </main>

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import LoadingComponent from "@/components/loading-component";
 import { JobType } from "@/types/jobs";
 import { AuthUserWithProfileType } from "@/types/auth";
+import { updateJob } from "@/app/actions/jobs";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -24,6 +25,7 @@ interface AdminStackContextProps {
     handleDeleteJob: (id: string | null) => Promise<void>;
     handleCurateJob: (jobId: string | null) => Promise<void>;
     handleResendJobToCuration: (jobId: string | null) => Promise<void>;
+    handleArchiveJob: (jobId: string | null) => Promise<void>;
   };
   loading: boolean;
 }
@@ -43,6 +45,7 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleDeleteJob: () => Promise.resolve() as Promise<void>,
     handleCurateJob: () => Promise.resolve() as Promise<void>,
     handleResendJobToCuration: () => Promise.resolve() as Promise<void>,
+    handleArchiveJob: () => Promise.resolve() as Promise<void>,
   },
   loading: true,
 });
@@ -190,6 +193,28 @@ export const AdminStackProvider = ({
     }
   };
 
+  const handleArchiveJob = async (jobId: string | null) => {
+    try {
+      if (!jobId) throw new Error("Invalid job ID");
+
+      const response = await updateJob(jobId, {
+        curated: false,
+        is_archived: true,
+      });
+      if (!response) throw new Error("failed to update job");
+
+      const filteredProfiles = jobs.map((job) =>
+        job.id === jobId ? { ...job, curated: false, is_archived: true } : job
+      );
+      setJobs(filteredProfiles);
+
+      toast.success("Vaga arquivada com sucesso!");
+    } catch (error) {
+      console.error("Error to curate job:", error);
+      toast.error("Erro ao arquivar a vaga.");
+    }
+  };
+
   if (loading) {
     return <LoadingComponent />;
   }
@@ -211,6 +236,7 @@ export const AdminStackProvider = ({
           handleDeleteJob,
           handleCurateJob,
           handleResendJobToCuration,
+          handleArchiveJob,
         },
         loading,
       }}

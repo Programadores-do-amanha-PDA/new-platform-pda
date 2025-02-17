@@ -2,7 +2,9 @@
 import { JobApplication } from "@/types/jobs";
 import { createClient } from "@/utils/supabase/server";
 
-export const createJobApplication = async (applicationData: Partial<JobApplication>) => {
+export const createJobApplication = async (
+  applicationData: Partial<JobApplication>
+) => {
   try {
     const supabase = await createClient();
 
@@ -24,7 +26,9 @@ export const getAllJobApplications = async () => {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.from("job_applications").select();
+    const { data, error } = await supabase
+      .from("job_applications")
+      .select("*, jobs!inner(*)");
     if (error) throw error;
 
     return data;
@@ -40,7 +44,7 @@ export const getAllJobApplicationsByUserId = async (userId: string) => {
 
     const { data, error } = await supabase
       .from("job_applications")
-      .select()
+      .select("*, jobs!inner(*)")
       .eq("user_id", userId);
     if (error) throw error;
 
@@ -57,7 +61,7 @@ export const getAllJobApplicationsByJobId = async (jobId: string) => {
 
     const { data, error } = await supabase
       .from("job_applications")
-      .select()
+      .select("*, jobs!inner(*)")
       .eq("job_id", jobId);
     if (error) throw error;
 
@@ -74,7 +78,7 @@ export const getJobApplicationById = async (id: string) => {
 
     const { data, error } = await supabase
       .from("job_applications")
-      .select()
+      .select("*, jobs!inner(*)")
       .eq("id", id)
       .single();
 
@@ -98,7 +102,7 @@ export const updateJobApplicationById = async (
       .from("job_applications")
       .update(applicationData)
       .eq("id", id)
-      .select();
+      .select("*, jobs!inner(*)");
 
     if (error) throw error;
 

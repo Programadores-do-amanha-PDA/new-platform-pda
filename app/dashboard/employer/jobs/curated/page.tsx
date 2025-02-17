@@ -13,7 +13,9 @@ export default function Home() {
 
       <div className="space-y-2">
         <JobsDataTable
-          jobs={jobs}
+          jobs={jobs
+            .filter((job) => job.curated === true)
+            .filter((job) => job.is_archived === false)}
           handleResendJobToCuration={handleResendJobToCuration}
           handleUpdateJob={handleUpdateJob}
         />

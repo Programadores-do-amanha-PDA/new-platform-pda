@@ -21,14 +21,14 @@ const JobsDataTable = ({
   jobs,
   handleInsertNewJob,
   handleUpdateJob,
-  handleDeleteJob,
+  handleArchiveJob,
   handleCurateJob,
   loading,
 }: {
   jobs: JobType[];
   handleInsertNewJob: (job: JobType) => void;
   handleUpdateJob: (job: JobType) => void;
-  handleDeleteJob: (jobId: string) => Promise<void>;
+  handleArchiveJob: (jobId: string) => Promise<void>;
   handleCurateJob: (jobId: string) => Promise<void>;
   loading: boolean;
 }) => {
@@ -182,11 +182,11 @@ const JobsDataTable = ({
                 handleUpdateJobs={handleUpdateJob}
               />
               <Button
-                onClick={() => handleDeleteJob(job.id)}
+                onClick={() => handleArchiveJob(job.id)}
                 variant="ghost"
                 className="!px-2 w-full h-max items-start justify-start text-start"
               >
-                Deletar Vaga
+                Arquivar vaga
               </Button>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -198,7 +198,7 @@ const JobsDataTable = ({
   return (
     <DataTable
       columns={columns}
-      data={jobs.filter((job) => job.curated === false)}
+      data={jobs}
       loading={loading}
       handleSetNewJob={handleInsertNewJob}
     />

@@ -54,11 +54,15 @@ export const getJobByID = async (jobId: string) => {
   }
 };
 
-export const createJob = async (job: JobType) => {
+export const createJob = async (job: Partial<JobType>) => {
   try {
     const supabase = await createClient();
+    const key = process.env.NEXT_PUBLIC_PDA_JOBS_SEARCH_ID;
 
-    const { data, error } = await supabase.from("jobs").insert(job).select();
+    const { data, error } = await supabase
+      .from("jobs")
+      .insert({ ...job, jobs_search_id: key })
+      .select();
 
     console.log(data, error);
 

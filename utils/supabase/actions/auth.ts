@@ -18,8 +18,10 @@ export async function login(userCredentials: UserAuthLogin) {
 
     return data;
   } catch (error) {
-    console.error(error);
-    return error.message;
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return false
   }
 }
 

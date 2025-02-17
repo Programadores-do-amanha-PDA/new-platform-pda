@@ -1,4 +1,5 @@
 "use server";
+import { CustomJwtPayload } from "@/types/jwt";
 import { createClient } from "@/utils/supabase/server";
 import { jwtDecode } from "jwt-decode";
 
@@ -86,7 +87,7 @@ export const getUserRole = async () => {
     if (error) throw error;
     if (!data || !data?.session) throw error;
 
-    const jwt = jwtDecode(data.session.access_token);
+    const jwt = jwtDecode<CustomJwtPayload>(data.session.access_token);
     const userRole = jwt.user_role;
 
     return userRole;

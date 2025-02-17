@@ -1,6 +1,6 @@
 "use server";
+import { getAllAlumniProfiles } from "@/app/actions/employer/profiles";
 import { createClientAdmin } from "@/utils/supabase/server";
-import { getAllAlumniProfiles } from "./profiles";
 
 export const getAllAlumni = async () => {
   try {

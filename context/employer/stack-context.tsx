@@ -4,12 +4,8 @@ import { toast } from "sonner";
 import LoadingComponent from "@/components/loading-component";
 import { JobType } from "@/types/jobs";
 import { AuthUserWithProfileType } from "@/types/auth";
-import { getAllAlumni } from "@/utils/supabase/actions/server/employer/auth_admin";
-import {
-  deleteJob,
-  getAllJobs,
-  updateJob,
-} from "@/app/actions/jobs";
+import { getAllAlumni } from "@/app/actions/employer/auth_admin";
+import { deleteJob, getAllJobs, updateJob } from "@/app/actions/jobs";
 import { adminDeleteUser } from "@/utils/supabase/actions/auth_admin";
 
 interface EmployerStackContextProps {
@@ -31,6 +27,7 @@ interface EmployerStackContextProps {
     handleDeleteJob: (id: string | null) => Promise<void>;
     handleCurateJob: (jobId: string | null) => Promise<void>;
     handleResendJobToCuration: (jobId: string | null) => Promise<void>;
+    handleArchiveJob: (jobId: string | null) => Promise<void>;
   };
   loading: boolean;
 }
@@ -51,6 +48,7 @@ const EmployerStackContext = createContext<EmployerStackContextProps>({
     handleDeleteJob: () => Promise.resolve() as Promise<void>,
     handleCurateJob: () => Promise.resolve() as Promise<void>,
     handleResendJobToCuration: () => Promise.resolve() as Promise<void>,
+    handleArchiveJob: () => Promise.resolve() as Promise<void>,
   },
   loading: true,
 });
@@ -178,11 +176,12 @@ export const EmployerStackProvider = ({
 
       const response = await updateJob(jobId, {
         curated: false,
+        is_archived: false,
       });
 
       if (!response) throw new Error("failed to update job");
       const filteredProfiles = jobs.map((job) =>
-        job.id === jobId ? { ...job, curated: false } : job
+        job.id === jobId ? { ...job, curated: false, is_archived: false } : job
       );
       setJobs(filteredProfiles);
 
@@ -190,6 +189,28 @@ export const EmployerStackProvider = ({
     } catch (error) {
       console.error("Error resend to curation job:", error);
       toast.error("Erro ao reenviar a vaga para a curadoria.");
+    }
+  };
+
+  const handleArchiveJob = async (jobId: string | null) => {
+    try {
+      if (!jobId) throw new Error("Invalid job ID");
+
+      const response = await updateJob(jobId, {
+        curated: false,
+        is_archived: true,
+      });
+      if (!response) throw new Error("failed to update job");
+
+      const filteredProfiles = jobs.map((job) =>
+        job.id === jobId ? { ...job, curated: false, is_archived: true } : job
+      );
+      setJobs(filteredProfiles);
+
+      toast.success("Vaga arquivada com sucesso!");
+    } catch (error) {
+      console.error("Error to curate job:", error);
+      toast.error("Erro ao arquivar a vaga.");
     }
   };
 
@@ -214,6 +235,7 @@ export const EmployerStackProvider = ({
           handleDeleteJob,
           handleCurateJob,
           handleResendJobToCuration,
+          handleArchiveJob,
         },
         loading,
       }}

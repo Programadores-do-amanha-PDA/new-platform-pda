@@ -86,23 +86,25 @@ const JobApplicationCard = ({
         newValue
       );
 
-      if (!response) throw "no job application adding response";
+      if (!response) throw new Error("no job application adding response");
       return true;
-    } catch (error) {
-      switch (error.message) {
-        case "state is not change":
-          toast.error("Estado não alterado!");
-          break;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "state is not change":
+            toast.error("Estado não alterado!");
+            break;
 
-        case "no currentJobApplication available":
-          toast.error("Não há ID de vaga disponível!");
-          break;
+          case "no currentJobApplication available":
+            toast.error("Não há ID de vaga disponível!");
+            break;
 
-        default:
-          toast.error(
-            "Erro ao editar a candidatura! Tente novamente mais tarde."
-          );
-          break;
+          default:
+            toast.error(
+              "Erro ao editar a candidatura! Tente novamente mais tarde."
+            );
+            break;
+        }
       }
       setLoading(false);
       return false;
@@ -164,9 +166,10 @@ const JobApplicationCard = ({
           </p>
         </span>
       </div>
-
       <Button
-        onClick={() => handleDeleteJobApplication(jobApplication.id)}
+        onClick={() =>
+          !loading ? handleDeleteJobApplication(jobApplication.id) : () => null
+        }
         variant="destructive"
         className="w-max h-full items-start justify-start text-start lg:!bg-transparent lg:shadow-none"
         title="Excluir candidatura"

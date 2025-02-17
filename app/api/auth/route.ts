@@ -23,7 +23,12 @@ export async function POST(req: NextRequest) {
       return response;
     }
 
-    if (!loginResponse?.user || !loginResponse?.session) {
+    if (
+      typeof loginResponse === "string" ||
+      !loginResponse ||
+      !loginResponse.user ||
+      !loginResponse.session
+    ) {
       return NextResponse.json(
         { error: "Invalid login credentials" },
         { status: 401 }

@@ -68,6 +68,10 @@ export default function RootLayout({
             title: "Curadoria",
             url: "/dashboard/employer/jobs/curation",
           },
+          {
+            title: "Vagas arquivadas",
+            url: "/dashboard/employer/jobs/archives",
+          },
         ],
       },
       {

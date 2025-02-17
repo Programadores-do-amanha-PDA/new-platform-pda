@@ -34,7 +34,7 @@ export function DataTable({
   loading,
   handleSetNewJob,
 }: {
-  data: unknown[];
+  data: JobType[];
   columns: ColumnDef<JobType>[];
   loading: boolean;
   handleSetNewJob: (newJob: JobType) => void;

@@ -7,7 +7,6 @@ import { useState } from "react";
 
 export default function AllJobsPage() {
   const {
-    jobsStack: { jobs },
     jobApplicationStack: {
       jobApplications,
       handleDeleteJobApplication,
@@ -19,13 +18,12 @@ export default function AllJobsPage() {
 
   const jobApplicationSearchFilter = jobApplicationSearch
     ? jobApplications.filter((jobApplication) => {
-        const job = jobs.find(({ id }) => id === jobApplication.job_id);
         return (
-          job !== null &&
-          (job?.company
+          jobApplication.jobs !== null &&
+          (jobApplication.jobs?.company
             .toLowerCase()
             .includes(jobApplicationSearch.toLowerCase()) ||
-            job?.title
+            jobApplication.jobs?.title
               .toLowerCase()
               .includes(jobApplicationSearch.toLowerCase()))
         );
@@ -46,14 +44,12 @@ export default function AllJobsPage() {
         </div>
         <ul className="w-full h-max flex flex-wrap gap-4 overflow-y-auto">
           {jobApplicationSearchFilter.map((jobApplication, i) => {
-            const job = jobs.find(({ id }) => id === jobApplication.job_id);
-
-            if (!job) return null;
+            if (!jobApplication.jobs?.id) return null;
 
             return (
               <JobApplicationCard
                 key={i}
-                job={job}
+                job={jobApplication.jobs}
                 jobApplication={jobApplication}
                 handleDeleteJobApplication={handleDeleteJobApplication}
                 handleUpdateJobApplicationStatus={

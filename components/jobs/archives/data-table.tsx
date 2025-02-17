@@ -1,6 +1,6 @@
 "use client";
-import * as React from "react";
 
+import * as React from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -14,10 +14,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { AuthUserWithProfileType } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -26,25 +24,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import UserSheetData from "./user-sheet-data";
+import { Skeleton } from "@/components/ui/skeleton";
+import { JobType } from "@/types/jobs";
 
 export function DataTable({
   data,
   columns,
   loading,
-  onInsertNewUser,
-  onUpdateUser,
-  excludeRoles,
 }: {
-  data: AuthUserWithProfileType[];
-  columns: ColumnDef<AuthUserWithProfileType>[];
+  data: JobType[];
+  columns: ColumnDef<JobType>[];
   loading: boolean;
-  onInsertNewUser: (newUser: AuthUserWithProfileType) => void;
-  onUpdateUser: (
-    userID: string | undefined,
-    user: Partial<AuthUserWithProfileType>
-  ) => void;
-  excludeRoles?: string[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -77,18 +67,12 @@ export function DataTable({
     <div className="w-full">
       <div className="flex items-center justify-between py-4">
         <Input
-          placeholder="Busque por um email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Procurando por algo?"
+          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("title")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
-        />
-        <UserSheetData
-          mode="new"
-          onInsertNewUser={onInsertNewUser}
-          onUpdateUser={onUpdateUser}
-          excludeRoles={excludeRoles}
         />
       </div>
 

@@ -28,6 +28,7 @@ const pathLabels: { [key: string]: string } = {
   match: "Match de vagas",
   curriculum: "Meu currículo",
   applications: "Minhas candidaturas",
+  archives: "Vagas arquivadas"
 };
 
 export function AppBar() {

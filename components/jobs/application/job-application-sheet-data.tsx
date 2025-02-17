@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,8 @@ const status = [
   { value: "rejected", label: "Candidatura rejeitada" },
   { value: "accepted", label: "Candidatura aceita" },
 ];
+
+type JobApplicationStatus = "applied" | "rejected" | "accepted";
 
 const JobApplicationSheetData = ({
   handleUpdateJobApplication,
@@ -52,9 +54,18 @@ const JobApplicationSheetData = ({
 
   const handleSetItemSelector = (
     newValue: string,
-    setState: (v: string) => void
+    setState: Dispatch<SetStateAction<JobApplicationStatus>>
   ) => {
-    setState(newValue);
+    // Ensure the newValue is one of the allowed statuses
+    if (
+      newValue === "applied" ||
+      newValue === "rejected" ||
+      newValue === "accepted"
+    ) {
+      setState(newValue);
+    } else {
+      console.error("Invalid status value:", newValue);
+    }
   };
 
   const handleSubmit = async () => {
@@ -72,26 +83,28 @@ const JobApplicationSheetData = ({
         jobApplicationStatus
       );
 
-      if (!response) throw "no job application adding response";
+      if (!response) throw new Error("no job application adding response");
 
       toast.success("Sucesso ao criar a vaga!");
 
       handleOpenChange(false);
     } catch (error) {
-      switch (error.message) {
-        case "state is not change":
-          toast.error("Estado não alterado!");
-          break;
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "state is not change":
+            toast.error("Estado não alterado!");
+            break;
 
-        case "no currentJobApplication available":
-          toast.error("Não há ID de vaga disponível!");
-          break;
+          case "no currentJobApplication available":
+            toast.error("Não há ID de vaga disponível!");
+            break;
 
-        default:
-          toast.error(
-            "Erro ao editar a candidatura! Tente novamente mais tarde."
-          );
-          break;
+          default:
+            toast.error(
+              "Erro ao editar a candidatura! Tente novamente mais tarde."
+            );
+            break;
+        }
       }
       setLoading(false);
     }
@@ -122,7 +135,7 @@ const JobApplicationSheetData = ({
             <Input
               id="name"
               type="text"
-              value={currentJobApplication?.job?.title}
+              value={currentJobApplication?.jobs?.title}
               readOnly
               className="col-row-2"
             />
@@ -135,7 +148,7 @@ const JobApplicationSheetData = ({
             <Input
               id="company"
               type="company"
-              value={currentJobApplication?.job?.company}
+              value={currentJobApplication?.jobs?.company}
               readOnly
               className="row-span-2"
             />

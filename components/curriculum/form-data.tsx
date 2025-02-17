@@ -31,6 +31,7 @@ const fetchAllBrazilianStates = async (
     }
     setStates(response.data);
   } catch (error) {
+    console.log(error);
     toast.error("Erro ao buscar os estados brasileiros!");
   }
 };
@@ -53,6 +54,7 @@ const fetchAllStatesCities = async (
 
     setStateCities(response.data);
   } catch (error) {
+    console.log(error);
     toast.error("Erro ao buscar as cidades do estado selecionado!");
   }
 };

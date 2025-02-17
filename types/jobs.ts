@@ -8,6 +8,7 @@ export type JobType = {
   created_at?: string;
   updated_at?: string;
   curated?: boolean;
+  is_archived?: boolean;
 };
 
 export type JobDetailsType = {
@@ -25,4 +26,4 @@ export type JobApplication = {
   updated_at?: string;
 };
 
-export type JobApplicationWithJob = JobApplication & { job?: JobType };
+export type JobApplicationWithJob = JobApplication & { jobs?: JobType };

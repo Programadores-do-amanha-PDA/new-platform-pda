@@ -17,7 +17,7 @@ import {
 
 import LoadingComponent from "@/components/loading-component";
 
-import { JobApplication, JobType } from "@/types/jobs";
+import { JobApplication, JobApplicationWithJob, JobType } from "@/types/jobs";
 import { AuthUserWithProfileType } from "@/types/auth";
 import { CurriculumType } from "@/types/curriculum";
 
@@ -27,7 +27,7 @@ interface AlumniStackContextProps {
   };
 
   jobApplicationStack: {
-    jobApplications: JobApplication[];
+    jobApplications: JobApplicationWithJob[];
     handleCreateJobApplication: (
       applicationData: Partial<JobApplication>
     ) => Promise<boolean>;
@@ -79,7 +79,7 @@ export const AlumniStackProvider = ({
   user: AuthUserWithProfileType;
 }) => {
   const [jobs, setJobs] = useState<JobType[]>([]);
-  const [jobApplications, setJobApplications] = useState<JobApplication[]>([]);
+  const [jobApplications, setJobApplications] = useState<JobApplicationWithJob[]>([]);
   const [curriculum, setAlumniCurriculum] = useState<CurriculumType>({});
   const [loading, setLoading] = useState(false);
 

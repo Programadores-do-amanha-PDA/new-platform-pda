@@ -12,24 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { JobApplicationWithJob, JobType } from "@/types/jobs";
-import { DataTable } from "./data-table";
 import { Badge } from "@/components/ui/badge";
-import JobApplicationSheetData from "./job-application-sheet-data";
+import { JobDetailsType, JobType } from "@/types/jobs";
+import { DataTable } from "./data-table";
 
-const JobApplicationsDataTable = ({
-  jobApplications,
-  handleDeleteJobApplication,
-  handleUpdateJobApplication,
+const JobsDataTable = ({
+  jobs,
+  handleDeleteJob,
+  handleResendJobToCuration,
+  loading,
 }: {
-  jobApplications: JobApplicationWithJob[];
-  handleUpdateJobApplication: (
-    applicationId: number,
-    application: "applied" | "rejected" | "accepted"
-  ) => Promise<boolean>;
-  handleDeleteJobApplication: (applicationId: number) => Promise<boolean>;
+  jobs: JobType[];
+  handleDeleteJob: (jobId: string) => Promise<void>;
+  handleResendJobToCuration: (jobId: string) => Promise<void>;
+  loading: boolean;
 }) => {
-  const columns: ColumnDef<JobApplicationWithJob>[] = [
+  const columns: ColumnDef<JobType>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -57,21 +55,24 @@ const JobApplicationsDataTable = ({
     },
     {
       accessorKey: "title",
-      header: () => {
+      header: ({ column }) => {
         return (
-          <Button variant="ghost" className="text-left px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
             Titulo
+            <ArrowUpDown />
           </Button>
         );
       },
-      cell: ({ row }) => {
-        return (
-          <div className="lowercase">{row.getValue<JobType>("job").title}</div>
-        );
-      },
+      cell: ({ row }) => (
+        <div className="lowercase">{row.getValue("title")}</div>
+      ),
     },
     {
-      accessorKey: "job",
+      accessorKey: "company",
       header: ({ column }) => {
         return (
           <Button
@@ -85,39 +86,8 @@ const JobApplicationsDataTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue<JobType>("job").company}</div>
+        <div className="lowercase">{row.getValue("company")}</div>
       ),
-    },
-    {
-      accessorKey: "status",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="px-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Status
-            <ArrowUpDown />
-          </Button>
-        );
-      },
-      cell: ({ row }) => {
-        const statusLabels = {
-          applied: "Candidatura enviada",
-          rejected: "Candidatura rejeitada",
-          accepted: "Candidatura",
-        };
-        return (
-          <Badge variant="outline">
-            {
-              statusLabels[
-                row.getValue<"applied" | "rejected" | "accepted">("status")
-              ]
-            }
-          </Badge>
-        );
-      },
     },
     {
       accessorKey: "created_at",
@@ -145,40 +115,38 @@ const JobApplicationsDataTable = ({
       },
     },
     {
-      accessorKey: "updated_at",
-      header: ({ column }) => {
-        return (
-          <Button
-            variant="ghost"
-            className="px-2"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Atualizada em
-            <ArrowUpDown />
-          </Button>
-        );
-      },
+      accessorKey: "details",
+      header: () => <div className="px-2 text-left">Tecnologias</div>,
+
       cell: ({ row }) => {
-        const createdAt = row.getValue("updated_at") as string;
-        if (createdAt) {
-          const date = new Date(createdAt);
-          const formattedDate = `${date
-            .getDate()
-            .toString()
-            .padStart(2, "0")}/${(date.getMonth() + 1)
-            .toString()
-            .padStart(2, "0")}/${date.getFullYear()}`;
-          return <div className="lowercase">{formattedDate}</div>;
-        } else if (!createdAt) {
-          return <div className="lowercase">--</div>;
-        }
+        return row
+          .getValue<JobDetailsType>("details")
+          .languages?.map((language, i) => (
+            <Badge variant="outline" className="!m-1" key={i}>
+              {language}
+            </Badge>
+          ));
+      },
+    },
+    {
+      accessorKey: "workplace_type",
+      header: () => <div className="px-2 text-left">Local de Trabalho</div>,
+
+      cell: ({ row }) => {
+        return row
+          .getValue<JobDetailsType>("details")
+          .workplace_type?.map((w, i) => (
+            <Badge variant="outline" className="!m-1" key={i}>
+              {w}
+            </Badge>
+          ));
       },
     },
     {
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const jobApplication = row.original;
+        const job = row.original;
 
         return (
           <DropdownMenu>
@@ -196,16 +164,19 @@ const JobApplicationsDataTable = ({
                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
                 <DropdownMenuSeparator />
               </div>
-              <JobApplicationSheetData
-                currentJobApplication={jobApplication}
-                handleUpdateJobApplication={handleUpdateJobApplication}
-              />
               <Button
-                onClick={() => handleDeleteJobApplication(jobApplication.id)}
+                onClick={() => handleResendJobToCuration(job.id)}
                 variant="ghost"
                 className="!px-2 w-full h-max items-start justify-start text-start"
               >
-                Deletar Candidatura
+                Reenviar a curadoria
+              </Button>
+              <Button
+                onClick={() => handleDeleteJob(job.id)}
+                variant="ghost"
+                className="!px-2 w-full h-max items-start justify-start text-start"
+              >
+                Deletar Vaga
               </Button>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -214,7 +185,7 @@ const JobApplicationsDataTable = ({
     },
   ];
 
-  return <DataTable columns={columns} data={jobApplications} loading={false} />;
+  return <DataTable columns={columns} data={jobs} loading={loading} />;
 };
 
-export default JobApplicationsDataTable;
+export default JobsDataTable;

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { JobApplication, JobType } from "@/types/jobs";
+import { JobApplicationWithJob, JobType } from "@/types/jobs";
 import {
   ArrowRight,
   FileCheck,
@@ -50,11 +50,10 @@ const formatDate = (stringDate: string | undefined) => {
 };
 
 const AlumniAllJobApplicationsCard = ({
-  jobs,
   jobApplications,
 }: {
   jobs: JobType[];
-  jobApplications: JobApplication[];
+  jobApplications: JobApplicationWithJob[];
 }) => {
   const router = useRouter();
   return (
@@ -71,14 +70,9 @@ const AlumniAllJobApplicationsCard = ({
         </div>
       </div>
       <ul className="w-full h-full flex flex-col gap-4 items-center">
-        {jobs
-          .filter((job) => jobApplications.some((app) => app.job_id === job.id))
+        {jobApplications
           .filter((_, i) => i < 3)
-          .map((job, i) => {
-            const jobApplication = jobApplications.find(
-              (app) => app.job_id === job.id
-            );
-
+          .map((jobApplication, i) => {
             return (
               <li
                 key={i}
@@ -89,7 +83,7 @@ const AlumniAllJobApplicationsCard = ({
 
                   <span className="w-full max-w-96 flex flex-col truncate">
                     <p className="font-bold text-card-foreground truncate">
-                      {job.title}
+                      {jobApplication?.jobs?.title}
                     </p>
                     <p className="text-sm">
                       {jobApplication?.status

@@ -17,12 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
-import { jwtDecode, JwtPayload } from "jwt-decode";
 
 export const LoginForm = () => {
   const router = useRouter();
-  const { redirectToRoleDashboard, setUser, setUserRole, updateAuthState } =
-    useAuth();
+  const { redirectToRoleDashboard, updateAuthState } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -48,7 +46,10 @@ export const LoginForm = () => {
         redirectToRoleDashboard();
       }
     } catch (error) {
-      if (error.response.status === 403) {
+      if (
+        error instanceof Error &&
+        error.message === "Request failed with status code 403"
+      ) {
         toast.error("Confirme seu email para continuar.");
         router.push("/confirmation");
       }

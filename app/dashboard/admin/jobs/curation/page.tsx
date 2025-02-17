@@ -8,9 +8,9 @@ export default function Home() {
     jobsStack: {
       jobs,
       handleCurateJob,
-      handleDeleteJob,
       handleInsertNewJob,
       handleUpdateJob,
+      handleArchiveJob,
     },
     loading,
   } = useAdminStackContext();
@@ -23,9 +23,9 @@ export default function Home() {
         <JobsDataTable
           jobs={jobs}
           handleCurateJob={handleCurateJob}
-          handleDeleteJob={handleDeleteJob}
           handleInsertNewJob={handleInsertNewJob}
           handleUpdateJob={handleUpdateJob}
+          handleArchiveJob={handleArchiveJob}
           loading={loading}
         />
       </div>

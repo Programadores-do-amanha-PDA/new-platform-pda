@@ -19,14 +19,12 @@ const JobsDataTable = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   const jobsSearchQuery = searchQuery.length
-    ? jobs
-        .filter((job) => job.curated === true)
-        .filter(
-          (job) =>
-            job.title.toLowerCase().includes(searchQuery) ||
-            job.company.toLowerCase().includes(searchQuery)
-        )
-    : jobs.filter((job) => job.curated === true);
+    ? jobs.filter(
+        (job) =>
+          job.title.toLowerCase().includes(searchQuery) ||
+          job.company.toLowerCase().includes(searchQuery)
+      )
+    : jobs;
 
   return (
     <div className="w-full h-full flex flex-col gap-4 py-8">

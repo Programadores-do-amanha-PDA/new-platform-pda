@@ -29,7 +29,7 @@ export const languageMatchPercentage = (
     job.details?.languages?.map((lang) => lang.toLowerCase()) || []
   );
 
-  const matched = [...studentLanguages].filter((lang) =>
+  const matched = Array.from(studentLanguages).filter((lang) =>
     jobLanguages.has(lang)
   ).length;
   const totalJobLanguages = jobLanguages.size || 1;

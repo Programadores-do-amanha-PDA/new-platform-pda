@@ -1,5 +1,4 @@
 import { useState } from "react";
-import axios from "axios";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoaderCircle, X } from "lucide-react";
 import { Selector } from "./curated/Selector";
 import { JobType } from "@/types/jobs";
+import { createJob, updateJob } from "@/app/actions/jobs";
 
 const technologies = [
   { value: "javascript", label: "JavaScript" },
@@ -185,62 +185,61 @@ const JobSheetData = ({
         details: {
           languages: jobLanguages,
           locale: [locale, announcementDate, applications],
-          workplace_type: [workload, workingHours, experiencieLevel],
+          workplace_type: [workload[0], workingHours[0], experiencieLevel[0]],
         },
       };
 
       if (mode === "new") {
-        const response = await axios.post("/api/jobs", data);
+        const response = await createJob(data);
 
-        if (response.status !== 201) throw "no job adding response";
+        if (!response) throw "no job adding response";
 
-        handleUpdateJobs(response.data.new_job);
+        handleUpdateJobs(response);
         toast.success("Sucesso ao criar a vaga!");
 
         handleOpenChange(false);
-      } else if (mode === "edit") {
-        const response = await axios.put("/api/jobs", {
-          jobId: currentJob?.id,
-          updates: data,
-        });
+      } else if (mode === "edit" && currentJob?.id) {
+        const response = await updateJob(currentJob?.id, data);
 
-        if (response.status !== 200) throw "no job editing response";
+        if (!response) throw new Error("no job editing response");
 
-        handleUpdateJobs(response.data.edited_job);
+        handleUpdateJobs(response);
         toast.success("Sucesso ao editar a vaga!");
         handleOpenChange(false);
       }
 
       setLoading(false);
     } catch (error) {
-      switch (error.message) {
-        case "fill the fields":
-          toast.error("Por favor preencha todos os campos obrigatórios!");
-          break;
+      if (error instanceof Error) {
+        switch (error.message) {
+          case "fill the fields":
+            toast.error("Por favor preencha todos os campos obrigatórios!");
+            break;
 
-        case "no job adding response":
-          toast.error("Erro ao criar vaga! Tente novamente mais tarde.");
-          break;
+          case "no job adding response":
+            toast.error("Erro ao criar vaga! Tente novamente mais tarde.");
+            break;
 
-        case "no job editing response":
-          toast.error("Erro ao editar vaga! Tente novamente mais tarde.");
-          break;
+          case "no job editing response":
+            toast.error("Erro ao editar vaga! Tente novamente mais tarde.");
+            break;
 
-        case "no jobId available":
-          toast.error(
-            "Vaga a ser editada não existe. Tente recarregar a pagina."
-          );
+          case "no jobId available":
+            toast.error(
+              "Vaga a ser editada não existe. Tente recarregar a pagina."
+            );
 
-          handleOpenChange(false);
-          break;
+            handleOpenChange(false);
+            break;
 
-        default:
-          toast.error(
-            mode === "new"
-              ? "Erro ao criar vaga! Tente novamente mais tarde."
-              : "Erro ao editar vaga! Tente novamente mais tarde."
-          );
-          break;
+          default:
+            toast.error(
+              mode === "new"
+                ? "Erro ao criar vaga! Tente novamente mais tarde."
+                : "Erro ao editar vaga! Tente novamente mais tarde."
+            );
+            break;
+        }
       }
       setLoading(false);
     }
