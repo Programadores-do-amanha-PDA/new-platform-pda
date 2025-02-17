@@ -26,7 +26,7 @@ const applicationStatusIcon = (status: string | undefined) => {
   switch (status) {
     case "applied":
       return <applicationsStatusIcons.applied className="size-6 min-w-6" />;
-    case "pending":
+    case "accepted":
       return <applicationsStatusIcons.accepted className="size-6 min-w-6" />;
     case "rejected":
       return <applicationsStatusIcons.rejected className="size-6 min-w-6" />;
