@@ -8,8 +8,13 @@ export default function Home() {
     alumniStack: {
       alumni,
       handleDeleteAlumni,
-      handleInsertNewAlumni,
+      handleCreateNewAlumni,
       handleUpdateAlumni,
+    },
+    userRoleStack: {
+      handleAddUserRole,
+      handleUpdateUserRole,
+      handleDeleteUserRole,
     },
     loading,
   } = useEmployerStack();
@@ -21,9 +26,12 @@ export default function Home() {
       <div className="space-y-2">
         <ProfilesDataTable
           users={alumni}
-          handleDeleteUser={handleDeleteAlumni}
-          handleInsertNewUser={handleInsertNewAlumni}
+          handleCreateNewUser={handleCreateNewAlumni}
           handleUpdateUser={handleUpdateAlumni}
+          handleDeleteUser={handleDeleteAlumni}
+          handleAddUserRole={handleAddUserRole}
+          handleUpdateUserRole={handleUpdateUserRole}
+          handleDeleteUserRole={handleDeleteUserRole}
           loading={loading}
           excludeRoles={[
             "admin",

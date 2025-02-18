@@ -13,30 +13,38 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 
-import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth";
 import { Badge } from "../ui/badge";
 import UserSheetData from "./user-sheet-data";
-import { UserMetadata } from "@supabase/supabase-js";
+import { AuthUser, UserMetadata } from "@supabase/supabase-js";
 
 const ProfilesDataTable = ({
   users,
   handleDeleteUser,
-  handleInsertNewUser,
+  handleCreateNewUser,
   handleUpdateUser,
+  handleAddUserRole,
+  handleUpdateUserRole,
+  handleDeleteUserRole,
   loading,
   excludeRoles,
 }: {
-  users: AuthUserWithProfileType[];
-  handleDeleteUser: (id?: string) => void;
-  handleInsertNewUser: (user: AuthUserWithProfileType) => void;
+  users: Partial<AuthUserWithProfileType>[];
+  handleCreateNewUser: (
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<string | false>;
+  handleDeleteUser: (id: string) => Promise<boolean>;
   handleUpdateUser: (
-    userID: string | undefined,
-    user: Partial<AuthUserWithProfileType>
-  ) => void;
+    userID: string,
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<boolean>;
+  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleDeleteUserRole: (userId: string) => Promise<boolean>;
+  excludeRoles?: RolesType[];
   loading: boolean;
-  excludeRoles?: string[];
 }) => {
-  const columns: ColumnDef<AuthUserWithProfileType>[] = [
+  const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -213,7 +221,7 @@ const ProfilesDataTable = ({
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const user: AuthUserWithProfileType = row.original;
+        const user = row.original;
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -228,15 +236,18 @@ const ProfilesDataTable = ({
               <UserSheetData
                 mode="edit"
                 currentUser={user}
-                onInsertNewUser={handleInsertNewUser}
-                onUpdateUser={handleUpdateUser}
+                handleAddUserRole={handleAddUserRole}
+                handleUpdateUserRole={handleUpdateUserRole}
+                handleDeleteUserRole={handleDeleteUserRole}
+                handleCreateNewUser={handleCreateNewUser}
+                handleUpdateUser={handleUpdateUser}
                 excludeRoles={excludeRoles}
               />
               {user.id && (
                 <Button
                   variant="ghost"
                   className="!px-2 w-full h-max items-start justify-start text-start"
-                  onClick={() => handleDeleteUser(user?.id)}
+                  onClick={() => handleDeleteUser(user.id || "")}
                 >
                   Deletar
                 </Button>
@@ -253,8 +264,12 @@ const ProfilesDataTable = ({
       columns={columns}
       data={users}
       loading={loading}
-      onInsertNewUser={handleInsertNewUser}
-      onUpdateUser={handleUpdateUser}
+      defaultRoleValue="admin"
+      handleAddUserRole={handleAddUserRole}
+      handleUpdateUserRole={handleUpdateUserRole}
+      handleDeleteUserRole={handleDeleteUserRole}
+      handleCreateNewUser={handleCreateNewUser}
+      handleUpdateUser={handleUpdateUser}
       excludeRoles={excludeRoles}
     />
   );

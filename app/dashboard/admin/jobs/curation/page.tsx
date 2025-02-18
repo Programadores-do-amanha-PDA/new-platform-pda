@@ -1,7 +1,7 @@
 "use client";
 import JobsDataTable from "@/components/jobs/curation/jobs-data-table";
 import { AppBar } from "@/components/app-bar";
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
+import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function Home() {
   const {

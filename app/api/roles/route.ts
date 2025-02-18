@@ -3,7 +3,7 @@ import {
   getAllUserRoles,
   insertUserRoleWithUserId,
   updateUserRoleWIthUserId,
-} from "@/utils/supabase/actions/roles";
+} from "@/app/actions/roles";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET() {

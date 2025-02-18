@@ -1,15 +1,20 @@
 "use client";
 import ProfilesDataTable from "@/components/users/profiles-data-table";
 import { AppBar } from "@/components/app-bar";
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
+import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function AllUsersPage() {
   const {
     usersStack: {
       users,
       handleDeleteUser,
-      handleInsertNewUser,
+      handleCreateNewUser,
       handleUpdateUser,
+    },
+    userRoleStack: {
+      handleAddUserRole,
+      handleDeleteUserRole,
+      handleUpdateUserRole,
     },
     loading,
   } = useAdminStackContext();
@@ -21,9 +26,12 @@ export default function AllUsersPage() {
       <div className="space-y-2">
         <ProfilesDataTable
           users={users}
-          handleInsertNewUser={handleInsertNewUser}
+          handleCreateNewUser={handleCreateNewUser}
           handleUpdateUser={handleUpdateUser}
           handleDeleteUser={handleDeleteUser}
+          handleAddUserRole={handleAddUserRole}
+          handleDeleteUserRole={handleDeleteUserRole}
+          handleUpdateUserRole={handleUpdateUserRole}
           loading={loading}
         />
       </div>

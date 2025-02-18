@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 
-import { useAdminStackContext } from "@/context/admin/admin-stack-context";
+import { useAdminStackContext } from "@/context/admin/stack-context";
 
 import { Button } from "@/components/ui/button";
 import { AppBar } from "@/components/app-bar";

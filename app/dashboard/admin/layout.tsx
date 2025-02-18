@@ -7,7 +7,7 @@ import { Briefcase, Users } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { AdminStackProvider } from "@/context/admin/admin-stack-context";
+import { AdminStackProvider } from "@/context/admin/stack-context";
 
 export default function RootLayout({
   children,

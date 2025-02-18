@@ -17,35 +17,42 @@ import {
 import { Separator } from "../ui/separator";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
-import axios from "axios";
 import { RoleSelector } from "./RoleSelector";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
-import { AuthUserWithProfileType } from "@/types/auth";
-import { UserMetadata } from "@supabase/supabase-js";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUser, UserMetadata } from "@supabase/supabase-js";
 
 const UserSheetData = ({
   mode,
   currentUser,
-  onInsertNewUser,
-  onUpdateUser,
+  handleCreateNewUser,
+  handleUpdateUser,
+  handleAddUserRole,
+  handleUpdateUserRole,
+  handleDeleteUserRole,
   excludeRoles,
 }: {
   mode: "new" | "edit";
-  currentUser?: AuthUserWithProfileType;
-  onInsertNewUser: (newUser: AuthUserWithProfileType) => void;
-  onUpdateUser: (
-    userID: string | undefined,
-    user: Partial<AuthUserWithProfileType>
-  ) => void;
-  excludeRoles?: string[];
+  currentUser?: Partial<AuthUserWithProfileType>;
+  handleCreateNewUser: (
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<string | false>;
+  handleUpdateUser: (
+    userID: string,
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<boolean>;
+  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleDeleteUserRole: (userId: string) => Promise<boolean>;
+  excludeRoles?: RolesType[];
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [userRoles, setUserRoles] = useState<RolesType[]>([]);
 
   const [loading, setLoading] = useState(false);
 
@@ -67,13 +74,11 @@ const UserSheetData = ({
     setIsOpen(open);
   };
 
-  const handleSetUserRoles = (newRoleName: string) => {
-    const newRole = app_role.find((role) => role === newRoleName);
-
-    if (newRole && !userRoles.includes(newRole)) {
-      setUserRoles([...userRoles, newRole]);
-    } else if (newRole && userRoles.includes(newRole)) {
-      setUserRoles(userRoles.filter((role) => role !== newRole));
+  const handleSetUserRoles = (newRoleName: RolesType) => {
+    if (!userRoles.includes(newRoleName)) {
+      setUserRoles([...userRoles, newRoleName]);
+    } else if (userRoles.includes(newRoleName)) {
+      setUserRoles(userRoles.filter((role) => role !== newRoleName));
     }
   };
 
@@ -115,26 +120,15 @@ const UserSheetData = ({
             user_email: email,
           },
         };
-        const response = await axios.post("/api/auth_users", data);
-        if (response.status !== 201 || !response.data.new_user.id)
-          throw "no sing up response";
+        const userCreatedId = await handleCreateNewUser(data);
 
-        if (userRoles.length > 0) {
-          const role = userRoles[0];
-          const data = { userId: response.data.new_user.id, role: role };
-          const roleAssignerResponse = await axios.post("/api/roles", data);
-          if (roleAssignerResponse.status !== 201) throw "role assign error";
-          onInsertNewUser({
-            ...response.data.new_user,
-            profile: {
-              ...response.data.new_user.profile,
-              user_roles: [{ role: role }],
-            },
-          });
+        if (userCreatedId) {
+          if (userRoles.length > 0) {
+            const role = userRoles[0];
+            await handleAddUserRole(userCreatedId, role);
+          }
         }
-
-        toast.success("Sucesso ao criar novo usuário!");
-      } else if (mode === "edit" && currentUser) {
+      } else if (mode === "edit" && currentUser && currentUser.id) {
         if (!fullName && !email) throw "fill the fields";
         if (
           fullName !== currentUser.profile?.full_name &&
@@ -169,43 +163,15 @@ const UserSheetData = ({
           data.user_metadata = userMetadata;
         }
 
-        const userUpdateResponse = await axios.put("/api/auth_users", {
-          id: currentUser.id,
-          updates: data,
-        });
-        if (
-          userUpdateResponse.status !== 201 ||
-          !userUpdateResponse.data.updatedUser.id
-        )
-          throw "no edit user response";
-
-        const userUpdatedData: AuthUserWithProfileType = {
-          ...currentUser,
-          ...userUpdateResponse.data.updatedUser,
-          profile: {
-            ...currentUser.profile,
-            email: userUpdateResponse.data.updatedUser.user_metadata.user_email,
-            full_name:
-              userUpdateResponse.data.updatedUser.user_metadata.full_name,
-          },
-          user_metadata: {
-            ...currentUser.user_metadata,
-            ...userUpdateResponse.data.updatedUser.user_metadata,
-          },
-        };
+        const userUpdateResponse = await handleUpdateUser(currentUser.id, data);
+        if (!userUpdateResponse) throw "no edit user response";
 
         if (
           currentUser?.profile?.user_roles?.length === 0 &&
           userRoles.length === 1
         ) {
           const role = userRoles[0];
-          const data = { userId: currentUser.id, role: role };
-          const roleAssignerResponse = await axios.post("/api/roles", data);
-          if (roleAssignerResponse.status !== 201) throw "role assign error";
-          if (userUpdatedData.profile) {
-            userUpdatedData.profile.user_roles =
-              roleAssignerResponse.data.results;
-          }
+          await handleAddUserRole(currentUser.id, role);
         } else if (
           currentUser?.profile?.user_roles?.length === 1 &&
           userRoles.length === 1 &&
@@ -214,29 +180,14 @@ const UserSheetData = ({
             .includes(userRoles[0])
         ) {
           const role = userRoles[0];
-          const roleAssignerResponse = await axios.put("/api/roles", {
-            role: role,
-            id: currentUser.id,
-          });
-          if (roleAssignerResponse.status !== 201) throw "role assign error";
-          if (userUpdatedData.profile) {
-            userUpdatedData.profile.user_roles =
-              roleAssignerResponse.data.results;
-          }
+          await handleUpdateUserRole(currentUser.id, role);
         } else if (
           currentUser?.profile?.user_roles?.length === 1 &&
           userRoles.length === 0
         ) {
-          const roleAssignerResponse = await axios.delete(
-            `/api/roles?id=${currentUser.id}`
-          );
-
-          if (roleAssignerResponse.status !== 200) throw "role delete error";
-          if (userUpdatedData.profile) {
-            userUpdatedData.profile.user_roles = [];
-          }
+          await handleDeleteUserRole(currentUser.id);
         }
-        onUpdateUser(currentUser.id, userUpdatedData);
+
         toast.success("Sucesso ao editar o usuário!");
       }
 
@@ -388,7 +339,7 @@ const UserSheetData = ({
                   <RoleSelector
                     excludeItens={userRoles.concat(excludeRoles || [])}
                     label="Adicionar cargo"
-                    value="0"
+                    value={userRoles[0]}
                     onChange={handleSetUserRoles}
                   />
                 )}

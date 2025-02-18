@@ -1,4 +1,6 @@
-export const app_role = [
+import { RolesType } from "@/types/auth";
+
+export const app_role: RolesType[] = [
   "admin",
   "employer",
   "class_manager",

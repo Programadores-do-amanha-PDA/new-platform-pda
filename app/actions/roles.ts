@@ -1,4 +1,5 @@
 "use server";
+import { RolesType } from "@/types/auth";
 import { CustomJwtPayload } from "@/types/jwt";
 import { createClient } from "@/utils/supabase/server";
 import { jwtDecode } from "jwt-decode";
@@ -20,7 +21,7 @@ export const getAllUserRoles = async () => {
 
 export const insertUserRoleWithUserId = async (
   user_id: string,
-  role: string
+  role: RolesType
 ) => {
   try {
     const supabase = await createClient();

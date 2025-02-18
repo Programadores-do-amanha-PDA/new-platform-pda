@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/selectRoles";
+import { RolesType } from "@/types/auth";
 import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
 
 export function RoleSelector({
@@ -18,9 +19,9 @@ export function RoleSelector({
 }: {
   placeholder?: string;
   label: string;
-  value?: string;
-  excludeItens?: string[];
-  onChange: (value: string) => void;
+  value?: RolesType;
+  excludeItens?: RolesType[];
+  onChange: (value: RolesType) => void;
 }) {
   return (
     <Select onValueChange={onChange} value={value}>

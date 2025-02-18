@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,24 +27,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import UserSheetData from "./user-sheet-data";
+import { AuthUser } from "@supabase/supabase-js";
 
 export function DataTable({
   data,
   columns,
   loading,
-  onInsertNewUser,
-  onUpdateUser,
+  handleCreateNewUser,
+  handleUpdateUser,
+  handleAddUserRole,
+  handleUpdateUserRole,
+  handleDeleteUserRole,
   excludeRoles,
 }: {
-  data: AuthUserWithProfileType[];
-  columns: ColumnDef<AuthUserWithProfileType>[];
+  data: Partial<AuthUserWithProfileType>[];
+  columns: ColumnDef<Partial<AuthUserWithProfileType>>[];
   loading: boolean;
-  onInsertNewUser: (newUser: AuthUserWithProfileType) => void;
-  onUpdateUser: (
-    userID: string | undefined,
-    user: Partial<AuthUserWithProfileType>
-  ) => void;
-  excludeRoles?: string[];
+  handleCreateNewUser: (
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<string | false>;
+  defaultRoleValue: RolesType;
+  handleUpdateUser: (
+    userID: string,
+    user: Partial<AuthUser & { password: string }>
+  ) => Promise<boolean>;
+  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
+  handleDeleteUserRole: (userId: string) => Promise<boolean>;
+  excludeRoles?: RolesType[];
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -86,8 +96,11 @@ export function DataTable({
         />
         <UserSheetData
           mode="new"
-          onInsertNewUser={onInsertNewUser}
-          onUpdateUser={onUpdateUser}
+          handleCreateNewUser={handleCreateNewUser}
+          handleUpdateUser={handleUpdateUser}
+          handleAddUserRole={handleAddUserRole}
+          handleUpdateUserRole={handleUpdateUserRole}
+          handleDeleteUserRole={handleDeleteUserRole}
           excludeRoles={excludeRoles}
         />
       </div>
