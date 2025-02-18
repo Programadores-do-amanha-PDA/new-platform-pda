@@ -32,12 +32,14 @@ export function DataTable({
   data,
   columns,
   loading,
-  handleSetNewJob,
+  handleCreateJob,
+  handleUpdateJob,
 }: {
   data: JobType[];
   columns: ColumnDef<JobType>[];
   loading: boolean;
-  handleSetNewJob: (newJob: JobType) => void;
+  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -77,7 +79,11 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        <JobSheetData handleUpdateJobs={handleSetNewJob} mode="new" />
+        <JobSheetData
+          handleCreateJob={handleCreateJob}
+          handleUpdateJob={handleUpdateJob}
+          mode="new"
+        />
       </div>
 
       <div className="rounded-md border">

@@ -19,17 +19,17 @@ import JobSheetData from "../job-sheet-data";
 
 const JobsDataTable = ({
   jobs,
-  handleInsertNewJob,
+  handleCreateJob,
   handleUpdateJob,
   handleArchiveJob,
   handleCurateJob,
   loading,
 }: {
   jobs: JobType[];
-  handleInsertNewJob: (job: JobType) => void;
-  handleUpdateJob: (job: JobType) => void;
-  handleArchiveJob: (jobId: string) => Promise<void>;
-  handleCurateJob: (jobId: string) => Promise<void>;
+  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+  handleCurateJob: (jobId: string) => Promise<boolean>;
+  handleArchiveJob: (jobId: string) => Promise<boolean>;
   loading: boolean;
 }) => {
   const columns: ColumnDef<JobType>[] = [
@@ -170,7 +170,7 @@ const JobsDataTable = ({
                 <DropdownMenuSeparator />
               </div>
               <Button
-                onClick={() => handleCurateJob(job.id)}
+                onClick={async () => await handleCurateJob(job.id)}
                 variant="ghost"
                 className="!px-2 w-full h-max items-start justify-start text-start"
               >
@@ -179,7 +179,8 @@ const JobsDataTable = ({
               <JobSheetData
                 mode="edit"
                 currentJob={job}
-                handleUpdateJobs={handleUpdateJob}
+                handleUpdateJob={handleUpdateJob}
+                handleCreateJob={() => Promise.resolve(false)}
               />
               <Button
                 onClick={() => handleArchiveJob(job.id)}
@@ -200,7 +201,8 @@ const JobsDataTable = ({
       columns={columns}
       data={jobs}
       loading={loading}
-      handleSetNewJob={handleInsertNewJob}
+      handleCreateJob={handleCreateJob}
+      handleUpdateJob={() => Promise.resolve(false)}
     />
   );
 };

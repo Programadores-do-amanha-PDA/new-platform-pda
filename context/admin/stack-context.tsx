@@ -4,7 +4,12 @@ import { toast } from "sonner";
 import LoadingComponent from "@/components/loading-component";
 
 import { AuthUser } from "@supabase/supabase-js";
-import { deleteJob, getAllJobs, updateJob } from "@/app/actions/jobs";
+import {
+  createJob,
+  deleteJob,
+  getAllJobs,
+  updateJob,
+} from "@/app/actions/jobs";
 import { getAllProfiles, getProfileById } from "@/app/actions/profiles";
 
 import { JobType } from "@/types/jobs";
@@ -15,7 +20,6 @@ import {
   getAllUsers,
   updateUser,
 } from "@/app/actions/auth_admin";
-import axios from "axios";
 import {
   deleteUserRoleWithUserId,
   insertUserRoleWithUserId,
@@ -41,15 +45,15 @@ interface AdminStackContextProps {
   };
   jobsStack: {
     jobs: JobType[];
-    setLoading: (loading: boolean) => void;
-    handleInsertNewJob: (job: JobType) => void;
-    handleUpdateJob: (job: JobType) => void;
-    handleDeleteJob: (id: string | null) => Promise<void>;
-    handleCurateJob: (jobId: string | null) => Promise<void>;
-    handleResendJobToCuration: (jobId: string | null) => Promise<void>;
-    handleArchiveJob: (jobId: string | null) => Promise<void>;
+    handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
+    handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+    handleDeleteJob: (id: string) => Promise<boolean>;
+    handleCurateJob: (jobId: string) => Promise<boolean>;
+    handleResendJobToCuration: (jobId: string) => Promise<boolean>;
+    handleArchiveJob: (jobId: string) => Promise<boolean>;
   };
   loading: boolean;
+  setLoading: (loading: boolean) => void;
 }
 
 const AdminStackContext = createContext<AdminStackContextProps>({
@@ -66,15 +70,15 @@ const AdminStackContext = createContext<AdminStackContextProps>({
   },
   jobsStack: {
     jobs: [],
-    setLoading: () => {},
-    handleInsertNewJob: () => {},
-    handleUpdateJob: () => {},
-    handleDeleteJob: () => Promise.resolve() as Promise<void>,
-    handleCurateJob: () => Promise.resolve() as Promise<void>,
-    handleResendJobToCuration: () => Promise.resolve() as Promise<void>,
-    handleArchiveJob: () => Promise.resolve() as Promise<void>,
+    handleCreateJob: () => Promise.resolve(false),
+    handleUpdateJob: () => Promise.resolve(false),
+    handleDeleteJob: () => Promise.resolve(false),
+    handleCurateJob: () => Promise.resolve(false),
+    handleResendJobToCuration: () => Promise.resolve(false),
+    handleArchiveJob: () => Promise.resolve(false),
   },
   loading: true,
+  setLoading: () => {},
 });
 
 export const AdminStackProvider = ({
@@ -309,64 +313,83 @@ export const AdminStackProvider = ({
   };
 
   // Jobs
-  const handleInsertNewJob = (newJob: JobType) => {
-    setJobs((jobs) => [...jobs, newJob]);
-  };
-
-  const handleUpdateJob = (newJob: JobType) => {
-    const updatedJobs = jobs.map((job) =>
-      job.id === newJob.id ? newJob : job
-    );
-    setJobs(updatedJobs);
-  };
-
-  const handleCurateJob = async (jobId: string | null) => {
+  const handleCreateJob = async (newJob: Partial<JobType>) => {
     try {
-      if (!jobId) throw new Error("Invalid job ID");
-      const data = {
-        jobId: jobId,
-        updates: {
-          curated: true,
-        },
-      };
+      const jobCreated = await createJob(newJob);
 
-      const response = await axios.put(`/api/jobs`, data);
-      if (response.status === 200) {
-        const filteredProfiles = jobs.map((job) =>
-          job.id === jobId ? { ...job, curated: true } : job
-        );
-        setJobs(filteredProfiles);
+      if (!jobCreated) throw "job is not created successfully";
 
-        toast.success("Vaga aprovada com sucesso!");
-      }
+      setJobs((jobs) => [...jobs, jobCreated]);
+      toast.success("Sucesso ao criar a vaga!");
+      return true;
     } catch (error) {
-      console.error("Error to curate job:", error);
-      toast.error("Erro ao aprovar a vaga.");
+      console.log(error);
+      toast.error("Erro ao criar a vaga. Tente novamente mais tarde!");
+      return false;
     }
   };
 
-  const handleResendJobToCuration = async (jobId: string | null) => {
+  const handleUpdateJob = async (jobId: string, updates: Partial<JobType>) => {
     try {
-      if (!jobId) throw new Error("Invalid job ID");
-      const data = {
-        jobId: jobId,
-        updates: {
-          curated: false,
-        },
-      };
+      const jobUpdated = await updateJob(jobId, updates);
 
-      const response = await axios.put(`/api/jobs`, data);
-      if (response.status === 200) {
-        const filteredProfiles = jobs.map((job) =>
-          job.id === jobId ? { ...job, curated: false } : job
-        );
-        setJobs(filteredProfiles);
+      if (!jobUpdated) throw new Error("job is not updated successfully");
 
-        toast.success("Vaga reenviada para curadoria com sucesso!");
-      }
+      setJobs((jobs) =>
+        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
+      );
+      toast.success("Sucesso ao editar vaga!");
+      return true;
     } catch (error) {
-      console.error("Error resend to curation job:", error);
-      toast.error("Erro ao reenviar a vaga para a curadoria.");
+      console.log(error);
+      toast.error("Erro ao editar vaga. Tente novamente mais tarde!");
+      return false;
+    }
+  };
+
+  const handleCurateJob = async (jobId: string) => {
+    try {
+      const jobUpdated = await updateJob(jobId, {
+        curated: true,
+        is_archived: false,
+      });
+
+      if (!jobUpdated) throw new Error("job is not updated successfully");
+
+      setJobs((jobs) =>
+        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
+      );
+
+      toast.success("Vaga aprovada com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao aprovar vaga. Tente novamente mais tarde!");
+      return false;
+    }
+  };
+
+  const handleResendJobToCuration = async (jobId: string) => {
+    try {
+      const jobUpdated = await updateJob(jobId, {
+        curated: false,
+        is_archived: false,
+      });
+
+      if (!jobUpdated) throw new Error("job is not updated successfully");
+
+      setJobs((jobs) =>
+        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
+      );
+
+      toast.success("Vaga reenviada a curadoria com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
+      );
+      return false;
     }
   };
 
@@ -380,15 +403,18 @@ export const AdminStackProvider = ({
       });
       if (!response) throw new Error("failed to update job");
 
-      const filteredProfiles = jobs.map((job) =>
-        job.id === jobId ? { ...job, curated: false, is_archived: true } : job
+      setJobs((jobs) =>
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, curated: false, is_archived: true } : job
+        )
       );
-      setJobs(filteredProfiles);
 
       toast.success("Vaga arquivada com sucesso!");
+      return true;
     } catch (error) {
       console.error("Error to curate job:", error);
       toast.error("Erro ao arquivar a vaga.");
+      return false;
     }
   };
 
@@ -402,9 +428,11 @@ export const AdminStackProvider = ({
 
       setJobs((jobs) => jobs.filter((job) => job.id !== jobId));
       toast.success("Vaga deletada com sucesso!");
+      return true;
     } catch (error) {
       console.log(error);
       toast.error("Erro ao deletar vaga. tente novamente mais tarde!");
+      return false;
     }
   };
 
@@ -428,8 +456,7 @@ export const AdminStackProvider = ({
         },
         jobsStack: {
           jobs,
-          setLoading,
-          handleInsertNewJob,
+          handleCreateJob,
           handleUpdateJob,
           handleDeleteJob,
           handleCurateJob,
@@ -437,6 +464,7 @@ export const AdminStackProvider = ({
           handleArchiveJob,
         },
         loading,
+        setLoading,
       }}
     >
       {children}

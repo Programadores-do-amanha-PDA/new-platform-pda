@@ -23,8 +23,8 @@ const JobsDataTable = ({
   loading,
 }: {
   jobs: JobType[];
-  handleDeleteJob: (jobId: string) => Promise<void>;
-  handleResendJobToCuration: (jobId: string) => Promise<void>;
+  handleDeleteJob: (id: string) => Promise<boolean>;
+  handleResendJobToCuration: (jobId: string) => Promise<boolean>;
   loading: boolean;
 }) => {
   const columns: ColumnDef<JobType>[] = [

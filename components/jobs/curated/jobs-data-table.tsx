@@ -13,8 +13,8 @@ const JobsDataTable = ({
   handleResendJobToCuration,
 }: {
   jobs: JobType[];
-  handleUpdateJob: (newJob: JobType) => void;
-  handleResendJobToCuration: (jobId: string) => void;
+  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+  handleResendJobToCuration: (jobId: string) => Promise<boolean>;
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -46,10 +46,11 @@ const JobsDataTable = ({
                 <JobSheetData
                   mode="edit"
                   currentJob={job}
-                  handleUpdateJobs={handleUpdateJob}
+                  handleUpdateJob={handleUpdateJob}
+                  handleCreateJob={() => Promise.resolve(false)}
                 />
                 <Button
-                  onClick={() => handleResendJobToCuration(job.id)}
+                  onClick={async () => await handleResendJobToCuration(job.id)}
                   variant="destructive"
                   className="!px-2 w-max h-max items-start justify-start text-start"
                 >

@@ -21,7 +21,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoaderCircle, X } from "lucide-react";
 import { Selector } from "./curated/Selector";
 import { JobType } from "@/types/jobs";
-import { createJob, updateJob } from "@/app/actions/jobs";
 
 const technologies = [
   { value: "javascript", label: "JavaScript" },
@@ -62,11 +61,13 @@ const experiencieLevelTypes = [
 ];
 
 const JobSheetData = ({
-  handleUpdateJobs,
+  handleCreateJob,
+  handleUpdateJob,
   currentJob,
   mode,
 }: {
-  handleUpdateJobs: (newJob: JobType) => void;
+  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
   currentJob?: JobType;
   mode: "edit" | "new";
 }) => {
@@ -190,21 +191,10 @@ const JobSheetData = ({
       };
 
       if (mode === "new") {
-        const response = await createJob(data);
-
-        if (!response) throw "no job adding response";
-
-        handleUpdateJobs(response);
-        toast.success("Sucesso ao criar a vaga!");
-
+        await handleCreateJob(data);
         handleOpenChange(false);
-      } else if (mode === "edit" && currentJob?.id) {
-        const response = await updateJob(currentJob?.id, data);
-
-        if (!response) throw new Error("no job editing response");
-
-        handleUpdateJobs(response);
-        toast.success("Sucesso ao editar a vaga!");
+      } else if (mode === "edit" && currentJob && currentJob.id) {
+        await handleUpdateJob(currentJob.id, data);
         handleOpenChange(false);
       }
 
@@ -216,20 +206,10 @@ const JobSheetData = ({
             toast.error("Por favor preencha todos os campos obrigatórios!");
             break;
 
-          case "no job adding response":
-            toast.error("Erro ao criar vaga! Tente novamente mais tarde.");
-            break;
-
-          case "no job editing response":
-            toast.error("Erro ao editar vaga! Tente novamente mais tarde.");
-            break;
-
           case "no jobId available":
             toast.error(
               "Vaga a ser editada não existe. Tente recarregar a pagina."
             );
-
-            handleOpenChange(false);
             break;
 
           default:
@@ -241,6 +221,7 @@ const JobSheetData = ({
             break;
         }
       }
+      handleOpenChange(false);
       setLoading(false);
     }
   };

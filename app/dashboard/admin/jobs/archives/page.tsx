@@ -18,8 +18,8 @@ export default function Home() {
           jobs={jobs
             .filter((job) => job.curated === false)
             .filter((job) => job.is_archived === true)}
-          handleDeleteJob={handleDeleteJob}
-          loading={loading}
+            loading={loading}
+            handleDeleteJob={handleDeleteJob}
           handleResendJobToCuration={handleResendJobToCuration}
         />
       </div>

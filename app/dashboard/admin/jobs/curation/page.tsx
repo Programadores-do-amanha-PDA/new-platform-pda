@@ -9,7 +9,7 @@ export default function Home() {
     jobsStack: {
       jobs,
       handleCurateJob,
-      handleInsertNewJob,
+      handleCreateJob,
       handleUpdateJob,
       handleArchiveJob,
     },
@@ -24,9 +24,9 @@ export default function Home() {
           jobs={jobs
             .filter((job) => job.curated === false)
             .filter((job) => job.is_archived === false)}
-          handleCurateJob={handleCurateJob}
-          handleInsertNewJob={handleInsertNewJob}
+          handleCreateJob={handleCreateJob}
           handleUpdateJob={handleUpdateJob}
+          handleCurateJob={handleCurateJob}
           handleArchiveJob={handleArchiveJob}
           loading={loading}
         />
