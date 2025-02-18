@@ -49,7 +49,7 @@ export default function RootLayout({
           <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
           <AvatarFallback>PdA</AvatarFallback>
         </Avatar>
-      )
+      ),
     },
     navMain: [
       {
@@ -76,6 +76,10 @@ export default function RootLayout({
           {
             title: "Curadoria de vagas",
             url: "/dashboard/admin/jobs/curation",
+          },
+          {
+            title: "Vagas arquivadas",
+            url: "/dashboard/admin/jobs/archives",
           },
         ],
       },

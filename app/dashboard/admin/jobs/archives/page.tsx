@@ -2,11 +2,12 @@
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 import { AppBar } from "@/components/app-bar";
-import JobsDataTable from "@/components/jobs/curated/jobs-data-table";
+import JobsDataTable from "@/components/jobs/archives/jobs-data-table";
 
 export default function Home() {
   const {
-    jobsStack: { jobs, handleResendJobToCuration, handleUpdateJob },
+    jobsStack: { jobs, handleDeleteJob, handleResendJobToCuration },
+    loading,
   } = useAdminStackContext();
   return (
     <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
@@ -15,10 +16,11 @@ export default function Home() {
       <div className="space-y-2">
         <JobsDataTable
           jobs={jobs
-            .filter((job) => job.curated === true)
-            .filter((job) => job.is_archived === false)}
+            .filter((job) => job.curated === false)
+            .filter((job) => job.is_archived === true)}
+          handleDeleteJob={handleDeleteJob}
+          loading={loading}
           handleResendJobToCuration={handleResendJobToCuration}
-          handleUpdateJob={handleUpdateJob}
         />
       </div>
     </main>

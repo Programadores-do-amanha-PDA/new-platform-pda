@@ -9,7 +9,9 @@ import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
 
 export default function Home() {
   const router = useRouter();
-  const { jobsStack: {jobs} } = useAdminStackContext();
+  const {
+    jobsStack: { jobs },
+  } = useAdminStackContext();
 
   const curatedChartData = [
     {
