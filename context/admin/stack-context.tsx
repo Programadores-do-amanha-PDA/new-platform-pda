@@ -51,6 +51,7 @@ interface AdminStackContextProps {
     handleCurateJob: (jobId: string) => Promise<boolean>;
     handleResendJobToCuration: (jobId: string) => Promise<boolean>;
     handleArchiveJob: (jobId: string) => Promise<boolean>;
+    handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
   };
   loading: boolean;
   setLoading: (loading: boolean) => void;
@@ -76,6 +77,7 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleCurateJob: () => Promise.resolve(false),
     handleResendJobToCuration: () => Promise.resolve(false),
     handleArchiveJob: () => Promise.resolve(false),
+    handleJobIsOnDiscord: () => Promise.resolve(false),
   },
   loading: true,
   setLoading: () => {},
@@ -393,6 +395,31 @@ export const AdminStackProvider = ({
     }
   };
 
+  const handleJobIsOnDiscord = async (jobId: string) => {
+    try {
+      const jobUpdated = await updateJob(jobId, {
+        is_on_discord: true,
+      });
+
+      if (!jobUpdated) throw new Error("job is not updated successfully");
+
+      setJobs((jobs) =>
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, is_on_discord: true } : job
+        )
+      );
+
+      toast.success("Vaga reenviada a curadoria com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
+      );
+      return false;
+    }
+  };
+
   const handleArchiveJob = async (jobId: string | null) => {
     try {
       if (!jobId) throw new Error("Invalid job ID");
@@ -462,6 +489,7 @@ export const AdminStackProvider = ({
           handleCurateJob,
           handleResendJobToCuration,
           handleArchiveJob,
+          handleJobIsOnDiscord,
         },
         loading,
         setLoading,
