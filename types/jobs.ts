@@ -9,6 +9,7 @@ export type JobType = {
   updated_at?: string;
   curated?: boolean;
   is_archived?: boolean;
+  is_on_discord?: boolean;
 };
 
 export type JobDetailsType = {
@@ -27,3 +28,5 @@ export type JobApplication = {
 };
 
 export type JobApplicationWithJob = JobApplication & { jobs?: JobType };
+
+export type JobWithApplications = JobType & { applications?: JobApplication[] };

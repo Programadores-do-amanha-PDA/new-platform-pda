@@ -17,6 +17,23 @@ export const getAllJobs = async () => {
   }
 };
 
+export const getAllJobsWithApplications = async () => {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("jobs")
+      .select("*, applications:job_applications(*)");
+
+    if (error) throw error;
+
+    return data;
+  } catch (error) {
+    console.error("Error fetching all jobs search:", error);
+    return null;
+  }
+};
+
 export const getAllCuratedJobs = async () => {
   try {
     const supabase = await createClient();

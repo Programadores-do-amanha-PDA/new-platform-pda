@@ -10,10 +10,15 @@ import {
   updateUser,
 } from "@/app/actions/auth_admin";
 import { getProfileById } from "@/app/actions/profiles";
-import { createJob, deleteJob, getAllJobs, updateJob } from "@/app/actions/jobs";
+import {
+  createJob,
+  deleteJob,
+  getAllJobsWithApplications,
+  updateJob,
+} from "@/app/actions/jobs";
 
 import { AuthUser } from "@supabase/supabase-js";
-import { JobType } from "@/types/jobs";
+import { JobType, JobWithApplications } from "@/types/jobs";
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import {
   deleteUserRoleWithUserId,
@@ -41,13 +46,14 @@ interface EmployerStackContextProps {
   };
 
   jobsStack: {
-    jobs: JobType[];
+    jobs: JobWithApplications[];
     handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
     handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
     handleDeleteJob: (id: string) => Promise<boolean>;
     handleCurateJob: (jobId: string) => Promise<boolean>;
     handleResendJobToCuration: (jobId: string) => Promise<boolean>;
     handleArchiveJob: (jobId: string) => Promise<boolean>;
+    handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
   };
   setLoading: (loading: boolean) => void;
   loading: boolean;
@@ -75,6 +81,7 @@ const EmployerStackContext = createContext<EmployerStackContextProps>({
     handleCurateJob: () => Promise.resolve(false),
     handleResendJobToCuration: () => Promise.resolve(false),
     handleArchiveJob: () => Promise.resolve(false),
+    handleJobIsOnDiscord: () => Promise.resolve(false),
   },
   setLoading: () => {},
   loading: true,
@@ -86,7 +93,7 @@ export const EmployerStackProvider = ({
   children: React.ReactNode;
 }) => {
   const [alumni, setAlumni] = useState<AuthUserWithProfileType[]>([]);
-  const [jobs, setJobs] = useState<JobType[]>([]);
+  const [jobs, setJobs] = useState<JobWithApplications[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -97,7 +104,7 @@ export const EmployerStackProvider = ({
         if (!allAlumni) throw "no get all alumni response";
         setAlumni(allAlumni);
 
-        const jobResponse = await getAllJobs();
+        const jobResponse = await getAllJobsWithApplications();
         if (!jobResponse) throw "no get all jobs response";
         setJobs(jobResponse);
       } catch (error) {
@@ -378,6 +385,31 @@ export const EmployerStackProvider = ({
     }
   };
 
+  const handleJobIsOnDiscord = async (jobId: string) => {
+    try {
+      const jobUpdated = await updateJob(jobId, {
+        is_on_discord: true,
+      });
+
+      if (!jobUpdated) throw new Error("job is not updated successfully");
+
+      setJobs((jobs) =>
+        jobs.map((job) =>
+          job.id === jobId ? { ...job, is_on_discord: true } : job
+        )
+      );
+
+      toast.success("Vaga reenviada a curadoria com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
+      );
+      return false;
+    }
+  };
+
   const handleArchiveJob = async (jobId: string | null) => {
     try {
       if (!jobId) throw new Error("Invalid job ID");
@@ -447,6 +479,7 @@ export const EmployerStackProvider = ({
           handleCurateJob,
           handleResendJobToCuration,
           handleArchiveJob,
+          handleJobIsOnDiscord,
         },
         loading,
         setLoading,

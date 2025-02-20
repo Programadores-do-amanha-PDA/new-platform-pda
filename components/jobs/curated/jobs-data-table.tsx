@@ -5,16 +5,22 @@ import { useState } from "react";
 import JobSheetData from "../job-sheet-data";
 import JobCard from "./JobCard";
 import { Input } from "@/components/ui/input";
-import { JobType } from "@/types/jobs";
+import { JobType, JobWithApplications } from "@/types/jobs";
+import { Archive, FileArchive } from "lucide-react";
+import JobCardDiscordSenderButton from "./job-card-discord-sender-button";
 
 const JobsDataTable = ({
   jobs,
   handleUpdateJob,
   handleResendJobToCuration,
+  handleArchiveJob,
+  handleJobIsOnDiscord,
 }: {
-  jobs: JobType[];
+  jobs: JobWithApplications[];
   handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
   handleResendJobToCuration: (jobId: string) => Promise<boolean>;
+  handleArchiveJob: (jobId: string) => Promise<boolean>;
+  handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -36,7 +42,7 @@ const JobsDataTable = ({
           className="max-w-sm"
         />
       </div>
-      <ul className="flex flex-row flex-wrap gap-4 py-4">
+      <ul className="flex flex-row flex-wrap items-center gap-4 py-4">
         {jobsSearchQuery.map((job) => (
           <JobCard
             key={job.id}
@@ -49,13 +55,30 @@ const JobsDataTable = ({
                   handleUpdateJob={handleUpdateJob}
                   handleCreateJob={() => Promise.resolve(false)}
                 />
-                <Button
-                  onClick={async () => await handleResendJobToCuration(job.id)}
-                  variant="destructive"
-                  className="!px-2 w-max h-max items-start justify-start text-start"
-                >
-                  Reenviar para a curadoria
-                </Button>
+
+                <div className="flex gap-4">
+                  <JobCardDiscordSenderButton
+                    job={job}
+                    handleJobIsOnDiscord={handleJobIsOnDiscord}
+                  />
+
+                  <Button
+                    onClick={() => handleResendJobToCuration(job.id)}
+                    variant="outline"
+                    className="!px-2 w-max h-max items-start justify-start text-start !bg-orange-400/80"
+                    title="Reenviar para curadoria"
+                  >
+                    <FileArchive className="size-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleArchiveJob(job.id)}
+                    variant="destructive"
+                    className="!px-2 w-max h-max items-start justify-start text-start"
+                    title="Arquivar Vaga"
+                  >
+                    <Archive className="size-4" />
+                  </Button>
+                </div>
               </>
             }
           />

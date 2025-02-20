@@ -7,12 +7,12 @@ import { AuthUser } from "@supabase/supabase-js";
 import {
   createJob,
   deleteJob,
-  getAllJobs,
+  getAllJobsWithApplications,
   updateJob,
 } from "@/app/actions/jobs";
 import { getAllProfiles, getProfileById } from "@/app/actions/profiles";
 
-import { JobType } from "@/types/jobs";
+import { JobType, JobWithApplications } from "@/types/jobs";
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import {
   createUser,
@@ -44,7 +44,7 @@ interface AdminStackContextProps {
     handleDeleteUserRole: (userId: string) => Promise<boolean>;
   };
   jobsStack: {
-    jobs: JobType[];
+    jobs: JobWithApplications[];
     handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
     handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
     handleDeleteJob: (id: string) => Promise<boolean>;
@@ -112,7 +112,7 @@ export const AdminStackProvider = ({
         });
         setUsers(usersWithProfiles);
 
-        const jobsResponse = await getAllJobs();
+        const jobsResponse = await getAllJobsWithApplications();
         if (!jobsResponse) throw "no jobs response";
         setJobs(jobsResponse);
       } catch (error) {

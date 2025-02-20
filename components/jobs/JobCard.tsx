@@ -1,15 +1,14 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { JobWithApplications } from "@/types/jobs";
-import { BookOpenText, Cpu, FileChartColumn, MapPin } from "lucide-react";
+import { JobType } from "@/types/jobs";
+import { BookOpenText, Cpu, MapPin } from "lucide-react";
 import { ReactElement } from "react";
-import JobApplicationsTable from "./job-apllications-table";
 
 const JobCard = ({
   job,
   cardFooter,
 }: {
-  job: JobWithApplications;
+  job: JobType;
   cardFooter: ReactElement;
 }) => {
   return (
@@ -36,7 +35,7 @@ const JobCard = ({
       <div className="w-full h-full flex flex-col space-y-3 pl-1">
         <div className="w-full max-h-16 h-16 flex items-start space-x-2">
           <div className="w-7 max-w-7 min-w-7 h-full bg-blue-100 rounded-full flex items-start py-2 justify-center">
-            <BookOpenText className="size-4" />
+            <BookOpenText className="size-5" />
           </div>
 
           <p className="text-sm w-full h-max">
@@ -48,7 +47,7 @@ const JobCard = ({
 
         <div className="flex items-center gap-2">
           <div className="size-7 bg-blue-100 rounded-full flex items-center justify-center">
-            <MapPin className="size-4" />
+            <MapPin className="size-5" />
           </div>
           <div>
             <p className="text-sm truncate">
@@ -60,7 +59,7 @@ const JobCard = ({
 
         <div className="flex items-center gap-2">
           <div className="size-7 bg-blue-100 rounded-full flex items-center justify-center">
-            <Cpu className="size-4" />
+            <Cpu className="size-5" />
           </div>
           <ul className="flex flex-row gap-2 flex-wrap">
             {job.details?.languages?.map((language, i) => (
@@ -70,28 +69,6 @@ const JobCard = ({
             ))}
           </ul>
         </div>
-        {job.applications && (
-          <div className="flex items-center gap-2 h-[150px] max-h-40">
-            <div className="w-7 max-w-7 min-w-7 h-full bg-primary/55 rounded-full flex items-start py-2 justify-center">
-              <FileChartColumn className="size-4" />
-            </div>
-
-            <JobApplicationsTable
-              jobApplicationStatistics={{
-                applied: job.applications.filter(
-                  (application) => application.status === "applied"
-                ).length,
-                accepted: job.applications.filter(
-                  (application) => application.status === "accepted"
-                ).length,
-                rejected: job.applications.filter(
-                  (application) => application.status === "rejected"
-                ).length,
-                total: job.applications.length,
-              }}
-            />
-          </div>
-        )}
       </div>
 
       <div className="flex items-center justify-between !mt-2 gap-4 pt-2">
