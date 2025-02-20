@@ -6,7 +6,13 @@ import JobsDataTable from "@/components/jobs/curated/jobs-data-table";
 
 export default function Home() {
   const {
-    jobsStack: { jobs, handleResendJobToCuration, handleUpdateJob },
+    jobsStack: {
+      jobs,
+      handleResendJobToCuration,
+      handleUpdateJob,
+      handleArchiveJob,
+      handleJobIsOnDiscord,
+    },
   } = useAdminStackContext();
   return (
     <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
@@ -19,6 +25,8 @@ export default function Home() {
             .filter((job) => job.is_archived === false)}
           handleResendJobToCuration={handleResendJobToCuration}
           handleUpdateJob={handleUpdateJob}
+          handleArchiveJob={handleArchiveJob}
+          handleJobIsOnDiscord={handleJobIsOnDiscord}
         />
       </div>
     </main>
