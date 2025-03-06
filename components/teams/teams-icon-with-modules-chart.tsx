@@ -57,8 +57,7 @@ export function TeamsIconWithModulesChart() {
               startAngle={90}
               endAngle={450}
               outerRadius={70}
-              cornerRadius={65}
-              paddingAngle={5}
+              // cornerRadius={65}
               strokeLinejoin="round"
               strokeLinecap="round"
             />

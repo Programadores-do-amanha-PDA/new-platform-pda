@@ -25,6 +25,8 @@ import {
   insertUserRoleWithUserId,
   updateUserRoleWIthUserId,
 } from "@/app/actions/roles";
+import { TeamType } from "@/types/teams";
+import { createTeam, deleteTeam, getAllTeams, updateTeam } from "@/app/actions/team";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -42,6 +44,18 @@ interface AdminStackContextProps {
     handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
     handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
     handleDeleteUserRole: (userId: string) => Promise<boolean>;
+  };
+  teamsStack: {
+    teams: TeamType[];
+    handleCreateTeam: (teamData: {
+      name: string;
+      period: "morning" | "afternoon" | "night";
+    }) => Promise<boolean | number>;
+    handleUpdateTeam: (
+      teamId: number,
+      updates: Partial<TeamType>
+    ) => Promise<boolean>;
+    handleDeleteTeam: (teamId: number) => Promise<boolean>;
   };
   jobsStack: {
     jobs: JobWithApplications[];
@@ -69,6 +83,12 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleUpdateUserRole: () => Promise.resolve(false),
     handleDeleteUserRole: () => Promise.resolve(false),
   },
+  teamsStack: {
+    teams: [],
+    handleCreateTeam: () => Promise.resolve(false),
+    handleUpdateTeam: () => Promise.resolve(false),
+    handleDeleteTeam: () => Promise.resolve(false),
+  },
   jobsStack: {
     jobs: [],
     handleCreateJob: () => Promise.resolve(false),
@@ -89,6 +109,7 @@ export const AdminStackProvider = ({
   children: React.ReactNode;
 }) => {
   const [users, setUsers] = useState<Partial<AuthUserWithProfileType>[]>([]);
+  const [teams, setTeams] = useState<TeamType[]>([]);
   const [jobs, setJobs] = useState<JobType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -113,6 +134,10 @@ export const AdminStackProvider = ({
           };
         });
         setUsers(usersWithProfiles);
+
+        const teamsResponse = await getAllTeams();
+        if (!teamsResponse) throw "no teams response";
+        setTeams(teamsResponse);
 
         const jobsResponse = await getAllJobsWithApplications();
         if (!jobsResponse) throw "no jobs response";
@@ -314,6 +339,80 @@ export const AdminStackProvider = ({
     }
   };
 
+  // Users
+  const handleCreateTeam = async (teamData: {
+    name: string;
+    period: "morning" | "afternoon" | "night";
+  }) => {
+    try {
+      if (
+        !teamData.name ||
+        teamData.name.trim().length === 0 ||
+        teams.map((t) => t.name).includes(teamData.name)
+      ) {
+        toast.error("Nome da turma é inválido ou já existe!");
+        throw new Error("invalid team name");
+      }
+
+      if (!teamData.period) {
+        toast.error("Período da turma é inválido!");
+        throw new Error("invalid team period");
+      }
+
+      const newTeam = await createTeam(teamData);
+      if (!newTeam) throw new Error("no team create response");
+
+      setTeams((teams) => [...teams, { ...newTeam }]);
+      toast.success(`Turma ${newTeam.name} criada com sucesso!`);
+      return newTeam.id;
+    } catch (error) {
+      toast.error("Erro ao criar novo usuário!");
+      console.log(error);
+      return false;
+    }
+  };
+
+  const handleUpdateTeam = async (
+    teamId: number,
+    updates: Partial<TeamType>
+  ) => {
+    try {
+      if (!teamId || !updates) {
+        throw new Error("id and updates fields are required");
+      }
+
+      const teamUpdated = await updateTeam(teamId, updates);
+      if (!teamUpdated) throw new Error("no update team response");
+
+      setTeams((teams) =>
+        teams.map((team) => (team.id === teamId ? teamUpdated : team))
+      );
+      toast.success("Turma atualizada com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao atualizar a turma!");
+      return false;
+    }
+  };
+
+  const handleDeleteTeam = async (teamId: number) => {
+    try {
+      if (!teamId) throw new Error("team id is required to delete");
+
+      const response = await deleteTeam(teamId);
+      if (!response) throw new Error("no delete team response");
+
+      setTeams((teams) => teams.filter((team) => team.id !== teamId));
+      toast.success("Turma deletada com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao deletar turma. Tente novamente mais tarde!");
+      return false;
+    }
+  };
+
   // Jobs
   const handleCreateJob = async (newJob: Partial<JobType>) => {
     try {
@@ -480,6 +579,12 @@ export const AdminStackProvider = ({
           handleAddUserRole,
           handleUpdateUserRole,
           handleDeleteUserRole,
+        },
+        teamsStack: {
+          teams,
+          handleCreateTeam,
+          handleUpdateTeam,
+          handleDeleteTeam,
         },
         jobsStack: {
           jobs,

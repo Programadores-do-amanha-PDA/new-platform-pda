@@ -1,8 +1,27 @@
-import { TeamsIconWithModulesChart } from "@/components/teams/teams-icon-with-modules-chart";
+"use client";
+import TeamCard from "@/components/teams/team-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAdminStackContext } from "@/context/admin/stack-context";
+import { useState } from "react";
+
+const teamStatusLabels = {
+  created: "Criada",
+  active: "Ativa",
+  finished: "Finalizada",
+};
 
 const TeamPage = () => {
+  const [statusFilter, setStatusFilter] = useState("all");
+  const {
+    teamsStack: { teams },
+  } = useAdminStackContext();
+
+  const filteredTeams =
+    statusFilter === "all"
+      ? teams
+      : teams.filter((t) => t.status === statusFilter);
+
   return (
     <div className="relative w-full h-max flex flex-col p-6 gap-10 xl:p-8">
       <header className="w-full flex flex-col gap-4">
@@ -12,27 +31,45 @@ const TeamPage = () => {
         </div>
         <div className="w-full h-px border-b border-sidebar-accent" />
         <div className="w-full h-9 flex gap-4 border-b border-card">
-          <Button variant="ghost" size="sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setStatusFilter("all")}
+          >
             <p className="text-primary text-sm font-semibold">Todas</p>
-            <Badge variant="default">12</Badge>
+            <Badge variant="default">{teams.length}</Badge>
           </Button>
           <div className="h-full w-px border-l border-sidebar-accent" />
 
-          <Button variant="ghost" size="sm">
-            <p className="text-sm font-semibold">Em curso</p>
-            <Badge variant="outline">12</Badge>
-          </Button>
-          <div className="h-full w-px border-l border-sidebar-accent" />
-
-          <Button variant="ghost" size="sm">
-            <p className="text-sm font-semibold">Finalizadas</p>
-            <Badge variant="outline">12</Badge>
-          </Button>
+          {teams.length > 0 &&
+            teams
+              .map((t) => t.status)
+              .map((teamStatus, i) => (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setStatusFilter(teamStatus)}
+                  >
+                    <p className="text-sm font-semibold">
+                      {teamStatusLabels[teamStatus]}
+                    </p>
+                    <Badge variant="outline">
+                      {teams.filter((t) => t.status === teamStatus).length}
+                    </Badge>
+                  </Button>
+                  {i < teams.length - 1 && (
+                    <div className="h-full w-px border-l border-sidebar-accent" />
+                  )}
+                </>
+              ))}
         </div>
       </header>
 
       <ul className="w-full">
-        <TeamsIconWithModulesChart />
+        {filteredTeams.map((team, i) => (
+          <TeamCard key={i} team={team} teamStatusLabels={teamStatusLabels}  />
+        ))}
       </ul>
     </div>
   );
