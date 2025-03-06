@@ -6,9 +6,9 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 import { useState } from "react";
 
 const teamStatusLabels = {
-  created: "Criada",
-  active: "Ativa",
-  finished: "Finalizada",
+  created: "Criado",
+  active: "Em curso",
+  finished: "Finalizado",
 };
 
 const TeamPage = () => {
@@ -68,7 +68,7 @@ const TeamPage = () => {
 
       <ul className="w-full">
         {filteredTeams.map((team, i) => (
-          <TeamCard key={i} team={team} teamStatusLabels={teamStatusLabels}  />
+          <TeamCard key={i} team={team} teamStatusLabels={teamStatusLabels} />
         ))}
       </ul>
     </div>
