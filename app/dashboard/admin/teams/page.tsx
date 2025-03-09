@@ -3,6 +3,7 @@ import TeamCard from "@/components/teams/team-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAdminStackContext } from "@/context/admin/stack-context";
+import { TeamTypeStatus } from "@/types/teams";
 import { useState } from "react";
 
 const teamStatusLabels = {
@@ -12,7 +13,9 @@ const teamStatusLabels = {
 };
 
 const TeamPage = () => {
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState<TeamTypeStatus | "all">(
+    "all"
+  );
   const {
     teamsStack: { teams },
   } = useAdminStackContext();
@@ -36,8 +39,16 @@ const TeamPage = () => {
             size="sm"
             onClick={() => setStatusFilter("all")}
           >
-            <p className="text-primary text-sm font-semibold">Todas</p>
-            <Badge variant="default">{teams.length}</Badge>
+            <p
+              className={`text-sm font-semibold ${
+                statusFilter === "all" && "text-primary"
+              }`}
+            >
+              Todas
+            </p>
+            <Badge variant={statusFilter === "all" ? "default" : "outline"}>
+              {teams.length}
+            </Badge>
           </Button>
           <div className="h-full w-px border-l border-sidebar-accent" />
 
@@ -51,10 +62,18 @@ const TeamPage = () => {
                     size="sm"
                     onClick={() => setStatusFilter(teamStatus)}
                   >
-                    <p className="text-sm font-semibold">
+                    <p
+                      className={`text-sm font-semibold ${
+                        statusFilter === teamStatus && "text-primary"
+                      }`}
+                    >
                       {teamStatusLabels[teamStatus]}
                     </p>
-                    <Badge variant="outline">
+                    <Badge
+                      variant={
+                        statusFilter === teamStatus ? "default" : "outline"
+                      }
+                    >
                       {teams.filter((t) => t.status === teamStatus).length}
                     </Badge>
                   </Button>
@@ -67,6 +86,12 @@ const TeamPage = () => {
       </header>
 
       <ul className="w-full">
+        {filteredTeams.length === 0 && (
+          <p className="text-center text-lg font-semibold">
+            Nenhuma turma encontrada
+          </p>
+        )}
+
         {filteredTeams.map((team, i) => (
           <TeamCard key={i} team={team} teamStatusLabels={teamStatusLabels} />
         ))}

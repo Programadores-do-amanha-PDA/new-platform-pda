@@ -1,8 +1,5 @@
 "use client";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Briefcase, Users } from "lucide-react";
 
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
@@ -39,58 +36,9 @@ export default function RootLayout({
     );
   }
 
-  const sidebarData = {
-    user: user,
-    userRole: userRole,
-    team: {
-      name: "Administrador",
-      logo: () => (
-        <Avatar className="size-8">
-          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
-          <AvatarFallback>PdA</AvatarFallback>
-        </Avatar>
-      ),
-    },
-    navMain: [
-      {
-        title: "Usuários",
-        url: "/dashboard/admin/users",
-        icon: Users,
-        items: [
-          {
-            title: "Todos os usuários",
-            url: "/dashboard/admin/users/all",
-          },
-        ],
-      },
-      {
-        title: "Vagas",
-        url: "/dashboard/admin/jobs",
-        icon: Briefcase,
-        isActive: true,
-        items: [
-          {
-            title: "Vagas curadas",
-            url: "/dashboard/admin/jobs/curated",
-          },
-          {
-            title: "Curadoria de vagas",
-            url: "/dashboard/admin/jobs/curation",
-          },
-          {
-            title: "Vagas arquivadas",
-            url: "/dashboard/admin/jobs/archives",
-          },
-        ],
-      },
-    ],
-    projects: [],
-  };
-
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar loading={!user || !userRole} data={sidebarData} />
-      <AdminStackProvider>{children}</AdminStackProvider>
+      <AdminStackProvider user={user} userRole={userRole}>{children}</AdminStackProvider>
     </SidebarProvider>
   );
 }

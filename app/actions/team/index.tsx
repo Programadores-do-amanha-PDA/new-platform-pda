@@ -38,7 +38,7 @@ export const getAllTeams = async () => {
   }
 };
 
-export const getTeamById = async (id: number) => {
+export const getTeamById = async (id: string) => {
   try {
     const supabase = await createClient();
 
@@ -57,7 +57,7 @@ export const getTeamById = async (id: number) => {
   }
 };
 
-export const updateTeam = async (id: number, teamData: Partial<TeamType>) => {
+export const updateTeam = async (id: string, teamData: Partial<TeamType>) => {
   try {
     const supabase = await createClient();
 
@@ -82,7 +82,7 @@ export const updateTeam = async (id: number, teamData: Partial<TeamType>) => {
   }
 };
 
-export const deleteTeam = async (id: number) => {
+export const deleteTeam = async (id: string) => {
   try {
     const supabase = await createClient();
 

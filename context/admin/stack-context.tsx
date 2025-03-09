@@ -26,7 +26,16 @@ import {
   updateUserRoleWIthUserId,
 } from "@/app/actions/roles";
 import { TeamType } from "@/types/teams";
-import { createTeam, deleteTeam, getAllTeams, updateTeam } from "@/app/actions/team";
+import {
+  createTeam,
+  deleteTeam,
+  getAllTeams,
+  updateTeam,
+} from "@/app/actions/team";
+
+import { AppSidebar } from "@/components/app-sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Book, Briefcase, Users } from "lucide-react";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -50,12 +59,12 @@ interface AdminStackContextProps {
     handleCreateTeam: (teamData: {
       name: string;
       period: "morning" | "afternoon" | "night";
-    }) => Promise<boolean | number>;
+    }) => Promise<boolean | string>;
     handleUpdateTeam: (
-      teamId: number,
+      teamId: string,
       updates: Partial<TeamType>
     ) => Promise<boolean>;
-    handleDeleteTeam: (teamId: number) => Promise<boolean>;
+    handleDeleteTeam: (teamId: string) => Promise<boolean>;
   };
   jobsStack: {
     jobs: JobWithApplications[];
@@ -105,8 +114,12 @@ const AdminStackContext = createContext<AdminStackContextProps>({
 
 export const AdminStackProvider = ({
   children,
+  user,
+  userRole,
 }: {
   children: React.ReactNode;
+  user: AuthUserWithProfileType;
+  userRole: string;
 }) => {
   const [users, setUsers] = useState<Partial<AuthUserWithProfileType>[]>([]);
   const [teams, setTeams] = useState<TeamType[]>([]);
@@ -373,7 +386,7 @@ export const AdminStackProvider = ({
   };
 
   const handleUpdateTeam = async (
-    teamId: number,
+    teamId: string,
     updates: Partial<TeamType>
   ) => {
     try {
@@ -396,7 +409,7 @@ export const AdminStackProvider = ({
     }
   };
 
-  const handleDeleteTeam = async (teamId: number) => {
+  const handleDeleteTeam = async (teamId: string) => {
     try {
       if (!teamId) throw new Error("team id is required to delete");
 
@@ -566,6 +579,70 @@ export const AdminStackProvider = ({
     return <LoadingComponent />;
   }
 
+  const sidebarData = {
+    user: user,
+    userRole: userRole,
+    team: {
+      name: "Administrador",
+      logo: () => (
+        <Avatar className="size-8">
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      ),
+    },
+    navMain: [
+      {
+        title: "Usuários",
+        url: "/dashboard/admin/users",
+        icon: Users,
+        items: [
+          {
+            title: "Todos os usuários",
+            url: "/dashboard/admin/users/all",
+          },
+        ],
+      },
+      {
+        title: "Vagas",
+        url: "/dashboard/admin/jobs",
+        icon: Briefcase,
+        isActive: true,
+        items: [
+          {
+            title: "Vagas curadas",
+            url: "/dashboard/admin/jobs/curated",
+          },
+          {
+            title: "Curadoria de vagas",
+            url: "/dashboard/admin/jobs/curation",
+          },
+          {
+            title: "Vagas arquivadas",
+            url: "/dashboard/admin/jobs/archives",
+          },
+        ],
+      },
+      {
+        title: "Turmas",
+        url: "/dashboard/admin/teams",
+        icon: Book,
+        isActive: true,
+        items: teams.map((team) => ({
+          title: team.name,
+          url: `/dashboard/admin/teams/${team.id}`,
+          items: [
+            {
+              title: "Coodesh",
+              url: `/dashboard/admin/teams/${team.id}/coodesh`,
+            },
+          ],
+        })),
+      },
+    ],
+    projects: [],
+  };
+
   return (
     <AdminStackContext.Provider
       value={{
@@ -600,6 +677,7 @@ export const AdminStackProvider = ({
         setLoading,
       }}
     >
+      <AppSidebar loading={loading} data={sidebarData} />
       {children}
     </AdminStackContext.Provider>
   );
