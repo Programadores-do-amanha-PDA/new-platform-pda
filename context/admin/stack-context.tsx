@@ -25,7 +25,7 @@ import {
   insertUserRoleWithUserId,
   updateUserRoleWIthUserId,
 } from "@/app/actions/roles";
-import { TeamType } from "@/types/teams";
+import { TeamPeriodsType, TeamType } from "@/types/teams";
 import {
   createTeam,
   deleteTeam,
@@ -58,7 +58,7 @@ interface AdminStackContextProps {
     teams: TeamType[];
     handleCreateTeam: (teamData: {
       name: string;
-      period: "morning" | "afternoon" | "night";
+      period: TeamPeriodsType;
     }) => Promise<boolean | string>;
     handleUpdateTeam: (
       teamId: string,
@@ -355,7 +355,7 @@ export const AdminStackProvider = ({
   // Users
   const handleCreateTeam = async (teamData: {
     name: string;
-    period: "morning" | "afternoon" | "night";
+    period: TeamPeriodsType;
   }) => {
     try {
       if (
