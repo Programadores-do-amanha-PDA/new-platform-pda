@@ -1,4 +1,5 @@
 "use client";
+import { CreateTeamDialog } from "@/components/teams/create-team-dialog";
 import TeamCard from "@/components/teams/team-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ const TeamPage = () => {
       <header className="w-full flex flex-col gap-4">
         <div className="flex justify-between items-center gap-4 xl:gap-6">
           <h1 className="text-left font-bold text-3xl">Turmas</h1>
-          <Button className="font-semibold">Nova Turma</Button>
+          <CreateTeamDialog />
         </div>
         <div className="w-full h-px border-b border-sidebar-accent" />
         <div className="w-full h-9 flex gap-4 border-b border-card">
