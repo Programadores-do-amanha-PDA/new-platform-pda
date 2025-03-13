@@ -25,3 +25,10 @@ export type AssessmentType = {
   limit: number;
   payload: AssessmentPayloadType[];
 };
+
+export type TeamCoodeshAssessments = {
+  id?: number;
+  assessment_id: string;
+  team_id: string;
+  created_at: string;
+};

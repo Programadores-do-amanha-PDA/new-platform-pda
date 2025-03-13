@@ -36,6 +36,7 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Briefcase, Users } from "lucide-react";
+import { createTeamCoodeshAssessment } from "@/app/actions/team/coodesh";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -65,6 +66,12 @@ interface AdminStackContextProps {
       updates: Partial<TeamType>
     ) => Promise<boolean>;
     handleDeleteTeam: (teamId: string) => Promise<boolean>;
+    coodesh: {
+      handleCreateTeamAssessment: (
+        teamId: string,
+        assessmentId: string
+      ) => Promise<boolean>;
+    };
   };
   jobsStack: {
     jobs: JobWithApplications[];
@@ -97,6 +104,9 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleCreateTeam: () => Promise.resolve(false),
     handleUpdateTeam: () => Promise.resolve(false),
     handleDeleteTeam: () => Promise.resolve(false),
+    coodesh: {
+      handleCreateTeamAssessment: () => Promise.resolve(false),
+    },
   },
   jobsStack: {
     jobs: [],
@@ -150,6 +160,7 @@ export const AdminStackProvider = ({
 
         const teamsResponse = await getAllTeams();
         if (!teamsResponse) throw "no teams response";
+        console.log(teamsResponse);
         setTeams(teamsResponse);
 
         const jobsResponse = await getAllJobsWithApplications();
@@ -426,6 +437,42 @@ export const AdminStackProvider = ({
     }
   };
 
+  //  Team - Coodesh
+  const handleCreateTeamAssessment = async (
+    teamId: string,
+    assessmentId: string
+  ) => {
+    try {
+      if (!teamId || !assessmentId) throw new Error("required fields");
+
+      const assessmentCreated = await createTeamCoodeshAssessment({
+        assessment_id: assessmentId,
+        team_id: teamId,
+      });
+      if (!assessmentCreated)
+        throw new Error("no assessment created successfully");
+
+      setTeams((teams) =>
+        teams.map((team) =>
+          team.id === teamId
+            ? {
+                ...team,
+                team_coodesh_assessments: team.team_coodesh_assessments
+                  ? [...team.team_coodesh_assessments, assessmentCreated]
+                  : [assessmentCreated],
+              }
+            : team
+        )
+      );
+      toast.success("Avaliação anexada com sucesso!");
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao anexar a avaliação! Tente novamente mais tarde!");
+      return false;
+    }
+  };
+
   // Jobs
   const handleCreateJob = async (newJob: Partial<JobType>) => {
     try {
@@ -662,6 +709,9 @@ export const AdminStackProvider = ({
           handleCreateTeam,
           handleUpdateTeam,
           handleDeleteTeam,
+          coodesh: {
+            handleCreateTeamAssessment,
+          },
         },
         jobsStack: {
           jobs,

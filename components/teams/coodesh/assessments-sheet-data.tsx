@@ -1,7 +1,4 @@
 "use client";
-
-import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,100 +10,58 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { AssessmentType } from "@/types/assessments";
 import { Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { useAdminStackContext } from "@/context/admin/stack-context";
+import { AssessmentType } from "@/types/assessments";
 
 const AssessmentsSheetData = ({
-  handleAttachAssessment,
-  attachedAssessments,
   teamId,
+  assessments,
 }: {
   teamId: string;
-  handleAttachAssessment: (
-    teamId: string,
-    assessmentId: string
-  ) => Promise<boolean>;
-  attachedAssessments?: string[];
+  assessments: AssessmentType[];
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const {
+    teamsStack: {
+      teams,
+      coodesh: { handleCreateTeamAssessment },
+    },
+  } = useAdminStackContext();
 
-  const [assessments, setAssessments] = useState<AssessmentType[]>([]);
-
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-
-    if (true) {
-      setAssessments([
-        {
-          offset: 0,
-          total: 1,
-          limit: 150,
-          payload: [
-            {
-              assessment_id: "6707e51d867d313ecdd5f456",
-              name: "AT - Integração",
-              description: "Teste integração ATT",
-              default_locale: "pt",
-              duration: 5,
-              duration_unit: "hour",
-              questions: [
-                {
-                  name: "Teste básico de lógica",
-                  description: "Crie uma classe que possa os métodos abaixo...",
-                  type: "freecoding",
-                  type_formatted: "Programação livre",
-                  level: "beginner",
-                  level_formatted: "Iniciante",
-                  duration: 30,
-                  duration_unit: "minute",
-                },
-                {
-                  name: "Infraestrutura Multiusuários e Multitenant",
-                  description:
-                    "Solicitar ao candidato que desenhe e explique uma arquitetura...",
-                  type: "whiteboard",
-                  type_formatted: "Quadro branco",
-                  level: "advanced",
-                  level_formatted: "Avançado",
-                  duration: 5,
-                  duration_unit: "hour",
-                },
-              ],
-            },
-          ],
-        },
-      ]);
-    }
-  };
+  const attachedAssessments = teams.find(
+    (team) => team.id === teamId
+  )?.team_coodesh_assessments;
 
   return (
-    <Sheet onOpenChange={handleOpenChange} open={isOpen}>
+    <Sheet>
       <SheetTrigger asChild>
         <Button className="!px-4 w-max items-start justify-start font-semibold">
-          Anexar Teste
+          Anexar Avaliação
         </Button>
       </SheetTrigger>
 
       <SheetContent className="h-full flex flex-col">
         <SheetHeader>
-          <SheetTitle>Anexar Teste</SheetTitle>
+          <SheetTitle>Anexar Avaliação</SheetTitle>
           <SheetDescription>
-            Anexe abaixo os testes da Coodesh que fazem parte desta turma
+            Anexe abaixo as avaliações da Coodesh que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
         <main className="h-full flex flex-col gap-4 xl:gap-6 py-2">
           <div>
             <Input placeholder="Procurando por algo?" />
           </div>
-          <ul className="p-2 h-full">
+          <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2">
             {assessments.map((assessment) =>
               assessment.payload
                 .filter(
                   (p) =>
                     !(
                       attachedAssessments &&
-                      attachedAssessments.includes(p.assessment_id)
+                      attachedAssessments
+                        .map((att) => att.assessment_id)
+                        .includes(p.assessment_id)
                     )
                 )
                 .map((assessmentPayload) => (
@@ -125,7 +80,7 @@ const AssessmentsSheetData = ({
                       </div>
                       <Button
                         onClick={() =>
-                          handleAttachAssessment(
+                          handleCreateTeamAssessment(
                             teamId,
                             assessmentPayload.assessment_id
                           )
@@ -146,16 +101,19 @@ const AssessmentsSheetData = ({
                   (p) =>
                     !(
                       attachedAssessments &&
-                      attachedAssessments.includes(p.assessment_id)
+                      attachedAssessments
+                        .map((att) => att.assessment_id)
+                        .includes(p.assessment_id)
                     )
                 ).length > 0
             ).length === 0 && (
               <div className="flex flex-col gap-2 h-full items-center justify-center">
                 <h2 className="text-sm font-bold text-gray-800">
-                  Não ha testes disponíveis
+                  Não ha avaliações disponíveis
                 </h2>
                 <i className="text-xs text-muted-foreground px-2 text-center">
-                  (Testes que ja estão anexados a esta turma não aparecem aqui.)
+                  (Avaliações que ja estão anexadas a esta turma não aparecem
+                  aqui.)
                 </i>
               </div>
             )}

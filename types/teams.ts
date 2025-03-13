@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import { TeamCoodeshAssessments } from "./assessments";
 
 export type TeamTypeStatus = "created" | "active" | "finished";
 export type TeamPeriodsType = "morning" | "afternoon" | "evening";
@@ -11,4 +12,5 @@ export type TeamType = {
   status: TeamTypeStatus;
   created_at: string;
   updated_at: string | null;
+  team_coodesh_assessments?: TeamCoodeshAssessments[]
 };

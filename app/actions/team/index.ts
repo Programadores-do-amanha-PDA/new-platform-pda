@@ -26,8 +26,8 @@ export const getAllTeams = async () => {
 
     const { data, error } = await supabase
       .from("teams")
-      .select("*, team_coodesh_assessments!inner(*)")
-      .order("created_at", { ascending: false });
+      .select("*, team_coodesh_assessments(*)")
+      .order("created_at", { ascending: true });
 
     if (error) throw error;
 

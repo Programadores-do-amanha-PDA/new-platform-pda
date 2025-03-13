@@ -1,10 +1,10 @@
 "use server";
 
-import { AssessmentType } from "@/types/assessments";
+import { TeamCoodeshAssessments } from "@/types/assessments";
 import { createClient } from "@/utils/supabase/server";
 
 export const createTeamCoodeshAssessment = async (
-  assessmentData: Partial<AssessmentType>
+  assessmentData: Partial<TeamCoodeshAssessments>
 ) => {
   try {
     const supabase = await createClient();
@@ -14,7 +14,7 @@ export const createTeamCoodeshAssessment = async (
       .select();
 
     if (error) throw error;
-    return data[0] as AssessmentType;
+    return data[0] as TeamCoodeshAssessments;
   } catch (error) {
     console.error("Error creating team coodesh assessment:", error);
     return false;
@@ -30,7 +30,7 @@ export const getAllTeamCoodeshAssessments = async () => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as AssessmentType[];
+    return data as TeamCoodeshAssessments[];
   } catch (error) {
     console.error("Error fetching all team coodesh assessments:", error);
     return false;
@@ -47,7 +47,7 @@ export const getTeamCoodeshAssessmentById = async (id: number) => {
       .single();
 
     if (error) throw error;
-    return data as AssessmentType;
+    return data as TeamCoodeshAssessments;
   } catch (error) {
     console.error("Error fetching team coodesh assessment:", error);
     return false;
@@ -56,7 +56,7 @@ export const getTeamCoodeshAssessmentById = async (id: number) => {
 
 export const updateTeamCoodeshAssessment = async (
   id: number,
-  assessmentData: Partial<AssessmentType>
+  assessmentData: Partial<TeamCoodeshAssessments>
 ) => {
   try {
     const supabase = await createClient();
@@ -73,7 +73,7 @@ export const updateTeamCoodeshAssessment = async (
       .select();
 
     if (error) throw error;
-    return data[0] as AssessmentType;
+    return data[0] as TeamCoodeshAssessments;
   } catch (error) {
     console.error("Error updating team coodesh assessment:", error);
     return false;
