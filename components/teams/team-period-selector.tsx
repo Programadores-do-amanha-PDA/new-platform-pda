@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { TeamPeriodsType } from "@/types/teams";
 
 const teamPeriodLabels = {
   morning: "Manhã",
@@ -34,9 +35,15 @@ const periods = [
   },
 ];
 
-export function TeamPeriodSelector() {
+export function TeamPeriodSelector({
+  value,
+  handleOnchange,
+}: {
+  value: string;
+  handleOnchange: (value: TeamPeriodsType) => void;
+}) {
   return (
-    <Select>
+    <Select onValueChange={handleOnchange} value={value}>
       <SelectTrigger className="max-w-80 w-[190px]">
         <SelectValue className="w-full" placeholder="Selecione um período" />
       </SelectTrigger>

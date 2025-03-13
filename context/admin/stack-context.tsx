@@ -352,7 +352,7 @@ export const AdminStackProvider = ({
     }
   };
 
-  // Users
+  // Team
   const handleCreateTeam = async (teamData: {
     name: string;
     period: TeamPeriodsType;

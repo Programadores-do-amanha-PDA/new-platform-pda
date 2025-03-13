@@ -86,7 +86,7 @@ const TeamPage = () => {
         </div>
       </header>
 
-      <ul className="w-full">
+      <ul className="w-full h-full flex flex-row flex-wrap justify-start gap-4 py-4">
         {filteredTeams.length === 0 && (
           <p className="text-center text-lg font-semibold">
             Nenhuma turma encontrada
