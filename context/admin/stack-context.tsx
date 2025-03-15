@@ -37,6 +37,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Briefcase, Users } from "lucide-react";
 import { createTeamCoodeshAssessment } from "@/app/actions/team/coodesh";
+import { AssessmentType, TeamCoodeshAssessments } from "@/types/assessments";
+import { getCoodeshAPIAssessments } from "@/utils/coodesh-api";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -68,9 +70,12 @@ interface AdminStackContextProps {
     handleDeleteTeam: (teamId: string) => Promise<boolean>;
     coodesh: {
       handleCreateTeamAssessment: (
-        teamId: string,
-        assessmentId: string
+        assessmentData: Partial<TeamCoodeshAssessments>
       ) => Promise<boolean>;
+      api: {
+        assessments: AssessmentType[];
+        handleGetAssessments: () => Promise<boolean>;
+      };
     };
   };
   jobsStack: {
@@ -106,6 +111,10 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleDeleteTeam: () => Promise.resolve(false),
     coodesh: {
       handleCreateTeamAssessment: () => Promise.resolve(false),
+      api: {
+        assessments: [],
+        handleGetAssessments: () => Promise.resolve(false),
+      },
     },
   },
   jobsStack: {
@@ -133,6 +142,9 @@ export const AdminStackProvider = ({
 }) => {
   const [users, setUsers] = useState<Partial<AuthUserWithProfileType>[]>([]);
   const [teams, setTeams] = useState<TeamType[]>([]);
+  const [coodeshAPIAssessment, setCoodeshAPIAssessment] = useState<
+    AssessmentType[]
+  >([]);
   const [jobs, setJobs] = useState<JobType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -439,22 +451,21 @@ export const AdminStackProvider = ({
 
   //  Team - Coodesh
   const handleCreateTeamAssessment = async (
-    teamId: string,
-    assessmentId: string
+    assessmentData: Partial<TeamCoodeshAssessments>
   ) => {
     try {
-      if (!teamId || !assessmentId) throw new Error("required fields");
+      if (!assessmentData.team_id || !assessmentData.assessment_id)
+        throw new Error("required fields");
 
-      const assessmentCreated = await createTeamCoodeshAssessment({
-        assessment_id: assessmentId,
-        team_id: teamId,
-      });
+      const assessmentCreated = await createTeamCoodeshAssessment(
+        assessmentData
+      );
       if (!assessmentCreated)
         throw new Error("no assessment created successfully");
 
       setTeams((teams) =>
         teams.map((team) =>
-          team.id === teamId
+          team.id === assessmentData.team_id
             ? {
                 ...team,
                 team_coodesh_assessments: team.team_coodesh_assessments
@@ -469,6 +480,19 @@ export const AdminStackProvider = ({
     } catch (error) {
       console.log(error);
       toast.error("Erro ao anexar a avaliação! Tente novamente mais tarde!");
+      return false;
+    }
+  };
+
+  const handleGetCoodeshAPIAssessments = async () => {
+    try {
+      const assessments = await getCoodeshAPIAssessments();
+      if (!assessments) throw "no assessments fetched successfully";
+      setCoodeshAPIAssessment(assessments.data);
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error("Erro ao buscar avaliações! Tente novamente mais tarde!");
       return false;
     }
   };
@@ -711,6 +735,10 @@ export const AdminStackProvider = ({
           handleDeleteTeam,
           coodesh: {
             handleCreateTeamAssessment,
+            api: {
+              assessments: coodeshAPIAssessment,
+              handleGetAssessments: handleGetCoodeshAPIAssessments,
+            },
           },
         },
         jobsStack: {

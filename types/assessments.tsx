@@ -30,5 +30,8 @@ export type TeamCoodeshAssessments = {
   id?: number;
   assessment_id: string;
   team_id: string;
+  publication_date?: string;
+  finish_publication_date?: string;
   created_at: string;
-};
+  updated_at?: string;
+} & AssessmentPayloadType;
