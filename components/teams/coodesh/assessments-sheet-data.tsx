@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { LoaderCircle, Paperclip, RefreshCw } from "lucide-react";
+import { LoaderCircle, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { AssessmentPayloadType } from "@/types/assessments";
@@ -33,87 +33,11 @@ const AssessmentsSheetData = ({ teamId }: { teamId: string }) => {
     (team) => team.id === teamId
   )?.team_coodesh_assessments;
 
-  // [
-  //   {
-  //     offset: 0,
-  //     total: 1,
-  //     limit: 150,
-  //     payload: [
-  //       {
-  //         assessment_id: "6807e51d867d313ecdd5f456",
-  //         name: "AT - Integração",
-  //         description: "Teste integração ATT",
-  //         default_locale: "pt",
-  //         duration: 5,
-  //         duration_unit: "hour",
-  //         questions: [
-  //           {
-  //             name: "Teste básico de lógica",
-  //             description: "Crie uma classe que possa os métodos abaixo...",
-  //             type: "freecoding",
-  //             type_formatted: "Programação livre",
-  //             level: "beginner",
-  //             level_formatted: "Iniciante",
-  //             duration: 30,
-  //             duration_unit: "minute",
-  //           },
-  //           {
-  //             name: "Infraestrutura Multiusuários e Multitenant",
-  //             description:
-  //               "Solicitar ao candidato que desenhe e explique uma arquitetura...",
-  //             type: "whiteboard",
-  //             type_formatted: "Quadro branco",
-  //             level: "advanced",
-  //             level_formatted: "Avançado",
-  //             duration: 5,
-  //             duration_unit: "hour",
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         assessment_id: "6707e51d867d313ecdd5f456",
-  //         name: "AT - Integração",
-  //         description: "Teste integração ATT",
-  //         default_locale: "pt",
-  //         duration: 5,
-  //         duration_unit: "hour",
-  //         questions: [
-  //           {
-  //             name: "Teste básico de lógica",
-  //             description: "Crie uma classe que possa os métodos abaixo...",
-  //             type: "freecoding",
-  //             type_formatted: "Programação livre",
-  //             level: "beginner",
-  //             level_formatted: "Iniciante",
-  //             duration: 30,
-  //             duration_unit: "minute",
-  //           },
-  //           {
-  //             name: "Infraestrutura Multiusuários e Multitenant",
-  //             description:
-  //               "Solicitar ao candidato que desenhe e explique uma arquitetura...",
-  //             type: "whiteboard",
-  //             type_formatted: "Quadro branco",
-  //             level: "advanced",
-  //             level_formatted: "Avançado",
-  //             duration: 5,
-  //             duration_unit: "hour",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // ]
-
-  const handleRefreshCoodeshAssessments = async () => {
-    setLoading(true);
-    await handleGetAssessments();
-    setLoading(false);
-  };
-
   const handleOpen = async (open: boolean) => {
     if (open === true && assessments.length === 0) {
-      await handleRefreshCoodeshAssessments();
+      setLoading(true);
+      await handleGetAssessments();
+      setLoading(false);
     }
 
     setOpenModal(open);
@@ -129,16 +53,7 @@ const AssessmentsSheetData = ({ teamId }: { teamId: string }) => {
 
       <SheetContent className="h-full flex flex-col">
         <SheetHeader>
-          <SheetTitle className="gap-4 w-full justify-between">
-            Anexar Avaliação
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={handleRefreshCoodeshAssessments}
-            >
-              <RefreshCw className="size-5" />
-            </Button>
-          </SheetTitle>
+          <SheetTitle>Anexar Avaliação</SheetTitle>
           <SheetDescription>
             Anexe abaixo as avaliações da Coodesh que fazem parte desta turma
           </SheetDescription>

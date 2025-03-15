@@ -1,11 +1,8 @@
 "use client";
 import { useAdminStackContext } from "@/context/admin/stack-context";
+import AssessmentsTeamListCard from "./assessments-team-list-card";
 
-const AssessmentsTeamList = ({
-  teamId,
-}: {
-  teamId: string;
-}) => {
+const AssessmentsTeamList = ({ teamId }: { teamId: string }) => {
   const {
     teamsStack: {
       teams,
@@ -20,18 +17,10 @@ const AssessmentsTeamList = ({
   return (
     <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2">
       {attachedAssessments?.map((assessment) => (
-        <li key={assessment.assessment_id} className="p-2 border rounded-lg">
-          <div className="flex items-center gap-4 justify-between">
-            <div className="flex flex-col gap-1 truncate">
-              <h2 className="font-semibold text-sm truncate">
-                {assessment.name}
-              </h2>
-              <p className="text-xs text-gray-500 truncate">
-                {assessment.description}
-              </p>
-            </div>
-          </div>
-        </li>
+        <AssessmentsTeamListCard
+          key={assessment.assessment_id}
+          assessment={assessment}
+        />
       ))}
 
       {attachedAssessments?.length === 0 && (

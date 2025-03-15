@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "https://api.beta.coodesh.com",
+  baseURL: "https://api.coodesh.com",
   headers: {
     "X-API-KEY": process.env.NEXT_PUBLIC_COODESH_API_TOKEN,
     "Content-Type": "application/json",
