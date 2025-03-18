@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarPlus, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -13,6 +13,8 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { AssessmentDatePicker } from "./assessments-date-picker";
 import { useState } from "react";
+import { DateRange } from "react-day-picker";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const AssessmentsTeamListCard = ({
   assessment,
@@ -20,8 +22,7 @@ const AssessmentsTeamListCard = ({
   assessment: TeamCoodeshAssessments;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
 
   return (
     <li
@@ -49,7 +50,7 @@ const AssessmentsTeamListCard = ({
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
             {assessment.questions && (
-              <p className="text-sm font-semibold truncate">
+              <p className="text-sm font-semibold  truncate">
                 {assessment.questions.length} questões
               </p>
             )}
@@ -102,17 +103,21 @@ const AssessmentsTeamListCard = ({
         <div className="w-full flex flex-col gap-6">
           <div className="w-full flex flex-col gap-4">
             <Label htmlFor="startDate">Data de início:</Label>
-            <AssessmentDatePicker date={startDate} setDate={setStartDate} />
-          </div>
-          <div className="w-full flex flex-col gap-4">
-            <Label htmlFor="startDate">Data limite:</Label>
-            <AssessmentDatePicker date={endDate} setDate={setEndDate} />
+            <AssessmentDatePicker
+              date={scheduleDate}
+              setDate={setScheduleDate}
+            />
           </div>
         </div>
-        <Button className="flex gap-4 font-semibold">
-          <CalendarPlus className="size-5" />
-          Adicionar ao cronograma
-        </Button>
+        <div className="flex items-center space-x-2">
+          <Checkbox id="is_visible_on_schedule" />
+          <label
+            htmlFor="is_visible_on_schedule"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Visível no calendário da turma?
+          </label>
+        </div>
       </div>
     </li>
   );

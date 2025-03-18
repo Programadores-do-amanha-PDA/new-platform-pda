@@ -29,7 +29,7 @@ const AssessmentsTeamList = ({ teamId }: { teamId: string }) => {
             Não ha avaliações anexadas para essa turma.
           </h2>
           <i className="text-xs text-muted-foreground px-2 text-center">
-            (Assim que você adicionar avaliações, elas aparecerão aqui.)
+            (Assim que você anexar avaliações, elas aparecerão aqui.)
           </i>
         </div>
       )}

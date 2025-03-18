@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import UserSheetData from "./user-sheet-data";
 import { AuthUser } from "@supabase/supabase-js";
+import InsertManyUsersDrawer from "./insert-many-users-drawer";
 
 export function DataTable({
   data,
@@ -94,15 +95,23 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        <UserSheetData
-          mode="new"
-          handleCreateNewUser={handleCreateNewUser}
-          handleUpdateUser={handleUpdateUser}
-          handleAddUserRole={handleAddUserRole}
-          handleUpdateUserRole={handleUpdateUserRole}
-          handleDeleteUserRole={handleDeleteUserRole}
-          excludeRoles={excludeRoles}
-        />
+        <div className="flex gap-4">
+          <InsertManyUsersDrawer
+            handleAddUserRole={handleAddUserRole}
+            handleCreateNewUser={handleCreateNewUser}
+            excludeRoles={excludeRoles}
+          />
+
+          <UserSheetData
+            mode="new"
+            handleCreateNewUser={handleCreateNewUser}
+            handleUpdateUser={handleUpdateUser}
+            handleAddUserRole={handleAddUserRole}
+            handleUpdateUserRole={handleUpdateUserRole}
+            handleDeleteUserRole={handleDeleteUserRole}
+            excludeRoles={excludeRoles}
+          />
+        </div>
       </div>
 
       <div className="rounded-md border">
