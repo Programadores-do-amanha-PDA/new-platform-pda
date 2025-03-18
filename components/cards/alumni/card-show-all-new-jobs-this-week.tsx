@@ -51,7 +51,7 @@ const CardShowAllNewJobsThisWeek = ({ jobs }: { jobs: JobType[] }) => {
           </p>
         </div>
       </div>
-      <ul className="w-full h-full flex flex-col gap-4 items-start">
+      <ul className="w-full h-full flex flex-row a overflow-x-auto pb-2 gap-4 items-start">
         {newJobsCount
           .filter((_, i) => i < 3)
           .map((job, i) => {
