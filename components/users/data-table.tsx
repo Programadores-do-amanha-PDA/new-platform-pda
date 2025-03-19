@@ -85,7 +85,7 @@ export function DataTable({
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full overflow-hidden">
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Busque por um email..."

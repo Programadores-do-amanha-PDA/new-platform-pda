@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LoaderCircle, Sparkles } from "lucide-react";
+import { LoaderCircle, Sparkles, X } from "lucide-react";
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import { AuthUser } from "@supabase/supabase-js";
 import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
@@ -54,8 +54,11 @@ const InsertManyUsersDrawer = ({
   handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   excludeRoles?: RolesType[];
 }) => {
+  const [open, setOpen] = useState(false);
+
   const [users, setUsers] = useState<UserData[]>([]);
   const [allUsersRole, setAllUsersRole] = useState<RolesType[]>([]);
+  const [stage, setStage] = useState<0 | 1 | 2>(0);
   const [loading, setLoading] = useState(false);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -68,12 +71,10 @@ const InsertManyUsersDrawer = ({
         skipEmptyLines: true,
         complete: (results) => {
           if (results.errors.length > 0) {
-            console.error("Erros de parsing:", results.errors);
+            console.error("Parsing errors:", results.errors);
             setUsers([]);
             return;
           }
-
-          console.log(results.data);
 
           const parsedUsers = (results.data as UserRow[])
             .map((row: UserRow) => ({
@@ -87,12 +88,12 @@ const InsertManyUsersDrawer = ({
                 user.email.includes("@")
             );
 
-          console.log(parsedUsers);
-
           setUsers(parsedUsers);
+          setStage(1);
         },
         error: (error: Error) => {
-          console.error("Erro ao ler arquivo:", error);
+          console.error("Error in parsing file:", error);
+          setStage(0);
           setUsers([]);
         },
       });
@@ -121,7 +122,7 @@ const InsertManyUsersDrawer = ({
     );
   };
 
-  const handleSetUserRolesForAll = (newRoleName: RolesType) => {
+  const handleSetRolesForAll = (newRoleName: RolesType) => {
     setUsers((users) =>
       users.map((user) => ({
         ...user,
@@ -131,10 +132,20 @@ const InsertManyUsersDrawer = ({
     setAllUsersRole([newRoleName]);
   };
 
+  const handleRemoveRolesForAll = () => {
+    setUsers((users) =>
+      users.map((user) => ({
+        ...user,
+        userRoles: [],
+      }))
+    );
+    setAllUsersRole([]);
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
 
-    const fullNameRegex = /^[a-zA-Z]{2,}(?: [a-zA-Z]{2,})+$/;
+    const fullNameRegex = /^[a-zA-ZÀ-ÿ'\-]+(?: [a-zA-ZÀ-ÿ'\-]+)*$/;
     const emailRegex =
       /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -197,28 +208,38 @@ const InsertManyUsersDrawer = ({
       }
 
       setLoading(false);
+      setStage(1);
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      setUsers([]);
+      setAllUsersRole([]);
+      setLoading(false);
+    }
+
+    setOpen(open);
+  };
+
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerTrigger>
         <Button variant={"secondary"}>Inserir via CSV</Button>
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Inserir usuários em lote</DrawerTitle>
-          {/* <DrawerDescription>
-            Faça upload de um arquivo csv para carregar os dados dos usuários a
-            serem inseridos.
-          </DrawerDescription> */}
+          <DrawerTitle>
+            {stage === 0 &&
+              "Selecione um arquivo csv para carregar os dados dos usuários"}
+            {stage === 1 && "Revise os dados dos usuários a serem inseridos"}
+            {stage === 2 && "Resultados das inserções"}
+          </DrawerTitle>
         </DrawerHeader>
 
-        {!users.length ? (
+        {stage === 0 ? (
           <div className="grid w-full items-center gap-1.5 px-4 my-6">
-            <Label htmlFor="file">
-              Selecione um arquivo csv para carregar os dados dos usuários:
-            </Label>
+            <Label htmlFor="file"></Label>
             <Input
               id="file"
               type="file"
@@ -228,7 +249,7 @@ const InsertManyUsersDrawer = ({
             />
           </div>
         ) : (
-          <div className="w-full max-h-96 overflow-y-auto px-4">
+          <div className="w-full max-h-96 overflow-y-auto px-4 my-6">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -240,13 +261,13 @@ const InsertManyUsersDrawer = ({
                     <div className="flex items-center gap-2">
                       Senha
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
-                        className="flex items-center justify-center"
+                        className="flex items-center justify-center !py-1 !h-max !w-10"
                         title="Gerar senha aleatória"
                         onClick={() => handleGenerateRandomPassword()}
                       >
-                        <Sparkles className="size-5" />
+                        <Sparkles className="!size-3" />
                       </Button>
                     </div>
                   </TableHead>
@@ -254,47 +275,171 @@ const InsertManyUsersDrawer = ({
                   <TableHead className="max-w-36 w-36 truncate">
                     <div className="flex items-center gap-2">
                       Cargo
-                      {app_role.filter((role) => !allUsersRole.includes(role))
-                        .length > 0 && (
-                        <RoleSelector
-                          excludeItens={excludeRoles}
-                          label="Adicionar cargo"
-                          value={allUsersRole[0]}
-                          onChange={(v) => handleSetUserRolesForAll(v)}
-                        />
-                      )}
+                      {allUsersRole.map((r, i) => (
+                        <Badge variant="outline" key={i}>
+                          {r}
+                          <X
+                            onClick={handleRemoveRolesForAll}
+                            className="size-3 ml-1 cursor-pointer"
+                          />
+                        </Badge>
+                      ))}
+                      {allUsersRole.length < 1 &&
+                        app_role.filter((role) => !allUsersRole.includes(role))
+                          .length > 0 && (
+                          <RoleSelector
+                            excludeItens={allUsersRole.concat(
+                              excludeRoles || []
+                            )}
+                            label="Adicionar cargo"
+                            value={allUsersRole[0]}
+                            onChange={handleSetRolesForAll}
+                          />
+                        )}
                     </div>
                   </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users &&
-                  users.map((user, index) => (
-                    <TableRow key={index} className={ `${user.status && user.status === "success" ? "bg-green-50" : user.status && user.status === "error" ? 'bg-red-50': 'bg-yellow-50'}`}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.password}</TableCell>
-                      {user.userRoles && user.userRoles.length > 0 && (
+                  users.map((user, index) =>
+                    user.status ? (
+                      <TableRow
+                        key={index}
+                        className={`${
+                          user.status === "success"
+                            ? "bg-green-50"
+                            : user.status === "error"
+                            ? "bg-red-50"
+                            : "bg-yellow-50"
+                        }`}
+                      >
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.password}</TableCell>
                         <TableCell>
-                          <Badge variant="outline">{user.userRoles[0]}</Badge>
+                          {user.userRoles && user.userRoles.length > 0 && (
+                            <Badge variant="outline">{user.userRoles[0]}</Badge>
+                          )}
                         </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
+                      </TableRow>
+                    ) : (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Input
+                            type="text"
+                            value={user.name}
+                            onChange={(e) =>
+                              setUsers((prevUsers) =>
+                                prevUsers.map((u, i) =>
+                                  index === i
+                                    ? { ...u, name: e.target.value }
+                                    : u
+                                )
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="email"
+                            value={user.email}
+                            onChange={(e) =>
+                              setUsers((prevUsers) =>
+                                prevUsers.map((u, i) =>
+                                  index === i
+                                    ? { ...u, email: e.target.value }
+                                    : u
+                                )
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="password"
+                            value={user.password}
+                            onChange={(e) =>
+                              setUsers((prevUsers) =>
+                                prevUsers.map((u, i) =>
+                                  index === i
+                                    ? { ...u, password: e.target.value }
+                                    : u
+                                )
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {user?.userRoles?.map((r, i) => (
+                            <Badge variant="outline" key={i}>
+                              {r}
+                              <X
+                                onClick={() =>
+                                  setUsers((prevUsers) =>
+                                    prevUsers.map((u, i) =>
+                                      index === i ? { ...u, userRoles: [] } : u
+                                    )
+                                  )
+                                }
+                                className="size-3 ml-1 cursor-pointer"
+                              />
+                            </Badge>
+                          ))}
+                          {user.userRoles &&
+                            user.userRoles?.length < 1 &&
+                            app_role.filter(
+                              (role) => !user.userRoles?.includes(role)
+                            ).length > 0 && (
+                              <RoleSelector
+                                excludeItens={excludeRoles || []}
+                                label="Adicionar cargo"
+                                value={user.userRoles[0]}
+                                onChange={(role) =>
+                                  setUsers((prevUsers) =>
+                                    prevUsers.map((u, i) =>
+                                      index === i
+                                        ? { ...u, userRoles: [role] }
+                                        : u
+                                    )
+                                  )
+                                }
+                              />
+                            )}
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
               </TableBody>
             </Table>
           </div>
         )}
 
         <DrawerFooter className="!flex !flex-row justify-end gap-8">
-          <DrawerClose>
-            <Button variant="outline">Cancelar</Button>
-          </DrawerClose>
-          {users.length > 0 && (
-            <Button onClick={() => (!loading ? handleSubmit() : null)}>
-              {loading && <LoaderCircle className="size-5 animate-spin" />}
-              Inserir {users.length} usuários
-            </Button>
+          {stage === 0 && (
+            <DrawerClose>
+              <Button variant="outline">Cancelar</Button>
+            </DrawerClose>
+          )}
+          {stage === 1 && (
+            <>
+              <Button onClick={() => setUsers([])} variant="outline">
+                Trocar arquivo csv
+              </Button>
+              {users.length > 0 && (
+                <Button onClick={() => (!loading ? handleSubmit() : null)}>
+                  {loading && <LoaderCircle className="size-5 animate-spin" />}
+                  Inserir {users.length} usuários
+                </Button>
+              )}
+            </>
+          )}
+          {stage === 2 && (
+            <>
+              <DrawerClose>
+                <Button>Finalizar</Button>
+              </DrawerClose>
+            </>
           )}
         </DrawerFooter>
       </DrawerContent>

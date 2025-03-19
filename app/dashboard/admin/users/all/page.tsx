@@ -20,7 +20,7 @@ export default function AllUsersPage() {
   } = useAdminStackContext();
 
   return (
-    <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
+    <main className="relative w-full overflow-hidden flex flex-col p-6 gap-4 xl:p-8">
       <AppBar />
 
       <div className="space-y-2">
