@@ -33,7 +33,7 @@ export default function AllJobsPage() {
   };
 
   return (
-    <main className="w-full h-full relative flex flex-col p-6 gap-10 xl:p-8 overflow-hidden">
+    <main className="w-full h-full relative flex flex-col p-6 gap-4 xl:p-8 overflow-hidden">
       <AppBar />
 
       <div className="h-full w-full flex flex-col gap-4 overflow-hidden">
