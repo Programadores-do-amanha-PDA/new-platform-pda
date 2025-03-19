@@ -12,7 +12,7 @@ const JobCard = ({
   cardFooter: ReactElement;
 }) => {
   return (
-    <div className="flex flex-col box-border w-80 h-max bg-card text-card-foreground rounded-md p-4 border justify-start gap-4 shadow-md">
+    <div className="flex flex-col box-border w-full md:w-80 h-max bg-card text-card-foreground rounded-md p-4 border justify-start gap-4 shadow-md">
       <div
         className="group w-full h-max min-h-10 flex items-center justify-start cursor-pointer overflow-hidden space-x-2 mb-2"
         onClick={() => window.open(job.link, "_blank")}
@@ -38,7 +38,7 @@ const JobCard = ({
             <BookOpenText className="size-5" />
           </div>
 
-          <p className="text-sm w-full h-max">
+          <p className="text-sm w-2/3 md:w-full h-max">
             {job?.description
               ? job?.description.substring(0, 100) + "..."
               : job?.description}
