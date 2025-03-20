@@ -38,7 +38,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Briefcase, Users } from "lucide-react";
 import { createTeamCoodeshAssessment } from "@/app/actions/team/coodesh";
 import { AssessmentType, TeamCoodeshAssessments } from "@/types/assessments";
-import { getCoodeshAPIAssessments } from "@/utils/coodesh-api";
+import axios from "axios";
 
 interface AdminStackContextProps {
   usersStack: {
@@ -486,7 +486,7 @@ export const AdminStackProvider = ({
 
   const handleGetCoodeshAPIAssessments = async () => {
     try {
-      const assessments = await getCoodeshAPIAssessments();
+      const assessments = await axios.get("/api/coodesh/assessments")
       if (!assessments) throw "no assessments fetched successfully";
       setCoodeshAPIAssessment(assessments.data);
       return true;

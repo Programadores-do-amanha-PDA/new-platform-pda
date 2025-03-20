@@ -16,28 +16,19 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import axios from "axios";
-import { toast } from "sonner";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
 import { AuthUserWithProfileType } from "@/types/auth";
-export function NavUser({ user, userRole}: { user: AuthUserWithProfileType; userRole: string }) {
+export function NavUser({
+  user,
+  userRole,
+}: {
+  user: AuthUserWithProfileType;
+  userRole: string;
+}) {
   const router = useRouter();
   const { handleSignOut } = useAuth();
   const { isMobile } = useSidebar();
-
-  const signOut = async () => {
-    try {
-      const response = await axios.delete("/api/auth");
-      if (response.status === 200) {
-        toast.success("Usuário desconectado com sucesso!");
-        handleSignOut();
-      }
-    } catch (error) {
-      console.error("Error sign out:", error);
-      toast.error("Erro ao desconectar usuário!");
-    }
-  };
 
   return (
     <SidebarMenu>
@@ -105,7 +96,7 @@ export function NavUser({ user, userRole}: { user: AuthUserWithProfileType; user
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOut />
               Desconectar
             </DropdownMenuItem>

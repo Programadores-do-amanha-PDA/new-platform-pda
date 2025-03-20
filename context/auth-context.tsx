@@ -8,6 +8,8 @@ import LoadingComponent from "@/components/loading-component";
 import { getAuthUser, getSession } from "@/utils/supabase/actions/client/auth";
 import { getProfileById } from "@/utils/supabase/actions/profiles";
 import { getAvatarUrl } from "@/utils/supabase/actions/user_avatar";
+import { resendAnEmailSignupConfirmation, signOut } from "@/app/actions/auth";
+import { toast } from "sonner";
 
 interface AuthContextProps {
   user: AuthUserWithProfileType | null;
@@ -16,7 +18,8 @@ interface AuthContextProps {
   redirectToRoleDashboard: () => void;
   setUser: (user: AuthUserWithProfileType) => void;
   setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
-  handleSignOut: () => void;
+  handleSignOut: () => Promise<void>;
+  handleResendAnEmailSignupConfirmation: (email: string) => Promise<boolean>;
   fetchSession: () => Promise<void>;
   updateAuthState: (session: { access_token: string } | null) => Promise<void>;
 }
@@ -28,7 +31,8 @@ const AuthContext = createContext<AuthContextProps>({
   redirectToRoleDashboard: () => {},
   setUser: () => {},
   setUserRole: () => {},
-  handleSignOut: () => {},
+  handleSignOut: () => Promise.resolve(),
+  handleResendAnEmailSignupConfirmation: () => Promise.resolve(false),
   fetchSession: () => Promise.resolve(),
   updateAuthState: () => Promise.resolve(),
 });
@@ -95,10 +99,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    fetchSession();
-  }, []);
-
   const redirectToRoleDashboard = () => {
     if (!loading) {
       setIsRedirecting(true);
@@ -123,11 +123,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const handleSignOut = () => {
-    setUser(null);
-    setUserRole(null);
-    router.push("/");
+  const handleSignOut = async () => {
+    const isSigningOut = await signOut();
+    if (isSigningOut) {
+      toast.error("Usuario deslogado com sucesso!");
+      setUser(null);
+      setUserRole(null);
+      router.push("/");
+      return;
+    }
+
+    toast.error("Falha ao deslogar o usuário! Tente novamente mais tarde!");
+    return;
   };
+
+  const handleResendAnEmailSignupConfirmation = async (email: string) => {
+    const isResendingConfirmation = await resendAnEmailSignupConfirmation(
+      email
+    );
+    if (isResendingConfirmation) {
+      toast.success("Confirmação de email reenviada com sucesso!");
+      return true;
+    }
+
+    toast.error(
+      "Falha ao reenviar a confirmação de email! Tente novamente mais tarde!"
+    );
+    return false;
+  };
+
+  useEffect(() => {
+    fetchSession();
+  }, []);
 
   useEffect(() => {
     redirectToRoleDashboard();
@@ -147,6 +174,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUserRole,
         redirectToRoleDashboard,
         handleSignOut,
+        handleResendAnEmailSignupConfirmation,
         fetchSession,
         updateAuthState,
       }}

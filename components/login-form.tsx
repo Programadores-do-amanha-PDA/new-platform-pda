@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import axios from "axios";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -17,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
+import { signInWithPassword } from "@/app/actions/auth";
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -34,28 +34,20 @@ export const LoginForm = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post("/api/auth", data);
+      const response = await signInWithPassword(data);
 
-      if (
-        response.status === 200 &&
-        response.data.user &&
-        response.data.session
-      ) {
-        updateAuthState(response.data.session);
+      if (response.error === true && response.confirmation === true) {
+        toast.error("Confirme seu email para continuar.");
+        router.push("/confirmation");
+      } else if (response.confirmation === false && response.error === true)
+        throw new Error();
+      else if (response.error === false && response.data) {
+        updateAuthState(response.data?.session);
         toast.success("Login feito com sucesso!");
         redirectToRoleDashboard();
       }
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === "Request failed with status code 403"
-      ) {
-        toast.error("Confirme seu email para continuar.");
-        router.push("/confirmation");
-      }
-
-      toast.error("Erro ao fazer o login. Verifique suas credenciais.");
-      return;
+    } catch {
+      toast.error("Erro ao fazer login. Verifique suas credenciais.");
     } finally {
       setLoading(false);
     }

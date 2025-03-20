@@ -7,21 +7,29 @@ type UserAuthLogin = {
   password: string;
 };
 
-export async function login(userCredentials: UserAuthLogin) {
+export async function signInWithPassword(userCredentials: UserAuthLogin) {
   try {
     const supabase = await createClient();
+
+    if (!userCredentials.email || !userCredentials.password)
+      throw new Error("Invalid credentials");
 
     const { data, error } = await supabase.auth.signInWithPassword(
       userCredentials
     );
     if (error) throw error;
 
-    return data;
+    return {error: false, data}
   } catch (error) {
-    if (error instanceof Error) {
-      return error.message;
+    if (
+      error instanceof Error &&
+      error.message === "Request failed with status code 403"
+    ) {
+      return { error: true,  confirmation: true };
+    } else {
+      console.log("Error on signInWithPassword", error);
+      return {error: true, confirmation: false };
     }
-    return false
   }
 }
 

@@ -1,7 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 
@@ -16,12 +14,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getCookie } from "cookies-next";
+import { useAuth } from "@/context/auth-context";
 
 export const ResendConfirmationForm = () => {
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const INITIAL_COOLDOWN = 120;
+
+  const { handleResendAnEmailSignupConfirmation } = useAuth();
 
   useEffect(() => {
     const getEmailFromCookie = async () => {
@@ -45,24 +46,18 @@ export const ResendConfirmationForm = () => {
     event.preventDefault();
 
     const formData = new FormData(event.target as HTMLFormElement);
-    const data = {
-      email: formData.get("email") as string,
-    };
+    const email = formData.get("email") as string;
 
     setLoading(true);
-    try {
-      const response = await axios.post("/api/auth/confirmation", data);
 
-      if (response.status === 200) {
-        toast.success("Confirmação de email enviado com sucesso!");
-        setCooldown(INITIAL_COOLDOWN);
-      }
-    } catch (error) {
-      toast.error("Erro ao fazer o login. Verifique suas credenciais.");
-      return error;
-    } finally {
-      setLoading(false);
+    const isConfirmationEmailReseeded =
+      await handleResendAnEmailSignupConfirmation(email);
+
+    if (isConfirmationEmailReseeded === true) {
+      setCooldown(INITIAL_COOLDOWN);
     }
+
+    setLoading(false);
   };
 
   return (
