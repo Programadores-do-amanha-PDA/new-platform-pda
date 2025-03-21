@@ -33,48 +33,50 @@ export default function AllJobsPage() {
   };
 
   return (
-    <main className="w-full h-full relative flex flex-col p-6 gap-10 xl:p-8">
+    <main className="w-full h-full relative flex flex-col p-6 gap-4 xl:p-8 overflow-hidden">
       <AppBar />
 
-      <div className="h-max flex flex-col gap-8">
-        <div className="flex gap-2 items-center justify-start max-w-96">
+      <div className="h-full w-full flex flex-col gap-4 overflow-hidden">
+        <div className="flex gap-2 items-center justify-start  w-full md:max-w-sm">
           <Input
             placeholder="Pesquisar pelo titulo ou empresa"
             value={jobSearch}
             onChange={handleSetJobSearch}
           />
         </div>
-        <div className="w-full h-max flex flex-wrap gap-4 overflow-y-auto">
-          {jobSearchFilter.map((job, i) => {
-            const jobApplicationExists = jobApplications.find(
-              (apply) => apply.job_id === job.id
-            );
-            return (
-              <JobCard
-                key={i}
-                job={job}
-                cardFooter={
-                  !jobApplicationExists ? (
-                    <>
-                      <Button
-                        className="font-semibold"
-                        onClick={() => handleApplyToJob(job)}
-                      >
-                        Já me candidatei!
-                      </Button>
-                      <Button className="font-semibold" variant="ghost">
-                        <Flag className="size-5" />
-                      </Button>
-                    </>
-                  ) : (
-                    <p className="font-semibold text-sm py-2 px-4 gap-2 h-9">
-                      Candidatura declarada!
-                    </p>
-                  )
-                }
-              />
-            );
-          })}
+        <div className="flex h-full w-full overflow-y-auto">
+          <ul className="w-full h-max flex flex-wrap gap-4 lg:gap-8 my-4 pr-4">
+            {jobSearchFilter.map((job, i) => {
+              const jobApplicationExists = jobApplications.find(
+                (apply) => apply.job_id === job.id
+              );
+              return (
+                <JobCard
+                  key={i}
+                  job={job}
+                  cardFooter={
+                    !jobApplicationExists ? (
+                      <>
+                        <Button
+                          className="font-semibold"
+                          onClick={() => handleApplyToJob(job)}
+                        >
+                          Já me candidatei!
+                        </Button>
+                        <Button className="font-semibold" variant="ghost">
+                          <Flag className="size-5" />
+                        </Button>
+                      </>
+                    ) : (
+                      <p className="font-semibold text-sm py-2 px-4 gap-2 h-9">
+                        Candidatura declarada!
+                      </p>
+                    )
+                  }
+                />
+              );
+            })}
+          </ul>
         </div>
       </div>
     </main>
