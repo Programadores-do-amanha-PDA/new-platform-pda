@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -12,37 +12,91 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { AssessmentDatePicker } from "./assessments-date-picker";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const AssessmentsTeamListCard = ({
   assessment,
+  handleUpdateTeamAssessment,
 }: {
   assessment: TeamCoodeshAssessments;
+  handleUpdateTeamAssessment: (
+    assessmentId: string,
+    assessmentData: Partial<TeamCoodeshAssessments>
+  ) => Promise<boolean>;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
+  const [isVisibleOnSchedule, setIsVisibleOnSchedule] =
+    useState<boolean>(false);
+  const [acceptLateDeliveries, setAcceptLateDeliveries] =
+    useState<boolean>(false);
+
+  useEffect(() => {
+    if (assessment?.schedule_date?.from && assessment?.schedule_date?.to) {
+      setScheduleDate({
+        from: new Date(assessment?.schedule_date?.from),
+        to: new Date(assessment?.schedule_date?.to),
+      });
+    }
+    if (assessment.is_visible_on_schedule) {
+      setIsVisibleOnSchedule(assessment.is_visible_on_schedule);
+    }
+    if (assessment.accept_late_deliveries) {
+      setAcceptLateDeliveries(assessment.accept_late_deliveries);
+    }
+  }, [assessment]);
+
+  const isEdit =
+    assessment.accept_late_deliveries !== acceptLateDeliveries ||
+    assessment.is_visible_on_schedule !== isVisibleOnSchedule ||
+    (scheduleDate !== undefined &&
+      assessment.schedule_date?.from !== undefined &&
+      scheduleDate?.from !== undefined &&
+      new Date(assessment.schedule_date.from).getTime() !==
+        scheduleDate.from.getTime()) ||
+    (assessment.schedule_date?.to !== undefined &&
+      scheduleDate?.to !== undefined &&
+      new Date(assessment.schedule_date.to).getTime() !==
+        scheduleDate.to.getTime());
+
+  const handleUpdateAssessment = async () => {
+    setLoading(true);
+    try {
+      if (!assessment.id) throw new Error("Assessment ID is required");
+
+      await handleUpdateTeamAssessment(assessment?.id, {
+        accept_late_deliveries: acceptLateDeliveries,
+        is_visible_on_schedule: isVisibleOnSchedule,
+        schedule_date: scheduleDate,
+      });
+    } catch (error) {
+      console.error("Error updating assessment:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <li
-      key={assessment.assessment_id}
-      className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col"
-    >
+    <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
-          <h2 className="font-semibold truncate">{assessment.name}</h2>
-          {assessment.description && (
-            <p className="text-sm text-gray-500 truncate">
-              {assessment.description}
-            </p>
-          )}
-          {assessment.duration && (
-            <p className="text-xs text-gray-500 truncate">
-              {assessment.duration}{" "}
-              {assessment.duration_unit === "hour" ? "horas" : "minutos"}
-            </p>
-          )}
+          <h2 className="font-semibold truncate" title={assessment.name}>
+            {assessment.name}
+          </h2>
+          <p
+            className="text-sm h-5 text-gray-500"
+            title={assessment.description}
+          >
+            {assessment.description}
+          </p>
+          <p className="text-xs h-4 text-gray-500 truncate">
+            {assessment.duration}{" "}
+            {assessment.duration_unit === "hour" ? "horas" : "minutos"}
+          </p>
         </div>
       </div>
       <Separator className="my-4" />
@@ -99,10 +153,10 @@ const AssessmentsTeamListCard = ({
       </Collapsible>
       <Separator className="my-4" />
 
-      <div className="flex flex-col items-start gap-8">
+      <div className="flex flex-col items-start gap-8 bg-primary/25 p-4 rounded-xl">
         <div className="w-full flex flex-col gap-6">
           <div className="w-full flex flex-col gap-4">
-            <Label htmlFor="startDate">Data de início:</Label>
+            <Label htmlFor="startDate">Período de entregas:</Label>
             <AssessmentDatePicker
               date={scheduleDate}
               setDate={setScheduleDate}
@@ -110,13 +164,42 @@ const AssessmentsTeamListCard = ({
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id="is_visible_on_schedule" />
+          <Checkbox
+            id={`is_visible_on_schedule_${assessment.id}`}
+            checked={isVisibleOnSchedule}
+            onCheckedChange={(v: boolean) => setIsVisibleOnSchedule(v)}
+            disabled={
+              scheduleDate?.from === undefined || scheduleDate?.to === undefined
+            }
+          />
           <label
-            htmlFor="is_visible_on_schedule"
+            htmlFor={`is_visible_on_schedule_${assessment.id}`}
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           >
             Visível no calendário da turma?
           </label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id={`accept_late_deliveries_${assessment.id}`}
+            checked={acceptLateDeliveries}
+            onCheckedChange={(v: boolean) => setAcceptLateDeliveries(v)}
+            disabled={
+              scheduleDate?.from === undefined || scheduleDate?.to === undefined
+            }
+          />
+          <label
+            htmlFor={`accept_late_deliveries_${assessment.id}`}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Aceitar entregas apos o prazo final?
+          </label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button disabled={!isEdit} onClick={handleUpdateAssessment}>
+            {loading && <LoaderCircle className="size-5 animate-spin" />}
+            Salvar alterações
+          </Button>
         </div>
       </div>
     </li>

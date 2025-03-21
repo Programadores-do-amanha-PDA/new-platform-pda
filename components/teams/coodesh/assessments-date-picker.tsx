@@ -46,7 +46,7 @@ export function AssessmentDatePicker({
                 format(date.from, "LLL dd, y", { locale: ptBR })
               )
             ) : (
-              <span>Pick a date</span>
+              <span>Selecione um intervalo</span>
             )}
           </Button>
         </PopoverTrigger>

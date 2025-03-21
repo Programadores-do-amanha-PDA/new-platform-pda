@@ -6,7 +6,7 @@ const AssessmentsTeamList = ({ teamId }: { teamId: string }) => {
   const {
     teamsStack: {
       teams,
-      coodesh: {},
+      coodesh: { handleUpdateTeamAssessment },
     },
   } = useAdminStackContext();
 
@@ -15,16 +15,22 @@ const AssessmentsTeamList = ({ teamId }: { teamId: string }) => {
   )?.team_coodesh_assessments;
 
   return (
-    <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2">
-      {attachedAssessments?.map((assessment) => (
-        <AssessmentsTeamListCard
-          key={assessment.assessment_id}
-          assessment={assessment}
-        />
-      ))}
+    <ul className="p-2 py-4 h-full w-full flex flex-col md:flex-row md:flex-wrap gap-4 xl:gap-6">
+      {attachedAssessments
+        ?.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+        .map((assessment) => (
+          <AssessmentsTeamListCard
+            key={assessment.assessment_id}
+            assessment={assessment}
+            handleUpdateTeamAssessment={handleUpdateTeamAssessment}
+          />
+        ))}
 
       {attachedAssessments?.length === 0 && (
-        <div className="flex flex-col gap-2 h-full items-center justify-center">
+        <div className="flex flex-col gap-2 h-full w-full bg-red-100 items-center justify-center">
           <h2 className="text-sm font-bold text-gray-800">
             Não ha avaliações anexadas para essa turma.
           </h2>

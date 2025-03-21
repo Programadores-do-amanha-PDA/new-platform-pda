@@ -55,7 +55,7 @@ export const getTeamCoodeshAssessmentById = async (id: number) => {
 };
 
 export const updateTeamCoodeshAssessment = async (
-  id: number,
+  id: string,
   assessmentData: Partial<TeamCoodeshAssessments>
 ) => {
   try {

@@ -1,10 +1,12 @@
+import { DateRange } from "react-day-picker";
+
 export type AssessmentPayloadQuestionType = {
   name: string;
   description: string;
   type: string;
   type_formatted: string;
-  level: string;
-  level_formatted: string;
+  level?: string;
+  level_formatted?: string;
   duration: number;
   duration_unit: string;
 };
@@ -20,18 +22,19 @@ export type AssessmentPayloadType = {
 };
 
 export type AssessmentType = {
-  offset: number;
-  total: number;
-  limit: number;
+  offset?: number;
+  total?: number;
+  limit?: number;
   payload: AssessmentPayloadType[];
 };
 
 export type TeamCoodeshAssessments = {
-  id?: number;
+  id?: string;
   assessment_id: string;
   team_id: string;
-  publication_date?: string;
-  finish_publication_date?: string;
+  schedule_date?: DateRange | undefined;
+  is_visible_on_schedule?: boolean;
+  accept_late_deliveries?: boolean;
   created_at: string;
   updated_at?: string;
 } & AssessmentPayloadType;

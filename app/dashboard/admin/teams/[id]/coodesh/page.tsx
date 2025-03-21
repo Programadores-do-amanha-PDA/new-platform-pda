@@ -18,7 +18,7 @@ export default async function Page({
         </div>
       </header>
 
-      <main>
+      <main className="w-full h-full flex items-center justify-center">
         <AssessmentsTeamList teamId={id}/>
       </main>
     </div>
