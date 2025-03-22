@@ -13,7 +13,7 @@ import {
 import { LoaderCircle, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { AssessmentPayloadType } from "@/types/assessments";
+import { AssessmentPayloadType } from "@/types/coodesh/assessments";
 import { useState } from "react";
 
 const AssessmentsSheetData = ({ teamId }: { teamId: string }) => {

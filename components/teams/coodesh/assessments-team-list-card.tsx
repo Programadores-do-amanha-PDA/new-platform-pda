@@ -7,7 +7,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { TeamCoodeshAssessments } from "@/types/assessments";
+import { TeamCoodeshAssessments } from "@/types/coodesh/assessments";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,8 @@ import { AssessmentDatePicker } from "./assessments-date-picker";
 import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const AssessmentsTeamListCard = ({
   assessment,
@@ -26,6 +28,8 @@ const AssessmentsTeamListCard = ({
     assessmentData: Partial<TeamCoodeshAssessments>
   ) => Promise<boolean>;
 }) => {
+  const path = usePathname();
+
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -84,9 +88,13 @@ const AssessmentsTeamListCard = ({
     <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
-          <h2 className="font-semibold truncate" title={assessment.name}>
+          <Link
+            href={`${path}/${assessment.id}`}
+            className="font-semibold truncate hover:underline cursor-pointer"
+            title={assessment.name}
+          >
             {assessment.name}
-          </h2>
+          </Link>
           <p
             className="text-sm h-5 text-gray-500"
             title={assessment.description}

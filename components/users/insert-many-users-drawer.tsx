@@ -216,6 +216,7 @@ const InsertManyUsersDrawer = ({
     if (!open) {
       setUsers([]);
       setAllUsersRole([]);
+      setStage(0);
       setLoading(false);
     }
 

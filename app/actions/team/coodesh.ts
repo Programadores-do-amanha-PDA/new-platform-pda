@@ -1,6 +1,6 @@
 "use server";
 
-import { TeamCoodeshAssessments } from "@/types/assessments";
+import { TeamCoodeshAssessments } from "@/types/coodesh/assessments";
 import { createClient } from "@/utils/supabase/server";
 
 export const createTeamCoodeshAssessment = async (

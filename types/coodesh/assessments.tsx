@@ -1,4 +1,5 @@
 import { DateRange } from "react-day-picker";
+import { ParticipantData } from "./attempts";
 
 export type AssessmentPayloadQuestionType = {
   name: string;
@@ -15,7 +16,7 @@ export type AssessmentPayloadType = {
   assessment_id: string;
   name: string;
   description: string;
-  default_locale: string;
+  default_locale?: "pt" | "en" | "es" | string;
   duration: number;
   duration_unit: string;
   questions: AssessmentPayloadQuestionType[];
@@ -32,6 +33,7 @@ export type TeamCoodeshAssessments = {
   id?: string;
   assessment_id: string;
   team_id: string;
+  participants_data?: ParticipantData[];
   schedule_date?: DateRange | undefined;
   is_visible_on_schedule?: boolean;
   accept_late_deliveries?: boolean;

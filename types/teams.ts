@@ -1,5 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { TeamCoodeshAssessments } from "./assessments";
+import { TeamCoodeshAssessments } from "./coodesh/assessments";
 
 export type TeamTypeStatus = "created" | "active" | "finished";
 export type TeamPeriodsType = "morning" | "afternoon" | "evening";

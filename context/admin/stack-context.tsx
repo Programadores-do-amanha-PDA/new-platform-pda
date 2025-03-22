@@ -36,11 +36,14 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Book, Briefcase, Users } from "lucide-react";
-import { createTeamCoodeshAssessment, updateTeamCoodeshAssessment } from "@/app/actions/team/coodesh";
+import {
+  createTeamCoodeshAssessment,
+  updateTeamCoodeshAssessment,
+} from "@/app/actions/team/coodesh";
 import {
   AssessmentPayloadType,
   TeamCoodeshAssessments,
-} from "@/types/assessments";
+} from "@/types/coodesh/assessments";
 import axios from "axios";
 
 interface AdminStackContextProps {
@@ -76,7 +79,7 @@ interface AdminStackContextProps {
         assessmentData: Partial<TeamCoodeshAssessments>
       ) => Promise<boolean>;
       handleUpdateTeamAssessment: (
-        assessmentId: string,
+        assessment: TeamCoodeshAssessments,
         assessmentData: Partial<TeamCoodeshAssessments>
       ) => Promise<boolean>;
       api: {
@@ -1939,16 +1942,35 @@ export const AdminStackProvider = ({
   };
 
   const handleUpdateTeamAssessment = async (
-    assessmentId: string,
+    assessment: TeamCoodeshAssessments,
     updatedData: Partial<TeamCoodeshAssessments>
   ) => {
     try {
+      if (!assessment.id) throw new Error("no assessment id provided");
+      if (!updatedData) throw new Error("no updated data provided");
+
       const updatedAssessment = await updateTeamCoodeshAssessment(
-        assessmentId,
+        assessment.id,
         updatedData
       );
       if (!updatedAssessment)
         throw new Error("no assessment updated successfully");
+
+      setTeams((prevTeams) =>
+        prevTeams.map((team) =>
+          team.id === assessment.team_id
+            ? {
+                ...team,
+                team_coodesh_assessments: team.team_coodesh_assessments?.map(
+                  (assessment) =>
+                    assessment.id === assessment.id
+                      ? updatedAssessment
+                      : assessment
+                ),
+              }
+            : team
+        )
+      );
       toast.success("Avaliação atualizada com sucesso!");
       return true;
     } catch (error) {
