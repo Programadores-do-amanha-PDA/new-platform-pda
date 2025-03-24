@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import {
   Drawer,
@@ -88,12 +88,6 @@ const InsertAssessmentAttempts = ({
     setStage(1);
   };
 
-  useEffect(() => {
-    if (stage === 0 && resultsCsv && integrityCsv && actionPlansCsv) {
-      handleExtractParticipantData();
-    }
-  }, [stage, resultsCsv, integrityCsv, actionPlansCsv]);
-
   const handleSubmit = async () => {
     setLoading(true);
     try {
@@ -172,7 +166,7 @@ const InsertAssessmentAttempts = ({
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
       <DrawerTrigger>
-        <Button variant={"secondary"}>
+        <Button>
           <Upload className="size-5" />
           Carregar arquivos de respostas
         </Button>
@@ -267,13 +261,32 @@ const InsertAssessmentAttempts = ({
 
         <DrawerFooter className="!flex !flex-row justify-end gap-8">
           {stage === 0 && (
-            <DrawerClose>
-              <Button variant="outline">Cancelar</Button>
-            </DrawerClose>
+            <>
+              <DrawerClose>
+                <Button variant="outline">Cancelar</Button>
+              </DrawerClose>
+
+              <Button
+                onClick={handleExtractParticipantData}
+                disabled={
+                  stage === 0 &&
+                  (!resultsCsv || !integrityCsv || !actionPlansCsv)
+                }
+              >
+                Extrair dados
+              </Button>
+            </>
           )}
           {stage === 1 && (
             <>
-              <Button onClick={() => setParticipantData([])} variant="outline">
+              <Button
+                onClick={() => {
+                  setParticipantData([]);
+                  setStage(0);
+                  return;
+                }}
+                variant="outline"
+              >
                 Trocar arquivos csv
               </Button>
               {participantData && participantData.length > 0 && (

@@ -1,23 +1,10 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { ChevronsUpDown, FileSearch, Languages, Timer } from "lucide-react";
-import { useState } from "react";
-import InsertAssessmentAttempts from "./insert-assessment-attemts";
-import {
-  calculateAccuracyByChallenge,
-  calculateAverageDurationByChallenge,
-  calculateMetrics,
-  calculateOverallAccuracy,
-  calculateOverallAverageDuration,
-} from "@/utils/coodesh/calculate-metric";
+import { FileSearch, Languages, Timer } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AttemptsDataTable } from "./attempts-data-table";
 
 type DefaultLocations = {
   pt: string;
@@ -32,8 +19,6 @@ const AssessmentPage = ({
   teamId: string;
   assessmentId: string;
 }) => {
-  const [isQuestionsExpanded, setIsQuestionsExpanded] = useState(false);
-
   const {
     teamsStack: {
       teams,
@@ -52,19 +37,6 @@ const AssessmentPage = ({
     ?.team_coodesh_assessments?.find(
       (assessment) => assessment.id === assessmentId
     );
-
-  const overallAccuracy = calculateOverallAccuracy(
-    assessment?.participants_data || []
-  );
-  const accuracyByChallenge = calculateAccuracyByChallenge(
-    assessment?.participants_data || []
-  );
-  const overallDuration = calculateOverallAverageDuration(
-    assessment?.participants_data || []
-  );
-  const durationByChallenge = calculateAverageDurationByChallenge(
-    assessment?.participants_data || []
-  );
 
   return (
     <div className="w-full h-full flex flex-col gap-8">
@@ -109,42 +81,18 @@ const AssessmentPage = ({
         </div>
       </header>
 
-      <Collapsible
-        open={isQuestionsExpanded}
-        onOpenChange={setIsQuestionsExpanded}
-        className="space-y-2"
-      >
-        <div className="flex items-center justify-between gap-4 py-2">
-          <div className="flex gap-6">
-            <p className="text-lg font-semibold  truncate">Questões</p>
-          </div>
-
-          <div className="w-max h-6 items-center flex gap-4">
-            {assessment?.participants_data &&
-              assessment?.participants_data?.length > 0 && (
-                <div className="flex gap-1 h-full">
-                  <Badge variant="default" className="text-xs truncate">
-                    Entregas: {assessment.participants_data.length}
-                  </Badge>
-                  <Badge variant="default" className="text-xs truncate">
-                    Media geral de acertos:{overallAccuracy.toFixed(1)}%
-                  </Badge>
-                  <Badge variant="default" className="text-xs truncate">
-                    Media geral de duração: {overallDuration.toFixed(1)}
-                    minutos
-                  </Badge>
-                </div>
-              )}
-          </div>
-
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="shrink-0">
-              <ChevronsUpDown className="h-4 w-4" />
-              <span className="sr-only">Alternar questões</span>
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        <CollapsibleContent className="space-y-2">
+      <Tabs defaultValue="attempts" className="w-full">
+        <TabsList>
+          <TabsTrigger value="attempts">Respostas</TabsTrigger>
+          <TabsTrigger value="questions">Questões</TabsTrigger>
+        </TabsList>
+        <TabsContent value="attempts">
+          <AttemptsDataTable
+            assessment={assessment}
+            handleUpdateTeamAssessment={handleUpdateTeamAssessment}
+          />
+        </TabsContent>
+        <TabsContent value="questions">
           {assessment?.questions.map((question) => (
             <div
               key={question.name}
@@ -192,46 +140,8 @@ const AssessmentPage = ({
               </div>
             </div>
           ))}
-        </CollapsibleContent>
-      </Collapsible>
-
-      <div className="flex items-center justify-between gap-4 py-2">
-        <div className="flex gap-6">
-          <p className="text-lg font-semibold  truncate">Questões</p>
-        </div>
-
-        <div className="w-max h-6 items-center flex gap-4">
-          <div className="flex gap-1 h-full">
-            <Badge
-              variant="outline"
-              className="text-xs text-muted-foreground truncate"
-            >
-              QTD. {assessment?.questions.length}
-            </Badge>
-          </div>
-
-          {assessment?.participants_data &&
-            assessment?.participants_data?.length > 0 && (
-              <>
-                <Separator orientation="vertical" className="h-full" />
-                <div className="flex gap-1 h-full">
-                  <Badge variant="default" className="text-xs truncate">
-                    Media geral de acertos: 20%
-                  </Badge>
-                  <Badge variant="default" className="text-xs truncate">
-                    Media geral de duração: 17m
-                  </Badge>
-                </div>
-              </>
-            )}
-        </div>
-
-        <InsertAssessmentAttempts
-          assessment={assessment}
-          handleUpdateTeamAssessment={handleUpdateTeamAssessment}
-        />
-      </div>
-      <div></div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

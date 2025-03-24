@@ -53,6 +53,8 @@ export function formatParticipantsData(
     }
   });
 
+  console.log(Array.from(participantsMap.values()));
+
   return Array.from(participantsMap.values());
 }
 
@@ -62,8 +64,9 @@ function parseCsv<T>(csvString: string): T[] {
     transformHeader: (header) => {
       return header
         .trim()
-        .toLowerCase()
-        .replace(/(?:\s+)(\w)/g, (_, match) => match.toUpperCase())
+        .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+          return index === 0 ? word.toLowerCase() : word.toUpperCase();
+        })
         .replace(/\s+/g, "")
         .replace(/[^a-zA-Z0-9]/g, "");
     },
