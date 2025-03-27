@@ -14,7 +14,7 @@ export interface ResultsRow {
   challengeType: string;
   challengeScore: number;
   challengeStatus: string;
-  challengeSubmittedAt: string;
+  challengeSubmittedAt: number;
   challengeDurationMinutes: number;
   challengeLink: string;
   likertPlatformExperience: string;
@@ -46,6 +46,9 @@ export interface IntegrityRow {
   country: string;
   question?: string;
   answer?: string;
+  suspect?: string;
+  oS?: string;
+  created?: string;
 }
 
 export interface ActionPlanRow {
@@ -73,9 +76,9 @@ export interface ActionPlanRow {
 }
 
 export interface ParticipantData {
-    email: string;
-    name: string;
-    results: ResultsRow[];
-    integrityEvents: IntegrityRow[];
-    actionPlans: ActionPlanRow[];
-  }
+  email: string;
+  name: string;
+  results: ResultsRow[];
+  integrityEvents: IntegrityRow[];
+  actionPlans: ActionPlanRow[];
+}
