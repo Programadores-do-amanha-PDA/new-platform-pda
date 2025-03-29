@@ -6,7 +6,7 @@ import LoadingComponent from "@/components/loading-component";
 import {
   createUser,
   deleteUser,
-  getAllAlumni,
+  getAllUsers,
   updateUser,
 } from "@/app/actions/auth_admin";
 import { getProfileById } from "@/app/actions/profiles";
@@ -100,7 +100,7 @@ export const EmployerStackProvider = ({
     const fetchData = async () => {
       setLoading(true);
       try {
-        const allAlumni = await getAllAlumni();
+        const allAlumni = await getAllUsers("alumni");
         if (!allAlumni) throw "no get all alumni response";
         setAlumni(allAlumni);
 

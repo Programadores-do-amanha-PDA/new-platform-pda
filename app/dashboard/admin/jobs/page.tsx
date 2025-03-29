@@ -6,12 +6,24 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 import { Button } from "@/components/ui/button";
 import { AppBar } from "@/components/app-bar";
 import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
+import { useEffect } from "react";
+import LoadingComponent from "@/components/loading-component";
 
 export default function Home() {
   const router = useRouter();
   const {
-    jobsStack: { jobs },
+    jobsStack: { jobs, jobsLoading, handleGetAllJobs },
   } = useAdminStackContext();
+
+  useEffect(() => {
+    if (!jobs.length) {
+      handleGetAllJobs();
+    }
+  }, []);
+
+  if (jobsLoading) {
+    return <LoadingComponent />;
+  }
 
   const curatedChartData = [
     {

@@ -14,12 +14,12 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 export function NavMain({
   items,
+  title,
 }: {
   items: {
     title: string;
@@ -35,11 +35,12 @@ export function NavMain({
       }[];
     }[];
   }[];
+  title: string;
 }) {
   const router = useRouter();
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible
@@ -65,46 +66,13 @@ export function NavMain({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map((subItem) => {
-                    if (subItem?.items && subItem?.items?.length > 0) {
-                      return (
-                        <Collapsible
-                          key={subItem.title}
-                          className="group/collapsibleSub"
-                        >
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuButton tooltip={subItem.title}>
-                              <Link href={subItem.url}>
-                                <span>{subItem.title}</span>
-                              </Link>
-                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsibleSub:rotate-90" />
-                            </SidebarMenuButton>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <SidebarMenuSub>
-                              {subItem.items?.map((subItem) => (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                  <SidebarMenuSubButton asChild>
-                                    <Link href={subItem.url}>
-                                      <span>{subItem.title}</span>
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              ))}
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </Collapsible>
-                      );
-                    } else if (!subItem?.items) {
-                      return (
-                        <SidebarMenuSubButton key={subItem.title}>
-                          <Link href={subItem.url}>
-                            <span>{subItem.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
-                      );
-                    }
-                  })}
+                  {item.items?.map((subItem) => (
+                    <SidebarMenuSubButton key={subItem.title}>
+                      <Link href={subItem.url}>
+                        <span>{subItem.title}</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  ))}
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>

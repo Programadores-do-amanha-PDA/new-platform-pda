@@ -6,11 +6,11 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { AdminStackProvider } from "@/context/admin/stack-context";
 
-export default function RootLayout({
+const AdminLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   const { user, userRole } = useAuth();
 
   if (!user || !userRole || userRole !== "admin") {
@@ -38,7 +38,11 @@ export default function RootLayout({
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <AdminStackProvider user={user} userRole={userRole}>{children}</AdminStackProvider>
+      <AdminStackProvider user={user} userRole={userRole}>
+        {children}
+      </AdminStackProvider>
     </SidebarProvider>
   );
-}
+};
+
+export default AdminLayout;

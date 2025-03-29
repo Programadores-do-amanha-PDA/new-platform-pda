@@ -31,6 +31,16 @@ interface AppSidebarProps {
         url: string;
       }[];
     }[];
+    classRooms?: {
+      title: string;
+      url: string;
+      icon?: LucideIcon;
+      isActive?: boolean;
+      items?: {
+        title: string;
+        url: string;
+      }[];
+    }[];
     projects: {
       name: string;
       url: string;
@@ -65,7 +75,12 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
         )}
       </SidebarHeader>
       <SidebarContent>
-        {props.data.navMain && <NavMain items={props.data.navMain} />}
+        {props.data.navMain && (
+          <NavMain items={props.data.navMain} title="Menu Principal" />
+        )}
+        {props.data.classRooms && (
+          <NavMain items={props.data.classRooms} title="Turmas" />
+        )}
         {props.data.projects && props.data.projects.length > 0 && (
           <NavProjects projects={props.data?.projects} />
         )}

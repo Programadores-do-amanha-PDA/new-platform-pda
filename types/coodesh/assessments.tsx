@@ -29,10 +29,10 @@ export type AssessmentType = {
   payload: AssessmentPayloadType[];
 };
 
-export type TeamCoodeshAssessments = {
+export type ClassroomCoodeshAssessment = {
   id?: string;
   assessment_id: string;
-  team_id: string;
+  classroom_id: string;
   participants_data?: ParticipantData[];
   schedule_date?: DateRange | undefined;
   is_visible_on_schedule?: boolean;
