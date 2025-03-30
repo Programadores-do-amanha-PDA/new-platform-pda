@@ -31,13 +31,8 @@ const TeamPage = () => {
       : classrooms.filter((c) => c.status === statusFilter);
 
   return (
-    <div className="relative w-full h-max flex flex-col p-6 gap-10 xl:p-8">
-      <header className="w-full flex flex-col gap-4">
-        <div className="flex justify-between items-center gap-4 xl:gap-6">
-          <h1 className="text-left font-bold text-3xl">Turmas</h1>
-          <CreateClassroomDialog />
-        </div>
-        <div className="w-full h-px border-b border-sidebar-accent" />
+    <div className="relative w-full h-max flex flex-col gap-10 px-4">
+      <header className="w-full flex justify-between gap-4">
         <div className="w-full h-9 flex gap-4 border-b border-card">
           <Button
             variant="ghost"
@@ -91,6 +86,7 @@ const TeamPage = () => {
                 </>
               ))}
         </div>
+          <CreateClassroomDialog />
       </header>
 
       <ul className="w-full h-full flex flex-row flex-wrap justify-start gap-4 py-4">

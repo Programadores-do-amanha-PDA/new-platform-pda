@@ -25,12 +25,10 @@ import { SquareArrowOutUpRight } from "lucide-react";
 const AttemptDialog = ({
   open,
   onClose,
-  //   onConfirm,
   attempt,
 }: {
   open: boolean;
   onClose: (open: boolean) => void;
-  //   onConfirm: () => Promise<void>;
   attempt: ParticipantData;
 }) => {
   // "challenge_start", "fullscreen_enter", "idle", "active", "viewed_question", "challenge_finish", "tab_exit", "back_to_challenges_page", "copy_content"
@@ -63,11 +61,17 @@ const AttemptDialog = ({
             </div>
           </header>
 
-          <div className="w-full flex flex-col gap-1 bg-muted rounded-xl p-2">
-            <h2 className="text-lg font-bold w-full border-b pb-1">
-              Informações Gerais
-            </h2>
-            <div className="flex gap-2">
+          <Tabs defaultValue="generalInformation" className="w-full">
+            <TabsList>
+              <TabsTrigger value="generalInformation">
+                Informações Gerais
+              </TabsTrigger>
+              <TabsTrigger value="questions">Questões</TabsTrigger>
+              <TabsTrigger value="integrity">Integridade</TabsTrigger>
+              <TabsTrigger value="action-plan">Planos de Ações</TabsTrigger>
+            </TabsList>
+            <TabsContent value="generalInformation" className="w-full gap-1 bg-muted rounded-xl p-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">Dispositivo usado:</p>
               <p className="font-semibold capitalize">
                 {
@@ -77,13 +81,13 @@ const AttemptDialog = ({
                 }
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">Navegador:</p>
               <p className="font-semibold capitalize">
                 {new Set(attempt.integrityEvents.map((event) => event.browser))}
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">Local:</p>
               <p className="font-semibold capitalize">
                 {
@@ -95,7 +99,7 @@ const AttemptDialog = ({
                 }
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">Saiu do modo tela cheia?</p>
               {attempt.integrityEvents.filter(
                 (event) => event.eventType === "fullscreen_leave"
@@ -105,7 +109,7 @@ const AttemptDialog = ({
                 <p className="font-semibold uppercase text-green-400">não</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">
                 Saiu da guia de navegação?
               </p>
@@ -117,7 +121,7 @@ const AttemptDialog = ({
                 <p className="font-semibold uppercase text-green-400">não</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">
                 Utilizou mais de um único endereço de IP?
               </p>
@@ -131,7 +135,7 @@ const AttemptDialog = ({
                 <p className="font-semibold uppercase text-green-400">não</p>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 text-sm">
               <p className="text-muted-foreground">Copiar/Colar detectado?</p>
               {attempt.integrityEvents.filter(
                 (event) =>
@@ -143,14 +147,7 @@ const AttemptDialog = ({
                 <p className="font-semibold uppercase text-green-400">não</p>
               )}
             </div>
-          </div>
-
-          <Tabs defaultValue="questions" className="w-full">
-            <TabsList>
-              <TabsTrigger value="questions">Questões</TabsTrigger>
-              <TabsTrigger value="integrity">Integridade</TabsTrigger>
-              <TabsTrigger value="action-plan">Planos de Ações</TabsTrigger>
-            </TabsList>
+            </TabsContent>
             <TabsContent value="questions" className="bg-muted p-1 rounded-xl">
               <div className="bg-background rounded-xl">
                 <Table className="max-h-40 overflow-y-auto">

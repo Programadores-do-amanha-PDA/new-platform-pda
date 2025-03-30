@@ -11,12 +11,12 @@ import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
-import { AssessmentDatePicker } from "./assessments-date-picker";
 import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import DateIntervalPicker from "@/components/date-interval-picker";
 
 const AssessmentsClassroomListCard = ({
   assessment,
@@ -165,7 +165,7 @@ const AssessmentsClassroomListCard = ({
         <div className="w-full flex flex-col gap-6">
           <div className="w-full flex flex-col gap-4">
             <Label htmlFor="startDate">Período de entregas:</Label>
-            <AssessmentDatePicker
+            <DateIntervalPicker
               date={scheduleDate}
               setDate={setScheduleDate}
             />

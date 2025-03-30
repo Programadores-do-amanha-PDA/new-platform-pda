@@ -19,6 +19,8 @@ import { AppSidebar } from "@/components/app-sidebar";
 import LoadingComponent from "@/components/loading-component";
 
 import { AuthUserWithProfileType } from "@/types/auth";
+import { AppBar } from "@/components/app-bar";
+import AppMap from "@/components/app-map";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -209,8 +211,12 @@ export const AdminStackProvider = ({
       isActive: true,
       items: [
         {
-          title: "Coodesh",
+          title: "⬆️ Coodesh",
           url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
+        },
+        {
+          title: "⬆️ Zoom",
+          url: `/dashboard/admin/classrooms/${classroom.id}/zoom`,
         },
       ],
     })),
@@ -267,7 +273,13 @@ export const AdminStackProvider = ({
       }}
     >
       <AppSidebar loading={loading} data={sidebarData} />
-      {children}
+      <div className="relative w-full h-full flex flex-col gap-6 overflow-hidden">
+        <AppBar />
+        <div className="w-full h-full flex flex-col gap-10 overflow-hidden px-4">
+          <AppMap />
+          {children}
+        </div>
+      </div>
     </AdminStackContext.Provider>
   );
 };

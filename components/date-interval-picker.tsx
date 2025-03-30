@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
@@ -13,16 +14,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { DateRange } from "react-day-picker";
 
-export function AssessmentDatePicker({
+const DateIntervalPicker = ({
   date,
   setDate,
   className,
 }: {
   date: DateRange | undefined;
   setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
-} & React.HTMLAttributes<HTMLDivElement>) {
+} & React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -64,4 +64,6 @@ export function AssessmentDatePicker({
       </Popover>
     </div>
   );
-}
+};
+
+export default DateIntervalPicker;
