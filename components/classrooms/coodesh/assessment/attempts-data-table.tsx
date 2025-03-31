@@ -85,7 +85,6 @@ export function AttemptsDataTable({
     {
       accessorKey: "name",
       header: ({ column }) => {
-        console.log("column");
         return (
           <Button
             variant="ghost"
@@ -281,6 +280,14 @@ export function AttemptsDataTable({
       columnVisibility,
       rowSelection,
     },
+    manualPagination: false,
+    autoResetPageIndex: false,
+    initialState: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: assessment?.participants_data?.length || 1000,
+      },
+    },
   });
 
   const [isAttemptDialogOpen, setIsAttemptDialogOpen] =
@@ -303,7 +310,7 @@ export function AttemptsDataTable({
 
   return (
     <>
-      <div className="w-full">
+      <div className="w-full h-full overflow-hidden">
         <div className="flex items-center justify-between py-4">
           <Input
             placeholder="Filtrar emails..."
@@ -348,7 +355,7 @@ export function AttemptsDataTable({
             </div>
           )}
         </div>
-        <div className="rounded-md border">
+        <div className="w-full h-full max-h-[50vh] rounded-md border overflow-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
@@ -391,36 +398,12 @@ export function AttemptsDataTable({
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    Nenhuma resposta encontrada.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </div>
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
         </div>
       </div>
 

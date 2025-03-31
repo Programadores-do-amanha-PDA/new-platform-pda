@@ -1,10 +1,9 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { FileSearch, Languages, Timer } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AttemptsDataTable } from "./attempts-data-table";
+import { AttemptsDataTable } from "../../components/classrooms/coodesh/assessment/attempts-data-table";
+import { AssessmentQuestionsTable } from "@/components/classrooms/coodesh/assessment/assessment-questions-table";
 
 type DefaultLocations = {
   pt: string;
@@ -39,7 +38,7 @@ const AssessmentPage = ({
     );
 
   return (
-    <div className="w-full h-full flex flex-col gap-8">
+    <div className="w-full h-full flex flex-col gap-8 p-4 py-6 overflow-hidden">
       <header className="w-full flex flex-col gap-2">
         <div>
           <h2 className="font-bold text-2xl text-foreground">
@@ -81,65 +80,22 @@ const AssessmentPage = ({
         </div>
       </header>
 
-      <Tabs defaultValue="attempts" className="w-full">
+      <Tabs defaultValue="attempts" className="w-full h-full overflow-hidden">
         <TabsList>
           <TabsTrigger value="attempts">Respostas</TabsTrigger>
           <TabsTrigger value="questions">Questões</TabsTrigger>
         </TabsList>
-        <TabsContent value="attempts">
+        <TabsContent value="attempts" className="w-full h-full overflow-hidden">
           <AttemptsDataTable
             assessment={assessment}
             handleUpdateCoodeshAssessment={handleUpdateCoodeshAssessment}
           />
         </TabsContent>
-        <TabsContent value="questions">
-          {assessment?.questions.map((question) => (
-            <div
-              key={question.name}
-              className="rounded-md border px-4 py-2 text-sm shadow-sm"
-            >
-              <h3 className="font-semibold">{question.name}</h3>
-              <p className="text-gray-600 mt-1">{question.description}</p>
-
-              <div className="w-full h-6 flex gap-4 mt-3">
-                <div className="flex gap-1 h-full">
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-muted-foreground truncate"
-                  >
-                    {question.type_formatted}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-muted-foreground truncate"
-                  >
-                    {question.level_formatted}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className="text-xs text-muted-foreground truncate"
-                  >
-                    {question.duration}{" "}
-                    {question.duration_unit === "hour" ? "horas" : "minutos"}
-                  </Badge>
-                </div>
-                {assessment.participants_data &&
-                  assessment?.participants_data?.length > 0 && (
-                    <>
-                      <Separator orientation="vertical" className="h-full" />
-                      <div className="flex gap-1 h-full">
-                        <Badge variant="default" className="text-xs truncate">
-                          Media de acertos: 20%
-                        </Badge>
-                        <Badge variant="default" className="text-xs truncate">
-                          Media de duração: 17m
-                        </Badge>
-                      </div>
-                    </>
-                  )}
-              </div>
-            </div>
-          ))}
+        <TabsContent
+          value="questions"
+          className="w-full h-full overflow-hidden"
+        >
+          <AssessmentQuestionsTable assessment={assessment} />
         </TabsContent>
       </Tabs>
     </div>

@@ -1,36 +1,33 @@
 "use client";
 
-import { ChevronsUpDown, LoaderCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
-import { Checkbox } from "@/components/ui/checkbox";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { DateRange } from "react-day-picker";
+import { LoaderCircle } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import DateIntervalPicker from "@/components/date-interval-picker";
 
-const AssessmentsClassroomListCard = ({
-  assessment,
-  handleUpdateCoodeshAssessment,
-}: {
+import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
+
+type AssessmentsClassroomListCardProps = {
   assessment: ClassroomCoodeshAssessment;
   handleUpdateCoodeshAssessment: (
     assessment: ClassroomCoodeshAssessment,
     assessmentData: Partial<ClassroomCoodeshAssessment>
   ) => Promise<boolean>;
-}) => {
+};
+
+const AssessmentsClassroomListCard = ({
+  assessment,
+  handleUpdateCoodeshAssessment,
+}: AssessmentsClassroomListCardProps) => {
   const path = usePathname();
 
-  const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
@@ -85,7 +82,7 @@ const AssessmentsClassroomListCard = ({
   };
 
   return (
-    <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col">
+    <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
           <Link
@@ -101,74 +98,26 @@ const AssessmentsClassroomListCard = ({
           >
             {assessment.description}
           </p>
-          <p className="text-xs h-4 text-gray-500 truncate">
-            {assessment.duration}{" "}
-            {assessment.duration_unit === "hour" ? "horas" : "minutos"}
+          <p className="text-sm h-5 text-gray-500 flex gap-1">
+            Duração:
+            <p className="font-bold">
+              {assessment.duration}{" "}
+              {assessment.duration_unit === "hour" ? "horas" : "minutos"}
+            </p>
+          </p>
+          <p className="text-sm h-5 text-gray-500 flex gap-1">
+            Questões:
+            <p className="font-bold">{assessment.questions.length}</p>
           </p>
         </div>
       </div>
-      <Separator className="my-4" />
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="space-y-2">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-1 truncate">
-            {assessment.questions && (
-              <p className="text-sm font-semibold  truncate">
-                {assessment.questions.length} questões
-              </p>
-            )}
-          </div>
-
-          <CollapsibleTrigger asChild>
-            <Button variant="ghost" size="sm" className="shrink-0">
-              <ChevronsUpDown className="h-4 w-4" />
-              <span className="sr-only">Alternar questões</span>
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-        <CollapsibleContent className="space-y-2">
-          {assessment.questions.map((question) => (
-            <div
-              key={question.name}
-              className="rounded-md border px-4 py-2 text-sm shadow-sm"
-            >
-              <h3 className="font-semibold">{question.name}</h3>
-              <p className="text-gray-600 mt-1">{question.description}</p>
-
-              <div className="mt-2 flex flex-wrap gap-1">
-                <Badge
-                  variant="outline"
-                  className="text-xs text-muted-foreground truncate"
-                >
-                  {question.type_formatted}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="text-xs text-muted-foreground truncate"
-                >
-                  {question.level_formatted}
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className="text-xs text-muted-foreground truncate"
-                >
-                  {question.duration}{" "}
-                  {question.duration_unit === "hour" ? "horas" : "minutos"}
-                </Badge>
-              </div>
-            </div>
-          ))}
-        </CollapsibleContent>
-      </Collapsible>
-      <Separator className="my-4" />
-
-      <div className="flex flex-col items-start gap-8 bg-primary/25 p-4 rounded-xl">
+      <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
         <div className="w-full flex flex-col gap-6">
-          <div className="w-full flex flex-col gap-4">
-            <Label htmlFor="startDate">Período de entregas:</Label>
-            <DateIntervalPicker
-              date={scheduleDate}
-              setDate={setScheduleDate}
-            />
+          <div className="w-full flex flex-col gap-2">
+            <Label htmlFor="startDate" className="font-semibold">
+              Período de entregas:
+            </Label>
+            <DateIntervalPicker date={scheduleDate} setDate={setScheduleDate} />
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -180,12 +129,9 @@ const AssessmentsClassroomListCard = ({
               scheduleDate?.from === undefined || scheduleDate?.to === undefined
             }
           />
-          <label
-            htmlFor={`is_visible_on_schedule_${assessment.id}`}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
+          <Label htmlFor={`is_visible_on_schedule_${assessment.id}`}>
             Visível no calendário da turma?
-          </label>
+          </Label>
         </div>
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -196,12 +142,9 @@ const AssessmentsClassroomListCard = ({
               scheduleDate?.from === undefined || scheduleDate?.to === undefined
             }
           />
-          <label
-            htmlFor={`accept_late_deliveries_${assessment.id}`}
-            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-          >
+          <Label htmlFor={`accept_late_deliveries_${assessment.id}`}>
             Aceitar entregas apos o prazo final?
-          </label>
+          </Label>
         </div>
         <div className="flex items-center space-x-2">
           <Button disabled={!isEdit} onClick={handleUpdateAssessment}>

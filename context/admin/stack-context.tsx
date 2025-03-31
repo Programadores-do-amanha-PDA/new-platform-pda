@@ -20,7 +20,6 @@ import LoadingComponent from "@/components/loading-component";
 
 import { AuthUserWithProfileType } from "@/types/auth";
 import { AppBar } from "@/components/app-bar";
-import AppMap from "@/components/app-map";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -273,10 +272,9 @@ export const AdminStackProvider = ({
       }}
     >
       <AppSidebar loading={loading} data={sidebarData} />
-      <div className="relative w-full h-full flex flex-col gap-6 overflow-hidden">
+      <div className="relative w-full h-full flex flex-col overflow-hidden">
         <AppBar />
         <div className="w-full h-full flex flex-col gap-10 overflow-hidden px-4">
-          <AppMap />
           {children}
         </div>
       </div>

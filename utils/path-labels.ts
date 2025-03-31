@@ -21,7 +21,8 @@ const pathLabels: { [key: string]: string } = {
   meetings: "Meetings",
   classrooms: "Turmas",
   coodesh: "Coodesh",
-  zoom: "Zoom"
+  zoom: "Zoom",
+  assessments: "Avaliações"
 };
 
 export default pathLabels;

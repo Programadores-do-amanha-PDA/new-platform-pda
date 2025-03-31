@@ -90,6 +90,7 @@ const meetingsStatusLabels = {
   cancelled: "Canceladas",
   past: "Passadas",
 };
+
 const ZoomMeetingsPage = ({ classroom_id }: { classroom_id: string }) => {
   const [meetings, setMeetings] = useState(meetingsAPIExample);
   const [searchFilter, setSearchFilter] = useState<string>("");
