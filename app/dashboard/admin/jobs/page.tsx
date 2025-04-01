@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 import { Button } from "@/components/ui/button";
-import { AppBar } from "@/components/app-bar";
 import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
 import { useEffect } from "react";
 import LoadingComponent from "@/components/loading-component";
@@ -56,8 +55,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full flex flex-col p-6 gap-8 xl:p-8">
-      <AppBar />
+    <main className="relative w-full flex flex-col py-6 gap-8">
 
       <div className="flex items-center justify-start gap-4">
         <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">

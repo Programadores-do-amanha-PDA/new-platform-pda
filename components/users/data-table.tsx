@@ -15,7 +15,6 @@ import {
 } from "@tanstack/react-table";
 
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -82,10 +81,18 @@ export function DataTable({
       columnVisibility,
       rowSelection,
     },
+    manualPagination: false,
+    autoResetPageIndex: false,
+    initialState: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: data?.length || 1000,
+      },
+    },
   });
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Busque por um email..."
@@ -114,7 +121,7 @@ export function DataTable({
         </div>
       </div>
 
-      <div className="rounded-md border">
+      <div className="w-full h-full rounded-md border flex overflow-y-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -182,29 +189,6 @@ export function DataTable({
               {table.getFilteredSelectedRowModel().rows.length} de{" "}
               {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
             </>
-          )}
-        </div>
-        <div className="space-x-2">
-          {table.getCanPreviousPage() && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Anterior
-            </Button>
-          )}
-
-          {table.getCanNextPage() && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Proxima
-            </Button>
           )}
         </div>
       </div>

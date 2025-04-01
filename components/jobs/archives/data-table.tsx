@@ -64,7 +64,7 @@ export function DataTable({
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder="Procurando por algo?"
@@ -76,7 +76,7 @@ export function DataTable({
         />
       </div>
 
-      <div className="rounded-md border">
+      <div className="w-full h-full rounded-md border flex overflow-y-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

@@ -7,79 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-
-const meetingsAPIExample = [
-  {
-    agenda: "My Meeting 1",
-    created_at: "2025-03-23T05:31:16Z",
-    duration: 60,
-    host_id: "30R7kT7bTIKSNUFEuH_Qlg",
-    id: 97763643886,
-    join_url: "https://example.com/j/11111",
-    pmi: "97891943927",
-    start_time: "2025-03-23T06:00:00Z",
-    timezone: "America/Los_Angeles",
-    topic: "My Meeting 2",
-    type: 2,
-    uuid: "aDYlohsHRtCd4ii1uC2+hA==",
-    participants: [
-      {
-        id: "30R7kT7bTIKSNUFEuH_Qlg",
-        name: "Jill Chill",
-        user_id: "27423744",
-        registrant_id: "_f08HhPJS82MIVLuuFaJPg",
-        user_email: "jchill@example.com",
-        join_time: "2022-03-23T06:58:09Z",
-        leave_time: "2022-03-23T07:02:28Z",
-        duration: 259,
-        failover: false,
-        status: "in_meeting",
-        internal_user: false,
-      },
-      {
-        id: "30R7kT7bTIKSNUFEuH_Qlg",
-        name: "Jill Chill",
-        user_id: "27423744",
-        registrant_id: "_f08HhPJS82MIVLuuFaJPg",
-        user_email: "jchill@example.com",
-        join_time: "2022-03-23T06:58:09Z",
-        leave_time: "2022-03-23T07:02:28Z",
-        duration: 259,
-        failover: false,
-        status: "in_meeting",
-        internal_user: false,
-      },
-      {
-        id: "30R7kT7bTIKSNUFEuH_Qlg",
-        name: "Jill Chill",
-        user_id: "27423744",
-        registrant_id: "_f08HhPJS82MIVLuuFaJPg",
-        user_email: "jchill@example.com",
-        join_time: "2022-03-23T06:58:09Z",
-        leave_time: "2022-03-23T07:02:28Z",
-        duration: 259,
-        failover: false,
-        status: "in_meeting",
-        internal_user: false,
-      },
-    ],
-    is_visible_on_schedule: true,
-  },
-  {
-    agenda: "My Meeting",
-    created_at: "2025-04-23T05:31:16Z",
-    duration: 60,
-    host_id: "30R7kT7bTIKSNUFEuH_Qlg",
-    id: 97763643886,
-    join_url: "https://example.com/j/11111",
-    pmi: "97891943927",
-    start_time: "2025-04-23T06:00:00Z",
-    timezone: "America/Los_Angeles",
-    topic: "My Meeting",
-    type: 2,
-    uuid: "aDYlohsHRtCd4ii1uC2+hAasdasd==",
-  },
-];
+import { useAdminStackContext } from "@/context/admin/stack-context";
+import MeetingsSheetData from "@/components/classrooms/zoom/meetings-sheet-data";
 
 type meetingStatusT = "all" | "upcoming" | "completed" | "past";
 
@@ -92,7 +21,11 @@ const meetingsStatusLabels = {
 };
 
 const ZoomMeetingsPage = ({ classroom_id }: { classroom_id: string }) => {
-  const [meetings, setMeetings] = useState(meetingsAPIExample);
+  const {
+    classroomsStack: {
+      zoom: { meetings },
+    },
+  } = useAdminStackContext();
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<meetingStatusT>("all");
 
@@ -180,6 +113,7 @@ const ZoomMeetingsPage = ({ classroom_id }: { classroom_id: string }) => {
             <Search className="size-5 text-primary-foreground" />
           </Label>
         </div>
+        <MeetingsSheetData classroom_id={classroom_id}  />
       </div>
 
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2">

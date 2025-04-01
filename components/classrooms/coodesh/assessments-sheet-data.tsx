@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { LoaderCircle, Paperclip } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -125,7 +125,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                         className="font-semibold min-w-9 min-h-9"
                         size={"icon"}
                       >
-                        <Paperclip />
+                        <Plus />
                       </Button>
                     </div>
                   </li>

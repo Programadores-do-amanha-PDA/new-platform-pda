@@ -1,4 +1,4 @@
-import JobCard from "@/components/jobs/curated/JobCard";
+import JobCard from "@/components/jobs/curated/Job-card";
 import { Button } from "@/components/ui/button";
 import { JobType } from "@/types/jobs";
 import { ArrowRight, Target } from "lucide-react";

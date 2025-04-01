@@ -8,12 +8,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { ZoomMeetingT } from "@/types/zoom/meettings";
+import { ZoomMeetingType } from "@/types/zoom/meettings";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingT }) => {
+const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
   const path = usePathname();
   const [loading, setLoading] = useState(false);
 

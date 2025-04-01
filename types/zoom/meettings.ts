@@ -1,4 +1,4 @@
-export type ZoomMeetingT = {
+export type ZoomMeetingType = {
   agenda: string;
   created_at: string;
   duration: number;
@@ -11,10 +11,13 @@ export type ZoomMeetingT = {
   topic: string;
   type: number;
   uuid: string;
-  participants?: ZoomMeetingParticipantT[];
+  participants?: ZoomMeetingParticipantType[];
+  poll_results?: ZoomMeetingPollResponses[];
+  classroom_id?: string;
+  is_visible_on_schedule?: boolean;
 };
 
-export type ZoomMeetingParticipantT = {
+export type ZoomMeetingParticipantType = {
   id: string;
   name: string;
   user_id: string;
@@ -26,4 +29,20 @@ export type ZoomMeetingParticipantT = {
   failover: boolean;
   status: string;
   internal_user: boolean;
+};
+
+export type ZoomMeetingPollResponses = {
+  id: number;
+  questions: {
+    email: string;
+    name: string;
+    question_details: {
+      answer: string;
+      date_time: string;
+      polling_id: string;
+      question: string;
+    }[];
+  }[];
+  start_time: string;
+  uuid: string;
 };

@@ -1,6 +1,5 @@
 "use client";
 import ProfilesDataTable from "@/components/users/profiles-data-table";
-import { AppBar } from "@/components/app-bar";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function AllUsersPage() {
@@ -20,10 +19,8 @@ export default function AllUsersPage() {
   } = useAdminStackContext();
 
   return (
-    <main className="relative w-full overflow-hidden flex flex-col p-6 gap-4 xl:p-8">
-      <AppBar />
+    <main className="relative w-full overflow-hidden flex flex-col py-6 gap-4">
 
-      <div className="space-y-2">
         <ProfilesDataTable
           users={users}
           handleCreateNewUser={handleCreateNewUser}
@@ -34,7 +31,6 @@ export default function AllUsersPage() {
           handleUpdateUserRole={handleUpdateUserRole}
           loading={loading}
         />
-      </div>
     </main>
   );
 }

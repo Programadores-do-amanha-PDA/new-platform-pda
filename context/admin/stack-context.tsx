@@ -20,6 +20,12 @@ import LoadingComponent from "@/components/loading-component";
 
 import { AuthUserWithProfileType } from "@/types/auth";
 import { AppBar } from "@/components/app-bar";
+import useZoomMeetingsStack, {
+  ZoomMeetingsStackI,
+} from "../modules/classrooms/zoom/meetings";
+import useZoomAPIMeetingsStack, {
+  ZoomAPIMeetingsStackI,
+} from "../modules/classrooms/zoom/api";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -27,6 +33,9 @@ interface AdminStackContextProps {
   classroomsStack: ClassroomStackI & {
     coodesh: CoodeshAssessmentI & {
       api: CoodeshAPIAssessmentsI;
+    };
+    zoom: ZoomMeetingsStackI & {
+      api: ZoomAPIMeetingsStackI;
     };
   };
   jobsStack: JobsStackI;
@@ -61,6 +70,21 @@ const AdminStackContext = createContext<AdminStackContextProps>({
       api: {
         coodeshAPIAssessments: [],
         handleGetCoodeshAPIAssessments: () => Promise.resolve(false),
+      },
+    },
+    zoom: {
+      meetings: [],
+      meetingsLoading: false,
+      handleGetAllZoomMeetings: () => Promise.resolve(false),
+      handleGetZoomMeetingById: () => Promise.resolve(false),
+      handleCreateZoomMeeting: () => Promise.resolve(false),
+      handleUpdateZoomMeeting: () => Promise.resolve(false),
+      handleDeleteZoomMeeting: () => Promise.resolve(false),
+      api: {
+        meetingsByAPI: [],
+        meetingsByAPILoading: false,
+        handleGetAllZoomMeetingsByAPI: () => Promise.resolve(false),
+        handleGetAllParticipantsByMeetingIdFromAPI: () => Promise.resolve(false),
       },
     },
   },
@@ -117,14 +141,6 @@ export const AdminStackProvider = ({
     handleDeleteClassroom,
   } = ClassroomStack();
 
-  // Coodesh
-  const { handleCreateCoodeshAssessment, handleUpdateCoodeshAssessment } =
-    CoodeshAssessmentsStack(setClassrooms);
-
-  // Coodesh API
-  const { coodeshAPIAssessments, handleGetCoodeshAPIAssessments } =
-    CoodeshAPIAssessmentsStack();
-
   // Jobs
   const {
     jobs,
@@ -138,6 +154,29 @@ export const AdminStackProvider = ({
     handleArchiveJob,
     handleJobIsOnDiscord,
   } = JobsStack();
+
+  // Coodesh
+  const { handleCreateCoodeshAssessment, handleUpdateCoodeshAssessment } =
+    CoodeshAssessmentsStack(setClassrooms);
+
+  // Coodesh API
+  const { coodeshAPIAssessments, handleGetCoodeshAPIAssessments } =
+    CoodeshAPIAssessmentsStack();
+
+  // Zoom Meetings
+  const {
+    meetings,
+    meetingsLoading,
+    handleGetZoomMeetingById,
+    handleGetAllZoomMeetings,
+    handleCreateZoomMeeting,
+    handleUpdateZoomMeeting,
+    handleDeleteZoomMeeting,
+  } = useZoomMeetingsStack();
+
+  // Zoom API
+  const { meetingsByAPI, meetingsByAPILoading, handleGetAllZoomMeetingsByAPI, handleGetAllParticipantsByMeetingIdFromAPI} =
+    useZoomAPIMeetingsStack();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,6 +291,21 @@ export const AdminStackProvider = ({
             api: {
               coodeshAPIAssessments,
               handleGetCoodeshAPIAssessments,
+            },
+          },
+          zoom: {
+            meetings,
+            meetingsLoading,
+            handleGetZoomMeetingById,
+            handleGetAllZoomMeetings,
+            handleCreateZoomMeeting,
+            handleUpdateZoomMeeting,
+            handleDeleteZoomMeeting,
+            api: {
+              meetingsByAPI,
+              meetingsByAPILoading,
+              handleGetAllZoomMeetingsByAPI,
+              handleGetAllParticipantsByMeetingIdFromAPI
             },
           },
         },

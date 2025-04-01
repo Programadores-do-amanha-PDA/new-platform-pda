@@ -1,6 +1,3 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-
 import {
   Dialog,
   DialogContent,
@@ -27,6 +24,7 @@ import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
 import { ExternalLink, SquareArrowOutUpRight } from "lucide-react";
+import { MarkdownRenderer } from "@/components/shiki-markdown";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   challenge_start: "Início do Desafio",
@@ -52,49 +50,6 @@ const AttemptDialog = ({
   attempt: ParticipantData;
 }) => {
   // "challenge_start", "fullscreen_enter", "idle", "active", "viewed_question", "challenge_finish", "tab_exit", "back_to_challenges_page", "copy_content"
-
-  const renderTextWithCodeHighlight = (text: string) => {
-    if (!text) return "Nenhum plano de ação disponível";
-
-    // Regex para identificar blocos de código como ```sql ... ```
-    const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
-    const parts = [];
-    let lastIndex = 0;
-
-    text.replace(codeBlockRegex, (match, language, code, offset) => {
-      // Adiciona o texto antes do bloco de código
-      if (offset > lastIndex) {
-        parts.push(text.substring(lastIndex, offset));
-      }
-
-      // Adiciona o bloco de código com highlight
-      parts.push(
-        <SyntaxHighlighter
-          key={offset}
-          language={language || "sql"} // Padrão para SQL se não especificado
-          style={atomDark}
-          customStyle={{
-            padding: "1rem",
-            borderRadius: "16px",
-            backgroundColor: "#161616",
-            margin: "0rem",
-          }}
-        >
-          {code.trim()}
-        </SyntaxHighlighter>
-      );
-
-      lastIndex = offset + match.length;
-      return match;
-    });
-
-    // Adiciona o restante do texto após o último bloco de código
-    if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
-    }
-
-    return parts.length ? parts : text;
-  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -370,16 +325,20 @@ const AttemptDialog = ({
                                 )}
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
                               <DialogHeader>
                                 <DialogTitle>Plano de Ação</DialogTitle>
                               </DialogHeader>
-                              <div className="whitespace-pre-wrap p-4 bg-muted rounded-lg">
-                                {plan.actionPlanText
-                                  ? renderTextWithCodeHighlight(
-                                      plan.actionPlanText
-                                    )
-                                  : "Nenhum plano de ação disponível"}
+                              <div className="p-4 bg-muted rounded-lg h-full overflow-y-auto">
+                                <div className="whitespace-pre-wrap">
+                                  {plan.actionPlanText ? (
+                                    <MarkdownRenderer
+                                      content={plan.actionPlanText}
+                                    />
+                                  ) : (
+                                    "Nenhum plano de ação disponível"
+                                  )}
+                                </div>
                               </div>
                             </DialogContent>
                           </Dialog>

@@ -46,8 +46,7 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
         <AssessmentsSheetData classroom_id={classroom_id} />
       </header>
 
-      <main className="w-full h-full flex items-center justify-center overflow-y-auto pr-4">
-        <ul className="p-2 py-4 h-full w-full flex flex-col md:flex-row md:flex-wrap gap-4 xl:gap-6">
+        <ul className="p-2 py-4 h-full w-full flex flex-col sm:flex-row sm:flex-wrap gap-4 overflow-y-auto pr-4">
           {filteredAssessments
             ?.sort(
               (a, b) =>
@@ -73,7 +72,6 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
             </div>
           )}
         </ul>
-      </main>
     </div>
   );
 };

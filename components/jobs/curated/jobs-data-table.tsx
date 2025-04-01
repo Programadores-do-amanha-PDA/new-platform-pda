@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 import JobSheetData from "../job-sheet-data";
-import JobCard from "./JobCard";
+import JobCard from "./Job-card";
 import { Input } from "@/components/ui/input";
 import { JobType, JobWithApplications } from "@/types/jobs";
 import { Archive, FileArchive } from "lucide-react";
@@ -33,7 +33,7 @@ const JobsDataTable = ({
     : jobs;
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 py-8">
+    <div className="w-full h-full flex flex-col gap-4 overflow-hidden">
       <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por algo?"
@@ -42,7 +42,7 @@ const JobsDataTable = ({
           className="max-w-sm"
         />
       </div>
-      <ul className="flex flex-row flex-wrap items-center gap-4 py-4">
+      <ul className="flex flex-row flex-wrap gap-4 py-4 overflow-y-auto">
         {jobsSearchQuery.map((job) => (
           <JobCard
             key={job.id}
