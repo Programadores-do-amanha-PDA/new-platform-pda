@@ -9,11 +9,12 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { TeamSwitcher } from "@/components/team-switcher";
-import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
-import { NavUser } from "@/components/nav-user";
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavProjects } from "@/components/sidebar/nav-projects";
+import { NavUser } from "@/components/sidebar/nav-user";
 import { LucideIcon } from "lucide-react";
 import { AuthUserWithProfileType } from "@/types/auth";
+import { Separator } from "../ui/separator";
 
 interface AppSidebarProps {
   data: {
@@ -79,7 +80,10 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
           <NavMain items={props.data.navMain} title="Menu Principal" />
         )}
         {props.data.classRooms && (
+          <>
+          <Separator />
           <NavMain items={props.data.classRooms} title="Turmas" />
+          </>
         )}
         {props.data.projects && props.data.projects.length > 0 && (
           <NavProjects projects={props.data?.projects} />

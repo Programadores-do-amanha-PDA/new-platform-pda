@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { Book, Briefcase, Users } from "lucide-react";
+import {  Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
 
 import UsersStack, { UsersStackI } from "../modules/users";
 import UserRolesStack, { UserRolesStackI } from "../modules/users/roles";
@@ -15,7 +15,7 @@ import CoodeshAPIAssessmentsStack, {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import LoadingComponent from "@/components/loading-component";
 
 import { AuthUserWithProfileType } from "@/types/auth";
@@ -84,7 +84,8 @@ const AdminStackContext = createContext<AdminStackContextProps>({
         meetingsByAPI: [],
         meetingsByAPILoading: false,
         handleGetAllZoomMeetingsByAPI: () => Promise.resolve(false),
-        handleGetAllParticipantsByMeetingIdFromAPI: () => Promise.resolve(false),
+        handleGetAllParticipantsByMeetingIdFromAPI: () =>
+          Promise.resolve(false),
       },
     },
   },
@@ -175,8 +176,12 @@ export const AdminStackProvider = ({
   } = useZoomMeetingsStack();
 
   // Zoom API
-  const { meetingsByAPI, meetingsByAPILoading, handleGetAllZoomMeetingsByAPI, handleGetAllParticipantsByMeetingIdFromAPI} =
-    useZoomAPIMeetingsStack();
+  const {
+    meetingsByAPI,
+    meetingsByAPILoading,
+    handleGetAllZoomMeetingsByAPI,
+    handleGetAllParticipantsByMeetingIdFromAPI,
+  } = useZoomAPIMeetingsStack();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -196,6 +201,12 @@ export const AdminStackProvider = ({
   if (loading) {
     return <LoadingComponent />;
   }
+
+  const classroomPeriodsIcons = {
+    morning: Sunrise,
+    afternoon: Sun,
+    evening: Moon,
+  };
 
   const sidebarData = {
     user: user,
@@ -245,7 +256,7 @@ export const AdminStackProvider = ({
     classRooms: classrooms.flatMap((classroom) => ({
       title: classroom.name,
       url: `/dashboard/admin/classrooms/${classroom.id}`,
-      icon: Book,
+      icon: classroomPeriodsIcons[classroom.period],
       isActive: true,
       items: [
         {
@@ -305,7 +316,7 @@ export const AdminStackProvider = ({
               meetingsByAPI,
               meetingsByAPILoading,
               handleGetAllZoomMeetingsByAPI,
-              handleGetAllParticipantsByMeetingIdFromAPI
+              handleGetAllParticipantsByMeetingIdFromAPI,
             },
           },
         },
