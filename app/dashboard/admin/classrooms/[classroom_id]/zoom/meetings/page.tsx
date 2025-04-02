@@ -1,4 +1,4 @@
-import ZoomMeetingsPage from "@/modules/zoom/meetings";
+import ZoomMeetingsPage from "@/modules/zoom/meetings-page";
 
 const MeetingsPage = async ({
   params,
