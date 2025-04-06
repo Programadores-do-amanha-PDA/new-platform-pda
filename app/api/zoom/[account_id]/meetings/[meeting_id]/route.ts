@@ -1,32 +1,41 @@
-import { getPastedMeetingDetails } from "@/utils/apis/zoom/meetings";
+import { getMeetingById } from "@/utils/apis/zoom/meetings";
 import { getAccessToken } from "@/utils/apis/zoom/oauth";
-import { NextApiRequest, NextApiResponse } from "next";
 
-export async function GET(
-  req: NextApiRequest,
-  res: NextApiResponse,
+export async function POST(
+  req: Request,
   { params }: { params: Promise<{ account_id: string; meeting_id: string }> }
 ) {
   try {
     const { account_id, meeting_id } = await params;
+    const { client_id, client_secret } = await req.json();
 
     if (!account_id || !meeting_id) {
       throw new Error("Missing account id or meeting id parameters");
     }
 
     const token = await getAccessToken({
-      account_id: account_id,
-      token_key: `zoom_access_token_key_${account_id}`,
+      account_id,
+      client_id,
+      client_secret,
     });
 
     if (!token) {
       throw new Error("Failed to get access token");
     }
 
-    const meeting = await getPastedMeetingDetails(meeting_id, token);
-    return res.status(200).json({ results: meeting });
+    const decodedMeetingId = decodeURIComponent(
+      decodeURIComponent(meeting_id as string)
+    );
+
+    const meeting = await getMeetingById(decodedMeetingId, token);
+    return Response.json(
+      {
+        results: meeting,
+      },
+      { status: 200 }
+    );
   } catch (error) {
-    console.log("Error in GET meetings request:", error);
-    return res.status(500).send({});
+    console.log("Error in GET meeting request:", error);
+    return Response.json({}, { status: 500 });
   }
 }

@@ -1,21 +1,23 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { getAccessToken } from "@/utils/apis/zoom/oauth";
 import { getMeAccount } from "@/utils/apis/zoom/account";
 
-export async function GET(
-  req: NextApiRequest,
-  res: NextApiResponse,
+export async function POST(
+  req: Request,
   { params }: { params: Promise<{ account_id: string }> }
 ) {
   try {
     const { account_id } = await params;
-    if (!account_id) {
+    console.log(account_id);
+    const { client_id, client_secret } = await req.json();
+    console.log(client_id, client_secret);
+    if (!account_id || !client_id || !client_secret) {
       throw new Error("Missing account id parameters");
     }
 
     const token = await getAccessToken({
-      account_id: account_id,
-      token_key: `zoom_access_token_key_${account_id}`,
+      account_id,
+      client_id,
+      client_secret,
     });
 
     if (!token) {
@@ -24,9 +26,11 @@ export async function GET(
 
     const account = await getMeAccount(token);
 
-    return res.status(200).json({ results: account });
+    console.log(account);
+
+    return Response.json({ results: account }, { status: 200 });
   } catch (error) {
-    console.log("Error in GET meetings request:", error);
-    return res.status(500).send({});
+    console.log("Error in GET account request:", error);
+    return Response.json({}, { status: 500 });
   }
 }

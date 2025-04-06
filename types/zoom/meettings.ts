@@ -1,9 +1,10 @@
 export type ZoomMeetingType = {
+  _id: string;
+  id: number;
   agenda: string;
   created_at: string;
   duration: number;
   host_id: string;
-  id: number;
   join_url: string;
   pmi: string;
   start_time: string;
@@ -11,8 +12,10 @@ export type ZoomMeetingType = {
   topic: string;
   type: number;
   uuid: string;
+  supportGoLive: boolean;
   participants?: ZoomMeetingParticipantType[];
-  poll_results?: ZoomMeetingPollResponses[];
+  poll_results?: ZoomMeetingPollResults[];
+  account_id?: string;
   classroom_id?: string;
   is_visible_on_schedule?: boolean;
 };
@@ -31,7 +34,7 @@ export type ZoomMeetingParticipantType = {
   internal_user: boolean;
 };
 
-export type ZoomMeetingPollResponses = {
+export type ZoomMeetingPollResults = {
   id: number;
   questions: {
     email: string;

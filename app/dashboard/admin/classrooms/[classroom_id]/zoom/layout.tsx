@@ -13,12 +13,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const {
     classroomsStack: {
-      zoom: { handleGetAllZoomMeetings },
+      zoom: {
+        meetings,
+        handleGetAllZoomMeetings,
+        accounts: { accounts, handleGetAllZoomAccounts },
+      },
     },
   } = useAdminStackContext();
 
   useEffect(() => {
-    handleGetAllZoomMeetings(classroom_id);
+    if (meetings.length === 0) {
+      handleGetAllZoomMeetings(classroom_id);
+    }
+
+    if (accounts.length === 0) {
+      handleGetAllZoomAccounts(classroom_id);
+    }
   }, [classroom_id]);
 
   return children;

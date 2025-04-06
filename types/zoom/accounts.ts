@@ -4,7 +4,8 @@ export type ZoomAccountType = {
   account_id: string;
   client_id: string;
   client_secret: string;
-  me: Partial<ZoomAccountMeType>;
+  me?: Partial<ZoomAccountMeType>;
+  label?: string;
   created_at: string;
 };
 

@@ -5,11 +5,19 @@ import {
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
+import { ZoomAccountType } from "@/types/zoom/accounts";
 import { ZoomMeetingType } from "@/types/zoom/meettings";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const useZoomMeetingsStack = () => {
+const useZoomMeetingsStack = ({
+  handleGetZoomMeetingByAPI,
+}: {
+  handleGetZoomMeetingByAPI: (
+    account: Partial<ZoomAccountType>,
+    meetingId: number
+  ) => Promise<ZoomMeetingType | null>;
+}) => {
   const [meetings, setMeetings] = useState<ZoomMeetingType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -45,26 +53,36 @@ const useZoomMeetingsStack = () => {
   };
 
   const handleCreateZoomMeeting = async (
+    account: Partial<ZoomAccountType>,
     meetingData: Partial<ZoomMeetingType>
   ) => {
     try {
       if (
-        !meetingData.classroom_id ||
-        !meetingData.topic ||
-        !meetingData.start_time
+        !meetingData.id ||
+        !account.account_id ||
+        !account.client_id ||
+        !account.client_secret
       ) {
         toast.error("Dados obrigatórios da reunião estão faltando!");
         throw new Error("missing required meeting data");
       }
 
       setLoading(true);
-      const newMeeting = await createZoomMeetingByClassroomId(meetingData);
+      const meeting = await handleGetZoomMeetingByAPI(account, meetingData.id);
+      if (!meeting) throw new Error("no meeting response");
+
+      const newMeeting = await createZoomMeetingByClassroomId({
+        ...meetingData,
+        account_id: account.id,
+        classroom_id: account.classroom_id,
+        ...meeting,
+      });
 
       if (!newMeeting) throw new Error("no meeting create response");
 
       setMeetings((meetings) => [newMeeting, ...meetings]);
       toast.success(`Reunião "${newMeeting.topic}" criada com sucesso!`);
-      return newMeeting.id;
+      return newMeeting.id as string;
     } catch (error) {
       console.error(error);
       toast.error("Erro ao criar nova reunião!");
@@ -145,8 +163,9 @@ export interface ZoomMeetingsStackI {
     meetingId: number
   ) => Promise<ZoomMeetingType | boolean>;
   handleCreateZoomMeeting: (
-    meetingData: Partial<ZoomMeetingType>
-  ) => Promise<number | boolean>;
+    account: Partial<ZoomAccountType>,
+    meeting_id: Partial<ZoomMeetingType>
+  ) => Promise<string | false>;
   handleUpdateZoomMeeting: (
     meetingId: number,
     updates: Partial<ZoomMeetingType>

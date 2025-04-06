@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import {  Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
+import { Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
 
 import UsersStack, { UsersStackI } from "../modules/users";
 import UserRolesStack, { UserRolesStackI } from "../modules/users/roles";
@@ -26,6 +26,9 @@ import useZoomMeetingsStack, {
 import useZoomAPIMeetingsStack, {
   ZoomAPIMeetingsStackI,
 } from "../modules/classrooms/zoom/api";
+import useZoomAccountsStack, {
+  ZoomAccountsStackI,
+} from "../modules/classrooms/zoom/accounts";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -35,6 +38,7 @@ interface AdminStackContextProps {
       api: CoodeshAPIAssessmentsI;
     };
     zoom: ZoomMeetingsStackI & {
+      accounts: ZoomAccountsStackI;
       api: ZoomAPIMeetingsStackI;
     };
   };
@@ -73,6 +77,15 @@ const AdminStackContext = createContext<AdminStackContextProps>({
       },
     },
     zoom: {
+      accounts: {
+        accounts: [],
+        accountsLoading: false,
+        handleGetAllZoomAccounts: () => Promise.resolve(false),
+        handleGetZoomAccountById: () => Promise.resolve(false),
+        handleCreateZoomAccount: () => Promise.resolve(false),
+        handleUpdateZoomAccountById: () => Promise.resolve(false),
+        handleDeleteZoomAccountById: () => Promise.resolve(false),
+      },
       meetings: [],
       meetingsLoading: false,
       handleGetAllZoomMeetings: () => Promise.resolve(false),
@@ -83,9 +96,13 @@ const AdminStackContext = createContext<AdminStackContextProps>({
       api: {
         meetingsByAPI: [],
         meetingsByAPILoading: false,
+        handleGetZoomMeAccountDataByAPI: () => Promise.resolve(false),
         handleGetAllZoomMeetingsByAPI: () => Promise.resolve(false),
+        handleGetZoomMeetingByAPI: () => Promise.resolve(null),
         handleGetAllParticipantsByMeetingIdFromAPI: () =>
-          Promise.resolve(false),
+          Promise.resolve([]),
+        handleGetAllPollResultsByMeetingIdFromAPI: () =>
+          Promise.resolve([]),
       },
     },
   },
@@ -164,6 +181,28 @@ export const AdminStackProvider = ({
   const { coodeshAPIAssessments, handleGetCoodeshAPIAssessments } =
     CoodeshAPIAssessmentsStack();
 
+  // Zoom API
+  const {
+    meetingsByAPI,
+    meetingsByAPILoading,
+    handleGetZoomMeAccountDataByAPI,
+    handleGetAllZoomMeetingsByAPI,
+    handleGetZoomMeetingByAPI,
+    handleGetAllParticipantsByMeetingIdFromAPI,
+    handleGetAllPollResultsByMeetingIdFromAPI
+  } = useZoomAPIMeetingsStack();
+
+  // Zoom Accounts
+  const {
+    accounts,
+    accountsLoading,
+    handleGetAllZoomAccounts,
+    handleGetZoomAccountById,
+    handleCreateZoomAccount,
+    handleUpdateZoomAccountById,
+    handleDeleteZoomAccountById,
+  } = useZoomAccountsStack(handleGetZoomMeAccountDataByAPI);
+
   // Zoom Meetings
   const {
     meetings,
@@ -173,15 +212,7 @@ export const AdminStackProvider = ({
     handleCreateZoomMeeting,
     handleUpdateZoomMeeting,
     handleDeleteZoomMeeting,
-  } = useZoomMeetingsStack();
-
-  // Zoom API
-  const {
-    meetingsByAPI,
-    meetingsByAPILoading,
-    handleGetAllZoomMeetingsByAPI,
-    handleGetAllParticipantsByMeetingIdFromAPI,
-  } = useZoomAPIMeetingsStack();
+  } = useZoomMeetingsStack({ handleGetZoomMeetingByAPI });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -305,6 +336,15 @@ export const AdminStackProvider = ({
             },
           },
           zoom: {
+            accounts: {
+              accounts,
+              accountsLoading,
+              handleGetAllZoomAccounts,
+              handleGetZoomAccountById,
+              handleCreateZoomAccount,
+              handleUpdateZoomAccountById,
+              handleDeleteZoomAccountById,
+            },
             meetings,
             meetingsLoading,
             handleGetZoomMeetingById,
@@ -315,8 +355,11 @@ export const AdminStackProvider = ({
             api: {
               meetingsByAPI,
               meetingsByAPILoading,
+              handleGetZoomMeAccountDataByAPI,
               handleGetAllZoomMeetingsByAPI,
+              handleGetZoomMeetingByAPI,
               handleGetAllParticipantsByMeetingIdFromAPI,
+              handleGetAllPollResultsByMeetingIdFromAPI
             },
           },
         },

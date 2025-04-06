@@ -1,5 +1,4 @@
 "use server";
-import { getZoomAccountById } from "@/app/actions/classrooms/zoom/accounts";
 import { cookies } from "next/headers";
 
 type TokenData = {
@@ -15,15 +14,19 @@ function isTokenValid(tokenData: TokenData): boolean {
 
 export async function getAccessToken({
   account_id,
-  token_key,
+  client_id,
+  client_secret,
 }: {
   account_id: string;
-  token_key: string;
+  client_id: string;
+  client_secret: string;
 }): Promise<string> {
   const cookieStore = cookies();
 
   try {
-    const storedToken = cookieStore.get(token_key)?.value;
+    const storedToken = cookieStore.get(
+      `zoom_access_token_key_${account_id}`
+    )?.value;
 
     if (storedToken) {
       const tokenData = JSON.parse(storedToken);
@@ -32,13 +35,12 @@ export async function getAccessToken({
       }
     }
 
-    const account = await getZoomAccountById(account_id);
-    if (!account) {
+    if (!client_id || !client_secret) {
       throw new Error("Zoom account not found");
     }
 
     const authHeader = `Basic ${Buffer.from(
-      `${account.client_id}:${account.client_secret}`
+      `${client_id}:${client_secret}`
     ).toString("base64")}`;
     const params = new URLSearchParams();
     params.append("grant_type", "account_credentials");
@@ -66,7 +68,7 @@ export async function getAccessToken({
     };
 
     cookieStore.set({
-      name: token_key,
+      name: `zoom_access_token_key_${account_id}`,
       value: JSON.stringify(tokenData),
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

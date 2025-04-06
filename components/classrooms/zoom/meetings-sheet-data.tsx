@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { LoaderCircle, Plus } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,18 +12,32 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { ZoomMeetingType } from "@/types/zoom/meettings";
+import MeetingsSheetDataItem from "./meetings-sheet-data-item";
+import { toast } from "sonner";
 
-const MeetingsSheetData = ({ classroom_id }: { classroom_id: string }) => {
+const MeetingsSheetData = () => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingsSearch, setMeetingsSearch] = useState<string>("");
+  const [selectedAccount, setSelectedAccount] = useState<string | "all">("all");
+  const [isAddingMeeting, setIsAddingMeeting] = useState<number | null>(null);
 
   const {
     classroomsStack: {
       zoom: {
+        accounts: { accounts },
         meetings,
         handleCreateZoomMeeting,
         api: { meetingsByAPI, handleGetAllZoomMeetingsByAPI },
@@ -32,34 +46,54 @@ const MeetingsSheetData = ({ classroom_id }: { classroom_id: string }) => {
   } = useAdminStackContext();
 
   const handleOpen = async (open: boolean) => {
-    setOpenModal(open);
     if (open === true && meetingsByAPI.length === 0) {
       setLoading(true);
-      await handleGetAllZoomMeetingsByAPI();
+      for (const account of accounts) {
+        await handleGetAllZoomMeetingsByAPI(account);
+      }
       setLoading(false);
+    } else if (open === false) {
+      setLoading(false);
+      setMeetingsSearch("");
+      setSelectedAccount("all");
+      setIsAddingMeeting(null);
     }
+
+    setOpenModal(open);
   };
 
   const filteredMeetings = meetingsByAPI.filter((meeting) => {
+    // Filtro por conta
+    if (
+      selectedAccount &&
+      selectedAccount !== "all" &&
+      meeting.account_id === selectedAccount
+    )
+      return true;
+
+    // Filtro original
     if (meetingsSearch) {
-      if (!meetings?.length) {
-        return meeting.topic
-          .toLowerCase()
-          .includes(meetingsSearch.toLowerCase());
-      } else if (meetings.length) {
-        return (
-          !meetings.map((att) => att.id).includes(meeting.id) &&
-          meeting.topic.toLowerCase().includes(meetingsSearch.toLowerCase())
-        );
-      }
-    } else {
-      if (!meetings?.length) {
-        return meeting;
-      } else if (meetings) {
-        return !meetings.map((att) => att.id).includes(meeting.id);
-      }
+      const searchMatch = meeting.topic
+        .toLowerCase()
+        .includes(meetingsSearch.toLowerCase());
+
+      if (!meetings?.length) return searchMatch;
+      return !meetings.map((att) => att.id).includes(meeting.id) && searchMatch;
     }
+
+    return !meetings?.map((att) => att.id).includes(meeting.id);
   });
+
+  const handleAddMeeting = async (meeting: ZoomMeetingType) => {
+    setIsAddingMeeting(meeting.id);
+    const account = accounts.find(
+      (account) => account.id === meeting.account_id
+    );
+    if (!account) return;
+    toast.info("Pegando informações da reunião...");
+    await handleCreateZoomMeeting(account, meeting);
+    setIsAddingMeeting(null);
+  };
 
   return (
     <Sheet onOpenChange={handleOpen} open={openModal}>
@@ -75,74 +109,58 @@ const MeetingsSheetData = ({ classroom_id }: { classroom_id: string }) => {
             Adicione abaixo as reuniões do Zoom que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
-        <main className="h-full flex flex-col gap-4 xl:gap-6 py-2">
-          <div>
+        <main className="h-full flex flex-col gap-4 py-2">
+          <div className="flex gap-2">
             <Input
-              placeholder="Procurando por algo?"
+              placeholder="Procurar reuniões..."
               onChange={(e) => setMeetingsSearch(e.target.value)}
               value={meetingsSearch}
             />
+            <Select onValueChange={setSelectedAccount} value={selectedAccount}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Todas as contas" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem key="all" value="all">
+                  Todas as contas
+                </SelectItem>
+                <SelectGroup>
+                  <SelectLabel>Contas Zoom</SelectLabel>
+                  {accounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.me?.display_name || account.me?.email}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
+
           {!loading ? (
-            <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2 overflow-y-auto">
+            <ul className="p-2 h-full flex flex-col gap-4 overflow-y-auto">
               {filteredMeetings.map((meeting: ZoomMeetingType) => (
-                <li key={meeting.id} className="p-2 border rounded-lg">
-                  <div className="flex items-center gap-4 justify-between">
-                    <div className="flex flex-col gap-1 truncate">
-                      <h2
-                        className="font-semibold text-sm truncate"
-                        title={meeting.topic}
-                      >
-                        {meeting.topic}
-                      </h2>
-                      <p className="text-xs text-gray-500 truncate">
-                        {meeting.agenda || "Sem descrição"}
-                      </p>
-                    </div>
-                    <Button
-                      onClick={() =>
-                        handleCreateZoomMeeting({
-                          ...meeting,
-                          classroom_id: classroom_id,
-                        })
-                      }
-                      className="font-semibold min-w-9 min-h-9"
-                      size={"icon"}
-                    >
-                      <Plus />
-                    </Button>
-                  </div>
-                </li>
+                <MeetingsSheetDataItem
+                  key={meeting.id}
+                  meeting={meeting}
+                  isAddingMeeting={isAddingMeeting}
+                  handleAddMeeting={handleAddMeeting}
+                />
               ))}
-              {meetingsByAPI.filter(
-                (m) =>
-                  !(meetings && meetings.map((att) => att.id).includes(m.id))
-              ).length === 0 && (
+
+              {filteredMeetings.length === 0 && (
                 <div className="flex flex-col gap-2 h-full items-center justify-center">
                   <h2 className="text-sm font-bold text-gray-800">
-                    Não há reuniões disponíveis
+                    {meetingsSearch
+                      ? "Não há reuniões com esse título"
+                      : "Não há reuniões disponíveis"}
                   </h2>
-                  <i className="text-xs text-muted-foreground px-2 text-center">
-                    (Reuniões que já estão associadas a esta turma não aparecem
-                    aqui.)
+                  <i className="text-xs text-muted-foreground text-center">
+                    {meetingsSearch
+                      ? "(Reuniões que já estão associadas não aparecem aqui.)"
+                      : "(Selecione outra conta ou verifique as reuniões existentes.)"}
                   </i>
                 </div>
               )}
-              {filteredMeetings.filter(
-                (m) =>
-                  !(meetings && meetings.map((att) => att.id).includes(m.id))
-              ).length === 0 &&
-                meetingsSearch && (
-                  <div className="flex flex-col gap-2 h-full items-center justify-center">
-                    <h2 className="text-sm font-bold text-gray-800">
-                      Não há reuniões com esse título
-                    </h2>
-                    <i className="text-xs text-muted-foreground px-2 text-center">
-                      (Reuniões que já estão associadas a esta turma não
-                      aparecem aqui.)
-                    </i>
-                  </div>
-                )}
             </ul>
           ) : (
             <div className="h-full w-full flex items-center justify-center">
@@ -152,7 +170,12 @@ const MeetingsSheetData = ({ classroom_id }: { classroom_id: string }) => {
         </main>
         <SheetFooter>
           <SheetClose asChild>
-            <Button className="font-semibold">Finalizar</Button>
+            <Button
+              className="font-semibold"
+              disabled={isAddingMeeting !== null || loading}
+            >
+              Finalizar
+            </Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>
