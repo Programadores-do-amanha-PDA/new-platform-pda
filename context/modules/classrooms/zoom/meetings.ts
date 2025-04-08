@@ -6,7 +6,10 @@ import {
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
 import { ZoomAccountType } from "@/types/zoom/accounts";
-import { ZoomMeetingType } from "@/types/zoom/meettings";
+import {
+  ZoomMeetingOccurrenceType,
+  ZoomMeetingType,
+} from "@/types/zoom/meetings";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -120,6 +123,127 @@ const useZoomMeetingsStack = ({
     }
   };
 
+  const handleUpdateZoomMeetingOccurrence = async (
+    meetingId: number,
+    occurrenceId: string,
+    updates: Partial<ZoomMeetingOccurrenceType>
+  ) => {
+    try {
+      if (!meetingId || !occurrenceId || !updates) {
+        throw new Error("id and updates fields are required");
+      }
+      setLoading(true);
+      const currentMeeting = meetings.find(
+        (meeting) => meeting.id === meetingId
+      );
+      const updatedOccurrences = currentMeeting?.occurrences?.map(
+        (occurrence) =>
+          occurrence.occurrence_id === occurrenceId
+            ? { ...occurrence, ...updates }
+            : occurrence
+      );
+      const updatedMeeting: ZoomMeetingType | false =
+        await updateZoomMeetingById(meetingId, {
+          occurrences: updatedOccurrences,
+        });
+      if (!updatedMeeting) throw new Error("no update meeting response");
+
+      setMeetings((meetings) =>
+        meetings.map((meeting) =>
+          meeting.id === meetingId ? updatedMeeting : meeting
+        )
+      );
+      toast.success("Reunião atualizada com sucesso!");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar a reunião!");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateZoomMeetingPastInstance = async (
+    meetingId: number,
+    pastInstanceId: number,
+    updates: Partial<ZoomMeetingOccurrenceType>
+  ) => {
+    try {
+      if (!meetingId || !pastInstanceId || !updates) {
+        throw new Error("id and updates fields are required");
+      }
+      setLoading(true);
+      const currentMeeting = meetings.find(
+        (meeting) => meeting.id === meetingId
+      );
+      const updatedPastsInstancies = currentMeeting?.past_instances?.map(
+        (past_instancie) =>
+          past_instancie.id === pastInstanceId
+            ? { ...past_instancie, ...updates }
+            : past_instancie
+      );
+      const updatedMeeting: ZoomMeetingType | false =
+        await updateZoomMeetingById(meetingId, {
+          past_instances: updatedPastsInstancies,
+        });
+      if (!updatedMeeting) throw new Error("no update meeting response");
+
+      setMeetings((meetings) =>
+        meetings.map((meeting) =>
+          meeting.id === meetingId ? updatedMeeting : meeting
+        )
+      );
+      toast.success("Reunião atualizada com sucesso!");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar a reunião!");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefreshAndUpdateZoomMeeting = async (
+    meetingId: number,
+    account: Partial<ZoomAccountType>
+  ) => {
+    try {
+      if (!meetingId) {
+        throw new Error("id and updates fields are required");
+      }
+      setLoading(true);
+
+      const currentMeeting = meetings.find(
+        (meeting) => meeting.id === meetingId
+      );
+      const meeting = await handleGetZoomMeetingByAPI(account, meetingId);
+      if (!meeting) throw new Error("no meeting response");
+
+      const newMeeting = await updateZoomMeetingById(meetingId, {
+        ...currentMeeting,
+        ...meeting,
+      });
+
+      if (!newMeeting) throw new Error("no meeting create response");
+
+      setMeetings((meetings) =>
+        meetings.map((meeting) =>
+          meeting.id === meetingId ? newMeeting : meeting
+        )
+      );
+      toast.success("Reunião atualizada com sucesso!");
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao atualizar a reunião!");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteZoomMeeting = async (meetingId: number) => {
     try {
       if (!meetingId) throw new Error("meeting id is required to delete");
@@ -149,6 +273,9 @@ const useZoomMeetingsStack = ({
     handleGetZoomMeetingById,
     handleCreateZoomMeeting,
     handleUpdateZoomMeeting,
+    handleUpdateZoomMeetingOccurrence,
+    handleUpdateZoomMeetingPastInstance,
+    handleRefreshAndUpdateZoomMeeting,
     handleDeleteZoomMeeting,
   };
 };
@@ -169,6 +296,20 @@ export interface ZoomMeetingsStackI {
   handleUpdateZoomMeeting: (
     meetingId: number,
     updates: Partial<ZoomMeetingType>
+  ) => Promise<boolean>;
+  handleUpdateZoomMeetingOccurrence: (
+    meetingId: number,
+    occurrenceId: string,
+    updates: Partial<ZoomMeetingOccurrenceType>
+  ) => Promise<boolean>;
+  handleUpdateZoomMeetingPastInstance: (
+    meetingId: number,
+    pastInstanceId: number,
+    updates: Partial<ZoomMeetingOccurrenceType>
+  ) => Promise<boolean>;
+  handleRefreshAndUpdateZoomMeeting: (
+    meetingId: number,
+    account: Partial<ZoomAccountType>
   ) => Promise<boolean>;
   handleDeleteZoomMeeting: (meetingId: number) => Promise<boolean>;
 }

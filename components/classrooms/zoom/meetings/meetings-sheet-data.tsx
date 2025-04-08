@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { ZoomMeetingType } from "@/types/zoom/meettings";
+import { ZoomMeetingType } from "@/types/zoom/meetings";
 import MeetingsSheetDataItem from "./meetings-sheet-data-item";
 import { toast } from "sonner";
 
@@ -38,8 +38,7 @@ const MeetingsSheetData = () => {
     classroomsStack: {
       zoom: {
         accounts: { accounts },
-        meetings,
-        handleCreateZoomMeeting,
+        meetings: { meetings, handleCreateZoomMeeting },
         api: { meetingsByAPI, handleGetAllZoomMeetingsByAPI },
       },
     },

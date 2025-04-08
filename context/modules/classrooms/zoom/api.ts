@@ -2,7 +2,7 @@ import {
   ZoomMeetingParticipantType,
   ZoomMeetingPollResults,
   ZoomMeetingType,
-} from "@/types/zoom/meettings";
+} from "@/types/zoom/meetings";
 import { useState } from "react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -76,7 +76,7 @@ const useZoomAPIMeetingsStack = () => {
 
   const handleGetZoomMeetingByAPI = async (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    meetingId: number | string
   ) => {
     try {
       // Verifica se todos os campos necessários estão presentes
@@ -88,7 +88,9 @@ const useZoomAPIMeetingsStack = () => {
       setLoading(true);
 
       // Chama a API para obter detalhes da reunião
-      const encodedMeetingId = encodeURIComponent(encodeURIComponent(meetingId));
+      const encodedMeetingId = encodeURIComponent(
+        encodeURIComponent(meetingId)
+      );
       const { data } = await axios.post(
         `/api/zoom/${account.account_id}/meetings/${encodedMeetingId}`,
         {
@@ -117,11 +119,11 @@ const useZoomAPIMeetingsStack = () => {
           // Reunião passada: busca participantes e pesquisas
           const participants = await handleGetAllParticipantsByMeetingIdFromAPI(
             account,
-            data.results.meeting_id
+            encodedMeetingId
           );
           const pollResults = await handleGetAllPollResultsByMeetingIdFromAPI(
             account,
-            data.results.meeting_id
+            encodedMeetingId
           );
 
           return {
@@ -148,18 +150,26 @@ const useZoomAPIMeetingsStack = () => {
 
   const handleGetAllParticipantsByMeetingIdFromAPI = async (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    meetingId: number | string
   ) => {
     try {
-      const { data } = await axios.post(
-        `/api/zoom/${account.account_id}/meetings/${meetingId}/participants`
+      const encodedMeetingId = encodeURIComponent(
+        encodeURIComponent(meetingId)
       );
 
-      if (!data || !Array.isArray(data)) {
+      const { data } = await axios.post(
+        `/api/zoom/${account.account_id}/meetings/${encodedMeetingId}/participants`,
+        {
+          client_id: account.client_id,
+          client_secret: account.client_secret,
+        }
+      );
+
+      if (!data || !Array.isArray(data.results)) {
         throw new Error("Invalid participants data from API");
       }
 
-      return data as ZoomMeetingParticipantType[];
+      return data.results as ZoomMeetingParticipantType[];
     } catch (error) {
       console.error("Error fetching meeting participants:", error);
       toast.error("Falha ao buscar participantes da reunião");
@@ -169,18 +179,26 @@ const useZoomAPIMeetingsStack = () => {
 
   const handleGetAllPollResultsByMeetingIdFromAPI = async (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    meetingId: number | string
   ) => {
     try {
-      const { data } = await axios.post(
-        `/api/zoom/${account.account_id}/meetings/${meetingId}/polls/results`
+      const encodedMeetingId = encodeURIComponent(
+        encodeURIComponent(meetingId)
       );
 
-      if (!data || !Array.isArray(data)) {
+      const { data } = await axios.post(
+        `/api/zoom/${account.account_id}/meetings/${encodedMeetingId}/polls/results`,
+        {
+          client_id: account.client_id,
+          client_secret: account.client_secret,
+        }
+      );
+
+      if (!data || !Array.isArray(data.results)) {
         throw new Error("Invalid poll results data from API");
       }
 
-      return data as ZoomMeetingPollResults[];
+      return data.results as ZoomMeetingPollResults[];
     } catch (error) {
       console.error("Error fetching poll results:", error);
       toast.error("Falha ao buscar resultados de pesquisas da reunião");
@@ -217,11 +235,11 @@ export interface ZoomAPIMeetingsStackI {
   ) => Promise<ZoomMeetingType | null>;
   handleGetAllParticipantsByMeetingIdFromAPI: (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    meetingId: number | string
   ) => Promise<ZoomMeetingParticipantType[]>;
   handleGetAllPollResultsByMeetingIdFromAPI: (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    meetingId: number | string
   ) => Promise<ZoomMeetingPollResults[]>;
 }
 

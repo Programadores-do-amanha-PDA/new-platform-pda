@@ -1,4 +1,4 @@
-export type ZoomAccountType = {
+export interface ZoomAccountType {
   id: string;
   classroom_id: string;
   account_id: string;
@@ -9,7 +9,7 @@ export type ZoomAccountType = {
   created_at: string;
 };
 
-export type ZoomAccountMeType = {
+export interface ZoomAccountMeType {
   id: string;
   first_name: string;
   last_name: string;

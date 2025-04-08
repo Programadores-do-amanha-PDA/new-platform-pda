@@ -8,15 +8,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { classroom_id } = useParams<{ classroom_id: string }>();
 
   if (!classroom_id) {
-    return <div>Turma não encontrada.</div>;
+    return (<div>Turma não encontrada.</div>)
   }
 
   const {
     classroomsStack: {
       zoom: {
-        meetings,
-        handleGetAllZoomMeetings,
         accounts: { accounts, handleGetAllZoomAccounts },
+        meetings: { meetings, handleGetAllZoomMeetings },
       },
     },
   } = useAdminStackContext();

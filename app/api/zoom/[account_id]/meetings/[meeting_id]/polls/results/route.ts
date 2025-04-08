@@ -23,7 +23,14 @@ export async function POST(
       throw new Error("Failed to get access token");
     }
 
-    const pollResults = await getPastMeetingsPollResults(meeting_id, token);
+    const decodedMeetingId = decodeURIComponent(
+      decodeURIComponent(meeting_id as string)
+    );
+
+    const pollResults = await getPastMeetingsPollResults(
+      decodedMeetingId,
+      token
+    );
     return Response.json(
       {
         results: pollResults,
@@ -31,7 +38,7 @@ export async function POST(
       { status: 200 }
     );
   } catch (error) {
-    console.log("Error in GET meeting request:", error);
+    console.log("Error in GET poll results request:", error);
     return Response.json({}, { status: 500 });
   }
 }

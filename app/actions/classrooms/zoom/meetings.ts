@@ -1,6 +1,8 @@
 "use server";
-
-import { ZoomMeetingType } from "@/types/zoom/meettings";
+import {
+  ZoomMeetingPastInstancesType,
+  ZoomMeetingType,
+} from "@/types/zoom/meetings";
 import { createClient } from "@/utils/supabase/server";
 
 const getAllZoomMeetingsByClassroomId = async (classroomId: string) => {
@@ -68,7 +70,7 @@ const createZoomMeetingByClassroomId = async (
 };
 
 const updateZoomMeetingById = async (
-  meetingId: number,
+  meetingId: number | string,
   updates: Partial<ZoomMeetingType>
 ) => {
   try {
@@ -76,12 +78,39 @@ const updateZoomMeetingById = async (
     const { data, error } = await supabase
       .from("classroom_zoom_meetings")
       .update(updates)
+      .eq("_id", meetingId)
+      .select()
+      .single();
+
+    console.log(data, error);
+    if (error) throw error;
+    return data as ZoomMeetingType;
+  } catch (error) {
+    console.error("Error updating zoom meeting:", error);
+    return false;
+  }
+};
+
+const updateZoomMeetingPastInstanceByMeetingId = async (
+  meetingId: number | string,
+  pastInstanceId: string,
+  updates: Partial<ZoomMeetingPastInstancesType>
+) => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("classroom_zoom_meetings")
+      .update(updates)
       .eq("id", meetingId)
+      .eq(
+        "past_instances->uuid",
+        encodeURIComponent(encodeURIComponent(pastInstanceId))
+      )
       .select()
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ZoomMeetingType;
   } catch (error) {
     console.error("Error updating zoom meeting:", error);
     return false;
@@ -109,5 +138,6 @@ export {
   getZoomMeetingById,
   createZoomMeetingByClassroomId,
   updateZoomMeetingById,
+  updateZoomMeetingPastInstanceByMeetingId,
   deleteZoomMeetingById,
 };

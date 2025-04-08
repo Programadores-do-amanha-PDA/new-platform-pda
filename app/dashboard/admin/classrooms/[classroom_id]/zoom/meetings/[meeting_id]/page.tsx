@@ -1,9 +1,11 @@
+import ZoomMeetingPage from "@/modules/zoom/meeting-page";
+
 const MeetingPage = async ({
   params,
 }: {
-  params: Promise<{ classroom_id: string; meeting_id: string }>;
+  params: Promise<{ meeting_id: string }>;
 }) => {
-  const { classroom_id, meeting_id } = await params;
-  return;
+  const { meeting_id } = await params;
+  return <ZoomMeetingPage meeting_id={meeting_id} />;
 };
 export default MeetingPage;

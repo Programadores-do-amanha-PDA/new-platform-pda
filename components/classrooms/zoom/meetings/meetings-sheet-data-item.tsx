@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ZoomMeetingType } from "@/types/zoom/meettings";
+import { ZoomMeetingType } from "@/types/zoom/meetings";
 import { LoaderCircle, Plus } from "lucide-react";
 
 const meetingTypes = {

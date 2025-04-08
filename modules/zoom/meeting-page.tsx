@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 
+import ZoomMeetingCard from "@/components/classrooms/zoom/meetings/meetings-card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import MeetingsSheetData from "@/components/classrooms/zoom/meetings/meetings-sheet-data";
-import ZoomMeetingsCard from "@/components/classrooms/zoom/meetings/meetings-card";
+import { ZoomMeetingType } from "@/types/zoom/meetings";
 
 type meetingStatusT = "all" | "upcoming" | "completed";
 
@@ -19,7 +20,7 @@ const meetingsStatusLabels = {
   cancelled: "Canceladas",
 };
 
-const ZoomMeetingsPage = () => {
+const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
   const {
     classroomsStack: {
       zoom: {
@@ -30,10 +31,51 @@ const ZoomMeetingsPage = () => {
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<meetingStatusT>("all");
 
-  const { filteredMeetings, statusCount } = useMemo(() => {
-    const count = { all: meetings.length, upcoming: 0, completed: 0 };
+  const allMeetings = meetings
+    .filter((m) => m._id === meeting_id)
+    .map((meeting) => {
+      let pastInstancies: ZoomMeetingType[] = [];
+      let occurrences: ZoomMeetingType[] = [];
 
-    const filtered = meetings.filter((meeting) => {
+      if (meeting.past_instances?.length > 0) {
+        pastInstancies = meeting.past_instances.map((instance) => {
+          return {
+            ...meeting,
+            id: meeting.id,
+            uuid: instance.uuid,
+            start_time: instance.start_time,
+            participants: instance.participants,
+            poll_results: instance.poll_results,
+            past_instances: [],
+            occurrences: [],
+            children_type: "past_instance",
+          } as ZoomMeetingType;
+        });
+      }
+
+      if (meeting.occurrences && meeting.occurrences?.length > 0) {
+        occurrences = meeting.occurrences.map((occurrence) => {
+          return {
+            ...meeting,
+            id: Number(occurrence.occurrence_id),
+            start_time: occurrence.start_time,
+            participants: [],
+            poll_results: [],
+            past_instances: [],
+            occurrences: [],
+            children_type: "occurrence",
+          } as ZoomMeetingType;
+        });
+      }
+
+      return [...pastInstancies, ...occurrences];
+    })
+    .flat();
+
+  const { filteredMeetings, statusCount } = useMemo(() => {
+    const count = { all: allMeetings.length, upcoming: 0, completed: 0 };
+
+    const filtered = allMeetings.filter((meeting) => {
       // Status calculation
 
       const startTime = new Date(meeting.start_time || 0).getTime();
@@ -62,7 +104,7 @@ const ZoomMeetingsPage = () => {
     });
 
     return { filteredMeetings: filtered, statusCount: count };
-  }, [meetings, statusFilter, searchFilter]);
+  }, [allMeetings, statusFilter, searchFilter]);
 
   const statusFilters: meetingStatusT[] = ["all", "upcoming", "completed"];
 
@@ -139,11 +181,11 @@ const ZoomMeetingsPage = () => {
             );
           })
           .map((meeting, i) => (
-            <ZoomMeetingsCard key={`meeting-${i}`} meeting={meeting} />
+            <ZoomMeetingCard key={`meeting-${i}`} meeting={meeting} />
           ))}
       </ul>
     </div>
   );
 };
 
-export default ZoomMeetingsPage;
+export default ZoomMeetingPage;
