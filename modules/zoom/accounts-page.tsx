@@ -67,6 +67,7 @@ const AccountsPage = ({ classroom_id }: { classroom_id: string }) => {
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2">
         {filteredAccounts.map((account) => (
           <ZoomAccountCard
+            expansive={true}
             account={account}
             key={account.id}
             handleSetCurrentAccount={setCurrentAccount}

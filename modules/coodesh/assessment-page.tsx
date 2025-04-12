@@ -11,17 +11,10 @@ type DefaultLocations = {
   es: string;
 };
 
-const AssessmentPage = ({
-  classroom_id,
-  assessment_id,
-}: {
-  classroom_id: string;
-  assessment_id: string;
-}) => {
+const AssessmentPage = ({ assessment_id }: { assessment_id: string }) => {
   const {
     classroomsStack: {
-      classrooms,
-      coodesh: { handleUpdateCoodeshAssessment },
+      coodesh: { assessments, handleUpdateCoodeshAssessment },
     },
   } = useAdminStackContext();
 
@@ -31,11 +24,9 @@ const AssessmentPage = ({
     es: "Español",
   };
 
-  const assessment = classrooms
-    .find((team) => team.id === classroom_id)
-    ?.classroom_coodesh_assessments?.find(
-      (assessment) => assessment.id === assessment_id
-    );
+  const assessment = assessments.find(
+    (assessment) => assessment.id === assessment_id
+  );
 
   return (
     <div className="w-full h-full flex flex-col gap-8 p-4 py-6 overflow-hidden">

@@ -70,6 +70,8 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleUpdateClassroom: () => Promise.resolve(false),
     handleDeleteClassroom: () => Promise.resolve(false),
     coodesh: {
+      assessments: [],
+      handleGetAllCoodeshAssessmentByClassroomId: () => Promise.resolve(false),
       handleCreateCoodeshAssessment: () => Promise.resolve(false),
       handleUpdateCoodeshAssessment: () => Promise.resolve(false),
       api: {
@@ -155,7 +157,6 @@ export const AdminStackProvider = ({
   // Classrooms
   const {
     classrooms,
-    setClassrooms,
     classroomsLoading,
     handleGetAllClassrooms,
     handleCreateClassroom,
@@ -178,8 +179,12 @@ export const AdminStackProvider = ({
   } = JobsStack();
 
   // Coodesh
-  const { handleCreateCoodeshAssessment, handleUpdateCoodeshAssessment } =
-    CoodeshAssessmentsStack(setClassrooms);
+  const {
+    assessments,
+    handleGetAllCoodeshAssessmentByClassroomId,
+    handleCreateCoodeshAssessment,
+    handleUpdateCoodeshAssessment,
+  } = CoodeshAssessmentsStack();
 
   // Coodesh API
   const { coodeshAPIAssessments, handleGetCoodeshAPIAssessments } =
@@ -337,6 +342,8 @@ export const AdminStackProvider = ({
           handleUpdateClassroom,
           handleDeleteClassroom,
           coodesh: {
+            assessments,
+            handleGetAllCoodeshAssessmentByClassroomId,
             handleCreateCoodeshAssessment,
             handleUpdateCoodeshAssessment,
             api: {
@@ -394,10 +401,10 @@ export const AdminStackProvider = ({
         setLoading,
       }}
     >
-      <AppSidebar loading={loading} data={sidebarData} />
+      <AppSidebar data={sidebarData} />
       <div className="relative w-full h-full flex flex-col overflow-hidden">
         <AppBar />
-        <div className="w-full h-full flex flex-col gap-10 overflow-hidden px-4">
+        <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
           {children}
         </div>
       </div>

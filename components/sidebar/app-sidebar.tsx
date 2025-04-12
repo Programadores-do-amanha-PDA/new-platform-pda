@@ -50,24 +50,9 @@ interface AppSidebarProps {
     user: AuthUserWithProfileType;
     userRole: string;
   };
-  loading: boolean;
 }
 
 export function AppSidebar({ ...props }: AppSidebarProps) {
-  if (props.loading) {
-    return (
-      <Sidebar
-        collapsible="icon"
-        {...props}
-        className="animate-pulse flex flex-col bg-background"
-      >
-        <SidebarHeader className="animate-pulse bg-primary/15 h-12 rounded-sm"></SidebarHeader>
-        <SidebarContent className="animate-pulse bg-primary/15 h-full rounded-sm my-4"></SidebarContent>
-        <SidebarFooter className="animate-pulse bg-primary/15 h-12 rounded-sm"></SidebarFooter>
-        <SidebarRail />
-      </Sidebar>
-    );
-  }
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -81,8 +66,8 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
         )}
         {props.data.classRooms && (
           <>
-          <Separator />
-          <NavMain items={props.data.classRooms} title="Turmas" />
+            <Separator />
+            <NavMain items={props.data.classRooms} title="Turmas" />
           </>
         )}
         {props.data.projects && props.data.projects.length > 0 && (

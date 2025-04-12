@@ -14,16 +14,11 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
 
   const {
     classroomsStack: {
-      classrooms,
-      coodesh: { handleUpdateCoodeshAssessment },
+      coodesh: { assessments, handleUpdateCoodeshAssessment },
     },
   } = useAdminStackContext();
 
-  const attachedAssessments = classrooms.find(
-    (team) => team.id === classroom_id
-  )?.classroom_coodesh_assessments;
-
-  const filteredAssessments = attachedAssessments?.filter((assessment) =>
+  const filteredAssessments = assessments?.filter((assessment) =>
     assessment.name.toLowerCase().includes(searchFilter.toLowerCase())
   );
 
@@ -61,7 +56,7 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
               />
             ))}
 
-          {attachedAssessments?.length === 0 && (
+          {assessments?.length === 0 && (
             <div className="flex flex-col gap-2 h-full w-full bg-red-100 items-center justify-center">
               <h2 className="text-sm font-bold text-gray-800">
                 Não ha avaliações anexadas para essa turma.

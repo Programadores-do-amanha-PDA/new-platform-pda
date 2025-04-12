@@ -1,24 +1,20 @@
 "use client";
-import { useMemo, useState } from "react";
-
-import ZoomMeetingCard from "@/components/classrooms/zoom/meetings/meetings-card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { useMemo } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import MeetingsSheetData from "@/components/classrooms/zoom/meetings/meetings-sheet-data";
 import { ZoomMeetingType } from "@/types/zoom/meetings";
-
-type meetingStatusT = "all" | "upcoming" | "completed";
-
-const meetingsStatusLabels = {
-  all: "Todas",
-  upcoming: "Próximas",
-  completed: "Concluídas",
-  cancelled: "Canceladas",
-};
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { MeetingDataTable } from "@/components/classrooms/zoom/meetings/meeting/meeting-data-table";
 
 const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
   const {
@@ -28,162 +24,178 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
       },
     },
   } = useAdminStackContext();
-  const [searchFilter, setSearchFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<meetingStatusT>("all");
 
-  const allMeetings = meetings
-    .filter((m) => m._id === meeting_id)
-    .map((meeting) => {
-      let pastInstancies: ZoomMeetingType[] = [];
-      let occurrences: ZoomMeetingType[] = [];
+  // Processamento das meetings
+  const { upcomingMeetings, completedMeetings } = useMemo(() => {
+    const allMeetings = meetings
+      .filter((m) => m._id === meeting_id)
+      .flatMap((meeting) => [
+        ...(meeting.occurrences?.map((occurrence) => ({
+          ...meeting,
+          id: Number(occurrence.occurrence_id),
+          start_time: occurrence.start_time,
+          status: "upcoming",
+        })) || []),
+        ...(meeting.past_instances?.map((instance) => ({
+          ...meeting,
+          uuid: instance.uuid,
+          start_time: instance.start_time,
+          status: "completed",
+          participants: instance.participants,
+          poll_results: instance.poll_results,
+        })) || []),
+      ]);
 
-      if (meeting.past_instances?.length > 0) {
-        pastInstancies = meeting.past_instances.map((instance) => {
-          return {
-            ...meeting,
-            id: meeting.id,
-            uuid: instance.uuid,
-            start_time: instance.start_time,
-            participants: instance.participants,
-            poll_results: instance.poll_results,
-            past_instances: [],
-            occurrences: [],
-            children_type: "past_instance",
-          } as ZoomMeetingType;
-        });
-      }
+    const now = Date.now();
 
-      if (meeting.occurrences && meeting.occurrences?.length > 0) {
-        occurrences = meeting.occurrences.map((occurrence) => {
-          return {
-            ...meeting,
-            id: Number(occurrence.occurrence_id),
-            start_time: occurrence.start_time,
-            participants: [],
-            poll_results: [],
-            past_instances: [],
-            occurrences: [],
-            children_type: "occurrence",
-          } as ZoomMeetingType;
-        });
-      }
+    return {
+      upcomingMeetings: allMeetings.filter(
+        (m) => new Date(m.start_time!).getTime() > now
+      ),
+      completedMeetings: allMeetings.filter(
+        (m) => new Date(m.start_time!).getTime() <= now
+      ),
+    };
+  }, [meetings, meeting_id]);
 
-      return [...pastInstancies, ...occurrences];
-    })
-    .flat();
+  // Colunas para meetings futuras (Table)
+  const upcomingColumns = [
+    {
+      accessorKey: "topic",
+      header: "Reunião",
+    },
+    {
+      accessorKey: "start_time",
+      header: "Data/Hora",
+      cell: ({ row }: { row: { original: { start_time: string | Date } } }) =>
+        format(new Date(row.original.start_time), "Pp", { locale: ptBR }),
+    },
+    {
+      accessorKey: "duration",
+      header: "Duração",
+      cell: ({ row }: { row: { original: { duration: number } } }) =>
+        `${row.original.duration} minutos`,
+    },
+    {
+      accessorKey: "host_email",
+      header: "Host",
+    },
+  ];
 
-  const { filteredMeetings, statusCount } = useMemo(() => {
-    const count = { all: allMeetings.length, upcoming: 0, completed: 0 };
+  // Colunas para meetings terminadas (DataTable)
+  const completedColumns: ColumnDef<ZoomMeetingType>[] = [
+    {
+      accessorKey: "topic",
+      header: "Reunião",
+    },
+    {
+      accessorKey: "start_time",
+      header: "Data",
+      cell: ({ row }) =>
+        format(new Date(row.original.start_time!), "dd/MM/yyyy", {
+          locale: ptBR,
+        }),
+    },
+    {
+      accessorKey: "duration",
+      header: "Duração",
+      cell: ({ row }) => `${row.getValue("duration")} min`,
+    },
+    {
+      accessorKey: "participants",
+      header: "Participantes",
+      cell: ({ row }) => row.original.participants?.length || 0,
+    },
+    {
+      accessorKey: "poll_results",
+      header: "Respostas",
+      cell: ({ row }) => row.original.poll_results?.length || 0,
+    },
+  ];
 
-    const filtered = allMeetings.filter((meeting) => {
-      // Status calculation
+  function renderCellValue(value: unknown): React.ReactNode {
+    if (Array.isArray(value)) {
+      return value.length;
+    }
 
-      const startTime = new Date(meeting.start_time || 0).getTime();
-      const endTime = new Date(startTime + (meeting.duration || 0)).getTime();
-      const isUpcoming = endTime > Date.now();
-      const isCompleted = endTime < Date.now();
-      const status: meetingStatusT = isUpcoming ? "upcoming" : "completed";
+    if (typeof value === "object" && value !== null) {
+      const jsonString = JSON.stringify(value);
+      return jsonString ? jsonString : null;
+    }
 
-      // Update counts
-      if (isUpcoming) count.upcoming++;
-      if (isCompleted) count.completed++;
-
-      // Status filter
-      if (statusFilter !== "all" && status !== statusFilter) return false;
-
-      // Search filter
-      if (searchFilter) {
-        const searchLower = searchFilter.toLowerCase();
-        const matchesSearch =
-          meeting.topic.toLowerCase().includes(searchLower) ||
-          (meeting.agenda?.toLowerCase() || "").includes(searchLower);
-        if (!matchesSearch) return false;
-      }
-
-      return true;
-    });
-
-    return { filteredMeetings: filtered, statusCount: count };
-  }, [allMeetings, statusFilter, searchFilter]);
-
-  const statusFilters: meetingStatusT[] = ["all", "upcoming", "completed"];
+    switch (typeof value) {
+      case "string":
+        return value;
+      case "number":
+        return value;
+      case "boolean":
+        return value ? "Sim" : "Não";
+      case "undefined":
+        return "";
+      default:
+        return String(value);
+    }
+  }
 
   return (
-    <div className="w-full h-full flex flex-col gap-6">
-      <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
-        <div className="w-max h-9 flex gap-4">
-          {statusFilters.map((filter, index) => (
-            <div key={filter} className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setStatusFilter(filter)}
-              >
-                <p
-                  className={`text-sm font-semibold ${
-                    statusFilter === filter ? "text-primary" : ""
-                  }`}
-                >
-                  {meetingsStatusLabels[filter]}
-                </p>
-                <Badge
-                  variant={statusFilter === filter ? "default" : "outline"}
-                >
-                  {statusCount[filter]}
-                </Badge>
-              </Button>
-              {index < statusFilters.length - 1 && (
-                <div className="h-full w-px border-l border-sidebar-accent" />
-              )}
-            </div>
-          ))}
-        </div>
+    <div className="w-full h-full p-4 overflow-hidden">
+      <Tabs defaultValue="upcoming">
+        <TabsList>
+          <TabsTrigger value="upcoming">
+            Futuras ({upcomingMeetings.length})
+          </TabsTrigger>
+          <TabsTrigger value="completed">
+            Terminadas ({completedMeetings.length})
+          </TabsTrigger>
+        </TabsList>
 
-        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
-          <Input
-            id="search"
-            type="text"
-            placeholder="Buscando algo?"
-            className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
+        {/* Tab Meetings Futuras */}
+        <TabsContent
+          value="upcoming"
+          className="flex w-full h-full overflow-hidden"
+        >
+          <div className="w-full max-h-[80vh] h-full flex overflow-y-auto border rounded-md">
+            <Table>
+              <TableHeader className="sticky top-0 bg-background">
+                <TableRow>
+                  {upcomingColumns.map((column) => (
+                    <TableHead key={column.accessorKey}>
+                      {column.header}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {upcomingMeetings.map((meeting) => (
+                  <TableRow key={meeting.id} data-meeting-id={meeting.id}>
+                    {upcomingColumns.map((column) => (
+                      <TableCell key={`${meeting.id}-${column.accessorKey}`}>
+                        {column.cell
+                          ? column.cell({ row: { original: meeting } })
+                          : renderCellValue(
+                              meeting[
+                                column.accessorKey as keyof ZoomMeetingType
+                              ]
+                            )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent
+          value="completed"
+          className="flex w-full h-full overflow-hidden"
+        >
+          <MeetingDataTable
+            columns={completedColumns}
+            data={completedMeetings}
           />
-          <Label htmlFor="search">
-            <Search className="size-5 text-primary-foreground" />
-          </Label>
-        </div>
-        <MeetingsSheetData />
-      </div>
-
-      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
-        {filteredMeetings
-          .sort((a, b) => {
-            if (statusFilter === "all") {
-              return (
-                new Date(b.start_time ?? 0).getTime() -
-                new Date(a.start_time ?? 0).getTime()
-              );
-            } else if (statusFilter === "upcoming") {
-              return (
-                new Date(a.start_time ?? 0).getTime() -
-                new Date(b.start_time ?? 0).getTime()
-              );
-            } else if (statusFilter === "completed") {
-              return (
-                new Date(b.start_time ?? 0).getTime() -
-                new Date(a.start_time ?? 0).getTime()
-              );
-            }
-
-            return (
-              new Date(b.start_time ?? 0).getTime() -
-              new Date(a.start_time ?? 0).getTime()
-            );
-          })
-          .map((meeting, i) => (
-            <ZoomMeetingCard key={`meeting-${i}`} meeting={meeting} />
-          ))}
-      </ul>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

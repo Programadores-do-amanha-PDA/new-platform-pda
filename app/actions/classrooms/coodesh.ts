@@ -21,12 +21,13 @@ export const createClassroomCoodeshAssessment = async (
   }
 };
 
-export const getAllClassroomCoodeshAssessment = async () => {
+export const getAllClassroomCoodeshAssessment = async (classRoomId: string) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("classroom_coodesh_assessments")
       .select()
+      .eq("classroom_id", classRoomId)
       .order("created_at", { ascending: false });
 
     if (error) throw error;

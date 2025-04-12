@@ -1,5 +1,3 @@
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { ZoomAccountType } from "@/types/zoom/accounts";
 import { Button } from "@/components/ui/button";
 import { Edit, Ellipsis } from "lucide-react";
@@ -13,22 +11,21 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 const ZoomAccountCard = ({
   account,
   handleSetCurrentAccount,
+  expansive,
 }: {
   account: ZoomAccountType;
   handleSetCurrentAccount: (account: ZoomAccountType) => void;
+  expansive: boolean;
 }) => {
-  const path = usePathname();
-
   return (
-    <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4">
+    <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4 bg-background">
       <div className="flex flex-col gap-1">
-        <Link
-          href={`${path}/${account.id}`}
-          className="font-semibold truncate hover:underline cursor-pointer"
+        <p
+          className="font-semibold truncate"
           title={account.me?.first_name ?? account.account_id}
         >
           {account.me?.first_name ?? account.account_id}
-        </Link>
+        </p>
         <p className="font-bold text-sm text-muted-foreground">
           {account.me?.email}
         </p>
@@ -42,22 +39,24 @@ const ZoomAccountCard = ({
           </p>
         </p>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild className="w-max">
-          <Button variant={"outline"} size="sm">
-            <Ellipsis className="size-5" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuItem
-            onClick={() => handleSetCurrentAccount(account)}
-            className="cursor-pointed font-semibold text-muted-foreground"
-          >
-            <Edit className="size-5" />
-            Editar
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {expansive && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="w-max">
+            <Button variant={"outline"} size="sm">
+              <Ellipsis className="size-5" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => handleSetCurrentAccount(account)}
+              className="cursor-pointed font-semibold text-muted-foreground"
+            >
+              <Edit className="size-5" />
+              Editar
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </li>
   );
 };

@@ -13,6 +13,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useAdminStackContext } from "@/context/admin/stack-context";
+import { Separator } from "@/components/ui/separator";
 
 const meetingTypes = {
   1: "Reunião instantânea",
@@ -21,7 +22,17 @@ const meetingTypes = {
   8: "Reunião recorrente com horário fixo",
 };
 
-const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
+const ZoomMeetingsCard = ({
+  meeting,
+  allMeetingLoading,
+  setAllMeetingLoading,
+  expansive,
+}: {
+  meeting: ZoomMeetingType;
+  allMeetingLoading: boolean;
+  setAllMeetingLoading: (v: boolean) => void;
+  expansive: boolean;
+}) => {
   const path = usePathname();
   const [loading, setLoading] = useState(false);
 
@@ -29,12 +40,13 @@ const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
     classroomsStack: {
       zoom: {
         accounts: { accounts },
-        meetings: {},
+        meetings: { handleRefreshAndUpdateZoomMeeting },
       },
     },
   } = useAdminStackContext();
 
-  const handleRefresh = async () => {
+  const handleRefreshMeeting = async () => {
+    setAllMeetingLoading(true);
     setLoading(true);
 
     const account = accounts.find(
@@ -42,21 +54,28 @@ const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
     );
     if (!account) return;
 
+    await handleRefreshAndUpdateZoomMeeting(meeting.id, account);
+
+    setAllMeetingLoading(false);
     setLoading(false);
   };
 
-  if (meeting.type === 8) {
+  if (meeting.type === 8 || meeting.type === 3) {
     return (
       <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <Link
-            href={`${path}/${meeting._id}`}
+            href={
+              expansive
+                ? `${path}/${meeting._id}`
+                : `${path}/meetings/${meeting._id}`
+            }
             className="font-semibold truncate hover:underline cursor-pointer"
             title={meeting.topic}
           >
             {meeting.topic}
           </Link>
-          <p className="text-sm text-muted-foreground truncate">
+          <p className="text-sm font-semibold text-muted-foreground truncate">
             {meetingTypes[meeting.type as keyof typeof meetingTypes] ||
               "Sem tipo"}
           </p>
@@ -76,63 +95,68 @@ const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
                 </p>
               </>
             )}
-          {meeting.start_time &&
-            new Date(meeting.start_time).getTime() >= Date.now() && (
-              <a
-                href={meeting.join_url}
-                className="text-sm font-semibold text-primary-foreground underline"
-                target="_blank"
-                rel="noopener noreferrer"
+        </div>
+
+        {expansive && (
+          <>
+            <Separator />
+            <div className="w-full flex justify-between items-start">
+              <div className="flex flex-col gap-2">
+                {meeting?.synchronized_at && (
+                  <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                    Ultima (re)sincronização:
+                    <p className="font-bold">{meeting?.synchronized_at}</p>
+                  </p>
+                )}
+                {meeting?.past_instances &&
+                meeting?.past_instances?.length > 0 ? (
+                  <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                    Reuniões finalizadas:
+                    <p className="font-bold">
+                      {meeting?.past_instances?.length}
+                    </p>
+                  </p>
+                ) : (
+                  <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                    Nenhum participante encontrado.
+                  </p>
+                )}
+
+                {meeting?.occurrences &&
+                meeting?.occurrences?.filter(
+                  (o) => new Date(o.start_time).getTime() >= Date.now()
+                ).length > 0 ? (
+                  <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                    Próximas reuniões:
+                    <p className="font-bold">
+                      {
+                        meeting?.occurrences?.filter(
+                          (o) => new Date(o.start_time).getTime() >= Date.now()
+                        ).length
+                      }
+                    </p>
+                  </p>
+                ) : (
+                  <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                    Sem próximas reuniões.
+                  </p>
+                )}
+              </div>
+
+              <Button
+                size="icon"
+                disabled={loading || allMeetingLoading}
+                onClick={handleRefreshMeeting}
+                title="Atualizar"
               >
-                Entrar na reunião
-              </a>
-            )}
-        </div>
-
-        <div className="w-full flex justify-between items-center">
-          <div className="flex flex-col gap-2">
-            {meeting?.past_instances && meeting?.past_instances?.length > 0 ? (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Reuniões finalizadas:
-                <p className="font-bold">{meeting?.past_instances?.length}</p>
-              </p>
-            ) : (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Nenhum participante encontrado.
-              </p>
-            )}
-
-            {meeting?.occurrences &&
-            meeting?.occurrences?.filter(
-              (o) => new Date(o.start_time).getTime() >= Date.now()
-            ).length > 0 ? (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Próximas reuniões:
-                <p className="font-bold">
-                  {
-                    meeting?.occurrences?.filter(
-                      (o) => new Date(o.start_time).getTime() >= Date.now()
-                    ).length
-                  }
-                </p>
-              </p>
-            ) : (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Sem próximas reuniões.
-              </p>
-            )}
-          </div>
-
-          <Button
-            size="icon"
-            disabled={loading}
-            onClick={handleRefresh}
-            title="Atualizar"
-          >
-            <RefreshCw className={cn("size-5", loading && "animate-spin")} />
-            <p className="sr-only">Atualizar</p>
-          </Button>
-        </div>
+                <RefreshCw
+                  className={cn("size-5", loading && "animate-spin")}
+                />
+                <p className="sr-only">Atualizar</p>
+              </Button>
+            </div>
+          </>
+        )}
       </li>
     );
   }
@@ -141,15 +165,27 @@ const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
     <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <Link
-          href={`${path}/${meeting._id}`}
+          href={
+            expansive
+              ? `${path}/${meeting._id}`
+              : `${path}/meetings/${meeting._id}`
+          }
           className="font-semibold truncate hover:underline cursor-pointer"
           title={meeting.topic}
         >
           {meeting.topic}
         </Link>
+        <p className="text-sm font-semibold text-muted-foreground truncate">
+          {meetingTypes[meeting.type as keyof typeof meetingTypes] ||
+            "Sem tipo"}
+        </p>
         {meeting.start_time && (
           <p className="text-sm h-5 text-muted-foreground flex gap-1">
-            Início em:
+            {meeting.start_time &&
+            new Date(meeting.start_time).getTime() >= Date.now()
+              ? "Início em:"
+              : "Realizada em:"}
+
             <p className="font-bold">
               {new Date(meeting.start_time).toLocaleString("pt-BR", {
                 timeZone: "America/Sao_Paulo",
@@ -187,57 +223,72 @@ const ZoomMeetingsCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
             </a>
           )}
       </div>
-
-      {meeting.start_time &&
-      new Date(meeting.start_time).getTime() >= new Date().getTime() ? (
-        !meeting.is_visible_on_schedule ? (
-          <Button className="font-semibold" disabled={loading}>
-            <CalendarPlus className="size-5" />
-            Adicionar ao calendário
-          </Button>
-        ) : (
-          <Button className="font-semibold" disabled={loading}>
-            <CalendarMinus className="size-5" />
-            {loading && <LoaderCircle className="size-5 animate-spin" />}
-            Ocultar do calendário
-          </Button>
-        )
-      ) : (
-        <div className="w-full flex justify-between items-center">
-          <div className="flex flex-col gap-2">
-            {meeting?.participants && meeting?.participants?.length > 0 ? (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Participantes:
-                <p className="font-bold">{meeting?.participants?.length}</p>
-              </p>
+      {expansive && (
+        <>
+          {meeting.start_time &&
+          new Date(meeting.start_time).getTime() >= new Date().getTime() ? (
+            !meeting.is_visible_on_schedule ? (
+              <Button className="font-semibold" disabled={loading}>
+                <CalendarPlus className="size-5" />
+                Adicionar ao calendário
+              </Button>
             ) : (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Nenhum participante encontrado.
-              </p>
-            )}
+              <Button className="font-semibold" disabled={loading}>
+                <CalendarMinus className="size-5" />
+                {loading && <LoaderCircle className="size-5 animate-spin" />}
+                Ocultar do calendário
+              </Button>
+            )
+          ) : (
+            <>
+              <Separator />
 
-            {meeting?.poll_results && meeting?.poll_results?.length > 0 ? (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Respostas:
-                <p className="font-bold">{meeting?.poll_results?.length}</p>
-              </p>
-            ) : (
-              <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                Nenhuma resposta encontrada.
-              </p>
-            )}
-          </div>
+              <div className="w-full flex justify-between items-center">
+                <div className="flex flex-col gap-2">
+                  {meeting?.participants &&
+                  meeting?.participants?.length > 0 ? (
+                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                      Participantes:
+                      <p className="font-bold">
+                        {meeting?.participants?.length}
+                      </p>
+                    </p>
+                  ) : (
+                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                      Nenhum participante encontrado.
+                    </p>
+                  )}
 
-          <Button
-            size="icon"
-            disabled={loading}
-            onClick={handleRefresh}
-            title="Atualizar"
-          >
-            <RefreshCw className={cn("size-5", loading && "animate-spin")} />
-            <p className="sr-only">Atualizar</p>
-          </Button>
-        </div>
+                  {meeting?.poll_results &&
+                  meeting?.poll_results?.length > 0 ? (
+                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                      Respostas:
+                      <p className="font-bold">
+                        {meeting?.poll_results?.length}
+                      </p>
+                    </p>
+                  ) : (
+                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                      Nenhuma resposta encontrada.
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  size="icon"
+                  disabled={loading || allMeetingLoading}
+                  onClick={handleRefreshMeeting}
+                  title="Atualizar"
+                >
+                  <RefreshCw
+                    className={cn("size-5", loading && "animate-spin")}
+                  />
+                  <p className="sr-only">Atualizar</p>
+                </Button>
+              </div>
+            </>
+          )}
+        </>
       )}
     </li>
   );

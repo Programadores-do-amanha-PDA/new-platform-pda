@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import MeetingsSheetData from "@/components/classrooms/zoom/meetings/meetings-sheet-data";
 import ZoomMeetingsCard from "@/components/classrooms/zoom/meetings/meetings-card";
+import { MeetingsParticipantsChart } from "@/components/classrooms/zoom/meetings-participants-chart";
 
 type meetingStatusT = "all" | "upcoming" | "completed";
 
@@ -24,11 +25,13 @@ const ZoomMeetingsPage = () => {
     classroomsStack: {
       zoom: {
         meetings: { meetings },
+        accounts: { accounts },
       },
     },
   } = useAdminStackContext();
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<meetingStatusT>("all");
+  const [allMeetingLoading, setAllMeetingLoading] = useState<boolean>(false);
 
   const { filteredMeetings, statusCount } = useMemo(() => {
     const count = { all: meetings.length, upcoming: 0, completed: 0 };
@@ -66,82 +69,111 @@ const ZoomMeetingsPage = () => {
 
   const statusFilters: meetingStatusT[] = ["all", "upcoming", "completed"];
 
+  const chartData = meetings
+    .map((meeting) => {
+      const account = accounts.find((acc) => acc.id === meeting.account_id);
+      const account_label =
+        account?.me?.display_name || meeting.account_id || "Desconhecida";
+
+      return (
+        meeting?.past_instances?.map((instance) => ({
+          account_id: meeting.account_id || "",
+          account_label: account_label,
+          date: instance?.start_time,
+          participants: instance?.participants?.length || 0,
+          poll_results: instance?.poll_results?.length || 0,
+        })) || []
+      );
+    })
+    .flat()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   return (
-    <div className="w-full h-full flex flex-col gap-6">
-      <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
-        <div className="w-max h-9 flex gap-4">
-          {statusFilters.map((filter, index) => (
-            <div key={filter} className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setStatusFilter(filter)}
-              >
-                <p
-                  className={`text-sm font-semibold ${
-                    statusFilter === filter ? "text-primary" : ""
-                  }`}
+    <div className="w-full h-full flex flex-col gap-6 py-6 overflow-y-auto px-4">
+      <MeetingsParticipantsChart chartData={chartData} />
+
+      <div className="w-full h-full flex flex-col gap-6">
+        <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
+          <div className="w-max h-9 flex gap-4">
+            {statusFilters.map((filter, index) => (
+              <div key={filter} className="flex items-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setStatusFilter(filter)}
                 >
-                  {meetingsStatusLabels[filter]}
-                </p>
-                <Badge
-                  variant={statusFilter === filter ? "default" : "outline"}
-                >
-                  {statusCount[filter]}
-                </Badge>
-              </Button>
-              {index < statusFilters.length - 1 && (
-                <div className="h-full w-px border-l border-sidebar-accent" />
-              )}
-            </div>
-          ))}
+                  <p
+                    className={`text-sm font-semibold ${
+                      statusFilter === filter ? "text-primary" : ""
+                    }`}
+                  >
+                    {meetingsStatusLabels[filter]}
+                  </p>
+                  <Badge
+                    variant={statusFilter === filter ? "default" : "outline"}
+                  >
+                    {statusCount[filter]}
+                  </Badge>
+                </Button>
+                {index < statusFilters.length - 1 && (
+                  <div className="h-full w-px border-l border-sidebar-accent" />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
+            <Input
+              id="search"
+              type="text"
+              placeholder="Buscando algo?"
+              className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+            />
+            <Label htmlFor="search">
+              <Search className="size-5 text-primary-foreground" />
+            </Label>
+          </div>
+          <MeetingsSheetData />
         </div>
 
-        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
-          <Input
-            id="search"
-            type="text"
-            placeholder="Buscando algo?"
-            className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
-          />
-          <Label htmlFor="search">
-            <Search className="size-5 text-primary-foreground" />
-          </Label>
-        </div>
-        <MeetingsSheetData />
+        <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
+          {filteredMeetings
+            .sort((a, b) => {
+              if (statusFilter === "all") {
+                return (
+                  new Date(b.start_time ?? 0).getTime() -
+                  new Date(a.start_time ?? 0).getTime()
+                );
+              } else if (statusFilter === "upcoming") {
+                return (
+                  new Date(a.start_time ?? 0).getTime() -
+                  new Date(b.start_time ?? 0).getTime()
+                );
+              } else if (statusFilter === "completed") {
+                return (
+                  new Date(b.start_time ?? 0).getTime() -
+                  new Date(a.start_time ?? 0).getTime()
+                );
+              }
+
+              return (
+                new Date(b.start_time ?? 0).getTime() -
+                new Date(a.start_time ?? 0).getTime()
+              );
+            })
+            .map((meeting, i) => (
+              <ZoomMeetingsCard
+                key={`meeting-${i}`}
+                meeting={meeting}
+                allMeetingLoading={allMeetingLoading}
+                setAllMeetingLoading={setAllMeetingLoading}
+                expansive={true}
+              />
+            ))}
+        </ul>
       </div>
-
-      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
-        {filteredMeetings
-          .sort((a, b) => {
-            if (statusFilter === "all") {
-              return (
-                new Date(b.start_time ?? 0).getTime() -
-                new Date(a.start_time ?? 0).getTime()
-              );
-            } else if (statusFilter === "upcoming") {
-              return (
-                new Date(a.start_time ?? 0).getTime() -
-                new Date(b.start_time ?? 0).getTime()
-              );
-            } else if (statusFilter === "completed") {
-              return (
-                new Date(b.start_time ?? 0).getTime() -
-                new Date(a.start_time ?? 0).getTime()
-              );
-            }
-
-            return (
-              new Date(b.start_time ?? 0).getTime() -
-              new Date(a.start_time ?? 0).getTime()
-            );
-          })
-          .map((meeting, i) => (
-            <ZoomMeetingsCard key={`meeting-${i}`} meeting={meeting} />
-          ))}
-      </ul>
     </div>
   );
 };

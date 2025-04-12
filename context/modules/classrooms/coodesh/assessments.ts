@@ -1,15 +1,44 @@
-import {
-  createClassroomCoodeshAssessment,
-  updateClassroomCoodeshAssessment,
-} from "@/app/actions/classrooms/coodesh";
-import { ClassroomType } from "@/types/classrooms";
-import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
-import { Dispatch, SetStateAction } from "react";
+"use client";
+import { useState } from "react";
 import { toast } from "sonner";
 
-const CoodeshAssessmentsStack = (
-  setClassrooms: Dispatch<SetStateAction<ClassroomType[]>>
-) => {
+import {
+  createClassroomCoodeshAssessment,
+  getAllClassroomCoodeshAssessment,
+  updateClassroomCoodeshAssessment,
+} from "@/app/actions/classrooms/coodesh";
+
+import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
+
+const CoodeshAssessmentsStack = () => {
+  const [assessments, setAssessments] = useState<ClassroomCoodeshAssessment[]>(
+    []
+  );
+
+  const handleGetAllCoodeshAssessmentByClassroomId = async (
+    classroomId: string
+  ) => {
+    try {
+      if (!classroomId) throw new Error("required fields");
+
+      const allAssessments = await getAllClassroomCoodeshAssessment(
+        classroomId
+      );
+
+      if (!allAssessments)
+        throw new Error("no assessment created successfully");
+
+      setAssessments(allAssessments);
+      return true;
+    } catch (error) {
+      console.log(error);
+      toast.error(
+        "Erro ao buscar avaliações da sala de aula! Tente novamente mais tarde!"
+      );
+      return false;
+    }
+  };
+
   const handleCreateCoodeshAssessment = async (
     assessmentData: Partial<ClassroomCoodeshAssessment>
   ) => {
@@ -23,22 +52,10 @@ const CoodeshAssessmentsStack = (
       if (!assessmentCreated)
         throw new Error("no assessment created successfully");
 
-      setClassrooms((classrooms) =>
-        classrooms.map((classroom) =>
-          classroom.id === assessmentData.classroom_id
-            ? {
-                ...classroom,
-                classroom_coodesh_assessments:
-                  classroom.classroom_coodesh_assessments
-                    ? [
-                        ...classroom.classroom_coodesh_assessments,
-                        assessmentCreated,
-                      ]
-                    : [assessmentCreated],
-              }
-            : classroom
-        )
-      );
+      setAssessments((prevAssessments) => [
+        ...prevAssessments,
+        assessmentCreated,
+      ]);
       toast.success("Avaliação anexada com sucesso!");
       return true;
     } catch (error) {
@@ -63,19 +80,9 @@ const CoodeshAssessmentsStack = (
       if (!updatedAssessment)
         throw new Error("no assessment updated successfully");
 
-      setClassrooms((prevTeams) =>
-        prevTeams.map((classroom) =>
-          classroom.id === assessment.classroom_id
-            ? {
-                ...classroom,
-                classroom_coodesh_assessments:
-                  classroom.classroom_coodesh_assessments?.map((assessment) =>
-                    assessment.id === assessment.id
-                      ? updatedAssessment
-                      : assessment
-                  ),
-              }
-            : classroom
+      setAssessments((prevAssessments) =>
+        prevAssessments.map((assmt) =>
+          assmt.id === updatedAssessment.id ? updatedAssessment : assmt
         )
       );
       toast.success("Avaliação atualizada com sucesso!");
@@ -88,6 +95,8 @@ const CoodeshAssessmentsStack = (
   };
 
   return {
+    assessments,
+    handleGetAllCoodeshAssessmentByClassroomId,
     handleCreateCoodeshAssessment,
     handleUpdateCoodeshAssessment,
   };
@@ -96,6 +105,10 @@ const CoodeshAssessmentsStack = (
 export default CoodeshAssessmentsStack;
 
 export interface CoodeshAssessmentI {
+  assessments: ClassroomCoodeshAssessment[];
+  handleGetAllCoodeshAssessmentByClassroomId: (
+    classroomId: string
+  ) => Promise<boolean>;
   handleCreateCoodeshAssessment: (
     assessmentData: Partial<ClassroomCoodeshAssessment>
   ) => Promise<boolean>;

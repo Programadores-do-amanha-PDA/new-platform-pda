@@ -3,7 +3,7 @@ export interface ZoomMeetingType {
   id: number;
   agenda?: string;
   created_at: string;
-  duration?: number;
+  duration: number;
   host_id: string;
   join_url: string;
   pmi: string;
@@ -37,7 +37,7 @@ export interface ZoomMeetingType {
   account_id?: string;
   classroom_id?: string;
   is_visible_on_schedule?: boolean;
-  children_type?: string;
+  synchronized_at?: string;
 }
 
 export interface ZoomMeetingOccurrenceType {

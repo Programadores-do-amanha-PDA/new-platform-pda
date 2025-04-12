@@ -78,6 +78,7 @@ const useZoomMeetingsStack = ({
         ...meetingData,
         account_id: account.id,
         classroom_id: account.classroom_id,
+        synchronized_at: new Date().toString(),
         ...meeting,
       });
 
@@ -210,7 +211,12 @@ const useZoomMeetingsStack = ({
     account: Partial<ZoomAccountType>
   ) => {
     try {
-      if (!meetingId) {
+      if (
+        !meetingId ||
+        !account.account_id ||
+        !account.client_id ||
+        !account.client_secret
+      ) {
         throw new Error("id and updates fields are required");
       }
       setLoading(true);
@@ -230,7 +236,13 @@ const useZoomMeetingsStack = ({
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
-          meeting.id === meetingId ? newMeeting : meeting
+          meeting.id === meetingId
+            ? {
+                ...currentMeeting,
+                ...meeting,
+                synchronized_at: new Date().toString(),
+              }
+            : meeting
         )
       );
       toast.success("Reunião atualizada com sucesso!");

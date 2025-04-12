@@ -1,9 +1,7 @@
+import ZoomHomePage from "@/modules/zoom/home-page";
+
 const ZoomPage = () => {
-  return (
-    <div>
-      <h1>Zoom Page</h1>
-    </div>
-  );
+  return <ZoomHomePage />;
 };
 
 export default ZoomPage;

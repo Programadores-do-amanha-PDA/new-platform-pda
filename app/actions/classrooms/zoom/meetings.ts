@@ -70,7 +70,7 @@ const createZoomMeetingByClassroomId = async (
 };
 
 const updateZoomMeetingById = async (
-  meetingId: number | string,
+  meetingId: number,
   updates: Partial<ZoomMeetingType>
 ) => {
   try {
@@ -78,7 +78,7 @@ const updateZoomMeetingById = async (
     const { data, error } = await supabase
       .from("classroom_zoom_meetings")
       .update(updates)
-      .eq("_id", meetingId)
+      .eq("id", meetingId)
       .select()
       .single();
 
