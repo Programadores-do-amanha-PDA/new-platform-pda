@@ -220,16 +220,49 @@ const useZoomMeetingsStack = ({
         throw new Error("id and updates fields are required");
       }
       setLoading(true);
+      toast.info("Atualizando dados da reunião...", {
+        duration: 50000,
+        closeButton: true,
+      });
 
       const currentMeeting = meetings.find(
         (meeting) => meeting.id === meetingId
       );
-      const meeting = await handleGetZoomMeetingByAPI(account, meetingId);
-      if (!meeting) throw new Error("no meeting response");
+      const updatedMeeting = await handleGetZoomMeetingByAPI(
+        account,
+        meetingId
+      );
+      if (!updatedMeeting) throw new Error("no meeting response");
+
+      console.log("Meeting", updatedMeeting);
 
       const newMeeting = await updateZoomMeetingById(meetingId, {
         ...currentMeeting,
-        ...meeting,
+        ...updatedMeeting,
+        past_instances:
+          currentMeeting && currentMeeting?.past_instances?.length > 0
+            ? currentMeeting.past_instances.map((past_instance) => {
+                const updatedPastInstance =
+                  updatedMeeting?.past_instances?.find(
+                    (updatedInstance) =>
+                      updatedInstance.uuid === past_instance.uuid
+                  );
+                return updatedPastInstance
+                  ? { ...past_instance, ...updatedPastInstance }
+                  : past_instance;
+              })
+            : updatedMeeting?.past_instances || [],
+        occurrences: updatedMeeting?.occurrences?.map((occurrence) => {
+          const currentOccurrence = currentMeeting?.occurrences?.find(
+            (currentOccurrence) =>
+              currentOccurrence.occurrence_id === occurrence.occurrence_id
+          );
+
+          return currentOccurrence
+            ? { ...occurrence, ...currentOccurrence }
+            : occurrence;
+        }),
+        synchronized_at: new Date().toISOString(),
       });
 
       if (!newMeeting) throw new Error("no meeting create response");
@@ -245,11 +278,11 @@ const useZoomMeetingsStack = ({
             : meeting
         )
       );
-      toast.success("Reunião atualizada com sucesso!");
+      toast.success("Dados da reunião atualizados com sucesso!");
       return true;
     } catch (error) {
       console.error(error);
-      toast.error("Erro ao atualizar a reunião!");
+      toast.error("Erro ao atualizar dados da reunião!");
       return false;
     } finally {
       setLoading(false);

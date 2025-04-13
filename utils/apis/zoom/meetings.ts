@@ -127,12 +127,7 @@ export const getPastMeetingInstances = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    return (
-      response.data.meetings.map((m: ZoomMeetingPastInstancesType) => ({
-        ...m,
-        is_visible_on_schedule: true,
-      })) || []
-    );
+    return (response.data.meetings as ZoomMeetingPastInstancesType[]) || [];
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
     return [];
@@ -186,7 +181,6 @@ export const getPastedMeetingParticipants = async (
     if (response.status !== 200)
       throw new Error("Failed to fetch participants");
 
-    console.log(response.data.participants);
     return response.data.participants;
   } catch (error) {
     console.error("Error fetching participants:", error);

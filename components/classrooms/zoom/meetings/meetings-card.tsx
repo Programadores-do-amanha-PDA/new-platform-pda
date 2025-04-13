@@ -105,7 +105,11 @@ const ZoomMeetingsCard = ({
                 {meeting?.synchronized_at && (
                   <p className="text-sm h-4 text-muted-foreground flex gap-1">
                     Ultima (re)sincronização:
-                    <p className="font-bold">{meeting?.synchronized_at}</p>
+                    <p className="font-bold">
+                      {new Date(meeting?.synchronized_at).toLocaleDateString(
+                        "pt-BR"
+                      )}
+                    </p>
                   </p>
                 )}
                 {meeting?.past_instances &&
@@ -245,6 +249,16 @@ const ZoomMeetingsCard = ({
 
               <div className="w-full flex justify-between items-center">
                 <div className="flex flex-col gap-2">
+                  {meeting?.synchronized_at && (
+                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
+                      Ultima (re)sincronização:
+                      <p className="font-bold">
+                        {new Date(meeting?.synchronized_at).toLocaleDateString(
+                          "pt-BR"
+                        )}
+                      </p>
+                    </p>
+                  )}
                   {meeting?.participants &&
                   meeting?.participants?.length > 0 ? (
                     <p className="text-sm h-4 text-muted-foreground flex gap-1">

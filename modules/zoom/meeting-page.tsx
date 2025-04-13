@@ -1,8 +1,11 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { ZoomMeetingType } from "@/types/zoom/meetings";
+import {
+  ZoomMeetingParticipantType,
+  ZoomMeetingPollResults,
+} from "@/types/zoom/meetings";
 import {
   Table,
   TableBody,
@@ -23,53 +26,96 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis } from "lucide-react";
+import { Ellipsis, RefreshCw, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { toast } from "sonner";
+
+type MeetingOccurrence = {
+  topic: string;
+  meeting_id: string;
+  occurrence_id: string;
+  start_time: string;
+  duration: number;
+  status?: string;
+  is_visible_on_schedule: boolean;
+  actions?: string;
+};
+
+type ValidMeetingKeys = Exclude<keyof MeetingOccurrence, "actions">;
+type Column = {
+  accessorKey: ValidMeetingKeys;
+  header: string;
+  cell?: ({ row }: { row: { original: MeetingOccurrence } }) => React.ReactNode;
+};
+
+type MeetingPastInstance = {
+  topic: string;
+  meeting_id: string;
+  uuid: string;
+  start_time: string;
+  duration: number;
+  id: number;
+  poll_results?: ZoomMeetingPollResults[];
+  participants?: ZoomMeetingParticipantType[];
+  is_visible_on_schedule?: boolean;
+};
 
 const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const {
     classroomsStack: {
       zoom: {
-        meetings: { meetings },
+        accounts: { accounts },
+        meetings: { meetings, handleRefreshAndUpdateZoomMeeting },
       },
     },
   } = useAdminStackContext();
 
+  const currentMeeting = meetings?.find((m) => m._id === meeting_id);
+
+  const handleRefreshMeeting = async () => {
+    setIsUpdating(true);
+
+    try {
+      if (!currentMeeting) throw new Error("Meeting not found");
+
+      const account = accounts.find(
+        (account) => account.id === currentMeeting.account_id
+      );
+      if (!account) return;
+
+      await handleRefreshAndUpdateZoomMeeting(currentMeeting.id, account);
+
+      setIsUpdating(false);
+    } catch {
+      toast.error("Erro ao atualizar a reunião!");
+      setIsUpdating(false);
+    }
+  };
+
   // Processamento das meetings
-  const { upcomingMeetings, completedMeetings } = useMemo(() => {
-    const allMeetings = meetings
-      .filter((m) => m._id === meeting_id)
-      .flatMap((meeting) => [
-        ...(meeting.occurrences?.map((occurrence) => ({
-          ...meeting,
-          id: Number(occurrence.occurrence_id),
-          start_time: occurrence.start_time,
-          status: "upcoming",
-        })) || []),
-        ...(meeting.past_instances?.map((instance) => ({
-          ...meeting,
-          uuid: instance.uuid,
-          start_time: instance.start_time,
-          status: "completed",
-          participants: instance.participants,
-          poll_results: instance.poll_results,
-        })) || []),
-      ]);
-
-    const now = Date.now();
-
+  const { meetingOccurrences, meetingPastInstances } = useMemo(() => {
     return {
-      upcomingMeetings: allMeetings.filter(
-        (m) => new Date(m.start_time!).getTime() > now
-      ),
-      completedMeetings: allMeetings.filter(
-        (m) => new Date(m.start_time!).getTime() <= now
+      meetingOccurrences: currentMeeting?.occurrences?.map((occurrence) => ({
+        ...occurrence,
+        topic: currentMeeting.topic,
+        meeting_id: currentMeeting._id,
+      })),
+      meetingPastInstances: currentMeeting?.past_instances?.map(
+        (pastInstance) => ({
+          ...pastInstance,
+          topic: currentMeeting.topic,
+          duration: currentMeeting.duration,
+          meeting_id: currentMeeting._id,
+        })
       ),
     };
   }, [meetings, meeting_id]);
 
-  // Colunas para meetings futuras (Table)
-  const upcomingColumns = [
+  const meetingOccurrencesColumns: Column[] = [
     {
       accessorKey: "topic",
       header: "Reunião",
@@ -77,41 +123,37 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
     {
       accessorKey: "start_time",
       header: "Data/Hora",
-      cell: ({ row }: { row: { original: { start_time: string | Date } } }) =>
+      cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
         format(new Date(row.original.start_time), "Pp", { locale: ptBR }),
     },
     {
       accessorKey: "duration",
       header: "Duração",
-      cell: ({ row }: { row: { original: { duration: number } } }) =>
+      cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
         `${row.original.duration} minutos`,
     },
     {
-      accessorKey: "host_email",
-      header: "Host",
-    },
-    {
-      accessorKey: "actions",
+      accessorKey: "is_visible_on_schedule",
       header: "Ações",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Ellipsis className="size-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="!p-0">
-              <Button variant="ghost">Ocultar do calendário</Button>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
+        !isUpdating && (
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <Ellipsis className="size-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="!p-0">
+                <Button variant="ghost">Ocultar do calendário</Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ),
     },
   ];
 
-  // Colunas para meetings terminadas (DataTable)
-  const completedColumns: ColumnDef<ZoomMeetingType>[] = [
+  const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     {
       accessorKey: "topic",
       header: "Reunião",
@@ -166,64 +208,143 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
   }
 
   return (
-    <div className="w-full h-full p-4 overflow-hidden">
-      <Tabs defaultValue="upcoming">
-        <TabsList>
-          <TabsTrigger value="upcoming">
-            Futuras ({upcomingMeetings.length})
-          </TabsTrigger>
-          <TabsTrigger value="completed">
-            Terminadas ({completedMeetings.length})
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Tab Meetings Futuras */}
-        <TabsContent
-          value="upcoming"
-          className="flex w-full h-full overflow-hidden"
-        >
-          <div className="w-full max-h-[80vh] h-full flex overflow-y-auto border rounded-md">
-            <Table>
-              <TableHeader className="sticky top-0 bg-background">
-                <TableRow>
-                  {upcomingColumns.map((column) => (
-                    <TableHead key={column.accessorKey}>
-                      {column.header}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {upcomingMeetings.map((meeting) => (
-                  <TableRow key={meeting.id} data-meeting-id={meeting.id}>
-                    {upcomingColumns.map((column) => (
-                      <TableCell key={`${meeting.id}-${column.accessorKey}`}>
-                        {column.cell
-                          ? column.cell({ row: { original: meeting } })
-                          : renderCellValue(
-                              meeting[
-                                column.accessorKey as keyof ZoomMeetingType
-                              ]
-                            )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+    <div className="w-full h-full p-4 overflow-hidden flex flex-col gap-8">
+      <header className="w-full flex flex-col gap-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="font-bold text-2xl text-foreground">
+              {currentMeeting?.topic}
+            </h2>
+            <p className="text-muted-foreground font-semibold flex gap-1">
+              Ultima sincronização em:
+              <p className="font-normal">
+                {currentMeeting?.synchronized_at &&
+                  new Date(
+                    currentMeeting.synchronized_at || 0
+                  ).toLocaleDateString("pt-BR")}
+              </p>
+            </p>
+            <p className="text-muted-foreground flex gap-1 font-semibold">
+              Host:
+              <p className="font-normal">{currentMeeting?.host_email}</p>
+            </p>
           </div>
-        </TabsContent>
+          <Button
+            disabled={isUpdating}
+            onClick={handleRefreshMeeting}
+            title="Atualizar"
+            className="font-semibold"
+          >
+            <RefreshCw className={cn("size-5", isUpdating && "animate-spin")} />
+            Atualizar
+          </Button>
+        </div>
 
-        <TabsContent
-          value="completed"
-          className="flex w-full h-full overflow-hidden"
+        {meetingOccurrences &&
+          meetingOccurrences?.filter(
+            (m) => new Date(m.start_time).getTime() < Date.now()
+          )?.length > 0 && (
+            <Alert variant={"destructive"}>
+              <Siren className="size-4" />
+              <AlertTitle className="font-semibold">
+                Foi encontrado dados desatualizados!
+              </AlertTitle>
+              <AlertDescription>
+                Foram encontrados{" "}
+                {
+                  meetingOccurrences?.filter(
+                    (m) => new Date(m.start_time).getTime() < Date.now()
+                  ).length
+                }{" "}
+                instancias desatualizadas, atualize (re-sincronize) os dados
+                desta reunião.
+              </AlertDescription>
+            </Alert>
+          )}
+      </header>
+
+      {(meetingOccurrences?.length || meetingPastInstances?.length) && (
+        <Tabs
+          defaultValue="upcoming"
+          className="w-full h-full flex flex-col overflow-hidden"
         >
-          <MeetingDataTable
-            columns={completedColumns}
-            data={completedMeetings}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsList className="w-max flex gap-2 overflow-hidden">
+            {meetingOccurrences && meetingOccurrences?.length > 0 && (
+              <TabsTrigger value="upcoming">
+                Futuras ({meetingOccurrences.length})
+              </TabsTrigger>
+            )}
+
+            {meetingPastInstances && meetingPastInstances.length > 0 && (
+              <TabsTrigger value="completed">
+                Terminadas ({meetingPastInstances.length})
+              </TabsTrigger>
+            )}
+          </TabsList>
+
+          {meetingOccurrences?.length && (
+            <TabsContent
+              value="upcoming"
+              className="w-full h-full overflow-hidden"
+            >
+              <div className="w-full max-h-[70vh] h-full flex overflow-y-auto border rounded-md">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-background">
+                    {meetingOccurrencesColumns.map((column) => (
+                      <TableHead key={column.accessorKey}>
+                        {column.header}
+                      </TableHead>
+                    ))}
+                  </TableHeader>
+                  <TableBody>
+                    {meetingOccurrences
+                      ?.filter(
+                        (m) => new Date(m.start_time).getTime() > Date.now()
+                      )
+                      .map((meeting) => {
+                        if (!meeting) return null;
+                        return (
+                          <TableRow
+                            key={meeting.occurrence_id}
+                            data-meeting-id={meeting.occurrence_id}
+                            className={cn(
+                              new Date(meeting.start_time).getTime() <
+                                Date.now() && "bg-red-100 hover:bg-red-100"
+                            )}
+                          >
+                            {meetingOccurrencesColumns.map((column) => (
+                              <TableCell
+                                key={`${meeting.occurrence_id}-${column.accessorKey}`}
+                              >
+                                {column.cell
+                                  ? column.cell({ row: { original: meeting } })
+                                  : renderCellValue(
+                                      meeting[column.accessorKey]
+                                    )}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          )}
+
+          {meetingPastInstances && (
+            <TabsContent
+              value="completed"
+              className="w-full h-full bg-red-400 overflow-hidden"
+            >
+              <MeetingDataTable
+                columns={meetingPastInstancesColumns}
+                data={meetingPastInstances}
+              />
+            </TabsContent>
+          )}
+        </Tabs>
+      )}
     </div>
   );
 };
