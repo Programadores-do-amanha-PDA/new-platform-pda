@@ -18,7 +18,7 @@ const pathLabels: { [key: string]: string } = {
   curriculum: "Meu currículo",
   applications: "Minhas candidaturas",
   archives: "Vagas arquivadas",
-  meetings: "Meetings",
+  meetings: "Reuniões",
   classrooms: "Turmas",
   coodesh: "⬆️ Coodesh",
   zoom: "⬆️ Zoom",

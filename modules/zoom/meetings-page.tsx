@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import MeetingsSheetData from "@/components/classrooms/zoom/meetings/meetings-sheet-data";
 import ZoomMeetingsCard from "@/components/classrooms/zoom/meetings/meetings-card";
-import { MeetingsParticipantsChart } from "@/components/classrooms/zoom/meetings-participants-chart";
 
 type meetingStatusT = "all" | "upcoming" | "completed";
 
@@ -25,7 +24,6 @@ const ZoomMeetingsPage = () => {
     classroomsStack: {
       zoom: {
         meetings: { meetings },
-        accounts: { accounts },
       },
     },
   } = useAdminStackContext();
@@ -69,29 +67,8 @@ const ZoomMeetingsPage = () => {
 
   const statusFilters: meetingStatusT[] = ["all", "upcoming", "completed"];
 
-  const chartData = meetings
-    .map((meeting) => {
-      const account = accounts.find((acc) => acc.id === meeting.account_id);
-      const account_label =
-        account?.me?.display_name || meeting.account_id || "Desconhecida";
-
-      return (
-        meeting?.past_instances?.map((instance) => ({
-          account_id: meeting.account_id || "",
-          account_label: account_label,
-          date: instance?.start_time,
-          participants: instance?.participants?.length || 0,
-          poll_results: instance?.poll_results?.length || 0,
-        })) || []
-      );
-    })
-    .flat()
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
   return (
     <div className="w-full h-full flex flex-col gap-6 py-6 overflow-y-auto px-4">
-      <MeetingsParticipantsChart chartData={chartData} />
-
       <div className="w-full h-full flex flex-col gap-6">
         <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
           <div className="w-max h-9 flex gap-4">

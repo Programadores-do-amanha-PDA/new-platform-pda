@@ -15,6 +15,16 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MeetingDataTable } from "@/components/classrooms/zoom/meetings/meeting/meeting-data-table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Ellipsis } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
   const {
@@ -79,6 +89,24 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
     {
       accessorKey: "host_email",
       header: "Host",
+    },
+    {
+      accessorKey: "actions",
+      header: "Ações",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Ellipsis className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="!p-0">
+              <Button variant="ghost">Ocultar do calendário</Button>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
     },
   ];
 

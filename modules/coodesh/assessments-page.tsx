@@ -23,8 +23,8 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
   );
 
   return (
-    <div className="relative w-full h-max py-4 flex flex-col gap-6 overflow-hidden">
-      <header className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
+    <div className="relative w-full h-max p-4 flex flex-col gap-6 overflow-hidden">
+      <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
         <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
           <Input
             id="search"
@@ -41,7 +41,7 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
         <AssessmentsSheetData classroom_id={classroom_id} />
       </header>
 
-        <ul className="p-2 py-4 h-full w-full flex flex-col sm:flex-row sm:flex-wrap gap-4 overflow-y-auto pr-4">
+        <ul className="p-2 h-full w-full flex flex-col sm:flex-row sm:flex-wrap gap-4 overflow-y-auto pr-4">
           {filteredAssessments
             ?.sort(
               (a, b) =>
@@ -53,6 +53,7 @@ const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
                 key={assessment.assessment_id}
                 assessment={assessment}
                 handleUpdateCoodeshAssessment={handleUpdateCoodeshAssessment}
+                expansive={true}
               />
             ))}
 

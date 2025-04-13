@@ -1,9 +1,1 @@
-const CoodeshPage = () => {
-  return (
-    <div>
-      <h1>Coodesh Page</h1>
-    </div>
-  );
-};
-
-export default CoodeshPage;
+export { default } from "@/modules/coodesh/home-page";

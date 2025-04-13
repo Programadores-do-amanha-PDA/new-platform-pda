@@ -6,6 +6,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,6 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const chartConfig = {
   views: {
@@ -49,6 +54,7 @@ export function MeetingsParticipantsChart({
     poll_results: number;
   }[];
 }) {
+  const path = usePathname();
   const [timeRange, setTimeRange] = useState<"all" | "90d" | "30d" | "7d">(
     "30d"
   );
@@ -240,6 +246,17 @@ export function MeetingsParticipantsChart({
           </AreaChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter className="flex justify-center items-center">
+        <Link href={`${path}/meetings`}>
+          <Button
+            variant="link"
+            className="text-sm font-bold text-primary-foreground"
+          >
+            Ir para Reuniões
+            <ArrowRight className="-rotate-6" />
+          </Button>
+        </Link>
+      </CardFooter>
     </Card>
   );
 }

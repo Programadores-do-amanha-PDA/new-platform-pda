@@ -1,6 +1,6 @@
 "use client";
 import ZoomAccountCard from "@/components/classrooms/zoom/accounts/account-card";
-import ZoomMeetingsCard from "@/components/classrooms/zoom/meetings/meetings-card";
+import { MeetingsParticipantsChart } from "@/components/classrooms/zoom/meetings-participants-chart";
 import { Button } from "@/components/ui/button";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { ArrowRight } from "lucide-react";
@@ -16,6 +16,25 @@ const ZoomHomePage = () => {
       },
     },
   } = useAdminStackContext();
+
+  const chartData = meetings
+    .map((meeting) => {
+      const account = accounts.find((acc) => acc.id === meeting.account_id);
+      const account_label =
+        account?.me?.display_name || meeting.account_id || "Desconhecida";
+
+      return (
+        meeting?.past_instances?.map((instance) => ({
+          account_id: meeting.account_id || "",
+          account_label: account_label,
+          date: instance?.start_time,
+          participants: instance?.participants?.length || 0,
+          poll_results: instance?.poll_results?.length || 0,
+        })) || []
+      );
+    })
+    .flat()
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const path = usePathname();
 
@@ -48,39 +67,7 @@ const ZoomHomePage = () => {
         </ul>
       </div>
 
-      <div className="w-full h-full flex flex-wrap items-start gap-4 px-6 overflow-hidden">
-        <header className="w-full flex justify-between gap-4">
-          <p className="text-lg font-bold mb-4">Reuniões sincronizadas</p>
-          <Link href={`${path}/meetings`}>
-            <Button
-              variant="link"
-              className="text-sm font-bold text-primary-foreground"
-            >
-              Ver todas as reuniões
-              <ArrowRight className="-rotate-6" />
-            </Button>
-          </Link>
-        </header>
-
-        <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto">
-          {meetings
-            .sort(
-              (a, b) =>
-                new Date(b.start_time ?? 0).getTime() -
-                new Date(a.start_time ?? 0).getTime()
-            )
-            .filter((_, i) => i < 10)
-            .map((meeting, i) => (
-              <ZoomMeetingsCard
-                key={`meeting-${i}`}
-                meeting={meeting}
-                allMeetingLoading={false}
-                setAllMeetingLoading={() => {}}
-                expansive={false}
-              />
-            ))}
-        </ul>
-      </div>
+      <MeetingsParticipantsChart chartData={chartData} />
     </div>
   );
 };

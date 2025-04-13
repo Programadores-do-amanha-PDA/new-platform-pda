@@ -20,11 +20,13 @@ type AssessmentsClassroomListCardProps = {
     assessment: ClassroomCoodeshAssessment,
     assessmentData: Partial<ClassroomCoodeshAssessment>
   ) => Promise<boolean>;
+  expansive: boolean;
 };
 
 const AssessmentsClassroomListCard = ({
   assessment,
   handleUpdateCoodeshAssessment,
+  expansive,
 }: AssessmentsClassroomListCardProps) => {
   const path = usePathname();
 
@@ -111,48 +113,55 @@ const AssessmentsClassroomListCard = ({
           </p>
         </div>
       </div>
-      <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
-        <div className="w-full flex flex-col gap-6">
-          <div className="w-full flex flex-col gap-2">
-            <Label htmlFor="startDate" className="font-semibold">
-              Período de entregas:
+      {expansive && (
+        <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
+          <div className="w-full flex flex-col gap-6">
+            <div className="w-full flex flex-col gap-2">
+              <Label htmlFor="startDate" className="font-semibold">
+                Período de entregas:
+              </Label>
+              <DateIntervalPicker
+                date={scheduleDate}
+                setDate={setScheduleDate}
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={`is_visible_on_schedule_${assessment.id}`}
+              checked={isVisibleOnSchedule}
+              onCheckedChange={(v: boolean) => setIsVisibleOnSchedule(v)}
+              disabled={
+                scheduleDate?.from === undefined ||
+                scheduleDate?.to === undefined
+              }
+            />
+            <Label htmlFor={`is_visible_on_schedule_${assessment.id}`}>
+              Visível no calendário da turma?
             </Label>
-            <DateIntervalPicker date={scheduleDate} setDate={setScheduleDate} />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={`accept_late_deliveries_${assessment.id}`}
+              checked={acceptLateDeliveries}
+              onCheckedChange={(v: boolean) => setAcceptLateDeliveries(v)}
+              disabled={
+                scheduleDate?.from === undefined ||
+                scheduleDate?.to === undefined
+              }
+            />
+            <Label htmlFor={`accept_late_deliveries_${assessment.id}`}>
+              Aceitar entregas apos o prazo final?
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button disabled={!isEdit} onClick={handleUpdateAssessment}>
+              {loading && <LoaderCircle className="size-5 animate-spin" />}
+              Salvar alterações
+            </Button>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id={`is_visible_on_schedule_${assessment.id}`}
-            checked={isVisibleOnSchedule}
-            onCheckedChange={(v: boolean) => setIsVisibleOnSchedule(v)}
-            disabled={
-              scheduleDate?.from === undefined || scheduleDate?.to === undefined
-            }
-          />
-          <Label htmlFor={`is_visible_on_schedule_${assessment.id}`}>
-            Visível no calendário da turma?
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id={`accept_late_deliveries_${assessment.id}`}
-            checked={acceptLateDeliveries}
-            onCheckedChange={(v: boolean) => setAcceptLateDeliveries(v)}
-            disabled={
-              scheduleDate?.from === undefined || scheduleDate?.to === undefined
-            }
-          />
-          <Label htmlFor={`accept_late_deliveries_${assessment.id}`}>
-            Aceitar entregas apos o prazo final?
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button disabled={!isEdit} onClick={handleUpdateAssessment}>
-            {loading && <LoaderCircle className="size-5 animate-spin" />}
-            Salvar alterações
-          </Button>
-        </div>
-      </div>
+      )}
     </li>
   );
 };
