@@ -167,7 +167,7 @@ const useZoomMeetingsStack = ({
 
   const handleUpdateZoomMeetingPastInstance = async (
     meetingId: number,
-    pastInstanceId: number,
+    pastInstanceId: string,
     updates: Partial<ZoomMeetingOccurrenceType>
   ) => {
     try {
@@ -180,7 +180,7 @@ const useZoomMeetingsStack = ({
       );
       const updatedPastsInstancies = currentMeeting?.past_instances?.map(
         (past_instancie) =>
-          past_instancie.id === pastInstanceId
+          past_instancie.uuid === pastInstanceId
             ? { ...past_instancie, ...updates }
             : past_instancie
       );
@@ -269,13 +269,7 @@ const useZoomMeetingsStack = ({
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
-          meeting.id === meetingId
-            ? {
-                ...currentMeeting,
-                ...meeting,
-                synchronized_at: new Date().toString(),
-              }
-            : meeting
+          meeting._id === currentMeeting?._id ? newMeeting : meeting
         )
       );
       toast.success("Dados da reunião atualizados com sucesso!");
@@ -349,7 +343,7 @@ export interface ZoomMeetingsStackI {
   ) => Promise<boolean>;
   handleUpdateZoomMeetingPastInstance: (
     meetingId: number,
-    pastInstanceId: number,
+    pastInstanceId: string,
     updates: Partial<ZoomMeetingOccurrenceType>
   ) => Promise<boolean>;
   handleRefreshAndUpdateZoomMeeting: (

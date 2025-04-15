@@ -30,10 +30,16 @@ const ZoomHomePage = () => {
           date: instance?.start_time,
           participants: instance?.participants?.length || 0,
           poll_results: instance?.poll_results?.length || 0,
+          is_visible_on_schedule: instance?.is_visible_on_schedule,
         })) || []
       );
     })
     .flat()
+    .filter(
+      (i) =>
+        i.is_visible_on_schedule === undefined ||
+        i.is_visible_on_schedule === true
+    )
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const path = usePathname();

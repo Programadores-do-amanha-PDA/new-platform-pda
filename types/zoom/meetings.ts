@@ -45,7 +45,7 @@ export interface ZoomMeetingOccurrenceType {
   start_time: string;
   duration: number;
   status?: string;
-  is_visible_on_schedule: boolean;
+  is_visible_on_schedule: boolean | undefined;
 }
 
 export interface ZoomMeetingRecurrenceType {
@@ -90,7 +90,7 @@ export interface ZoomMeetingPastInstancesType {
   id: number;
   poll_results?: ZoomMeetingPollResults[];
   participants?: ZoomMeetingParticipantType[];
-  is_visible_on_schedule?: boolean;
+  is_visible_on_schedule: boolean | undefined;
 }
 
 export interface ZoomMeetingTrackingFieldType {
