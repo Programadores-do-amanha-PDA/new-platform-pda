@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
+import LoadingComponent from "@/components/loading-component";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -8,14 +9,14 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { classroom_id } = useParams<{ classroom_id: string }>();
 
   if (!classroom_id) {
-    return (<div>Turma não encontrada.</div>)
+    return <div>Turma não encontrada.</div>;
   }
 
   const {
     classroomsStack: {
       zoom: {
-        accounts: { accounts, handleGetAllZoomAccounts },
-        meetings: { meetings, handleGetAllZoomMeetings },
+        accounts: { accounts, accountsLoading, handleGetAllZoomAccounts },
+        meetings: { meetings, meetingsLoading, handleGetAllZoomMeetings },
       },
     },
   } = useAdminStackContext();
@@ -29,6 +30,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       handleGetAllZoomAccounts(classroom_id);
     }
   }, [classroom_id]);
+
+  if (accountsLoading || meetingsLoading) return <LoadingComponent />;
 
   return children;
 };

@@ -1,9 +1,8 @@
 "use server";
-
 import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
 import { createClient } from "@/utils/supabase/server";
 
-export const createClassroomCoodeshAssessment = async (
+export const createCoodeshAssessment = async (
   assessmentData: Partial<ClassroomCoodeshAssessment>
 ) => {
   try {
@@ -21,7 +20,7 @@ export const createClassroomCoodeshAssessment = async (
   }
 };
 
-export const getAllClassroomCoodeshAssessment = async (classRoomId: string) => {
+export const getAllCoodeshAssessment = async (classRoomId: string) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -38,7 +37,7 @@ export const getAllClassroomCoodeshAssessment = async (classRoomId: string) => {
   }
 };
 
-export const getClassroomCoodeshAssessmentById = async (id: number) => {
+export const getCoodeshAssessmentById = async (id: number) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -55,33 +54,32 @@ export const getClassroomCoodeshAssessmentById = async (id: number) => {
   }
 };
 
-export const updateClassroomCoodeshAssessment = async (
+export const updateCoodeshAssessment = async (
   id: string,
   assessmentData: Partial<ClassroomCoodeshAssessment>
 ) => {
+  console.log({ ...assessmentData, updated_at: new Date().toISOString() })
   try {
     const supabase = await createClient();
-    // Add updated_at timestamp
-    const updatedData = {
-      ...assessmentData,
-      updated_at: new Date().toISOString(),
-    };
 
     const { data, error } = await supabase
       .from("classroom_coodesh_assessments")
-      .update(updatedData)
+      .update({ ...assessmentData, updated_at: new Date().toISOString() })
       .eq("id", id)
-      .select();
+      .select()
+      .single();
+
+    console.log(data, error);
 
     if (error) throw error;
-    return data[0] as ClassroomCoodeshAssessment;
+    return data as ClassroomCoodeshAssessment;
   } catch (error) {
     console.error("Error updating classroom coodesh assessment:", error);
     return false;
   }
 };
 
-export const deleteClassroomCoodeshAssessment = async (id: number) => {
+export const deleteCoodeshAssessment = async (id: string) => {
   try {
     const supabase = await createClient();
     const { error } = await supabase

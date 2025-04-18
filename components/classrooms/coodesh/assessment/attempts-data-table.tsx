@@ -229,7 +229,7 @@ export function AttemptsDataTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() =>
                   navigator.clipboard.writeText(
@@ -326,11 +326,10 @@ export function AttemptsDataTable({
                 assessment={assessment}
                 handleUpdateCoodeshAssessment={handleUpdateCoodeshAssessment}
               />
-
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
+                    <span className="sr-only">Abrir menu</span>
                     <MoreHorizontal />
                   </Button>
                 </DropdownMenuTrigger>

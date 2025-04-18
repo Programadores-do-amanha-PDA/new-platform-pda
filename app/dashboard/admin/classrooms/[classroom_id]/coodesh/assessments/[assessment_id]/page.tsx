@@ -9,4 +9,4 @@ const CoodeshAssessmentPage = async ({
   return <AssessmentPage assessment_id={assessment_id} />;
 };
 
-export default CoodeshAssessmentPage;
+export default CoodeshAssessmentPage; 

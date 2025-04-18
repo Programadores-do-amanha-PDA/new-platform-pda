@@ -17,6 +17,8 @@ import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth";
 import { Badge } from "../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { cn } from "@/lib/utils";
 
 const ProfilesDataTable = ({
   users,
@@ -61,11 +63,30 @@ const ProfilesDataTable = ({
         />
       ),
       cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value: unknown) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
+        <Avatar className="relative group">
+          <AvatarFallback>
+            {row
+              .getValue<ProfileType>("profile")
+              .full_name.split(" ")
+              .filter((word, i) => i < 2)
+              .map((word) => word[0].toUpperCase())
+              .join("") || "U"}
+          </AvatarFallback>
+          <AvatarImage src="/assets/images/avatar.png" />
+          <div
+            className={cn(
+              "bg-primary/15 rounded-full absolute top-0 right-0 bottom-0 left-0 m-auto hidden group-hover:flex justify-center items-center",
+              row.getIsSelected() && "!flex"
+            )}
+          >
+            <Checkbox
+              checked={row.getIsSelected()}
+              onCheckedChange={(value: unknown) => row.toggleSelected(!!value)}
+              aria-label="Select row"
+              className="size-5"
+            />
+          </div>
+        </Avatar>
       ),
       enableSorting: false,
       enableHiding: false,

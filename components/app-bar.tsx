@@ -17,12 +17,15 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { cn } from "@/lib/utils";
-import pathLabels from "@/utils/path-labels";
 
-export function AppBar() {
+interface AppBarProps {
+  pathLabels: { [key: string]: string };
+}
+
+const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   const path = usePathname();
   const segments = path.split("/").filter(Boolean);
-  const lastSegment = segments[segments.length - 1] || "Inicio";
+  // const lastSegment = segments[segments.length - 1] || "Inicio";
 
   const role = segments[1] || "";
   const parts = segments.slice(2);
@@ -43,15 +46,16 @@ export function AppBar() {
     [
       {
         label: "Inicio",
-        title: `Olá ${user?.profile?.full_name} 👋🏿`,
+        title: `Olá ${user?.profile?.full_name.split(" ", 1)[0]} 👋🏿`,
         href: `/dashboard/${role}`,
       },
     ]
   );
 
-  const title =
-    pathLabels[lastSegment] ||
-    lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+  const title = breadcrumbItems[breadcrumbItems.length - 1]?.title
+    ? breadcrumbItems[breadcrumbItems.length - 1]?.title
+    : breadcrumbItems[breadcrumbItems.length - 1]?.label;
+
   return (
     <div className="w-full flex flex-col gap-1 sticky top-0 left-0 bg-sidebar z-50 border-b">
       <div className="flex gap-4 items-center px-4 py-2">
@@ -91,4 +95,6 @@ export function AppBar() {
       </div>
     </div>
   );
-}
+};
+
+export default AppBar;

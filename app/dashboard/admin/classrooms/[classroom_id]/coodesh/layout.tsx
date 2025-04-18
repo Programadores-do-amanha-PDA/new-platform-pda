@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
+import LoadingComponent from "@/components/loading-component";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
@@ -13,7 +14,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const {
     classroomsStack: {
-      coodesh: { assessments, handleGetAllCoodeshAssessmentByClassroomId },
+      coodesh: { assessments, assessmentsLoading, handleGetAllCoodeshAssessmentByClassroomId },
     },
   } = useAdminStackContext();
 
@@ -22,6 +23,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       handleGetAllCoodeshAssessmentByClassroomId(classroom_id);
     }
   }, [classroom_id]);
+
+  if(assessmentsLoading) return <LoadingComponent />;
 
   return children;
 };

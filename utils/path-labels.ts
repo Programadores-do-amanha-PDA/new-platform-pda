@@ -1,4 +1,6 @@
 const pathLabels: { [key: string]: string } = {
+  // Home pages
+
   users: "Usuários",
   companies: "Empresas",
   jobs: "Vagas",
@@ -6,12 +8,10 @@ const pathLabels: { [key: string]: string } = {
   curation: "Curadoria de Vagas",
   dashboard: "Dashboard",
   all_users: "Todos os usuários",
-  alumni: "Alumni",
   all_alumni: "Todos os Alumni",
   all_companies: "Todos as empresas",
   all_jobs: "Todas as vagas",
   all_applications: "Todas as aplicações",
-  admin: "Administração",
   settings: "Configurações",
   profile: "Perfil",
   match: "Match de vagas",

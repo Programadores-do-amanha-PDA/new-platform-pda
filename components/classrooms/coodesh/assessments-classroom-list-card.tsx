@@ -88,7 +88,7 @@ const AssessmentsClassroomListCard = ({
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
           <Link
-            href={`${path}/${assessment.id}`}
+            href={expansive ? `${path}/${assessment.id}` : `${path}/assessments/${assessment.id}`}
             className="font-semibold truncate hover:underline cursor-pointer"
             title={assessment.name}
           >

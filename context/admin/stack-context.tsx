@@ -19,7 +19,6 @@ import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import LoadingComponent from "@/components/loading-component";
 
 import { AuthUserWithProfileType } from "@/types/auth";
-import { AppBar } from "@/components/app-bar";
 import useZoomMeetingsStack, {
   ZoomMeetingsStackI,
 } from "../modules/classrooms/zoom/meetings";
@@ -29,6 +28,9 @@ import useZoomAPIMeetingsStack, {
 import useZoomAccountsStack, {
   ZoomAccountsStackI,
 } from "../modules/classrooms/zoom/accounts";
+
+import pathLabels from "@/utils/path-labels";
+import AppBar from "@/components/app-bar";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -71,6 +73,7 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleDeleteClassroom: () => Promise.resolve(false),
     coodesh: {
       assessments: [],
+      assessmentsLoading: false,
       handleGetAllCoodeshAssessmentByClassroomId: () => Promise.resolve(false),
       handleCreateCoodeshAssessment: () => Promise.resolve(false),
       handleUpdateCoodeshAssessment: () => Promise.resolve(false),
@@ -181,6 +184,7 @@ export const AdminStackProvider = ({
   // Coodesh
   const {
     assessments,
+    assessmentsLoading,
     handleGetAllCoodeshAssessmentByClassroomId,
     handleCreateCoodeshAssessment,
     handleUpdateCoodeshAssessment,
@@ -318,6 +322,36 @@ export const AdminStackProvider = ({
     projects: [],
   };
 
+  const adminPathLabels = () => {
+    const classroomLabels: Record<string, string> = {};
+    const ZoomMeetings: Record<string, string> = {};
+    const CoodeshAssesments: Record<string, string> = {};
+
+    if (classrooms.length > 0) {
+      classrooms.forEach(
+        (classroom) => (classroomLabels[classroom.id] = classroom.name)
+      );
+    }
+
+    if (meetings.length > 0) {
+      meetings.forEach((meeting) => (ZoomMeetings[meeting._id] = meeting.topic));
+    }
+    if (assessments.length > 0) {
+      assessments.forEach((assessment) => {
+        if (assessment.id && assessment.name) {
+          CoodeshAssesments[assessment.id] = assessment.name;
+        }
+      });
+    }
+
+    return {
+      ...pathLabels,
+      ...classroomLabels,
+      ...ZoomMeetings,
+      ...CoodeshAssesments,
+    };
+  };
+
   return (
     <AdminStackContext.Provider
       value={{
@@ -343,6 +377,7 @@ export const AdminStackProvider = ({
           handleDeleteClassroom,
           coodesh: {
             assessments,
+            assessmentsLoading,
             handleGetAllCoodeshAssessmentByClassroomId,
             handleCreateCoodeshAssessment,
             handleUpdateCoodeshAssessment,
@@ -403,7 +438,7 @@ export const AdminStackProvider = ({
     >
       <AppSidebar data={sidebarData} />
       <div className="relative w-full h-full flex flex-col overflow-hidden">
-        <AppBar />
+        <AppBar pathLabels={adminPathLabels()} />
         <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
           {children}
         </div>
