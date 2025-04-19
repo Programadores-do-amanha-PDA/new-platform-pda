@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 "use client";
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";

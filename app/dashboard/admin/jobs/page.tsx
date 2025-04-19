@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 import { Button } from "@/components/ui/button";
-import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
+import { RadialShapeChart } from "@/components/common/jobs/RadialShapeChart";
 import { useEffect } from "react";
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 
 export default function Home() {
   const router = useRouter();

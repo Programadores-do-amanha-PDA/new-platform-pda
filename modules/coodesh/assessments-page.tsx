@@ -5,9 +5,9 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import AssessmentsSheetData from "@/components/classrooms/coodesh/assessments-sheet-data";
+import AssessmentsSheetData from "@/components/common/classrooms/coodesh/assessments-sheet-data";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import AssessmentsClassroomListCard from "@/components/classrooms/coodesh/assessments-classroom-list-card";
+import AssessmentsClassroomListCard from "@/components/common/classrooms/coodesh/assessments-classroom-list-card";
 
 const AssessmentsPage = ({ classroom_id }: { classroom_id: string }) => {
   const [searchFilter, setSearchFilter] = useState<string>("");

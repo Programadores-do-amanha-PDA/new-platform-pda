@@ -1,7 +1,7 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
-import JobCard from "@/components/jobs/Match/job-card";
-import { JobMatchChart } from "@/components/jobs/Match/JobMatchChart";
+import { AppBar } from "@/components/common/app-bar";
+import JobCard from "@/components/common/jobs/Match/job-card";
+import { JobMatchChart } from "@/components/common/jobs/Match/JobMatchChart";
 import { Button } from "@/components/ui/button";
 import { useAlumniStack } from "@/context/alumni/stack-context";
 import { JobType } from "@/types/jobs";

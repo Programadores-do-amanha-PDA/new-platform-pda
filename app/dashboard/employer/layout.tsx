@@ -5,7 +5,7 @@ import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { AppSidebar } from "@/components/common/sidebar/app-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Briefcase, Users } from "lucide-react";

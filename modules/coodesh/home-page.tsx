@@ -1,6 +1,6 @@
 "use client";
-import AssessmentsClassroomListCard from "@/components/classrooms/coodesh/assessments-classroom-list-card";
-import { AttemptsChallengeScoreChart } from "@/components/classrooms/coodesh/attempts-challenge-score-chart";
+import AssessmentsClassroomListCard from "@/components/common/classrooms/coodesh/assessments-classroom-list-card";
+import { AttemptsChallengeScoreChart } from "@/components/common/classrooms/coodesh/attempts-challenge-score-chart";
 import { Button } from "@/components/ui/button";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { ArrowRight } from "lucide-react";

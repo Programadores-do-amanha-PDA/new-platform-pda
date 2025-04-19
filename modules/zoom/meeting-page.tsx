@@ -9,14 +9,14 @@ import {
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { MeetingDataTable } from "@/components/classrooms/zoom/meetings/meeting/meeting-data-table";
+import { MeetingDataTable } from "@/components/common/classrooms/zoom/meetings/meeting/meeting-data-table";
 import { CalendarMinus, CalendarPlus, RefreshCw, Siren } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import RefreshButton from "@/components/refresh-button";
+import RefreshButton from "@/components/common/refresh-button";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceType & {
   topic: string;

@@ -1,13 +1,13 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
+import { AppBar } from "@/components/common/app-bar";
 
 import { useAlumniStack } from "@/context/alumni/stack-context";
 
-import AllAvailableJobsCard from "@/components/cards/alumni/all-avaliable-jobs-card";
-import AlumniAllJobApplicationsCard from "@/components/cards/alumni/all-job-aplications-card";
-import JobsMatchCard from "@/components/cards/alumni/jobs-match-card";
-import AlumniPercentCompletedCurriculumCard from "@/components/cards/alumni/percent-completed-curriculum-card";
-import CardCollectPublicFeedback from "@/components/cards/card-collect-public-feedback";
+import AllAvailableJobsCard from "@/components/common/cards/alumni/all-avaliable-jobs-card";
+import AlumniAllJobApplicationsCard from "@/components/common/cards/alumni/all-job-aplications-card";
+import JobsMatchCard from "@/components/common/cards/alumni/jobs-match-card";
+import AlumniPercentCompletedCurriculumCard from "@/components/common/cards/alumni/percent-completed-curriculum-card";
+import CardCollectPublicFeedback from "@/components/common/cards/card-collect-public-feedback";
 
 export default function HomeAdmin() {
   const {

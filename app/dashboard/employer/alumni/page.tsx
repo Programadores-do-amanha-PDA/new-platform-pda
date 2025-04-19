@@ -2,9 +2,9 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { AppBar } from "@/components/app-bar";
+import { AppBar } from "@/components/common/app-bar";
 import { Button } from "@/components/ui/button";
-import { DonutChart } from "@/components/users/DonutChart";
+import { DonutChart } from "@/components/common/users/DonutChart";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 export default function UserHomeDashboard() {

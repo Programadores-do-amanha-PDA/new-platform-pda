@@ -1,6 +1,6 @@
 "use client";
-import ZoomAccountCard from "@/components/classrooms/zoom/accounts/account-card";
-import { MeetingsParticipantsChart } from "@/components/classrooms/zoom/meetings-participants-chart";
+import ZoomAccountCard from "@/components/common/classrooms/zoom/accounts/account-card";
+import { MeetingsParticipantsChart } from "@/components/common/classrooms/zoom/meetings-participants-chart";
 import { Button } from "@/components/ui/button";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { ArrowRight } from "lucide-react";

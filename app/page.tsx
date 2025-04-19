@@ -1,5 +1,5 @@
 "use client";
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/components/common/login-form";
 import Image from "next/image";
 
 import Logo from "/public/assets/logos/Logo_PDA_Horizontal_FundoBranco.png";

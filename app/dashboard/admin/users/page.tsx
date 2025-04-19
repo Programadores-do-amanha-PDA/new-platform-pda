@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { DonutChart } from "@/components/users/DonutChart";
+import { DonutChart } from "@/components/common/users/DonutChart";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function UserHomeDashboard() {

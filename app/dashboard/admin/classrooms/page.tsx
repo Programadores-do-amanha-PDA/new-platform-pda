@@ -6,8 +6,8 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { CreateClassroomDialog } from "@/components/classrooms/create-classroom-dialog";
-import ClassroomCard from "@/components/classrooms/classroom-card";
+import { CreateClassroomDialog } from "@/components/common/classrooms/create-classroom-dialog";
+import ClassroomCard from "@/components/common/classrooms/classroom-card";
 
 import { ClassroomTypeStatus } from "@/types/classrooms";
 

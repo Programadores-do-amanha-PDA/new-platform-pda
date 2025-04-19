@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { AuthUserWithProfileType, JwtPayload } from "../types/auth";
 import { usePathname, useRouter } from "next/navigation";
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 
 import { getAuthUser, getSession } from "@/utils/supabase/actions/client/auth";
 import { getProfileById } from "@/utils/supabase/actions/profiles";

@@ -1,5 +1,5 @@
 import { Book } from "lucide-react";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
 import { ClassroomType, ClassroomTypeStatus } from "@/types/classrooms";
 import { useRouter } from "next/navigation";
 

@@ -1,6 +1,6 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
-import ProfileDataTabs from "@/components/profile/profile-data-tabs";
+import { AppBar } from "@/components/common/app-bar";
+import ProfileDataTabs from "@/components/common/profile/profile-data-tabs";
 import { useAuth } from "@/context/auth-context";
 
 export default function UserHomeDashboard() {

@@ -14,8 +14,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Separator } from "../ui/separator";
-import { Badge } from "../ui/badge";
+import { Separator } from "../../ui/separator";
+import { Badge } from "../../ui/badge";
 import { toast } from "sonner";
 import { RoleSelector } from "./RoleSelector";
 import { LoaderCircle, Sparkles, X } from "lucide-react";

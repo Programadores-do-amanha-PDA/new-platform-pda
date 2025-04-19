@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 import { Button } from "@/components/ui/button";
-import { AppBar } from "@/components/app-bar";
-import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
+import { AppBar } from "@/components/common/app-bar";
+import { RadialShapeChart } from "@/components/common/jobs/RadialShapeChart";
 
 export default function Home() {
   const router = useRouter();

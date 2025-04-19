@@ -7,8 +7,8 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import MeetingsSheetData from "@/components/classrooms/zoom/meetings/meetings-sheet-data";
-import ZoomMeetingsCard from "@/components/classrooms/zoom/meetings/meetings-card";
+import MeetingsSheetData from "@/components/common/classrooms/zoom/meetings/meetings-sheet-data";
+import ZoomMeetingsCard from "@/components/common/classrooms/zoom/meetings/meetings-card";
 
 type meetingStatusT = "all" | "upcoming" | "completed";
 

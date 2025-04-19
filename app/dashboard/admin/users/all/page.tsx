@@ -1,5 +1,5 @@
 "use client";
-import ProfilesDataTable from "@/components/users/profiles-data-table";
+import ProfilesDataTable from "@/components/common/users/profiles-data-table";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function AllUsersPage() {

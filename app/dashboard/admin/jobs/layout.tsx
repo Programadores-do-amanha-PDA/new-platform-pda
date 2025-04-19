@@ -1,5 +1,5 @@
 "use client";
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { useEffect } from "react";
 

@@ -1,5 +1,5 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
+import { AppBar } from "@/components/common/app-bar";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";

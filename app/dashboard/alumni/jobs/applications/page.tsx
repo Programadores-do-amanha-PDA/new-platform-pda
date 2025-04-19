@@ -1,6 +1,6 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
-import JobApplicationCard from "@/components/jobs/application/job-application-card";
+import { AppBar } from "@/components/common/app-bar";
+import JobApplicationCard from "@/components/common/jobs/application/job-application-card";
 import { Input } from "@/components/ui/input";
 import { useAlumniStack } from "@/context/alumni/stack-context";
 import { useState } from "react";

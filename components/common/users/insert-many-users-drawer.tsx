@@ -11,9 +11,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ import { AuthUser } from "@supabase/supabase-js";
 import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
 import { RoleSelector } from "./RoleSelector";
 import { toast } from "sonner";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
 
 interface UserData {
   name: string;

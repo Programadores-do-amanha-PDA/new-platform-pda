@@ -1,6 +1,6 @@
 "use client";
-import ProfilesDataTable from "@/components/users/profiles-data-table";
-import { AppBar } from "@/components/app-bar";
+import ProfilesDataTable from "@/components/common/users/profiles-data-table";
+import { AppBar } from "@/components/common/app-bar";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 export default function Home() {

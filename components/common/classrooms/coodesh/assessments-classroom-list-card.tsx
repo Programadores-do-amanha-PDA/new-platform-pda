@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import DateIntervalPicker from "@/components/date-interval-picker";
+import DateIntervalPicker from "@/components/common/date-interval-picker";
 
 import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
 

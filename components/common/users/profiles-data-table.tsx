@@ -2,8 +2,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "./data-table";
-import { Checkbox } from "../ui/checkbox";
-import { Button } from "../ui/button";
+import { Checkbox } from "../../ui/checkbox";
+import { Button } from "../../ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
@@ -11,13 +11,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+} from "../../ui/dropdown-menu";
 
 import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth";
-import { Badge } from "../ui/badge";
+import { Badge } from "../../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { cn } from "@/lib/utils";
 
 const ProfilesDataTable = ({

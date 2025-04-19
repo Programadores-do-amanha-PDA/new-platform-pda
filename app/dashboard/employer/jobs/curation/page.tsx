@@ -1,6 +1,6 @@
 "use client";
-import JobsDataTable from "@/components/jobs/curation/jobs-data-table";
-import { AppBar } from "@/components/app-bar";
+import JobsDataTable from "@/components/common/jobs/curation/jobs-data-table";
+import { AppBar } from "@/components/common/app-bar";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 export default function Home() {

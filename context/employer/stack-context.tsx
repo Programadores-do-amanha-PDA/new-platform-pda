@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 
 import {
   createUser,

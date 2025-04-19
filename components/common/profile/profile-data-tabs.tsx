@@ -1,12 +1,12 @@
 import { AuthUserWithProfileType } from "@/types/auth";
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
-import { Badge } from "../ui/badge";
+import { Button } from "../../ui/button";
+import { Separator } from "../../ui/separator";
+import { Badge } from "../../ui/badge";
 import { LoaderCircle } from "lucide-react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import { useEffect, useState } from "react";
-import { Textarea } from "../ui/textarea";
+import { Textarea } from "../../ui/textarea";
 import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
 import { updateAuthUser } from "@/app/actions/auth";

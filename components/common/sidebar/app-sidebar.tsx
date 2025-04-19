@@ -8,13 +8,13 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { TeamSwitcher } from "@/components/team-switcher";
-import { NavMain } from "@/components/sidebar/nav-main";
-import { NavProjects } from "@/components/sidebar/nav-projects";
-import { NavUser } from "@/components/sidebar/nav-user";
+import { TeamSwitcher } from "@/components/common/sidebar/team-switcher";
+import { NavMain } from "@/components/common/sidebar/nav-main";
+import { NavProjects } from "@/components/common/sidebar/nav-projects";
+import { NavUser } from "@/components/common/sidebar/nav-user";
 import { LucideIcon } from "lucide-react";
 import { AuthUserWithProfileType } from "@/types/auth";
-import { Separator } from "../ui/separator";
+import { Separator } from "../../ui/separator";
 
 interface AppSidebarProps {
   data: {

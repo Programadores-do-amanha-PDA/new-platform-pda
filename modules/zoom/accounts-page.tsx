@@ -6,8 +6,8 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import ZoomAccountCard from "@/components/classrooms/zoom/accounts/account-card";
-import AccountDialog from "@/components/classrooms/zoom/accounts/account-dialog";
+import ZoomAccountCard from "@/components/common/classrooms/zoom/accounts/account-card";
+import AccountDialog from "@/components/common/classrooms/zoom/accounts/account-dialog";
 
 import { ZoomAccountType } from "@/types/zoom/accounts";
 

@@ -15,7 +15,7 @@ import {
   deleteJobApplicationById,
 } from "@/app/actions/job_applications";
 
-import LoadingComponent from "@/components/loading-component";
+import LoadingComponent from "@/components/common/loading-component";
 
 import { JobApplication, JobApplicationWithJob, JobType } from "@/types/jobs";
 import { AuthUserWithProfileType } from "@/types/auth";

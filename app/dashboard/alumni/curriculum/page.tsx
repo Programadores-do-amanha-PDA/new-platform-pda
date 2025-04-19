@@ -1,6 +1,6 @@
 "use client"
-import { AppBar } from "@/components/app-bar";
-import CurriculumFormData from "@/components/curriculum/form-data";
+import { AppBar } from "@/components/common/app-bar";
+import CurriculumFormData from "@/components/common/curriculum/form-data";
 import { useAlumniStack } from "@/context/alumni/stack-context";
 
 export default function Page() {

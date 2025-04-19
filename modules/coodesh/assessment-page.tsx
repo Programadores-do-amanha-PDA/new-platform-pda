@@ -2,8 +2,8 @@
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { FileSearch, Languages, Timer } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AttemptsDataTable } from "../../components/classrooms/coodesh/assessment/attempts-data-table";
-import { AssessmentQuestionsTable } from "@/components/classrooms/coodesh/assessment/assessment-questions-table";
+import { AttemptsDataTable } from "../../components/common/classrooms/coodesh/assessment/attempts-data-table";
+import { AssessmentQuestionsTable } from "@/components/common/classrooms/coodesh/assessment/assessment-questions-table";
 
 type DefaultLocations = {
   pt: string;

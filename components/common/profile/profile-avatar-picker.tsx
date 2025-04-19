@@ -1,9 +1,9 @@
 import { Camera, Trash } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { AuthUserWithProfileType } from "@/types/auth";
 
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import { ChangeEvent, useState } from "react";
 
 import ProfileAvatarCropper from "./profile-avatar-cropper";
@@ -14,7 +14,7 @@ import {
   uploadUserAvatar,
 } from "@/utils/supabase/actions/user_avatar";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 
 export const ProfileAvatarPicker = ({
   user,

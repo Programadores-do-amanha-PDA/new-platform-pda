@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
+import { Button } from "../../ui/button";
+import { Separator } from "../../ui/separator";
 import { LoaderCircle, Plus, X } from "lucide-react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import { validateCurriculumForm } from "./form-data-validations";
 
 import {
