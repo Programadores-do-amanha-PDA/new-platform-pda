@@ -22,7 +22,7 @@ const SingleDatePicker = ({
   setDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }) => {
   return (
-    <Popover>
+    <Popover modal={true}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}

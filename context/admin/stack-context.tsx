@@ -2,6 +2,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
 
+import { AppSidebar } from "@/components/common/sidebar/app-sidebar";
+import LoadingComponent from "@/components/common/loading-component";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AppBar from "@/components/common/app-bar";
+
+import pathLabels from "@/utils/path-labels";
+
 import UsersStack, { UsersStackI } from "../modules/users";
 import UserRolesStack, { UserRolesStackI } from "../modules/users/roles";
 import JobsStack, { JobsStackI } from "../modules/jobs";
@@ -12,13 +19,6 @@ import CoodeshAssessmentsStack, {
 import CoodeshAPIAssessmentsStack, {
   CoodeshAPIAssessmentsI,
 } from "../modules/classrooms/coodesh/api";
-
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import LoadingComponent from "@/components/loading-component";
-
-import { AuthUserWithProfileType } from "@/types/auth";
 import useZoomMeetingsStack, {
   ZoomMeetingsStackI,
 } from "../modules/classrooms/zoom/meetings";
@@ -28,14 +28,17 @@ import useZoomAPIMeetingsStack, {
 import useZoomAccountsStack, {
   ZoomAccountsStackI,
 } from "../modules/classrooms/zoom/accounts";
+import useClassroomProjects, {
+  ClassroomProjectsI,
+} from "../modules/classrooms/projects";
 
-import pathLabels from "@/utils/path-labels";
-import AppBar from "@/components/app-bar";
+import { AuthUserWithProfileType } from "@/types/auth";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
   userRoleStack: UserRolesStackI;
   classroomsStack: ClassroomStackI & {
+    projects: ClassroomProjectsI;
     coodesh: CoodeshAssessmentI & {
       api: CoodeshAPIAssessmentsI;
     };
@@ -71,6 +74,14 @@ const AdminStackContext = createContext<AdminStackContextProps>({
     handleCreateClassroom: () => Promise.resolve(false),
     handleUpdateClassroom: () => Promise.resolve(false),
     handleDeleteClassroom: () => Promise.resolve(false),
+    projects: {
+      projects: [],
+      projectsLoading: false,
+      handleGetAllProjectsByClassroomId: () => Promise.resolve(false),
+      handleCreateClassroomProject: () => Promise.resolve(false),
+      handleUpdateClassroomProject: () => Promise.resolve(false),
+      handleDeleteProject: () => Promise.resolve(false),
+    },
     coodesh: {
       assessments: [],
       assessmentsLoading: false,
@@ -166,6 +177,16 @@ export const AdminStackProvider = ({
     handleUpdateClassroom,
     handleDeleteClassroom,
   } = ClassroomStack();
+
+  // Projects
+  const {
+    projects,
+    projectsLoading,
+    handleGetAllProjectsByClassroomId,
+    handleCreateClassroomProject,
+    handleUpdateClassroomProject,
+    handleDeleteProject,
+  } = useClassroomProjects();
 
   // Jobs
   const {
@@ -309,6 +330,10 @@ export const AdminStackProvider = ({
       isActive: true,
       items: [
         {
+          title: "Projetos",
+          url: `/dashboard/admin/classrooms/${classroom.id}/projects`,
+        },
+        {
           title: "⬆️ Coodesh",
           url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
         },
@@ -334,7 +359,9 @@ export const AdminStackProvider = ({
     }
 
     if (meetings.length > 0) {
-      meetings.forEach((meeting) => (ZoomMeetings[meeting._id] = meeting.topic));
+      meetings.forEach(
+        (meeting) => (ZoomMeetings[meeting._id] = meeting.topic)
+      );
     }
     if (assessments.length > 0) {
       assessments.forEach((assessment) => {
@@ -375,6 +402,14 @@ export const AdminStackProvider = ({
           handleCreateClassroom,
           handleUpdateClassroom,
           handleDeleteClassroom,
+          projects: {
+            projects,
+            projectsLoading,
+            handleGetAllProjectsByClassroomId,
+            handleCreateClassroomProject,
+            handleUpdateClassroomProject,
+            handleDeleteProject,
+          },
           coodesh: {
             assessments,
             assessmentsLoading,

@@ -1,6 +1,4 @@
 const pathLabels: { [key: string]: string } = {
-  // Home pages
-
   users: "Usuários",
   companies: "Empresas",
   jobs: "Vagas",
@@ -11,6 +9,7 @@ const pathLabels: { [key: string]: string } = {
   all_alumni: "Todos os Alumni",
   all_companies: "Todos as empresas",
   all_jobs: "Todas as vagas",
+  all_projects: "Todos os projetos",
   all_applications: "Todas as aplicações",
   settings: "Configurações",
   profile: "Perfil",
@@ -24,6 +23,7 @@ const pathLabels: { [key: string]: string } = {
   zoom: "⬆️ Zoom",
   assessments: "Avaliações",
   accounts: "Contas",
+  projects: "Projetos"
 };
 
 export default pathLabels;
