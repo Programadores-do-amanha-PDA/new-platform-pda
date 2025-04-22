@@ -62,7 +62,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       </SidebarHeader>
       <SidebarContent>
         {props.data.navMain && (
-          <NavMain items={props.data.navMain} title="Menu Principal" />
+          <NavMain items={props.data.navMain} title="Geral" />
         )}
         {props.data.classRooms && (
           <>

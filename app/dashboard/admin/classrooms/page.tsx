@@ -6,7 +6,7 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { CreateClassroomDialog } from "@/components/common/classrooms/create-classroom-dialog";
+import CreateOrEditClassroomDialog from "@/components/common/classrooms/create-classroom-dialog";
 import ClassroomCard from "@/components/common/classrooms/classroom-card";
 
 import { ClassroomTypeStatus } from "@/types/classrooms";
@@ -86,7 +86,7 @@ const TeamPage = () => {
                 </>
               ))}
         </div>
-          <CreateClassroomDialog />
+          <CreateOrEditClassroomDialog />
       </header>
 
       <ul className="w-full h-full flex flex-row flex-wrap justify-start gap-4 py-4">

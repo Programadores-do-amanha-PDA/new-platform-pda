@@ -71,7 +71,6 @@ export const getProfileById = async (id: string) => {
       )
       .eq("id", id)
       .single();
-    console.log(data);
 
     if (error) throw error;
 

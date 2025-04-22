@@ -28,7 +28,7 @@ export type ProfileType = {
   email: string;
   full_name: string;
   bio?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   user_roles?: UserRoleType[];
   created_at?: Date;
   updated_at?: Date;

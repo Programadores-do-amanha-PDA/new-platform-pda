@@ -95,10 +95,10 @@ export function DataTable({
     <div className="w-full h-full flex flex-col overflow-hidden">
       <div className="flex items-center justify-between py-4">
         <Input
-          placeholder="Busque por um email..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          placeholder="Procurando por alguém?"
+          value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("profile")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />

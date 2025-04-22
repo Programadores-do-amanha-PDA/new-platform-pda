@@ -351,6 +351,7 @@ export const AdminStackProvider = ({
     const classroomLabels: Record<string, string> = {};
     const ZoomMeetings: Record<string, string> = {};
     const CoodeshAssesments: Record<string, string> = {};
+    const ClassroomProjects: Record<string, string> = {};
 
     if (classrooms.length > 0) {
       classrooms.forEach(
@@ -371,11 +372,18 @@ export const AdminStackProvider = ({
       });
     }
 
+    if (projects.length > 0) {
+      projects.forEach(
+        (project) => (ClassroomProjects[project.id] = project.title)
+      );
+    }
+
     return {
       ...pathLabels,
       ...classroomLabels,
       ...ZoomMeetings,
       ...CoodeshAssesments,
+      ...ClassroomProjects,
     };
   };
 

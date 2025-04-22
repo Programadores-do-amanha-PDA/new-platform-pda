@@ -12,7 +12,7 @@ import {
   deleteUserAvatar,
   updateUserAvatar,
   uploadUserAvatar,
-} from "@/utils/supabase/actions/user_avatar";
+} from "@/app/actions/profile_avatar";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 

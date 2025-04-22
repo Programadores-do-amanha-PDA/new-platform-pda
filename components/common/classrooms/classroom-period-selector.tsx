@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { ClassroomPeriodsType } from "@/types/classrooms";
 
-const teamPeriodLabels = {
+const classroomPeriodLabels = {
   morning: "Manhã",
   afternoon: "Tarde",
   evening: "Noite",
@@ -21,27 +21,27 @@ const periods = [
   {
     id: "morning",
     name: "morning",
-    label: teamPeriodLabels.morning,
+    label: classroomPeriodLabels.morning,
   },
   {
     id: "afternoon",
     name: "afternoon",
-    label: teamPeriodLabels.afternoon,
+    label: classroomPeriodLabels.afternoon,
   },
   {
     id: "evening",
     name: "evening",
-    label: teamPeriodLabels.evening,
+    label: classroomPeriodLabels.evening,
   },
 ];
 
-export function TeamPeriodSelector({
+const ClassroomPeriodSelector = ({
   value,
   handleOnchange,
 }: {
   value: string;
   handleOnchange: (value: ClassroomPeriodsType) => void;
-}) {
+}) => {
   return (
     <Select onValueChange={handleOnchange} value={value}>
       <SelectTrigger className="max-w-80 w-[190px]">
@@ -59,4 +59,6 @@ export function TeamPeriodSelector({
       </SelectContent>
     </Select>
   );
-}
+};
+
+export default ClassroomPeriodSelector;

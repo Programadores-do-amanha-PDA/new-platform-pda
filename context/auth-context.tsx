@@ -7,9 +7,9 @@ import LoadingComponent from "@/components/common/loading-component";
 
 import { getAuthUser, getSession } from "@/utils/supabase/actions/client/auth";
 import { getProfileById } from "@/utils/supabase/actions/profiles";
-import { getAvatarUrl } from "@/utils/supabase/actions/user_avatar";
 import { resendAnEmailSignupConfirmation, signOut } from "@/app/actions/auth";
 import { toast } from "sonner";
+import { getAvatarUrlById } from "@/app/actions/profile_avatar";
 
 interface AuthContextProps {
   user: AuthUserWithProfileType | null;
@@ -52,11 +52,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const user = await getAuthUser(jwt);
     if (user) {
       const userProfile = await getProfileById(user.id);
-      const userAvatarUrl = await getAvatarUrl(user.id);
+      const userAvatarUrl = await getAvatarUrlById(user.id);
       if (userProfile) {
         setUser({
           ...user,
-          profile: { ...userProfile, avatarUrl: userAvatarUrl || "" },
+          profile: {...userProfile, avatarUrl: userAvatarUrl},
         });
         setLoading(false);
       } else if (!userProfile) {

@@ -4,6 +4,7 @@ import {
   updateUser,
   deleteUser,
 } from "@/app/actions/auth_admin";
+import { getManyAvatarUrlsByIds } from "@/app/actions/profile_avatar";
 import { getProfileById } from "@/app/actions/profiles";
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import { AuthUser } from "@supabase/supabase-js";
@@ -20,7 +21,21 @@ const UsersStack = () => {
       const users = await getAllUsers(role);
       if (!users) throw "no users response";
 
-      setUsers(users);
+      const usersAvatars = await getManyAvatarUrlsByIds(
+        users.map((user) => user.id)
+      );
+      const usersWithAvatars = users.map((user) => ({
+        ...user,
+        profile: {
+          ...user.profile,
+          avatarUrl:
+            usersAvatars?.find(
+              (avatar) => avatar.path === `${user.id}/avatar.png`
+            )?.signedUrl ?? null,
+        },
+      }));
+
+      setUsers(usersWithAvatars);
       return true;
     } catch (error) {
       console.error(error);

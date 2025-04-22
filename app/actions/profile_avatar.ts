@@ -1,7 +1,7 @@
 "use server";
-import { createClient } from "../server";
+import { createClient } from "../../utils/supabase/server";
 
-export const getAvatarUrl = async (userId: string) => {
+export const getAvatarUrlById = async (userId: string) => {
   try {
     const supabase = await createClient();
 
@@ -13,6 +13,23 @@ export const getAvatarUrl = async (userId: string) => {
     return data.signedUrl;
   } catch (error) {
     console.error("Error fetching avatar URL:", error);
+    return null;
+  }
+};
+
+export const getManyAvatarUrlsByIds = async (userIds: string[]) => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.storage
+      .from("user_avatar")
+      .createSignedUrls(
+        userIds.map((id) => `${id}/avatar.png`),
+        60
+      );
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error fetching avatar URLs:", error);
     return null;
   }
 };

@@ -11,78 +11,143 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { TeamPeriodSelector } from "./classroom-period-selector";
-import { ClassroomPeriodsType } from "@/types/classrooms";
+import {
+  ClassroomPeriodsType,
+  ClassroomType,
+  ClassroomTypeStatus,
+} from "@/types/classrooms";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ClassroomPeriodSelector from "./classroom-period-selector";
+import ClassroomStatusSelector from "./classroom-status-selector";
+import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
 
-export function CreateClassroomDialog() {
-  const {
-    classroomsStack: { handleCreateClassroom },
-  } = useAdminStackContext();
-
-  const [teamName, setTeamName] = useState<string>("");
-  const [teamPeriod, setTeamPeriod] =
-    useState<ClassroomPeriodsType>("afternoon");
+const CreateOrEditClassroomDialog = ({
+  currentClassroom,
+}: {
+  currentClassroom?: ClassroomType;
+}) => {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [name, setName] = useState<string>("");
+  const [period, setPeriod] = useState<ClassroomPeriodsType>("afternoon");
+  const [status, setStatus] = useState<ClassroomTypeStatus>("active");
   const [modalOpen, setModalOpen] = useState<boolean>(false);
+
+  const {
+    classroomsStack: { handleCreateClassroom, handleUpdateClassroom },
+  } = useAdminStackContext();
 
   const handleSetModalOpen = (open: boolean) => {
     if (!open) {
-      setTeamName("");
-      setTeamPeriod("afternoon");
+      setName("");
+      setPeriod("afternoon");
     }
     setModalOpen(open);
   };
 
-  const handleSubmit = async () => {
-    const isCreated = await handleCreateClassroom({
-      name: teamName,
-      period: teamPeriod,
-    });
-    if (isCreated) {
-      handleSetModalOpen(false);
+  useEffect(() => {
+    if (currentClassroom) {
+      setName(currentClassroom.name);
+      setPeriod(currentClassroom.period);
+      setStatus(currentClassroom.status);
     }
+  }, [currentClassroom]);
+
+  const handleSubmit = async () => {
+    if (!name || !period || !status) {
+      toast.error(
+        `Erro ao ${currentClassroom ? "Editar" : "Adicionar"} a turma!`
+      );
+    }
+
+    setLoading(true)
+
+    if (currentClassroom) {
+      const updates = {} as Partial<ClassroomType>;
+      if (name !== currentClassroom.name) updates.name = name;
+      if (period !== currentClassroom.period) updates.period = period;
+      if (status !== currentClassroom.status) updates.status = status;
+
+      await handleUpdateClassroom(currentClassroom.id, updates);
+
+    setLoading(false)
+      return handleSetModalOpen(false);
+    }
+
+    await handleCreateClassroom({
+      name: name,
+      period: period,
+    });
+
+    setLoading(false)
+    return handleSetModalOpen(false);
   };
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
       <DialogTrigger asChild>
-        <Button className="font-semibold">Nova Turma</Button>
+        <Button
+          className="font-semibold"
+          variant={currentClassroom ? "outline" : "default"}
+        >
+          {currentClassroom ? "Editar Turma" : "Adicionar Turma"}
+        </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-max">
         <DialogHeader>
-          <DialogTitle>Criar Turma</DialogTitle>
+          <DialogTitle>
+            {currentClassroom
+              ? `Editar ${currentClassroom.name}`
+              : "Adicionar Turma"}
+          </DialogTitle>
           <DialogDescription>
-            Insira o nome (ou codinome) e o período da nova turma.
+            {currentClassroom
+              ? `Edite as informações da ${currentClassroom.name}`
+              : "Insira o nome (ou codinome), o período e o status da nova turma."}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4 justify-start">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2 items-start justify-center">
+            <Label htmlFor="name" className="font-semibold">
               Nome
             </Label>
             <Input
               id="name"
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label className="text-right">Período</Label>
-            <TeamPeriodSelector
-              value={teamPeriod}
-              handleOnchange={(value) => setTeamPeriod(value)}
-            />
+          <div className="w-full flex justify-between items-center gap-4">
+            <div className="flex flex-col gap-2 items-start justify-center">
+              <Label className="font-semibold">Período</Label>
+              <ClassroomPeriodSelector
+                value={period}
+                handleOnchange={(value) => setPeriod(value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2 items-start justify-center">
+              <Label className="font-semibold">Status da turma</Label>
+              <ClassroomStatusSelector
+                value={status}
+                handleOnchange={(value) => setStatus(value)}
+              />
+            </div>
           </div>
         </div>
-        <DialogFooter className="w-full flex !justify-between gap-4">
-          <Button variant="secondary" onClick={() => handleSetModalOpen(false)}>
+        <DialogFooter className="w-full flex gap-4 mt-4">
+          <Button variant="outline" onClick={() => handleSetModalOpen(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSubmit}>Criar Turma</Button>
+          <Button onClick={handleSubmit} className="font-semibold" disabled={loading}>
+            {loading && <LoaderCircle className="size-5 animate-spin" />}
+            {currentClassroom ? "Salvar alterações" : "Criar turma"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};
+
+export default CreateOrEditClassroomDialog;
