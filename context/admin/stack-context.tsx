@@ -306,7 +306,7 @@ export const AdminStackProvider = ({
         title: "Vagas",
         url: "/dashboard/admin/jobs",
         icon: Briefcase,
-        isActive: true,
+        isActive: false,
         items: [
           {
             title: "Vagas curadas",
@@ -327,7 +327,7 @@ export const AdminStackProvider = ({
       title: classroom.name,
       url: `/dashboard/admin/classrooms/${classroom.id}`,
       icon: classroomPeriodsIcons[classroom.period],
-      isActive: true,
+      isActive: false,
       items: [
         {
           title: "Projetos",

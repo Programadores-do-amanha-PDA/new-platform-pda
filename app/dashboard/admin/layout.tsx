@@ -1,5 +1,4 @@
 "use client";
-import { SidebarProvider } from "@/components/ui/sidebar";
 
 import { useAuth } from "@/context/auth-context";
 import Image from "next/image";
@@ -37,11 +36,9 @@ const AdminLayout = ({
   }
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <AdminStackProvider user={user} userRole={userRole}>
-        {children}
-      </AdminStackProvider>
-    </SidebarProvider>
+    <AdminStackProvider user={user} userRole={userRole}>
+      {children}
+    </AdminStackProvider>
   );
 };
 
