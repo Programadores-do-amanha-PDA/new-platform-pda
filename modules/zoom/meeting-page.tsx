@@ -297,9 +297,6 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
       <header className="w-full flex flex-col gap-6">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="font-bold text-2xl text-foreground">
-              {currentMeeting?.topic}
-            </h2>
             <p className="text-muted-foreground font-semibold flex gap-1">
               Ultima sincronização em:
               <p className="font-normal">
@@ -340,7 +337,10 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
                 Foram encontrados{" "}
                 {
                   meetingOccurrences?.filter(
-                    (m) => new Date(m.start_time).getTime() + m.duration * 60 * 1000 < Date.now()
+                    (m) =>
+                      new Date(m.start_time).getTime() +
+                        m.duration * 60 * 1000 <
+                      Date.now()
                   ).length
                 }{" "}
                 instancias desatualizadas, atualize (re-sincronize) os dados
