@@ -28,7 +28,7 @@ export const getAllProjectsByClassroomId = async (
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("classroom_projects")
-      .select()
+      .select("*, deliveries:classroom_project_deliveries(*), corrections:classroom_project_corrections(*)")
       .eq("classroom_id", classRoomId)
       .order("created_at", { ascending: false });
 
