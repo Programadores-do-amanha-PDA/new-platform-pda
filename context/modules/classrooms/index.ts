@@ -4,7 +4,7 @@ import {
   getAllClassrooms,
   updateClassroom,
 } from "@/app/actions/classrooms";
-import { ClassroomPeriodsType, ClassroomType } from "@/types/classrooms";
+import { ClassroomType } from "@/types/classrooms";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -27,10 +27,9 @@ const ClassroomStack = () => {
     }
   };
 
-  const handleCreateClassroom = async (classroomData: {
-    name: string;
-    period: ClassroomPeriodsType;
-  }) => {
+  const handleCreateClassroom = async (
+    classroomData: Partial<ClassroomType>
+  ) => {
     try {
       if (
         !classroomData.name ||
@@ -120,10 +119,9 @@ export interface ClassroomStackI {
   classrooms: ClassroomType[];
   handleGetAllClassrooms: () => Promise<boolean>;
   classroomsLoading: boolean;
-  handleCreateClassroom: (classroomData: {
-    name: string;
-    period: ClassroomPeriodsType;
-  }) => Promise<boolean | string>;
+  handleCreateClassroom: (
+    classroomData: Partial<ClassroomType>
+  ) => Promise<boolean | string>;
   handleUpdateClassroom: (
     classroomId: string,
     updates: Partial<ClassroomType>

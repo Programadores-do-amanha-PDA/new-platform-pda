@@ -70,7 +70,6 @@ const useZoomMeetingsStack = ({
         throw new Error("missing required meeting data");
       }
 
-      setLoading(true);
       const meeting = await handleGetZoomMeetingByAPI(account, meetingData.id);
       if (!meeting) throw new Error("no meeting response");
 
@@ -91,8 +90,6 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao criar nova reunião!");
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -104,7 +101,6 @@ const useZoomMeetingsStack = ({
       if (!meetingId || !updates) {
         throw new Error("id and updates fields are required");
       }
-      setLoading(true);
       const updatedMeeting = await updateZoomMeetingById(meetingId, updates);
       if (!updatedMeeting) throw new Error("no update meeting response");
 
@@ -119,8 +115,6 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao atualizar a reunião!");
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -133,7 +127,6 @@ const useZoomMeetingsStack = ({
       if (!meetingId || !occurrenceId || !updates) {
         throw new Error("id and updates fields are required");
       }
-      setLoading(true);
       const currentMeeting = meetings.find(
         (meeting) => meeting.id === meetingId
       );
@@ -160,8 +153,6 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao atualizar a reunião!");
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -219,7 +210,6 @@ const useZoomMeetingsStack = ({
       ) {
         throw new Error("id and updates fields are required");
       }
-      setLoading(true);
       toast.info("Atualizando dados da reunião...", {
         duration: 50000,
         closeButton: true,
@@ -233,8 +223,6 @@ const useZoomMeetingsStack = ({
         meetingId
       );
       if (!updatedMeeting) throw new Error("no meeting response");
-
-      console.log("Meeting", updatedMeeting);
 
       const newMeeting = await updateZoomMeetingById(meetingId, {
         ...currentMeeting,
@@ -278,8 +266,6 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao atualizar dados da reunião!");
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 

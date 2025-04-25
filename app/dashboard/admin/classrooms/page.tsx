@@ -31,7 +31,7 @@ const TeamPage = () => {
       : classrooms.filter((c) => c.status === statusFilter);
 
   return (
-    <div className="relative w-full h-max flex flex-col gap-10 px-4">
+    <div className="relative w-full h-full flex flex-col gap-10 p-4 overflow-hidden">
       <header className="w-full flex justify-between gap-4">
         <div className="w-full h-9 flex gap-4 border-b border-card">
           <Button
@@ -53,9 +53,8 @@ const TeamPage = () => {
           <div className="h-full w-px border-l border-sidebar-accent" />
 
           {classrooms.length > 0 &&
-            classrooms
-              .map((c) => c.status)
-              .map((classroomStatus, i) => (
+            Array.from(new Set(classrooms.map((c) => c.status))).map(
+              (classroomStatus, i) => (
                 <>
                   <Button
                     variant="ghost"
@@ -84,14 +83,15 @@ const TeamPage = () => {
                     <div className="h-full w-px border-l border-sidebar-accent" />
                   )}
                 </>
-              ))}
+              )
+            )}
         </div>
-          <CreateOrEditClassroomDialog />
+        <CreateOrEditClassroomDialog />
       </header>
 
-      <ul className="w-full h-full flex flex-row flex-wrap justify-start gap-4 py-4">
+      <ul className="w-full max-h-full flex flex-row flex-wrap justify-start overflow-y-auto gap-4 p-4">
         {filteredClassrooms.length === 0 && (
-          <p className="text-center text-lg font-semibold">
+          <p className="w-full h-full text-center text-lg font-semibold">
             Nenhuma turma encontrada
           </p>
         )}
