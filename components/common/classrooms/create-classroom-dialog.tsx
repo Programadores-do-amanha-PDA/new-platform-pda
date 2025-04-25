@@ -78,6 +78,7 @@ const CreateOrEditClassroomDialog = ({
     await handleCreateClassroom({
       name: name,
       period: period,
+      status: status,
     });
 
     setLoading(false)

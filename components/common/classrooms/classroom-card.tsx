@@ -28,8 +28,8 @@ const ClassroomCard = ({
   const router = useRouter();
   return (
     <li
-      className="group bg-card flex flex-row gap-6 min-w-64 p-4 items-start rounded-xl border shadow-sm cursor-pointer"
-      onClick={() => router.push(`teams/${classroom.id}`)}
+      className="min-w-64 !h-[112px] group bg-card flex flex-row gap-6 p-4 items-start rounded-xl border shadow-sm cursor-pointer"
+      onClick={() => router.push(`classrooms/${classroom.id}`)}
     >
       <div className="mt-1">
         <Book />
