@@ -1,5 +1,8 @@
 "use client";
+import { DeliveryDataTable } from "@/components/common/classrooms/projects/deliveries/delivery-data-table";
 import { useAdminStackContext } from "@/context/admin/stack-context";
+import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/projects/project";
+import { Calendar1, Type } from "lucide-react";
 
 const projectTypesLabels = {
   mini_project: "Mini projeto",
@@ -13,7 +16,17 @@ const ProjectPageM = ({ project_id }: { project_id: string }) => {
       projects: { projects },
     },
   } = useAdminStackContext();
-  const currentProject = projects.find((project) => project.id === project_id);
+  const currentProject:
+    | ClassroomProjectWithDeliveriesAndCorrectionsT
+    | undefined = projects.find((project) => project.id === project_id);
+  const corrections = currentProject?.corrections || [];
+  const deliveries =
+    currentProject?.deliveries?.map((delivery) => ({
+      ...delivery,
+      lastCorrection:
+        corrections.find((corr) => corr.delivery_id === delivery.id)
+          ?.created_at || null,
+    })) || [];
 
   if (!currentProject) {
     return (
@@ -30,44 +43,56 @@ const ProjectPageM = ({ project_id }: { project_id: string }) => {
   }
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 p-4 py-6 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
       <header className="w-full flex flex-col gap-2">
-        <div>
-          <p className="text-muted-foreground font-semibold">
-            {projectTypesLabels[currentProject?.project_type]}
-          </p>
-        </div>
-        {/* <div className="flex gap-2">
-          <p className="text-muted-foreground font-semibold">Testes:</p>
-          <div className="flex gap-1" title="Duração do teste">
-            <Timer className="size-5 text-muted-foreground" />
+        <div className="flex items-center gap-4">
+          {/* <p className="text-muted-foreground font-semibold">Testes:</p> */}
+          <div className="flex items-center gap-1" title="Tipo do projeto">
+            <Type className="size-5 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {?.duration}{" "}
-              {assessment?.duration_unit === "hour" ? "horas" : "minutos"}
+              {projectTypesLabels[currentProject?.project_type]}
             </span>
           </div>
-          {assessment?.default_locale && (
-            <div className="flex gap-1" title="Idioma">
-              <Languages className="size-5 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {
-                  defaultLocations[
-                    assessment.default_locale as keyof DefaultLocations
-                  ]
-                }
-              </span>
-            </div>
-          )}
-          {
-            <div className="flex gap-1" title="Questões">
-              <FileSearch className="size-5 text-muted-foreground" />
-              <span className="text-muted-foreground">
-                {assessment?.questions.length}
-              </span>
-            </div>
-          }
-        </div> */}
+          <div className="flex items-center gap-1" title="Modulo do projeto">
+            <p className="text-muted-foreground text-xl font-semibold">M</p>
+            <span className="text-muted-foreground">
+              {currentProject.module}
+            </span>
+          </div>
+          {currentProject.schedule_date?.from &&
+            currentProject.schedule_date.to && (
+              <div
+                className="flex items-center gap-1 truncate"
+                title="Período de entregas do projeto"
+              >
+                <Calendar1 className="size-5 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  {new Date(
+                    currentProject.schedule_date?.from
+                  )?.toLocaleDateString("pt-BR", {
+                    dateStyle: "short",
+                  }) ?? "Não definido"}{" "}
+                  {" - "}
+                  {new Date(
+                    currentProject.schedule_date?.to
+                  )?.toLocaleDateString("pt-BR", {
+                    dateStyle: "short",
+                  }) ?? "Não definido"}
+                </span>
+              </div>
+            )}
+        </div>
       </header>
+
+      <div className="w-full h-full overflow-y-auto">
+        <DeliveryDataTable
+          deliveries={deliveries.sort(
+            (a, b) =>
+              new Date(a.created_at || 0).getTime() -
+              new Date(b.created_at || 0).getTime()
+          )}
+        />
+      </div>
     </div>
   );
 };

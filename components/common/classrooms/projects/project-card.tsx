@@ -12,11 +12,11 @@ import DateIntervalPicker from "@/components/common/date-interval-picker";
 
 import { DateRange } from "react-day-picker";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { ClassroomProjectT } from "@/types/projects/project";
+import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/projects/project";
 import { Separator } from "@/components/ui/separator";
 
 type ProjectCardProps = {
-  project: ClassroomProjectT;
+  project: ClassroomProjectWithDeliveriesAndCorrectionsT;
   expansive: boolean;
 };
 
@@ -135,11 +135,13 @@ const ProjectCard = ({ project, expansive }: ProjectCardProps) => {
             <div className="flex flex-col items-start gap-2">
               <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
                 Entregas:
-                <p className="font-normal">20</p>
+                <p className="font-normal">{project.deliveries?.length ?? 0}</p>
               </p>
               <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
-                Entregas corrigidas:
-                <p className="font-normal">19</p>
+                Correções:
+                <p className="font-normal">
+                  {project.corrections?.length ?? 0}
+                </p>
               </p>
             </div>
           </>

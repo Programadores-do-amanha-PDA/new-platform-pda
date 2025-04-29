@@ -6,11 +6,17 @@ import {
   getAllProjectsByClassroomId,
   updateClassroomProjectById,
   deleteProjectById,
+  getAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
 } from "@/app/actions/classrooms/projects";
-import { ClassroomProjectT } from "@/types/projects/project";
+import {
+  ClassroomProjectT,
+  ClassroomProjectWithDeliveriesAndCorrectionsT,
+} from "@/types/projects/project";
 
 const useClassroomProjects = () => {
-  const [projects, setProjects] = useState<ClassroomProjectT[]>([]);
+  const [projects, setProjects] = useState<
+    ClassroomProjectT[] | ClassroomProjectWithDeliveriesAndCorrectionsT[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   const handleGetAllProjectsByClassroomId = async (classroomId: string) => {
@@ -18,6 +24,28 @@ const useClassroomProjects = () => {
     try {
       if (!classroomId) throw new Error("Classroom ID is required");
       const allProjects = await getAllProjectsByClassroomId(classroomId);
+      if (!allProjects) throw new Error("No projects found");
+      setProjects(allProjects);
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao carregar projetos. Tente novamente mais tarde.");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId = async (
+    classroomId: string
+  ) => {
+    setLoading(true);
+    try {
+      if (!classroomId) throw new Error("Classroom ID is required");
+      const allProjects =
+        await getAllProjectsWithDeliveriesAndCorrectionsByClassroomId(
+          classroomId
+        );
       if (!allProjects) throw new Error("No projects found");
       setProjects(allProjects);
       return true;
@@ -94,6 +122,7 @@ const useClassroomProjects = () => {
     projects,
     projectsLoading: loading,
     handleGetAllProjectsByClassroomId,
+    handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
     handleCreateClassroomProject,
     handleUpdateClassroomProject,
     handleDeleteProject,
@@ -103,9 +132,14 @@ const useClassroomProjects = () => {
 export default useClassroomProjects;
 
 export interface ClassroomProjectsI {
-  projects: ClassroomProjectT[];
+  projects:
+    | ClassroomProjectT[]
+    | ClassroomProjectWithDeliveriesAndCorrectionsT[];
   projectsLoading: boolean;
   handleGetAllProjectsByClassroomId: (classroomId: string) => Promise<boolean>;
+  handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId: (
+    classroomId: string
+  ) => Promise<boolean>;
   handleCreateClassroomProject: (
     projectData: Omit<ClassroomProjectT, "id" | "created_at">
   ) => Promise<boolean>;

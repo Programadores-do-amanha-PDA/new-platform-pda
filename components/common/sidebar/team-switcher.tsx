@@ -31,8 +31,8 @@ export function TeamSwitcher({
             <team.logo />
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">{team.name}</span>
-            <span className="truncate text-xs">{userRole}</span>
+            <span className="truncate font-bold">Plataforma PdA</span>
+            <span className="truncate text-xs text-muted-foreground">{team.name}</span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

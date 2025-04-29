@@ -24,6 +24,7 @@ interface AppSidebarProps {
     };
     navMain: {
       title: string;
+      ref?: string;
       url: string;
       icon?: LucideIcon;
       isActive?: boolean;
@@ -34,6 +35,7 @@ interface AppSidebarProps {
     }[];
     classRooms?: {
       title: string;
+      ref?: string;
       url: string;
       icon?: LucideIcon;
       isActive?: boolean;

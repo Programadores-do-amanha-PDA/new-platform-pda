@@ -16,13 +16,14 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 export function NavMain({
   items,
   title,
 }: {
   items: {
     title: string;
+    ref?: string;
     url: string;
     icon?: LucideIcon;
     isActive?: boolean;
@@ -38,6 +39,7 @@ export function NavMain({
   title: string;
 }) {
   const router = useRouter();
+  const path = usePathname();
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
@@ -46,7 +48,9 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={item.isActive}
+            defaultOpen={
+              path.split("/").includes(item?.ref || "") ? true : false
+            }
             className="group/collapsible"
           >
             <SidebarMenuItem>
@@ -58,7 +62,10 @@ export function NavMain({
                       onClick={() => router.push(item.url)}
                     />
                   )}
-                  <span onClick={() => router.push(item.url)} className="font-semibold">
+                  <span
+                    onClick={() => router.push(item.url)}
+                    className="font-semibold"
+                  >
                     {item.title}
                   </span>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

@@ -17,14 +17,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       projects: {
         projects,
         projectsLoading,
-        handleGetAllProjectsByClassroomId,
+        handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
       },
     },
   } = useAdminStackContext();
 
   useEffect(() => {
     if (projects.length === 0) {
-      handleGetAllProjectsByClassroomId(classroom_id);
+      handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId(
+        classroom_id
+      );
     }
   }, [classroom_id]);
 

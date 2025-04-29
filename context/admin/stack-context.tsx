@@ -53,94 +53,9 @@ interface AdminStackContextProps {
   setLoading: (loading: boolean) => void;
 }
 
-const AdminStackContext = createContext<AdminStackContextProps>({
-  usersStack: {
-    users: [],
-    usersLoading: false,
-    handleGetAllUsersWithProfiles: () => Promise.resolve(false),
-    handleCreateNewUser: () => Promise.resolve(false),
-    handleUpdateUser: () => Promise.resolve(false),
-    handleDeleteUser: () => Promise.resolve(false),
-  },
-  userRoleStack: {
-    handleAddUserRole: () => Promise.resolve(false),
-    handleUpdateUserRole: () => Promise.resolve(false),
-    handleDeleteUserRole: () => Promise.resolve(false),
-  },
-  classroomsStack: {
-    classrooms: [],
-    classroomsLoading: false,
-    handleGetAllClassrooms: () => Promise.resolve(false),
-    handleCreateClassroom: () => Promise.resolve(false),
-    handleUpdateClassroom: () => Promise.resolve(false),
-    handleDeleteClassroom: () => Promise.resolve(false),
-    projects: {
-      projects: [],
-      projectsLoading: false,
-      handleGetAllProjectsByClassroomId: () => Promise.resolve(false),
-      handleCreateClassroomProject: () => Promise.resolve(false),
-      handleUpdateClassroomProject: () => Promise.resolve(false),
-      handleDeleteProject: () => Promise.resolve(false),
-    },
-    coodesh: {
-      assessments: [],
-      assessmentsLoading: false,
-      handleGetAllCoodeshAssessmentByClassroomId: () => Promise.resolve(false),
-      handleCreateCoodeshAssessment: () => Promise.resolve(false),
-      handleUpdateCoodeshAssessment: () => Promise.resolve(false),
-      api: {
-        coodeshAPIAssessments: [],
-        handleGetCoodeshAPIAssessments: () => Promise.resolve(false),
-      },
-    },
-    zoom: {
-      accounts: {
-        accounts: [],
-        accountsLoading: false,
-        handleGetAllZoomAccounts: () => Promise.resolve(false),
-        handleGetZoomAccountById: () => Promise.resolve(false),
-        handleCreateZoomAccount: () => Promise.resolve(false),
-        handleUpdateZoomAccountById: () => Promise.resolve(false),
-        handleDeleteZoomAccountById: () => Promise.resolve(false),
-      },
-      meetings: {
-        meetings: [],
-        meetingsLoading: false,
-        handleGetAllZoomMeetings: () => Promise.resolve(false),
-        handleGetZoomMeetingById: () => Promise.resolve(false),
-        handleCreateZoomMeeting: () => Promise.resolve(false),
-        handleUpdateZoomMeeting: () => Promise.resolve(false),
-        handleRefreshAndUpdateZoomMeeting: () => Promise.resolve(false),
-        handleUpdateZoomMeetingOccurrence: () => Promise.resolve(false),
-        handleUpdateZoomMeetingPastInstance: () => Promise.resolve(false),
-        handleDeleteZoomMeeting: () => Promise.resolve(false),
-      },
-      api: {
-        meetingsByAPI: [],
-        meetingsByAPILoading: false,
-        handleGetZoomMeAccountDataByAPI: () => Promise.resolve(false),
-        handleGetAllZoomMeetingsByAPI: () => Promise.resolve(false),
-        handleGetZoomMeetingByAPI: () => Promise.resolve(null),
-        handleGetAllParticipantsByMeetingIdFromAPI: () => Promise.resolve([]),
-        handleGetAllPollResultsByMeetingIdFromAPI: () => Promise.resolve([]),
-      },
-    },
-  },
-  jobsStack: {
-    jobs: [],
-    jobsLoading: false,
-    handleGetAllJobs: () => Promise.resolve(false),
-    handleCreateJob: () => Promise.resolve(false),
-    handleUpdateJob: () => Promise.resolve(false),
-    handleDeleteJob: () => Promise.resolve(false),
-    handleCurateJob: () => Promise.resolve(false),
-    handleResendJobToCuration: () => Promise.resolve(false),
-    handleArchiveJob: () => Promise.resolve(false),
-    handleJobIsOnDiscord: () => Promise.resolve(false),
-  },
-  loading: true,
-  setLoading: () => {},
-});
+const AdminStackContext = createContext<AdminStackContextProps>(
+  {} as AdminStackContextProps
+);
 
 export const AdminStackProvider = ({
   children,
@@ -183,6 +98,7 @@ export const AdminStackProvider = ({
     projects,
     projectsLoading,
     handleGetAllProjectsByClassroomId,
+    handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
     handleCreateClassroomProject,
     handleUpdateClassroomProject,
     handleDeleteProject,
@@ -294,6 +210,7 @@ export const AdminStackProvider = ({
       {
         title: "Usuários",
         url: "/dashboard/admin/users",
+        ref: "users",
         icon: Users,
         items: [
           {
@@ -305,6 +222,7 @@ export const AdminStackProvider = ({
       {
         title: "Vagas",
         url: "/dashboard/admin/jobs",
+        ref: "jobs",
         icon: Briefcase,
         isActive: false,
         items: [
@@ -325,6 +243,7 @@ export const AdminStackProvider = ({
     ],
     classRooms: classrooms.flatMap((classroom) => ({
       title: classroom.name,
+      ref: classroom.id,
       url: `/dashboard/admin/classrooms/${classroom.id}`,
       icon: classroomPeriodsIcons[classroom.period],
       isActive: false,
@@ -414,6 +333,7 @@ export const AdminStackProvider = ({
             projects,
             projectsLoading,
             handleGetAllProjectsByClassroomId,
+            handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
             handleCreateClassroomProject,
             handleUpdateClassroomProject,
             handleDeleteProject,

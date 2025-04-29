@@ -9,7 +9,7 @@ export type ClassroomProjectTypeT =
   | "end_module_project"
   | "end_module_english_project";
 
-export type ClassroomProjectT = {
+export interface ClassroomProjectT {
   id: string;
   classroom_id: string;
   title: string;
@@ -17,7 +17,11 @@ export type ClassroomProjectT = {
   project_type: ClassroomProjectTypeT;
   schedule_date: DateRange | undefined;
   description: string;
-  deliveries?: ClassroomProjectDeliveryT[];
-  corrections?: ClassroomProjectCorrectionT[];
   created_at: string;
-};
+}
+
+export type ClassroomProjectWithDeliveriesAndCorrectionsT =
+  ClassroomProjectT & {
+    deliveries?: ClassroomProjectDeliveryT[];
+    corrections?: ClassroomProjectCorrectionT[];
+  };
