@@ -25,7 +25,7 @@ const SelectTrigger = React.forwardRef<
     {...props}
   >
     <SelectPrimitive.Icon asChild>
-      <Plus className="size-4 opacity-50" />
+      <Plus className="!size-3 opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))

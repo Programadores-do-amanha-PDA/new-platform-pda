@@ -6,6 +6,7 @@ export default function AllUsersPage() {
   const {
     usersStack: {
       users,
+      usersLoading,
       handleDeleteUser,
       handleCreateNewUser,
       handleUpdateUser,
@@ -15,21 +16,24 @@ export default function AllUsersPage() {
       handleDeleteUserRole,
       handleUpdateUserRole,
     },
-    loading,
+    classroomsStack: { classrooms },
   } = useAdminStackContext();
 
   return (
     <main className="relative w-full overflow-hidden flex flex-col p-4 gap-4">
-      <ProfilesDataTable
-        users={users}
-        handleCreateNewUser={handleCreateNewUser}
-        handleUpdateUser={handleUpdateUser}
-        handleDeleteUser={handleDeleteUser}
-        handleAddUserRole={handleAddUserRole}
-        handleDeleteUserRole={handleDeleteUserRole}
-        handleUpdateUserRole={handleUpdateUserRole}
-        loading={loading}
-      />
+      <div className="w-full h-full flex relative overflow-y-auto">
+        <ProfilesDataTable
+          users={users}
+          handleCreateNewUser={handleCreateNewUser}
+          handleUpdateUser={handleUpdateUser}
+          handleDeleteUser={handleDeleteUser}
+          handleAddUserRole={handleAddUserRole}
+          handleDeleteUserRole={handleDeleteUserRole}
+          handleUpdateUserRole={handleUpdateUserRole}
+          loading={usersLoading}
+          classrooms={classrooms}
+        />
+      </div>
     </main>
   );
 }

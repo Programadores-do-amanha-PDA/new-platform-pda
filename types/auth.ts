@@ -33,6 +33,7 @@ export type ProfileType = {
   created_at?: Date;
   updated_at?: Date;
   user_id?: string;
+  classrooms?: string[];
 };
 
 export type AuthUserWithProfileType = AuthUser & { profile: ProfileType };

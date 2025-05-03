@@ -27,19 +27,10 @@ import {
 } from "@/components/ui/table";
 import UserSheetData from "./user-sheet-data";
 import { AuthUser } from "@supabase/supabase-js";
-import InsertManyUsersDrawer from "./insert-many-users-drawer";
+import { ClassroomType } from "@/types/classrooms";
+import InsertManyUsersDialog from "./insert-many-users-dialog";
 
-export function DataTable({
-  data,
-  columns,
-  loading,
-  handleCreateNewUser,
-  handleUpdateUser,
-  handleAddUserRole,
-  handleUpdateUserRole,
-  handleDeleteUserRole,
-  excludeRoles,
-}: {
+type DataTableProps = {
   data: Partial<AuthUserWithProfileType>[];
   columns: ColumnDef<Partial<AuthUserWithProfileType>>[];
   loading: boolean;
@@ -55,7 +46,21 @@ export function DataTable({
   handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
   excludeRoles?: RolesType[];
-}) {
+  classrooms?: ClassroomType[];
+};
+
+export function DataTable({
+  data,
+  columns,
+  loading,
+  handleCreateNewUser,
+  handleUpdateUser,
+  handleAddUserRole,
+  handleUpdateUserRole,
+  handleDeleteUserRole,
+  excludeRoles,
+  classrooms,
+}: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -92,8 +97,8 @@ export function DataTable({
   });
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between py-4">
+    <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
+      <div className="flex items-center justify-between py-4 sticky">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
@@ -103,10 +108,11 @@ export function DataTable({
           className="max-w-sm"
         />
         <div className="flex gap-4">
-          <InsertManyUsersDrawer
+          <InsertManyUsersDialog
             handleAddUserRole={handleAddUserRole}
             handleCreateNewUser={handleCreateNewUser}
             excludeRoles={excludeRoles}
+            classrooms={classrooms}
           />
 
           <UserSheetData
@@ -117,15 +123,19 @@ export function DataTable({
             handleUpdateUserRole={handleUpdateUserRole}
             handleDeleteUserRole={handleDeleteUserRole}
             excludeRoles={excludeRoles}
+            classrooms={classrooms}
           />
         </div>
       </div>
 
-      <div className="w-full h-full rounded-md border flex overflow-y-auto">
+      <div className="w-full h-full flex border rounded-lg overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 bg-white z-10">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow
+                key={headerGroup.id}
+                className="shadow !rounded-t-lg overflow-hidden"
+              >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id} className="!px-0">
@@ -182,16 +192,14 @@ export function DataTable({
         </Table>
       </div>
 
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length > 0 && (
-            <>
-              {table.getFilteredSelectedRowModel().rows.length} de{" "}
-              {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
-            </>
-          )}
+      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {table.getFilteredSelectedRowModel().rows.length} de{" "}
+            {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

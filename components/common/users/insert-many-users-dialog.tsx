@@ -3,14 +3,15 @@ import Papa from "papaparse";
 import generatePassword from "generate-password";
 
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "../../ui/button";
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
@@ -25,10 +26,12 @@ import {
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 import { AuthUser } from "@supabase/supabase-js";
-import { app_role } from "@/utils/supabase/enumeratedTypes/app_role";
-import { RoleSelector } from "./RoleSelector";
 import { toast } from "sonner";
 import { Badge } from "../../ui/badge";
+import BadgeSelector from "../badge-selector";
+import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
+import { ClassroomType } from "@/types/classrooms";
+import { ClassroomCombobox } from "./classroom-combobox";
 
 interface UserData {
   name: string;
@@ -36,28 +39,38 @@ interface UserData {
   password?: string;
   status?: "success" | "error" | "warning";
   userRoles?: RolesType[];
+  userClassrooms?: string[];
 }
 
 interface UserRow {
   nome?: string;
+  Nome?: string;
+  name?: string;
+  Name?: string;
   email?: string;
+  Email?: string;
 }
 
-const InsertManyUsersDrawer = ({
-  handleCreateNewUser,
-  handleAddUserRole,
-  excludeRoles,
-}: {
+type InsertManyUsersDialogProps = {
   handleCreateNewUser: (
     user: Partial<AuthUser & { password: string }>
   ) => Promise<string | false>;
   handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   excludeRoles?: RolesType[];
-}) => {
+  classrooms?: ClassroomType[];
+};
+
+const InsertManyUsersDialog = ({
+  handleCreateNewUser,
+  handleAddUserRole,
+  excludeRoles,
+  classrooms,
+}: InsertManyUsersDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const [users, setUsers] = useState<UserData[]>([]);
   const [allUsersRole, setAllUsersRole] = useState<RolesType[]>([]);
+  const [allUsersClassroom, setAllUsersClassroom] = useState<string[]>([]);
   const [stage, setStage] = useState<0 | 1 | 2>(0);
   const [loading, setLoading] = useState(false);
 
@@ -78,8 +91,8 @@ const InsertManyUsersDrawer = ({
 
           const parsedUsers = (results.data as UserRow[])
             .map((row: UserRow) => ({
-              name: row.nome || "",
-              email: row.email || "",
+              name: row.nome || row.Nome || row.name || row.Name || "",
+              email: row.email || row.Email || "",
             }))
             .filter(
               (user) =>
@@ -122,14 +135,24 @@ const InsertManyUsersDrawer = ({
     );
   };
 
-  const handleSetRolesForAll = (newRoleName: RolesType) => {
+  const handleSetRolesForAll = (newRoleName: string) => {
     setUsers((users) =>
       users.map((user) => ({
         ...user,
-        userRoles: [newRoleName],
+        userRoles: [newRoleName as RolesType],
       }))
     );
-    setAllUsersRole([newRoleName]);
+    setAllUsersRole([newRoleName as RolesType]);
+  };
+
+  const handleSetClassroomsForAll = (newClassroom: string[]) => {
+    setUsers((users) =>
+      users.map((user) => ({
+        ...user,
+        userClassrooms: [...newClassroom],
+      }))
+    );
+    setAllUsersClassroom([...newClassroom]);
   };
 
   const handleRemoveRolesForAll = () => {
@@ -157,7 +180,6 @@ const InsertManyUsersDrawer = ({
         if (!user.email || !user.name || !user.password)
           throw "fill the fields";
 
-        console.log(user);
         if (!fullNameRegex.test(user.name)) throw "Invalid full name";
         if (!emailRegex.test(user.email)) throw "Invalid email";
         if (!passwordRegex.test(user.password)) throw "Invalid password";
@@ -224,42 +246,54 @@ const InsertManyUsersDrawer = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger>
         <Button variant={"secondary"}>Inserir via CSV</Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>
-            {stage === 0 &&
-              "Selecione um arquivo csv para carregar os dados dos usuários"}
+      </DialogTrigger>
+      <DialogContent className="max-w-[85vw] w-max overflow-hidden">
+        <DialogHeader>
+          <DialogTitle>Inserir usuários via CSV</DialogTitle>
+          <DialogDescription>
+            {stage === 0 && (
+              <>
+                Selecione um arquivo csv para carregar os dados dos usuários
+                <p>
+                  O arquivo deve conter as colunas: <b>Nome</b>, <b>Email</b>
+                </p>
+              </>
+            )}
             {stage === 1 && "Revise os dados dos usuários a serem inseridos"}
             {stage === 2 && "Resultados das inserções"}
-          </DrawerTitle>
-        </DrawerHeader>
+          </DialogDescription>
+        </DialogHeader>
 
         {stage === 0 ? (
-          <div className="grid w-full items-center gap-1.5 px-4 my-6">
-            <Label htmlFor="file"></Label>
+          <div className="grid w-full items-center gap-4 my-4">
+            <Label
+              htmlFor="csv-file"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 w-max cursor-pointer"
+            >
+              Selecionar arquivo
+            </Label>
             <Input
-              id="file"
+              id="csv-file"
               type="file"
               accept=".csv"
-              className="max-w-sm"
+              className="hidden"
               onChange={handleFileChange}
             />
           </div>
         ) : (
-          <div className="w-full max-h-96 overflow-y-auto px-4 my-6">
-            <Table>
-              <TableHeader>
+          <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
+            <Table className="w-full h-full">
+              <TableHeader className="sticky top-0 bg-background z-10 shadow">
                 <TableRow>
-                  <TableHead className="max-w-56 w-56 truncate">Nome</TableHead>
-                  <TableHead className="max-w-56 w-56 truncate">
+                  <TableHead className="max-w-56 w-56 truncate font-semibold">Nome</TableHead>
+                  <TableHead className="max-w-56 w-56 truncate font-semibold">
                     Email
                   </TableHead>
-                  <TableHead className="max-w-36 w-36 truncate">
-                    <div className="flex items-center gap-2">
+                  <TableHead className="max-w-56 w-56 truncate font-semibold">
+                    <div className="w-full flex items-center justify-between pr-2 gap-2">
                       Senha
                       <Button
                         variant="outline"
@@ -273,22 +307,31 @@ const InsertManyUsersDrawer = ({
                     </div>
                   </TableHead>
 
-                  <TableHead className="max-w-36 w-36 truncate">
-                    <div className="flex items-center gap-2">
-                      Cargo
+                  <TableHead className="max-w-36 w-36 truncate font-semibold">
+                    <div className="w-full flex items-center justify-between pr-2 gap-2">
+                      {allUsersRole.length === 0 && "Cargo"}
                       {allUsersRole.map((r, i) => (
-                        <Badge variant="outline" key={i}>
-                          {r}
+                        <Badge
+                          variant="secondary"
+                          key={i}
+                          className="flex justify-between gap-2 w-max"
+                        >
+                          <p>
+                            {rolesLabels.find((role) => role.value === r)
+                              ?.label || r}
+                          </p>
                           <X
                             onClick={handleRemoveRolesForAll}
-                            className="size-3 ml-1 cursor-pointer"
+                            className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
                           />
                         </Badge>
                       ))}
                       {allUsersRole.length < 1 &&
-                        app_role.filter((role) => !allUsersRole.includes(role))
-                          .length > 0 && (
-                          <RoleSelector
+                        rolesLabels.filter(
+                          (role) => !allUsersRole.includes(role.value)
+                        ).length > 0 && (
+                          <BadgeSelector
+                            items={rolesLabels}
                             excludeItens={allUsersRole.concat(
                               excludeRoles || []
                             )}
@@ -299,9 +342,26 @@ const InsertManyUsersDrawer = ({
                         )}
                     </div>
                   </TableHead>
+
+                  {classrooms && classrooms.length > 0 && (
+                    <TableHead className="max-w-36 w-36 truncate font-semibold">
+                      <div className="w-full flex items-center justify-between pr-2 gap-2">
+                        {allUsersClassroom.length === 0 && "Turmas"}
+                        <ClassroomCombobox
+                          itens={classrooms?.map((c) => ({
+                            label: c.name,
+                            value: c.id,
+                          }))}
+                          value={allUsersClassroom}
+                          onChange={handleSetClassroomsForAll}
+                        />
+                      </div>
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
-              <TableBody>
+
+              <TableBody className="[&_tr:nth-child(odd)]:!bg-muted-foreground/5 [&_tr:nth-child(odd)]:hover:!bg-muted">
                 {users &&
                   users.map((user, index) =>
                     user.status ? (
@@ -372,42 +432,78 @@ const InsertManyUsersDrawer = ({
                           />
                         </TableCell>
                         <TableCell>
-                          {user?.userRoles?.map((r, i) => (
-                            <Badge variant="outline" key={i}>
-                              {r}
-                              <X
-                                onClick={() =>
-                                  setUsers((prevUsers) =>
-                                    prevUsers.map((u, i) =>
-                                      index === i ? { ...u, userRoles: [] } : u
+                          {user.userRoles?.length ? (
+                            user?.userRoles?.map((r, i) => (
+                              <Badge
+                                variant="secondary"
+                                key={i}
+                                className="flex justify-between gap-2 w-max"
+                              >
+                                <p>
+                                  {rolesLabels.find((role) => role.value === r)
+                                    ?.label || r}
+                                </p>
+                                <X
+                                  onClick={() =>
+                                    setUsers((prevUsers) =>
+                                      prevUsers.map((u, i) =>
+                                        index === i
+                                          ? { ...u, userRoles: [] }
+                                          : u
+                                      )
                                     )
-                                  )
-                                }
-                                className="size-3 ml-1 cursor-pointer"
-                              />
-                            </Badge>
-                          ))}
-                          {user.userRoles &&
-                            user.userRoles?.length < 1 &&
-                            app_role.filter(
-                              (role) => !user.userRoles?.includes(role)
-                            ).length > 0 && (
-                              <RoleSelector
+                                  }
+                                  className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
+                                />
+                              </Badge>
+                            ))
+                          ) : (
+                            <div className="w-full h-full flex justify-center items-center">
+                              <BadgeSelector
+                                items={rolesLabels}
                                 excludeItens={excludeRoles || []}
                                 label="Adicionar cargo"
-                                value={user.userRoles[0]}
                                 onChange={(role) =>
                                   setUsers((prevUsers) =>
                                     prevUsers.map((u, i) =>
                                       index === i
-                                        ? { ...u, userRoles: [role] }
+                                        ? {
+                                            ...u,
+                                            userRoles: [role as RolesType],
+                                          }
                                         : u
                                     )
                                   )
                                 }
                               />
-                            )}
+                            </div>
+                          )}
                         </TableCell>
+                        {classrooms && classrooms.length > 0 && (
+                          <TableCell>
+                            <div className="w-full h-full flex justify-center items-center">
+                              <ClassroomCombobox
+                                itens={classrooms?.map((c) => ({
+                                  label: c.name,
+                                  value: c.id,
+                                }))}
+                                value={user?.userClassrooms || []}
+                                onChange={(classrooms) =>
+                                  setUsers((prevUsers) =>
+                                    prevUsers.map((u, i) =>
+                                      index === i
+                                        ? {
+                                            ...u,
+                                            userClassrooms: [...classrooms],
+                                          }
+                                        : u
+                                    )
+                                  )
+                                }
+                              />
+                            </div>
+                          </TableCell>
+                        )}
                       </TableRow>
                     )
                   )}
@@ -416,11 +512,11 @@ const InsertManyUsersDrawer = ({
           </div>
         )}
 
-        <DrawerFooter className="!flex !flex-row justify-end gap-8">
+        <DialogFooter className="!flex !flex-row justify-end gap-8">
           {stage === 0 && (
-            <DrawerClose>
+            <DialogClose>
               <Button variant="outline">Cancelar</Button>
-            </DrawerClose>
+            </DialogClose>
           )}
           {stage === 1 && (
             <>
@@ -428,7 +524,10 @@ const InsertManyUsersDrawer = ({
                 Trocar arquivo csv
               </Button>
               {users.length > 0 && (
-                <Button onClick={() => (!loading ? handleSubmit() : null)}>
+                <Button
+                  onClick={() => (!loading ? handleSubmit() : null)}
+                  className="font-semibold"
+                >
                   {loading && <LoaderCircle className="size-5 animate-spin" />}
                   Inserir {users.length} usuários
                 </Button>
@@ -437,15 +536,15 @@ const InsertManyUsersDrawer = ({
           )}
           {stage === 2 && (
             <>
-              <DrawerClose>
+              <DialogClose>
                 <Button>Finalizar</Button>
-              </DrawerClose>
+              </DialogClose>
             </>
           )}
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default InsertManyUsersDrawer;
+export default InsertManyUsersDialog;

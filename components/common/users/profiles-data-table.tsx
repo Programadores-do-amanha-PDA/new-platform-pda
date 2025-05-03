@@ -19,18 +19,9 @@ import UserSheetData from "./user-sheet-data";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { cn } from "@/lib/utils";
+import { ClassroomType } from "@/types/classrooms";
 
-const ProfilesDataTable = ({
-  users,
-  handleDeleteUser,
-  handleCreateNewUser,
-  handleUpdateUser,
-  handleAddUserRole,
-  handleUpdateUserRole,
-  handleDeleteUserRole,
-  loading,
-  excludeRoles,
-}: {
+type ProfilesDataTableProps = {
   users: Partial<AuthUserWithProfileType>[];
   handleCreateNewUser: (
     user: Partial<AuthUser & { password: string }>
@@ -45,7 +36,21 @@ const ProfilesDataTable = ({
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
   excludeRoles?: RolesType[];
   loading: boolean;
-}) => {
+  classrooms: ClassroomType[];
+}
+
+const ProfilesDataTable = ({
+  users,
+  handleDeleteUser,
+  handleCreateNewUser,
+  handleUpdateUser,
+  handleAddUserRole,
+  handleUpdateUserRole,
+  handleDeleteUserRole,
+  loading,
+  excludeRoles,
+  classrooms
+}: ProfilesDataTableProps) => {
   const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
     {
       id: "select",
@@ -455,6 +460,7 @@ const ProfilesDataTable = ({
       handleCreateNewUser={handleCreateNewUser}
       handleUpdateUser={handleUpdateUser}
       excludeRoles={excludeRoles}
+      classrooms={classrooms}
     />
   );
 };
