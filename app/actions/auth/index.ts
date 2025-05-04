@@ -67,7 +67,7 @@ export const signOut = async () => {
 export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
   try {
     const supabase = await createClient();
-    const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_BASE_URL;
+    const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_PATH;
 
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
@@ -93,7 +93,7 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
       type: "signup",
       email: email,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_BASE_URL,
+        emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_PATH,
       },
     });
     if (error) throw error;

@@ -32,6 +32,9 @@ import BadgeSelector from "../badge-selector";
 import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 import { ClassroomType } from "@/types/classrooms";
 import { ClassroomCombobox } from "./classroom-combobox";
+import { UserClassroomT } from "@/types/user-classroom";
+import { emailRegex, passwordRegex } from "@/utils/regex/users";
+import { UserClassroomStackI } from "@/context/modules/users/classrooms";
 
 interface UserData {
   name: string;
@@ -58,13 +61,14 @@ type InsertManyUsersDialogProps = {
   handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   excludeRoles?: RolesType[];
   classrooms?: ClassroomType[];
-};
+} & Omit<UserClassroomStackI, "handleDeleteUserClassroom">;
 
 const InsertManyUsersDialog = ({
   handleCreateNewUser,
   handleAddUserRole,
   excludeRoles,
   classrooms,
+  handleInsertUserClassrooms,
 }: InsertManyUsersDialogProps) => {
   const [open, setOpen] = useState(false);
 
@@ -168,19 +172,13 @@ const InsertManyUsersDialog = ({
   const handleSubmit = async () => {
     setLoading(true);
 
-    const fullNameRegex = /^[a-zA-ZÀ-ÿ'\-]+(?: [a-zA-ZÀ-ÿ'\-]+)*$/;
-    const emailRegex =
-      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
-
     for (const user of users) {
       try {
         if (!user.email || !user.name || !user.password)
           throw "fill the fields";
 
-        if (!fullNameRegex.test(user.name)) throw "Invalid full name";
+        if (user.name.split(" ").length < 2 || user.name.length < 5)
+          throw "Invalid full name";
         if (!emailRegex.test(user.email)) throw "Invalid email";
         if (!passwordRegex.test(user.password)) throw "Invalid password";
 
@@ -199,6 +197,16 @@ const InsertManyUsersDialog = ({
             const role = user.userRoles[0];
             await handleAddUserRole(userCreatedId, role);
           }
+
+          if (user.userClassrooms && user.userClassrooms.length > 0) {
+            const uClassroom: UserClassroomT[] = user.userClassrooms.map(
+              (id) => ({
+                user_id: userCreatedId,
+                classroom_id: id,
+              })
+            );
+            await handleInsertUserClassrooms(uClassroom);
+          }
         }
         setUsers((prevUsers) =>
           prevUsers.map((u) =>
@@ -206,7 +214,7 @@ const InsertManyUsersDialog = ({
           )
         );
       } catch (error) {
-        console.log(error);
+        console.log("Error", error);
         switch (error) {
           case "role assign error":
             toast.error("Erro ao atribuir o cargo!");
@@ -228,16 +236,17 @@ const InsertManyUsersDialog = ({
             break;
         }
       }
-
-      setLoading(false);
-      setStage(1);
     }
+
+    setLoading(false);
+    setStage(2);
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setUsers([]);
       setAllUsersRole([]);
+      setAllUsersClassroom([]);
       setStage(0);
       setLoading(false);
     }
@@ -288,7 +297,9 @@ const InsertManyUsersDialog = ({
             <Table className="w-full h-full">
               <TableHeader className="sticky top-0 bg-background z-10 shadow">
                 <TableRow>
-                  <TableHead className="max-w-56 w-56 truncate font-semibold">Nome</TableHead>
+                  <TableHead className="max-w-56 w-56 truncate font-semibold">
+                    Nome
+                  </TableHead>
                   <TableHead className="max-w-56 w-56 truncate font-semibold">
                     Email
                   </TableHead>
@@ -310,36 +321,33 @@ const InsertManyUsersDialog = ({
                   <TableHead className="max-w-36 w-36 truncate font-semibold">
                     <div className="w-full flex items-center justify-between pr-2 gap-2">
                       {allUsersRole.length === 0 && "Cargo"}
-                      {allUsersRole.map((r, i) => (
+
+                      {allUsersRole.length === 1 ? (
                         <Badge
                           variant="secondary"
-                          key={i}
                           className="flex justify-between gap-2 w-max"
                         >
                           <p>
-                            {rolesLabels.find((role) => role.value === r)
-                              ?.label || r}
+                            {rolesLabels.find(
+                              (role) => role.value === allUsersRole[0]
+                            )?.label || allUsersRole[0]}
                           </p>
-                          <X
-                            onClick={handleRemoveRolesForAll}
-                            className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
-                          />
+                          {stage !== 2 && (
+                            <X
+                              onClick={handleRemoveRolesForAll}
+                              className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
+                            />
+                          )}
                         </Badge>
-                      ))}
-                      {allUsersRole.length < 1 &&
-                        rolesLabels.filter(
-                          (role) => !allUsersRole.includes(role.value)
-                        ).length > 0 && (
-                          <BadgeSelector
-                            items={rolesLabels}
-                            excludeItens={allUsersRole.concat(
-                              excludeRoles || []
-                            )}
-                            label="Adicionar cargo"
-                            value={allUsersRole[0]}
-                            onChange={handleSetRolesForAll}
-                          />
-                        )}
+                      ) : (
+                        <BadgeSelector
+                          items={rolesLabels}
+                          excludeItens={allUsersRole.concat(excludeRoles || [])}
+                          label="Adicionar cargo"
+                          value={allUsersRole[0]}
+                          onChange={handleSetRolesForAll}
+                        />
+                      )}
                     </div>
                   </TableHead>
 
@@ -347,49 +355,80 @@ const InsertManyUsersDialog = ({
                     <TableHead className="max-w-36 w-36 truncate font-semibold">
                       <div className="w-full flex items-center justify-between pr-2 gap-2">
                         {allUsersClassroom.length === 0 && "Turmas"}
-                        <ClassroomCombobox
-                          itens={classrooms?.map((c) => ({
-                            label: c.name,
-                            value: c.id,
-                          }))}
-                          value={allUsersClassroom}
-                          onChange={handleSetClassroomsForAll}
-                        />
+                        {stage !== 2 ? (
+                          <ClassroomCombobox
+                            itens={classrooms?.map((c) => ({
+                              label: c.name,
+                              value: c.id,
+                            }))}
+                            value={allUsersClassroom}
+                            onChange={handleSetClassroomsForAll}
+                          />
+                        ) : (
+                          <Badge variant="secondary">
+                            {
+                              classrooms.find(
+                                (c) => c.id === allUsersClassroom[0]
+                              )?.name
+                            }
+                          </Badge>
+                        )}
                       </div>
                     </TableHead>
                   )}
                 </TableRow>
               </TableHeader>
 
-              <TableBody className="[&_tr:nth-child(odd)]:!bg-muted-foreground/5 [&_tr:nth-child(odd)]:hover:!bg-muted">
+              <TableBody>
                 {users &&
                   users.map((user, index) =>
-                    user.status ? (
-                      <TableRow
-                        key={index}
-                        className={`${
-                          user.status === "success"
-                            ? "bg-green-50"
-                            : user.status === "error"
-                            ? "bg-red-50"
-                            : "bg-yellow-50"
-                        }`}
-                      >
+                    user.status === "success" ? (
+                      <TableRow key={index} className={"!bg-green-100"}>
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.password}</TableCell>
                         <TableCell>
                           {user.userRoles && user.userRoles.length > 0 && (
-                            <Badge variant="outline">{user.userRoles[0]}</Badge>
+                            <Badge variant="secondary">
+                              {rolesLabels.find(
+                                (r) =>
+                                  user.userRoles &&
+                                  r.value === user.userRoles[0]
+                              )?.label || user.userRoles[0]}
+                            </Badge>
                           )}
+                        </TableCell>
+                        <TableCell>
+                          {user.userClassrooms &&
+                            user.userClassrooms?.length > 0 && (
+                              <Badge variant="secondary">
+                                {classrooms?.find(
+                                  (c) =>
+                                    user?.userClassrooms &&
+                                    c.id === user?.userClassrooms[0]
+                                )?.name || user.userClassrooms}{" "}
+                                {user?.userClassrooms.length > 1 &&
+                                  `+${user?.userClassrooms.length - 1}`}
+                              </Badge>
+                            )}
                         </TableCell>
                       </TableRow>
                     ) : (
-                      <TableRow key={index}>
+                      <TableRow
+                        key={index}
+                        className={
+                          user.status === "error"
+                            ? "!bg-red-100"
+                            : user.status !== undefined
+                            ? "!bg-yellow-100"
+                            : ""
+                        }
+                      >
                         <TableCell>
                           <Input
                             type="text"
                             value={user.name}
+                            className="bg-background"
                             onChange={(e) =>
                               setUsers((prevUsers) =>
                                 prevUsers.map((u, i) =>
@@ -405,6 +444,7 @@ const InsertManyUsersDialog = ({
                           <Input
                             type="email"
                             value={user.email}
+                            className="bg-background"
                             onChange={(e) =>
                               setUsers((prevUsers) =>
                                 prevUsers.map((u, i) =>
@@ -420,6 +460,7 @@ const InsertManyUsersDialog = ({
                           <Input
                             type="password"
                             value={user.password}
+                            className="bg-background"
                             onChange={(e) =>
                               setUsers((prevUsers) =>
                                 prevUsers.map((u, i) =>
@@ -512,21 +553,34 @@ const InsertManyUsersDialog = ({
           </div>
         )}
 
-        <DialogFooter className="!flex !flex-row justify-end gap-8">
+        <DialogFooter className="!flex !flex-row justify-end gap-2">
           {stage === 0 && (
             <DialogClose>
-              <Button variant="outline">Cancelar</Button>
+              <Button
+                variant="outline"
+                className="font-semibold text-muted-foreground"
+              >
+                Cancelar
+              </Button>
             </DialogClose>
           )}
           {stage === 1 && (
             <>
-              <Button onClick={() => setUsers([])} variant="outline">
+              <Button
+                onClick={() => {
+                  setUsers([]);
+                  setStage(0);
+                }}
+                variant="outline"
+                className="font-semibold text-muted-foreground"
+              >
                 Trocar arquivo csv
               </Button>
               {users.length > 0 && (
                 <Button
                   onClick={() => (!loading ? handleSubmit() : null)}
                   className="font-semibold"
+                  disabled={loading}
                 >
                   {loading && <LoaderCircle className="size-5 animate-spin" />}
                   Inserir {users.length} usuários
@@ -536,8 +590,23 @@ const InsertManyUsersDialog = ({
           )}
           {stage === 2 && (
             <>
+              {users.filter((u) => u.status !== "success").length > 0 && (
+                <Button
+                  onClick={() => {
+                    setUsers((prev) =>
+                      prev.filter((u) => u.status !== "success")
+                    );
+                    setStage(1);
+                  }}
+                  variant="outline"
+                  className="font-semibold text-muted-foreground"
+                >
+                  Usuários não inseridos
+                </Button>
+              )}
+
               <DialogClose>
-                <Button>Finalizar</Button>
+                <Button className="font-semibold">Finalizar</Button>
               </DialogClose>
             </>
           )}

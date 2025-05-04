@@ -16,7 +16,10 @@ export default function AllUsersPage() {
       handleDeleteUserRole,
       handleUpdateUserRole,
     },
-    classroomsStack: { classrooms },
+    classroomsStack: {
+      classrooms,
+      users: { handleInsertUserClassrooms, handleDeleteUserClassroom },
+    },
   } = useAdminStackContext();
 
   return (
@@ -32,6 +35,8 @@ export default function AllUsersPage() {
           handleUpdateUserRole={handleUpdateUserRole}
           loading={usersLoading}
           classrooms={classrooms}
+          handleInsertUserClassrooms={handleInsertUserClassrooms}
+          handleDeleteUserClassroom={handleDeleteUserClassroom}
         />
       </div>
     </main>

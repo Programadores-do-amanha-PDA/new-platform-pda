@@ -29,6 +29,7 @@ import UserSheetData from "./user-sheet-data";
 import { AuthUser } from "@supabase/supabase-js";
 import { ClassroomType } from "@/types/classrooms";
 import InsertManyUsersDialog from "./insert-many-users-dialog";
+import { UserClassroomStackI } from "@/context/modules/users/classrooms";
 
 type DataTableProps = {
   data: Partial<AuthUserWithProfileType>[];
@@ -47,7 +48,7 @@ type DataTableProps = {
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
   excludeRoles?: RolesType[];
   classrooms?: ClassroomType[];
-};
+} & UserClassroomStackI;
 
 export function DataTable({
   data,
@@ -60,6 +61,8 @@ export function DataTable({
   handleDeleteUserRole,
   excludeRoles,
   classrooms,
+  handleInsertUserClassrooms,
+  handleDeleteUserClassroom,
 }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -113,6 +116,7 @@ export function DataTable({
             handleCreateNewUser={handleCreateNewUser}
             excludeRoles={excludeRoles}
             classrooms={classrooms}
+            handleInsertUserClassrooms={handleInsertUserClassrooms}
           />
 
           <UserSheetData
@@ -124,6 +128,8 @@ export function DataTable({
             handleDeleteUserRole={handleDeleteUserRole}
             excludeRoles={excludeRoles}
             classrooms={classrooms}
+            handleInsertUserClassrooms={handleInsertUserClassrooms}
+            handleDeleteUserClassroom={handleDeleteUserClassroom}
           />
         </div>
       </div>

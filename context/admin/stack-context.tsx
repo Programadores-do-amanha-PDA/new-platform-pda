@@ -33,6 +33,9 @@ import useClassroomProjects, {
 } from "../modules/classrooms/projects";
 
 import { AuthUserWithProfileType } from "@/types/auth";
+import UserClassroomStack, {
+  UserClassroomStackI,
+} from "../modules/users/classrooms";
 
 interface AdminStackContextProps {
   usersStack: UsersStackI;
@@ -47,6 +50,7 @@ interface AdminStackContextProps {
       meetings: ZoomMeetingsStackI;
       api: ZoomAPIMeetingsStackI;
     };
+    users: UserClassroomStackI;
   };
   jobsStack: JobsStackI;
   loading: boolean;
@@ -92,6 +96,10 @@ export const AdminStackProvider = ({
     handleUpdateClassroom,
     handleDeleteClassroom,
   } = ClassroomStack();
+
+  // User classrooms
+  const { handleInsertUserClassrooms, handleDeleteUserClassroom } =
+    UserClassroomStack(setUsers);
 
   // Projects
   const {
@@ -381,6 +389,10 @@ export const AdminStackProvider = ({
               handleGetAllParticipantsByMeetingIdFromAPI,
               handleGetAllPollResultsByMeetingIdFromAPI,
             },
+          },
+          users: {
+            handleInsertUserClassrooms,
+            handleDeleteUserClassroom,
           },
         },
         jobsStack: {

@@ -26,10 +26,14 @@ import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 import { ClassroomType } from "@/types/classrooms";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ClassroomCombobox } from "./classroom-combobox";
+import { UserClassroomT } from "@/types/user-classroom";
+import { UserClassroomStackI } from "@/context/modules/users/classrooms";
+import { emailRegex, passwordRegex } from "@/utils/regex/users";
 
 type UserSheetDataProps = {
   mode: "new" | "edit";
   currentUser?: Partial<AuthUserWithProfileType>;
+  excludeRoles?: RolesType[];
   handleCreateNewUser: (
     user: Partial<AuthUser & { password: string }>
   ) => Promise<string | false>;
@@ -40,20 +44,21 @@ type UserSheetDataProps = {
   handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
-  excludeRoles?: RolesType[];
   classrooms?: ClassroomType[];
-};
+} & UserClassroomStackI;
 
 const UserSheetData = ({
   mode,
   currentUser,
+  excludeRoles,
   handleCreateNewUser,
   handleUpdateUser,
   handleAddUserRole,
   handleUpdateUserRole,
   handleDeleteUserRole,
-  excludeRoles,
   classrooms,
+  handleInsertUserClassrooms,
+  handleDeleteUserClassroom,
 }: UserSheetDataProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [fullName, setFullName] = useState("");
@@ -107,17 +112,11 @@ const UserSheetData = ({
     setLoading(true);
 
     try {
-      const fullNameRegex = /^[a-zA-ZÀ-ÿ'\-]+(?: [a-zA-ZÀ-ÿ'\-]+)*$/;
-      const emailRegex =
-        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
-
       if (mode === "new") {
         if (!fullName && !email && !password) throw "fill the fields";
 
-        if (!fullNameRegex.test(fullName)) throw "Invalid full name";
+        if (fullName.split(" ").length < 2 || fullName.length < 5)
+          throw "Invalid full name";
         if (!emailRegex.test(email)) throw "Invalid email";
         if (!passwordRegex.test(password)) throw "Invalid password";
 
@@ -136,12 +135,20 @@ const UserSheetData = ({
             const role = userRoles[0];
             await handleAddUserRole(userCreatedId, role);
           }
+          if (userClassrooms.length > 0) {
+            const uClassroom: UserClassroomT[] = userClassrooms.map((id) => ({
+              user_id: userCreatedId,
+              classroom_id: id,
+            }));
+            await handleInsertUserClassrooms(uClassroom);
+          }
         }
       } else if (mode === "edit" && currentUser && currentUser.id) {
+        const userId = currentUser.id;
         if (!fullName && !email) throw "fill the fields";
         if (
           fullName !== currentUser.profile?.full_name &&
-          !fullNameRegex.test(fullName)
+          (fullName.split(" ").length < 2 || fullName.length < 5)
         )
           throw "Invalid full name";
         if (email !== currentUser.email && !emailRegex.test(email))
@@ -197,6 +204,41 @@ const UserSheetData = ({
           await handleDeleteUserRole(currentUser.id);
         }
 
+        if (
+          currentUser.profile?.classrooms?.length === 0 &&
+          userClassrooms.length > 0
+        ) {
+          const uClassroom: UserClassroomT[] = userClassrooms.flatMap((uc) => ({
+            user_id: userId,
+            classroom_id: uc,
+          }));
+
+          await handleInsertUserClassrooms(uClassroom);
+        } else if (
+          !currentUser?.profile?.classrooms?.every((c) =>
+            userClassrooms.includes(c)
+          )
+        ) {
+          const deleteClassrooms = currentUser?.profile?.classrooms?.filter(
+            (c) => !userClassrooms.includes(c)
+          );
+
+          const addClassrooms: UserClassroomT[] = userClassrooms
+            .filter((c) => !currentUser?.profile?.classrooms?.includes(c))
+            .flatMap((uc) => ({
+              user_id: userId,
+              classroom_id: uc,
+            }));
+
+          if (deleteClassrooms && deleteClassrooms.length > 0) {
+            await handleDeleteUserClassroom(userId, deleteClassrooms);
+          }
+
+          if (addClassrooms && addClassrooms.length > 0) {
+            await handleInsertUserClassrooms(addClassrooms);
+          }
+        }
+
         toast.success("Sucesso ao editar o usuário!");
       }
 
@@ -248,6 +290,7 @@ const UserSheetData = ({
           );
           break;
       }
+      console.log(error);
       setLoading(false);
     }
   };

@@ -20,6 +20,8 @@ import { AuthUser, UserMetadata } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
 import { cn } from "@/lib/utils";
 import { ClassroomType } from "@/types/classrooms";
+import { UserClassroomStackI } from "@/context/modules/users/classrooms";
+import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 
 type ProfilesDataTableProps = {
   users: Partial<AuthUserWithProfileType>[];
@@ -37,7 +39,7 @@ type ProfilesDataTableProps = {
   excludeRoles?: RolesType[];
   loading: boolean;
   classrooms: ClassroomType[];
-}
+} & UserClassroomStackI;
 
 const ProfilesDataTable = ({
   users,
@@ -49,7 +51,9 @@ const ProfilesDataTable = ({
   handleDeleteUserRole,
   loading,
   excludeRoles,
-  classrooms
+  classrooms,
+  handleInsertUserClassrooms,
+  handleDeleteUserClassroom,
 }: ProfilesDataTableProps) => {
   const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
     {
@@ -197,7 +201,8 @@ const ProfilesDataTable = ({
               .getValue<ProfileType>("profile")
               .user_roles?.map((userRole, i) => (
                 <Badge variant="outline" className="!mx-auto" key={i}>
-                  {userRole.role}
+                  {rolesLabels.find((role) => role.value === userRole.role)
+                    ?.label || userRole.role}
                 </Badge>
               ))}
           </div>
@@ -431,6 +436,9 @@ const ProfilesDataTable = ({
                 handleCreateNewUser={handleCreateNewUser}
                 handleUpdateUser={handleUpdateUser}
                 excludeRoles={excludeRoles}
+                classrooms={classrooms}
+                handleInsertUserClassrooms={handleInsertUserClassrooms}
+                handleDeleteUserClassroom={handleDeleteUserClassroom}
               />
               {user.id && (
                 <Button
@@ -461,6 +469,8 @@ const ProfilesDataTable = ({
       handleUpdateUser={handleUpdateUser}
       excludeRoles={excludeRoles}
       classrooms={classrooms}
+      handleInsertUserClassrooms={handleInsertUserClassrooms}
+      handleDeleteUserClassroom={handleDeleteUserClassroom}
     />
   );
 };
