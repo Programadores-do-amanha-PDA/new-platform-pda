@@ -116,7 +116,7 @@ const ProfilesDataTable = ({
           <div className="w-full flex justify-start items-center">
             <Button
               variant="ghost"
-              className="text-left px-2"
+              className="text-left px-2 font-semibold"
               onClick={() => {
                 if (!sortState) {
                   column.toggleSorting(false);
@@ -170,7 +170,7 @@ const ProfilesDataTable = ({
           <div className="flex justify-center align-center w-full">
             <Button
               variant="ghost"
-              className="text-center px-2"
+              className="text-center px-2 font-semibold"
               onClick={() => {
                 if (!sortState) {
                   column.toggleSorting(false);
@@ -225,6 +225,75 @@ const ProfilesDataTable = ({
       },
     },
     {
+      id: "classrooms",
+      header: ({ column }) => {
+        const sortState = column.getIsSorted();
+        return (
+          <div className="flex justify-center align-center w-full">
+            <Button
+              variant="ghost"
+              className="text-center px-2 font-semibold"
+              onClick={() => {
+                if (!sortState) {
+                  column.toggleSorting(false);
+                } else if (sortState === "asc") {
+                  column.toggleSorting(true);
+                } else {
+                  column.clearSorting();
+                }
+              }}
+            >
+              Turmas
+              {sortState === "asc" ? (
+                <ArrowUp className="stroke-primary" />
+              ) : sortState === "desc" ? (
+                <ArrowDown className="stroke-primary" />
+              ) : (
+                <ArrowUpDown />
+              )}
+            </Button>
+          </div>
+        );
+      },
+
+      cell: ({ row }) => {
+        const { profile } = row.original;
+        return (
+          <div className="flex justify-center align-center w-full">
+            {profile?.classrooms?.map((classroom, i) => (
+              <Badge
+                variant="outline"
+                className="!mx-auto"
+                key={`${i}-${classroom}`}
+              >
+                {classrooms?.find((c) => c.id === classroom.classroom_id)
+                  ?.name || ""}
+              </Badge>
+            ))}
+          </div>
+        );
+      },
+      sortingFn: (rowA, rowB) => {
+        const classroomsA = rowA.original?.profile?.classrooms || [
+          { classroom_id: "" },
+        ];
+        const classroomsB = rowB.original?.profile?.classrooms || [
+          { classroom_id: "" },
+        ];
+
+        const classroomsStrA = classroomsA
+          .map((c) => classrooms?.find((cr) => cr.id === c.classroom_id)?.name)
+          .sort()
+          .join(",");
+        const classroomsStrB = classroomsB
+          .map((c) => classrooms?.find((cr) => cr.id === c.classroom_id)?.name)
+          .sort()
+          .join(",");
+
+        return classroomsStrA.localeCompare(classroomsStrB);
+      },
+    },
+    {
       accessorKey: "created_at",
       header: ({ column }) => {
         const sortState = column.getIsSorted();
@@ -233,7 +302,7 @@ const ProfilesDataTable = ({
           <div className="flex items-center justify-center w-full">
             <Button
               variant="ghost"
-              className="text-left px-2"
+              className="text-left px-2 font-semibold"
               onClick={() => {
                 if (!sortState) {
                   column.toggleSorting(false);
@@ -272,53 +341,53 @@ const ProfilesDataTable = ({
         );
       },
     },
-    {
-      accessorKey: "last_sign_in_at",
-      header: ({ column }) => {
-        const sortState = column.getIsSorted();
+    // {
+    //   accessorKey: "last_sign_in_at",
+    //   header: ({ column }) => {
+    //     const sortState = column.getIsSorted();
 
-        return (
-          <div className="w-full flex justify-center items-center">
-            <Button
-              variant="ghost"
-              className="text-left px-2"
-              onClick={() => {
-                if (!sortState) {
-                  column.toggleSorting(false);
-                } else if (sortState === "asc") {
-                  column.toggleSorting(true);
-                } else {
-                  column.clearSorting();
-                }
-              }}
-            >
-              Ultimo login em
-              {sortState === "asc" ? (
-                <ArrowUp className="stroke-primary" />
-              ) : sortState === "desc" ? (
-                <ArrowDown className="stroke-primary" />
-              ) : (
-                <ArrowUpDown />
-              )}
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => {
-        const lastSingInAt = row.getValue("last_sign_in_at") as string;
-        const date = new Date(lastSingInAt);
-        const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
-          date.getMonth() + 1
-        )
-          .toString()
-          .padStart(2, "0")}/${date.getFullYear()}`;
-        return (
-          <div className="w-full flex justify-center items-center lowercase">
-            {formattedDate !== "NaN/NaN/NaN" ? formattedDate : "--"}
-          </div>
-        );
-      },
-    },
+    //     return (
+    //       <div className="w-full flex justify-center items-center">
+    //         <Button
+    //           variant="ghost"
+    //           className="text-left px-2 font-semibold"
+    //           onClick={() => {
+    //             if (!sortState) {
+    //               column.toggleSorting(false);
+    //             } else if (sortState === "asc") {
+    //               column.toggleSorting(true);
+    //             } else {
+    //               column.clearSorting();
+    //             }
+    //           }}
+    //         >
+    //           Ultimo login em
+    //           {sortState === "asc" ? (
+    //             <ArrowUp className="stroke-primary" />
+    //           ) : sortState === "desc" ? (
+    //             <ArrowDown className="stroke-primary" />
+    //           ) : (
+    //             <ArrowUpDown />
+    //           )}
+    //         </Button>
+    //       </div>
+    //     );
+    //   },
+    //   cell: ({ row }) => {
+    //     const lastSingInAt = row.getValue("last_sign_in_at") as string;
+    //     const date = new Date(lastSingInAt);
+    //     const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
+    //       date.getMonth() + 1
+    //     )
+    //       .toString()
+    //       .padStart(2, "0")}/${date.getFullYear()}`;
+    //     return (
+    //       <div className="w-full flex justify-center items-center lowercase">
+    //         {formattedDate !== "NaN/NaN/NaN" ? formattedDate : "--"}
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       accessorKey: "user_metadata",
       header: ({ column }) => {
@@ -328,7 +397,7 @@ const ProfilesDataTable = ({
           <div className="w-full flex justify-center items-center">
             <Button
               variant="ghost"
-              className="text-left px-2"
+              className="text-left px-2 font-semibold"
               onClick={() => {
                 if (!sortState) {
                   column.toggleSorting(false);
@@ -372,7 +441,7 @@ const ProfilesDataTable = ({
           <div className="w-full flex justify-center items-center">
             <Button
               variant="ghost"
-              className="text-left px-2"
+              className="text-left px-2 font-semibold"
               onClick={() => {
                 if (!sortState) {
                   column.toggleSorting(false);
