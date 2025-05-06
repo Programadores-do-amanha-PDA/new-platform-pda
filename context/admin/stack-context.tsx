@@ -249,27 +249,29 @@ export const AdminStackProvider = ({
         ],
       },
     ],
-    classRooms: classrooms.flatMap((classroom) => ({
-      title: classroom.name,
-      ref: classroom.id,
-      url: `/dashboard/admin/classrooms/${classroom.id}`,
-      icon: classroomPeriodsIcons[classroom.period],
-      isActive: false,
-      items: [
-        {
-          title: "Projetos",
-          url: `/dashboard/admin/classrooms/${classroom.id}/projects`,
-        },
-        {
-          title: "⬆️ Coodesh",
-          url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
-        },
-        {
-          title: "⬆️ Zoom",
-          url: `/dashboard/admin/classrooms/${classroom.id}/zoom`,
-        },
-      ],
-    })),
+    classRooms: classrooms
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .flatMap((classroom) => ({
+        title: classroom.name,
+        ref: classroom.id,
+        url: `/dashboard/admin/classrooms/${classroom.id}`,
+        icon: classroomPeriodsIcons[classroom.period],
+        isActive: false,
+        items: [
+          {
+            title: "Projetos",
+            url: `/dashboard/admin/classrooms/${classroom.id}/projects`,
+          },
+          {
+            title: "⬆️ Coodesh",
+            url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
+          },
+          {
+            title: "⬆️ Zoom",
+            url: `/dashboard/admin/classrooms/${classroom.id}/zoom`,
+          },
+        ],
+      })),
 
     projects: [],
   };

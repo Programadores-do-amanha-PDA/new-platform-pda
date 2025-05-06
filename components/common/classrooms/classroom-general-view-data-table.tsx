@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -19,6 +20,7 @@ import {
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { cn } from "@/lib/utils";
 import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
+import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/projects/project";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -34,6 +36,12 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
+const projectsShortLabels = {
+  mini_project: "MP",
+  end_module_project: "PF",
+  end_module_english_project: "PE",
+};
+
 const ClassroomGeneralViewDataTable = ({
   classroom_id,
 }: {
@@ -43,9 +51,18 @@ const ClassroomGeneralViewDataTable = ({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+
   const {
     usersStack: { users },
+    classroomsStack: {
+      projects: { projects },
+    },
   } = useAdminStackContext();
+
+  const classroomProjects = projects.filter(
+    (project) => project.classroom_id === classroom_id
+  ) as ClassroomProjectWithDeliveriesAndCorrectionsT[];
+
   const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
     {
       id: "select",
@@ -201,53 +218,61 @@ const ClassroomGeneralViewDataTable = ({
       },
     },
     {
-        id: "projects",
-        header: ({ column }) => {
-          const sortState = column.getIsSorted();
-  
-          return (
-            <div className="flex items-center justify-center w-full">
-              <Button
-                variant="ghost"
-                className="text-left px-2 font-semibold"
-                onClick={() => {
-                  if (!sortState) {
-                    column.toggleSorting(false);
-                  } else if (sortState === "asc") {
-                    column.toggleSorting(true);
-                  } else {
-                    column.clearSorting();
-                  }
-                }}
-              >
-                Criado em
-                {sortState === "asc" ? (
-                  <ArrowUp className="stroke-primary" />
-                ) : sortState === "desc" ? (
-                  <ArrowDown className="stroke-primary" />
-                ) : (
-                  <ArrowUpDown />
-                )}
-              </Button>
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          const createdAt = row.getValue("created_at") as string;
-          const date = new Date(createdAt);
-          const formattedDate = `${date.getDate().toString().padStart(2, "0")}/${(
-            date.getMonth() + 1
+      id: "projects",
+      header: () => (
+        <div className="flex items-center justify-center w-full font-semibold">
+          <p>Projetos</p>
+        </div>
+      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        const userProjects = classroomProjects
+          .filter((project: ClassroomProjectWithDeliveriesAndCorrectionsT) =>
+            project?.deliveries?.some((delivery) =>
+              delivery.members.some((member) => member === user.email)
+            )
           )
-            .toString()
-            .padStart(2, "0")}/${date.getFullYear()}`;
-  
-          return (
-            <div className="flex items-center justify-center w-full">
-              {formattedDate}
-            </div>
-          );
-        },
+          .sort((a, b) => {
+            const aType = a.project_type;
+            const bType = b.project_type;
+            if (aType === bType) return 0;
+            if (aType === "mini_project") return -1;
+            if (bType === "mini_project") return 1;
+            if (aType === "end_module_project") return -1;
+            if (bType === "end_module_project") return 1;
+            return 0;
+          })
+          .sort((a, b) => Number(a.module) - Number(b.module));
+
+        return (
+          <div className="flex items-center justify-start w-full">
+            {userProjects.length > 0 ? (
+              userProjects.map(
+                (project: ClassroomProjectWithDeliveriesAndCorrectionsT) => {
+                  const notes =
+                    project.corrections
+                      ?.map((correction) => Number(correction.final_note))
+                      .filter((note): note is number => !isNaN(note)) || [];
+
+                  const maxNote = notes.length > 0 ? Math.max(...notes) : 0;
+
+                  return (
+                    <Badge variant="outline" key={project.id}>
+                      {projectsShortLabels[project.project_type].concat(
+                        project.module
+                      )}
+                      : {maxNote}
+                    </Badge>
+                  );
+                }
+              )
+            ) : (
+              <p className="text-sm text-muted-foreground">Nenhum projeto</p>
+            )}
+          </div>
+        );
       },
+    },
   ];
 
   const classroomUsers = users.filter((user) =>
@@ -294,8 +319,8 @@ const ClassroomGeneralViewDataTable = ({
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
+            <Button variant="outline" className="ml-auto font-semibold">
+              Colunas <ChevronDown />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -320,13 +345,13 @@ const ClassroomGeneralViewDataTable = ({
         </DropdownMenu>
       </div>
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
-        <Table>
+        <Table className="w-max">
           <TableHeader className="sticky top-0 z-10 bg-background shadow">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} >
+                    <TableHead key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(

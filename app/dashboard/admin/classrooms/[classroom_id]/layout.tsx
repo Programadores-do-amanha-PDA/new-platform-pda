@@ -14,15 +14,38 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   const {
     usersStack: { users, handleGetAllUsersWithProfiles, usersLoading },
+    classroomsStack: {
+      projects: {
+        projects,
+        handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
+        projectsLoading,
+      },
+    },
   } = useAdminStackContext();
 
   useEffect(() => {
     if (users.length === 0) {
       handleGetAllUsersWithProfiles();
     }
-  }, []);
+    if (
+      projects.filter((project) => project.classroom_id === classroom_id)
+        .length === 0
+    ) {
+      handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId(
+        classroom_id
+      );
+    }
+  }, [
+    users,
+    projects,
+    classroom_id,
+    handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
+    handleGetAllUsersWithProfiles,
+    projects.length,
+    users.length,
+  ]);
 
-  if (usersLoading) return <LoadingComponent />;
+  if (usersLoading || projectsLoading) return <LoadingComponent />;
 
   return children;
 };
