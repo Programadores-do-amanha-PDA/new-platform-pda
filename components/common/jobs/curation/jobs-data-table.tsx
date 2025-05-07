@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Badge } from "@/components/ui/badge";
-import { JobDetailsType, JobType } from "@/types/jobs";
+import { JobDetailsT, JobT } from "@/types/jobs";
 import JobSheetData from "../job-sheet-data";
 
 const JobsDataTable = ({
@@ -25,14 +25,14 @@ const JobsDataTable = ({
   handleCurateJob,
   loading,
 }: {
-  jobs: JobType[];
-  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
-  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+  jobs: JobT[];
+  handleCreateJob: (job: Partial<JobT>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobT>) => Promise<boolean>;
   handleCurateJob: (jobId: string) => Promise<boolean>;
   handleArchiveJob: (jobId: string) => Promise<boolean>;
   loading: boolean;
 }) => {
-  const columns: ColumnDef<JobType>[] = [
+  const columns: ColumnDef<JobT>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -125,7 +125,7 @@ const JobsDataTable = ({
 
       cell: ({ row }) => {
         return row
-          .getValue<JobDetailsType>("details")
+          .getValue<JobDetailsT>("details")
           .languages?.map((language, i) => (
             <Badge variant="outline" className="!m-1" key={i}>
               {language}
@@ -139,7 +139,7 @@ const JobsDataTable = ({
 
       cell: ({ row }) => {
         return row
-          .getValue<JobDetailsType>("details")
+          .getValue<JobDetailsT>("details")
           .workplace_type?.map((w, i) => (
             <Badge variant="outline" className="!m-1" key={i}>
               {w}

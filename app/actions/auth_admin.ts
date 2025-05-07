@@ -17,10 +17,10 @@ export const getAllUsers = async (role?: RolesType) => {
 
     if (error) throw error;
 
-    const profiles = await getAllProfiles();
-    if (!profiles) throw new Error("no users profile response");
-
     if (!role) {
+      const profiles = await getAllProfiles();
+      if (!profiles) throw new Error("no users profile response");
+
       const usersWithPossibleProfiles = users.map((user) => {
         const profile = profiles.find((profile) => profile.id === user.id);
         return { user, profile };

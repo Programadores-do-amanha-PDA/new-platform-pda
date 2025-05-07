@@ -45,7 +45,7 @@ type UserSheetDataProps = {
   handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
   classrooms?: ClassroomType[];
-} & UserClassroomStackI;
+} & Partial<UserClassroomStackI>;
 
 const UserSheetData = ({
   mode,
@@ -77,7 +77,11 @@ const UserSheetData = ({
       setUserRoles(
         currentUser.profile?.user_roles?.map((role) => role.role) || []
       );
-      setUserClassrooms(currentUser.profile?.classrooms || []);
+      if (classrooms && classrooms?.length > 0) {
+        setUserClassrooms(
+          currentUser.profile?.classrooms?.map((c) => c.classroom_id) || []
+        );
+      }
     } else {
       setFullName("");
       setEmail("");
@@ -135,12 +139,18 @@ const UserSheetData = ({
             const role = userRoles[0];
             await handleAddUserRole(userCreatedId, role);
           }
-          if (userClassrooms.length > 0) {
-            const uClassroom: UserClassroomT[] = userClassrooms.map((id) => ({
-              user_id: userCreatedId,
-              classroom_id: id,
-            }));
-            await handleInsertUserClassrooms(uClassroom);
+          if (
+            classrooms &&
+            classrooms.length > 0 &&
+            handleInsertUserClassrooms
+          ) {
+            if (userClassrooms.length > 0) {
+              const uClassroom: UserClassroomT[] = userClassrooms.map((id) => ({
+                user_id: userCreatedId,
+                classroom_id: id,
+              }));
+              await handleInsertUserClassrooms(uClassroom);
+            }
           }
         }
       } else if (mode === "edit" && currentUser && currentUser.id) {
@@ -205,37 +215,54 @@ const UserSheetData = ({
         }
 
         if (
-          currentUser.profile?.classrooms?.length === 0 &&
-          userClassrooms.length > 0
+          classrooms &&
+          classrooms.length > 0 &&
+          handleInsertUserClassrooms &&
+          handleDeleteUserClassroom
         ) {
-          const uClassroom: UserClassroomT[] = userClassrooms.flatMap((uc) => ({
-            user_id: userId,
-            classroom_id: uc,
-          }));
+          if (
+            currentUser.profile?.classrooms?.length === 0 &&
+            userClassrooms.length > 0
+          ) {
+            const uClassroom: UserClassroomT[] = userClassrooms.flatMap(
+              (uc) => ({
+                user_id: userId,
+                classroom_id: uc,
+              })
+            );
 
-          await handleInsertUserClassrooms(uClassroom);
-        } else if (
-          !currentUser?.profile?.classrooms?.every((c) =>
-            userClassrooms.includes(c)
-          )
-        ) {
-          const deleteClassrooms = currentUser?.profile?.classrooms?.filter(
-            (c) => !userClassrooms.includes(c)
-          );
+            await handleInsertUserClassrooms(uClassroom);
+          } else if (
+            !currentUser?.profile?.classrooms?.every((c) =>
+              userClassrooms.includes(c.classroom_id)
+            )
+          ) {
+            const deleteClassrooms = currentUser?.profile?.classrooms?.filter(
+              (c) => !userClassrooms.includes(c.classroom_id)
+            );
 
-          const addClassrooms: UserClassroomT[] = userClassrooms
-            .filter((c) => !currentUser?.profile?.classrooms?.includes(c))
-            .flatMap((uc) => ({
-              user_id: userId,
-              classroom_id: uc,
-            }));
+            const addClassrooms: UserClassroomT[] = userClassrooms
+              .filter(
+                (c) =>
+                  !currentUser?.profile?.classrooms
+                    ?.map((c) => c.classroom_id)
+                    .includes(c)
+              )
+              .flatMap((uc) => ({
+                user_id: userId,
+                classroom_id: uc,
+              }));
 
-          if (deleteClassrooms && deleteClassrooms.length > 0) {
-            await handleDeleteUserClassroom(userId, deleteClassrooms);
-          }
+            if (deleteClassrooms && deleteClassrooms.length > 0) {
+              await handleDeleteUserClassroom(
+                userId,
+                deleteClassrooms.map((c) => c.classroom_id)
+              );
+            }
 
-          if (addClassrooms && addClassrooms.length > 0) {
-            await handleInsertUserClassrooms(addClassrooms);
+            if (addClassrooms && addClassrooms.length > 0) {
+              await handleInsertUserClassrooms(addClassrooms);
+            }
           }
         }
 

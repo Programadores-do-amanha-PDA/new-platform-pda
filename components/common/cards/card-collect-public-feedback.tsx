@@ -18,8 +18,8 @@ const CardCollectPublicFeedback = () => {
       </div>
       </div>
       <Button
-        variant="ghost"
-        className="text-card-foreground mt-2 underline"
+        variant="link"
+        className="text-muted-foreground font-semibold mt-2"
         onClick={() =>
           window.open(
             "https://docs.google.com/forms/d/e/1FAIpQLScF0plht-TJTpp9G_9flJ2ABjpV_kHdHg9cf-dnAa7OBXA0Ug/viewform?usp=dialog"

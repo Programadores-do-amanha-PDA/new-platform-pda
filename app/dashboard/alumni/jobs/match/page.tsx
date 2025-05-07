@@ -1,24 +1,30 @@
 "use client";
-import { AppBar } from "@/components/common/app-bar";
 import JobCard from "@/components/common/jobs/Match/job-card";
 import { JobMatchChart } from "@/components/common/jobs/Match/JobMatchChart";
 import { Button } from "@/components/ui/button";
 import { useAlumniStack } from "@/context/alumni/stack-context";
-import { JobType } from "@/types/jobs";
+import { useAuth } from "@/context/auth-context";
+import { JobT } from "@/types/jobs";
 import { calculateMatchPercentage } from "@/utils/job-x-curriculum-match";
 import { Flag } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Home() {
+  const { user } = useAuth();
   const {
     jobsStack: { jobs },
-    curriculumStack: { curriculum },
+    resumeStack: { resumes },
     jobApplicationStack: { jobApplications, handleCreateJobApplication },
   } = useAlumniStack();
-  // const [loading, setLoading] = useState(true);
+  const currentResume = resumes.sort(
+    (a, b) =>
+      new Date(b.created_at || 0).getTime() -
+      new Date(a.created_at || 0).getTime()
+  )[0];
 
   const jobsMatch = jobs
     .map((job) => {
-      const matchStatistics = calculateMatchPercentage(curriculum, job);
+      const matchStatistics = calculateMatchPercentage(currentResume, job);
       return {
         job,
         matchStatistics,
@@ -26,39 +32,25 @@ export default function Home() {
     })
     .filter((jm) => jm.matchStatistics.total > 35);
 
-  const handleApplyToJob = async (job: JobType) => {
-    await handleCreateJobApplication({ job_id: job.id, status: "applied" });
+  const handleApplyToJob = async (job: JobT) => {
+    if (!user) return toast.error("Erro ao aplicar para vaga");
+
+    await handleCreateJobApplication(
+      { job_id: job.id, status: "applied" },
+      user
+    );
   };
 
-  // if (loading) {
-  //   return (
-  //     <div className="relative p-6 lg:gap-10 lg:p-8 w-full h-full">
-  //       <div className="w-full h-full flex items-center justify-center space-y-2 bg-primary/75 rounded-lg">
-  //         <h1
-  //           className={cn(
-  //             "scroll-m-20 text-3xl font-bold tracking-tight animate-pulse"
-  //           )}
-  //         >
-  //           {loadingText}
-  //         </h1>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <main className="relative w-full flex flex-col p-6 gap-8 xl:p-8 h-max">
-      <AppBar />
+    <main className="relative w-full flex flex-col p-4 gap-8 h-full overflow-y-auto">
       <div className="w-full min-w-0 flex flex-col gap-10 rounded-lg">
         <div className="flex flex-col gap-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold">
-                Estatísticas do Match
-              </p>
+              <p className="text-2xl font-semibold">Estatísticas do Match</p>
             </div>
           </div>
-          <div className="max-w-80">
+          <div className="max-w-[400px]">
             <JobMatchChart jobsMatch={jobsMatch} />
           </div>
         </div>
@@ -66,9 +58,7 @@ export default function Home() {
         <div className="flex flex-col gap-8">
           <div className="flex justify-between items-center">
             <div className="flex flex-col gap-1">
-              <p className="text-lg font-semibold">
-                Vagas que deram Match
-              </p>
+              <p className="text-2xl font-semibold">Vagas que deram Match com seu perfil</p>
               <p className="text-muted-foreground">
                 Estas são vagas curadas pela equipe da PdA e são as que melhor
                 se encaixam com o seu currículo, lembre-se sempre de manter seu
@@ -81,7 +71,7 @@ export default function Home() {
             {jobsMatch
               .sort((a, b) => b.matchStatistics.total - a.matchStatistics.total)
               .map((jobM) => {
-                const jobApplicationExists = jobApplications.find(
+                const JobApplicationTExists = jobApplications.find(
                   (apply) => apply.job_id === jobM.job.id
                 );
                 return (
@@ -90,7 +80,7 @@ export default function Home() {
                     job={jobM.job}
                     matchStatistics={jobM.matchStatistics}
                     cardFooter={
-                      !jobApplicationExists ? (
+                      !JobApplicationTExists ? (
                         <>
                           <Button
                             className="font-semibold"

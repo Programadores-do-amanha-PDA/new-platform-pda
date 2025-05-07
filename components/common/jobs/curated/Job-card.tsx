@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { JobWithApplications } from "@/types/jobs";
+import { JobWithApplicationsT } from "@/types/jobs";
 import {
   BookOpenText,
   ChevronsUpDown,
@@ -9,7 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { ReactElement } from "react";
-import JobApplicationsTable from "./job-apllications-table";
+import JobApplicationTsTable from "./job-apllications-table";
 import {
   Collapsible,
   CollapsibleContent,
@@ -20,7 +20,7 @@ const JobCard = ({
   job,
   cardFooter,
 }: {
-  job: JobWithApplications;
+  job: JobWithApplicationsT;
   cardFooter: ReactElement;
 }) => {
   return (
@@ -101,8 +101,8 @@ const JobCard = ({
             <FileChartColumn className="size-4" />
           </div>
 
-          <JobApplicationsTable
-            jobApplicationStatistics={{
+          <JobApplicationTsTable
+            JobApplicationTStatistics={{
               applied: job.applications.filter(
                 (application) => application.status === "applied"
               ).length,

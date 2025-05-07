@@ -25,15 +25,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { JobApplicationWithJob } from "@/types/jobs";
+import { JobApplicationWithJobT } from "@/types/jobs";
 
 export function DataTable({
   data,
   columns,
   loading,
 }: {
-  data: JobApplicationWithJob[];
-  columns: ColumnDef<JobApplicationWithJob>[];
+  data: JobApplicationWithJobT[];
+  columns: ColumnDef<JobApplicationWithJobT>[];
   loading: boolean;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);

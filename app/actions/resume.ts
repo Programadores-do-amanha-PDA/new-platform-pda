@@ -1,14 +1,14 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { CurriculumType } from "@/types/curriculum";
+import { ResumeT } from "@/types/resume";
 
-export const createUserCurriculum = async (curriculumData: CurriculumType) => {
+export const createUserResume = async (resumeData: ResumeT) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("user_curriculum")
-      .insert([curriculumData])
+      .from("user_resume")
+      .insert([resumeData])
       .select()
       .single();
 
@@ -16,16 +16,16 @@ export const createUserCurriculum = async (curriculumData: CurriculumType) => {
 
     return data;
   } catch (error) {
-    console.error("Error creating user curriculum:", error);
+    console.error("Error creating user resume:", error);
     return false;
   }
 };
 
-export const getAllUserCurriculum = async () => {
+export const getAllUserResume = async () => {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase.from("user_curriculum").select();
+    const { data, error } = await supabase.from("user_resume").select();
     if (error) throw error;
 
     return data;
@@ -35,11 +35,11 @@ export const getAllUserCurriculum = async () => {
   }
 };
 
-export const getUserCurriculumByUserId = async (userId: string) => {
+export const getUserResumeByUserId = async (userId: string) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("user_curriculum")
+      .from("user_resume")
       .select()
       .eq("user_id", userId)
       .single();
@@ -47,17 +47,17 @@ export const getUserCurriculumByUserId = async (userId: string) => {
 
     return data;
   } catch (error) {
-    console.error("Error fetching user curriculum  by user id:", error);
+    console.error("Error fetching user resume  by user id:", error);
     return false;
   }
 };
 
-export const getUserCurriculumById = async (id: number) => {
+export const getUserResumeById = async (id: string) => {
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from("user_curriculum")
+      .from("user_resume")
       .select()
       .eq("id", id)
       .single();
@@ -71,16 +71,16 @@ export const getUserCurriculumById = async (id: number) => {
   }
 };
 
-export const updateUserCurriculumById = async (
-  id: number,
-  curriculumData: Partial<CurriculumType>
+export const updateUserResumeById = async (
+  id: string,
+  resumeData: Partial<ResumeT>
 ) => {
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
-      .from("user_curriculum")
-      .update(curriculumData)
+      .from("user_resume")
+      .update(resumeData)
       .eq("id", id)
       .select()
       .single();
@@ -89,25 +89,22 @@ export const updateUserCurriculumById = async (
 
     return data;
   } catch (error) {
-    console.error("Error updating user curriculum by id:", error);
+    console.error("Error updating user resume by id:", error);
     return false;
   }
 };
 
-export const deleteUserCurriculumById = async (id: number) => {
+export const deleteUserResumeById = async (id: string) => {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase
-      .from("user_curriculum")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("user_resume").delete().eq("id", id);
 
     if (error) throw error;
 
     return true;
   } catch (error) {
-    console.error("Error deleting user curriculum by id:", error);
+    console.error("Error deleting user resume by id:", error);
     return false;
   }
 };

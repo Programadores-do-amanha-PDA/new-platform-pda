@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { JobApplication, JobType } from "@/types/jobs";
+import { JobApplicationT, JobT } from "@/types/jobs";
 import { ArrowRight, WandSparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -7,8 +7,8 @@ const JobsMatchCard = ({
   jobs,
   jobApplications,
 }: {
-  jobs: JobType[];
-  jobApplications: JobApplication[];
+  jobs: JobT[];
+  jobApplications: JobApplicationT[];
 }) => {
   const router = useRouter();
 
@@ -39,7 +39,8 @@ const JobsMatchCard = ({
         </div>
       </div>
       <Button
-        className="mt-2"
+        className="mt-2 font-semibold text-primary-foreground"
+        variant="default"
         onClick={() => router.push("/dashboard/alumni/jobs/match")}
       >
         Realizar Match

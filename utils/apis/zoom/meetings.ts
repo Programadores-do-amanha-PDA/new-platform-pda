@@ -62,7 +62,7 @@ export const getMeetingById = async (
       throw new Error("Failed to fetch meeting details");
     }
 
-    const meetingPolls = await getMeetingPolls(
+    const meetingPolls = await getPastMeetingPolls(
       encodedMeetingId,
       ZOOM_ACCESS_TOKEN
     );
@@ -191,7 +191,7 @@ export const getPastedMeetingParticipants = async (
 /**
  * Fetches polls for a meeting.
  */
-export const getMeetingPolls = async (
+export const getPastMeetingPolls = async (
   meetingId: string,
   ZOOM_ACCESS_TOKEN: string
 ) => {

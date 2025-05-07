@@ -1,7 +1,7 @@
-import { CurriculumType } from "@/types/curriculum";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
+import { ResumeT } from "@/types/resume";
 
-export const areaMatch = (student: CurriculumType, job: JobType) => {
+export const areaMatch = (student: ResumeT, job: JobT) => {
   return (
     student.interesting_areas?.some((ia) => {
       const areaLower = ia.area.toLowerCase();
@@ -16,8 +16,8 @@ export const areaMatch = (student: CurriculumType, job: JobType) => {
 
 // Languages (3 points)
 export const languageMatchPercentage = (
-  student: CurriculumType,
-  job: JobType
+  student: ResumeT,
+  job: JobT
 ) => {
   const studentLanguages = new Set(
     student.interesting_areas
@@ -38,7 +38,7 @@ export const languageMatchPercentage = (
 };
 
 // Studies (1 point)
-export const studiesMatch = (student: CurriculumType, job: JobType) => {
+export const studiesMatch = (student: ResumeT, job: JobT) => {
   const studyKeywords = new Set(
     student.studies
       ?.flatMap((study) => [
@@ -60,7 +60,7 @@ export const studiesMatch = (student: CurriculumType, job: JobType) => {
 };
 
 // Locale (0.5 points)
-export const localeMatch = (student: CurriculumType, job: JobType) => {
+export const localeMatch = (student: ResumeT, job: JobT) => {
   const isRemote = job.details?.workplace_type?.some(
     (wt) => typeof wt === "string" && wt.toLowerCase() === "remote"
   );
@@ -87,9 +87,10 @@ export const localeMatch = (student: CurriculumType, job: JobType) => {
 };
 
 export const calculateMatchPercentage = (
-  student: CurriculumType,
-  job: JobType
+  student: ResumeT,
+  job: JobT
 ) => {
+  console.log(student)
   const area = areaMatch(student, job);
   const language = languageMatchPercentage(student, job);
   const studies = studiesMatch(student, job);

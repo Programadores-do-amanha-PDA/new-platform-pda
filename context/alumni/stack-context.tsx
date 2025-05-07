@@ -1,295 +1,142 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
-import { toast } from "sonner";
+import { createContext, useContext } from "react";
 
-import {
-  createUserCurriculum,
-  getUserCurriculumByUserId,
-  updateUserCurriculumById,
-} from "@/app/actions/curriculum";
-import { getAllCuratedJobs } from "@/app/actions/jobs";
-import {
-  getAllJobApplicationsByUserId,
-  createJobApplication,
-  updateJobApplicationById,
-  deleteJobApplicationById,
-} from "@/app/actions/job_applications";
-
-import LoadingComponent from "@/components/common/loading-component";
-
-import { JobApplication, JobApplicationWithJob, JobType } from "@/types/jobs";
-import { AuthUserWithProfileType } from "@/types/auth";
-import { CurriculumType } from "@/types/curriculum";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import useJobApplicationsStack, {
+  useJobApplicationsStackI,
+} from "../modules/jobs/applications";
+import JobsStack, { JobsStackAlumniI } from "../modules/jobs";
+import useResumesStack, { useResumesStackAlumniI } from "../modules/resume";
+import { AppSidebar } from "@/components/common/sidebar/app-sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Briefcase, FileUser } from "lucide-react";
+import AppBar from "@/components/common/app-bar";
+import pathLabels from "@/utils/path-labels";
 
 interface AlumniStackContextProps {
-  jobsStack: {
-    jobs: JobType[];
-  };
+  jobsStack: JobsStackAlumniI;
 
-  jobApplicationStack: {
-    jobApplications: JobApplicationWithJob[];
-    handleCreateJobApplication: (
-      applicationData: Partial<JobApplication>
-    ) => Promise<boolean>;
-    handleUpdateJobApplicationStatus: (
-      applicationId: number,
-      status: "applied" | "rejected" | "accepted"
-    ) => Promise<boolean>;
-    handleDeleteJobApplication: (applicationId: number) => Promise<boolean>;
-  };
+  jobApplicationStack: Omit<
+    useJobApplicationsStackI,
+    "handleGetAllJobsApplications"
+  >;
 
-  curriculumStack: {
-    curriculum: CurriculumType;
-    handleCreateCurriculum: (
-      curriculumData: CurriculumType
-    ) => Promise<boolean>;
-    handleUpdateCurriculum: (
-      curriculumData: CurriculumType
-    ) => Promise<boolean>;
-  };
-
-  loading: boolean;
-  setLoading: (loading: boolean) => void;
+  resumeStack: useResumesStackAlumniI;
 }
 
-const AlumniStackContext = createContext<AlumniStackContextProps>({
-  jobsStack: {
-    jobs: [],
-  },
-  jobApplicationStack: {
-    jobApplications: [],
-    handleCreateJobApplication: () => Promise.resolve(false),
-    handleUpdateJobApplicationStatus: () => Promise.resolve(false),
-    handleDeleteJobApplication: () => Promise.resolve(false),
-  },
-  curriculumStack: {
-    curriculum: {},
-    handleCreateCurriculum: () => Promise.resolve(false),
-    handleUpdateCurriculum: () => Promise.resolve(false),
-  },
-  loading: true,
-  setLoading: () => {},
-});
+const AlumniStackContext = createContext<AlumniStackContextProps>(
+  {} as AlumniStackContextProps
+);
 
 export const AlumniStackProvider = ({
   children,
   user,
+  userRole,
 }: {
   children: React.ReactNode;
   user: AuthUserWithProfileType;
+  userRole: RolesType;
 }) => {
-  const [jobs, setJobs] = useState<JobType[]>([]);
-  const [jobApplications, setJobApplications] = useState<JobApplicationWithJob[]>([]);
-  const [curriculum, setAlumniCurriculum] = useState<CurriculumType>({});
-  const [loading, setLoading] = useState(false);
+  const { jobs, jobsLoading, handleGetAllCuratedJobs } = JobsStack();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (!user.id) throw "user id is null";
+  const {
+    jobApplications,
+    jobsApplicationLoading,
+    handleGetAllJobsApplicationsByUserId,
+    handleCreateJobApplication,
+    handleUpdateJobApplicationStatus,
+    handleDeleteJobApplication,
+  } = useJobApplicationsStack();
 
-        const jobResponse = await getAllCuratedJobs();
-        if (!jobResponse) throw "get all job response is null";
-        setJobs(jobResponse);
+  const {
+    resumes,
+    resumesLoading,
+    handleGetResumeByUserId,
+    handleCreateResume,
+    handleUpdateResume,
+    handleDeleteResume,
+  } = useResumesStack();
 
-        const jobApplicationsResponse = await getAllJobApplicationsByUserId(
-          user.id
-        );
-        if (!jobApplicationsResponse)
-          throw "get all job applications response is null";
-        setJobApplications(jobApplicationsResponse);
+  const data = {
+    user: user,
+    team: {
+      name: "Empregabilidade Já",
+      logo: () => (
+        <Avatar className="size-8">
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      ),
+    },
+    userRole: userRole,
+    navMain: [
+      {
+        title: "Vagas",
+        url: "/dashboard/alumni/jobs",
+        icon: Briefcase,
+        items: [
+          {
+            title: "Todas as vagas",
+            url: "/dashboard/alumni/jobs/all",
+          },
+          {
+            title: "Realizar match",
+            url: "/dashboard/alumni/jobs/match",
+          },
+          {
+            title: "Minhas candidaturas",
+            url: "/dashboard/alumni/jobs/applications",
+          },
+        ],
+      },
+    ],
+    projects: [
+      {
+        name: "Meu currículo",
+        url: "/dashboard/alumni/resume",
+        icon: FileUser,
+      },
+    ],
+  };
 
-        const curriculumResponse = await getUserCurriculumByUserId(user.id);
-        if (!curriculumResponse) throw "get user curriculum response is null";
-        setAlumniCurriculum(curriculumResponse);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
+  const alumniPathLabels = () => {
+    return {
+      ...pathLabels,
     };
-
-    fetchData();
-  }, [user.id]);
-
-  const handleCreateJobApplication = async (
-    applicationData: Partial<JobApplication>
-  ) => {
-    try {
-      if (!user.id || !applicationData.job_id || !applicationData.status)
-        throw "user id and job id is required";
-
-      const application = await createJobApplication({
-        ...applicationData,
-        user_id: user.id,
-      });
-      if (!application) throw "create job application response is null";
-
-      setJobApplications([...jobApplications, application]);
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao declarar a candidatura! Tente recarregar a pagina!");
-      return false;
-    }
   };
-
-  const handleUpdateJobApplicationStatus = async (
-    applicationId: number,
-    status: "applied" | "rejected" | "accepted"
-  ): Promise<boolean> => {
-    try {
-      if (!user.id || !applicationId)
-        throw "user id and application id is required";
-
-      const application: JobApplication | undefined = jobApplications.find(
-        (application) => application.id === applicationId
-      );
-      if (!application || !status) throw "job application not found";
-
-      const updatedApplication: JobApplication | undefined =
-        await updateJobApplicationById(applicationId, {
-          status,
-          updated_at: JSON.stringify(new Date()),
-        });
-      if (!updatedApplication) throw "update job application response is null";
-
-      setJobApplications([
-        ...jobApplications.filter(
-          (application) => application.id !== applicationId
-        ),
-        updatedApplication,
-      ]);
-
-      toast.success("Status da candidatura foi atualizado com sucesso!");
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao atualizar o status da candidatura!");
-      return false;
-    }
-  };
-
-  const handleDeleteJobApplication = async (
-    applicationId: number
-  ): Promise<boolean> => {
-    try {
-      if (!user.id || !applicationId)
-        throw "user id and application id is required";
-
-      const application: JobApplication | undefined = jobApplications.find(
-        (application) => application.id === applicationId
-      );
-      if (!application) throw "job application not found";
-
-      const deletedApplication = await deleteJobApplicationById(applicationId);
-      if (!deletedApplication) throw "delete job application response is null";
-
-      setJobApplications([
-        ...jobApplications.filter(
-          (application) => application.id !== applicationId
-        ),
-      ]);
-
-      toast.success("Candidatura deletada com sucesso!");
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao deletar a candidatura!");
-      return false;
-    }
-  };
-
-  const handleCreateCurriculum = async (
-    curriculumData: CurriculumType
-  ): Promise<boolean> => {
-    try {
-      if (!user.id) throw "user id is required";
-      if (
-        !curriculumData.location &&
-        !curriculumData.studies &&
-        !curriculumData.interesting_areas
-      )
-        throw "location, studies and interesting areas are required";
-
-      const data: CurriculumType = {
-        user_id: user.id,
-      };
-
-      if (
-        curriculumData.location &&
-        curriculumData.location.state &&
-        curriculumData.location.city
-      ) {
-        data.location = { ...curriculumData.location };
-      }
-      if (curriculumData.studies && curriculumData.studies.length > 0) {
-        data.studies = [...curriculumData.studies];
-      }
-      if (
-        curriculumData.interesting_areas &&
-        curriculumData.interesting_areas.length > 0
-      ) {
-        data.interesting_areas = [...curriculumData.interesting_areas];
-      }
-
-      const curriculum = await createUserCurriculum(data);
-      if (!curriculum) throw "create curriculum response is null";
-      setAlumniCurriculum(curriculum);
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao criar o currículo! Tente recarregar a pagina!");
-      return false;
-    }
-  };
-
-  const handleUpdateCurriculum = async (
-    curriculumData: CurriculumType
-  ): Promise<boolean> => {
-    try {
-      if (!user.id || !curriculum.id) throw "curriculum id is required";
-      const updatedCurriculum = await updateUserCurriculumById(
-        curriculum.id,
-        curriculumData
-      );
-      if (!updatedCurriculum) throw "update curriculum response is null";
-      setAlumniCurriculum(updatedCurriculum);
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao atualizar o currículo! Tente recarregar a pagina!");
-      return false;
-    }
-  };
-
-  if (loading) {
-    return <LoadingComponent />;
-  }
-
   return (
     <AlumniStackContext.Provider
       value={{
         jobsStack: {
           jobs,
+          jobsLoading,
+          handleGetAllCuratedJobs,
         },
         jobApplicationStack: {
           jobApplications,
+          jobsApplicationLoading,
+          handleGetAllJobsApplicationsByUserId,
           handleCreateJobApplication,
           handleUpdateJobApplicationStatus,
           handleDeleteJobApplication,
         },
-        curriculumStack: {
-          curriculum,
-          handleUpdateCurriculum,
-          handleCreateCurriculum,
+        resumeStack: {
+          resumes,
+          resumesLoading,
+          handleGetResumeByUserId,
+          handleCreateResume,
+          handleDeleteResume,
+          handleUpdateResume,
         },
-        setLoading,
-        loading,
       }}
     >
-      {children}
+      <AppSidebar data={data} />
+      <div className="relative w-full h-full flex flex-col overflow-hidden">
+        <AppBar pathLabels={alumniPathLabels()} />
+        <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
+          {children}
+        </div>
+      </div>
     </AlumniStackContext.Provider>
   );
 };

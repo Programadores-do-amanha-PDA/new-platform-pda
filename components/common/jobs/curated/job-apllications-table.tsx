@@ -1,9 +1,9 @@
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
-const JobApplicationsTable = ({
-  jobApplicationStatistics,
+const JobApplicationTsTable = ({
+  JobApplicationTStatistics,
 }: {
-  jobApplicationStatistics: {
+  JobApplicationTStatistics: {
     applied: number;
     accepted: number;
     rejected: number;
@@ -18,27 +18,27 @@ const JobApplicationsTable = ({
             Aplicado
           </TableCell>
           <TableCell className="flex gap-1">
-            {jobApplicationStatistics.applied}
+            {JobApplicationTStatistics.applied}
           </TableCell>
         </TableRow>
         <TableRow className="">
           <TableCell className="font-bold text-start w-max border-r ">
             Aceito
           </TableCell>
-          <TableCell>{jobApplicationStatistics.accepted}</TableCell>
+          <TableCell>{JobApplicationTStatistics.accepted}</TableCell>
         </TableRow>
         <TableRow className="">
           <TableCell className="font-bold text-start w-max border-r ">
             Rejeitado
           </TableCell>
-          <TableCell>{jobApplicationStatistics.rejected}</TableCell>
+          <TableCell>{JobApplicationTStatistics.rejected}</TableCell>
         </TableRow>
         <TableRow className="!bg-primary/55">
           <TableCell className="font-bold text-start w-max border-r ">
             Total
           </TableCell>
           <TableCell className="flex gap-1">
-            {jobApplicationStatistics.total}
+            {JobApplicationTStatistics.total}
           </TableCell>
         </TableRow>
       </TableBody>
@@ -46,4 +46,4 @@ const JobApplicationsTable = ({
   );
 };
 
-export default JobApplicationsTable;
+export default JobApplicationTsTable;

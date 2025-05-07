@@ -1,24 +1,25 @@
 import { Button } from "@/components/ui/button";
-import { CurriculumType } from "@/types/curriculum";
-import { calculateCurriculumCompletion } from "@/utils/calculate-curriculum-completion";
+import { cn } from "@/lib/utils";
+import { ResumeT } from "@/types/resume";
+import { calculateResumeCompletion } from "@/utils/calculate-resume-completion";
 import { ArrowRight, FileUser } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-const AlumniPercentCompletedCurriculumCard = ({
-  curriculum,
+const AlumniPercentCompletedResumeCard = ({
+  resumes,
 }: {
-  curriculum: CurriculumType;
+  resumes: ResumeT[];
 }) => {
   const router = useRouter();
 
-  const completionPercent = calculateCurriculumCompletion(curriculum);
+  const completionPercent = calculateResumeCompletion(resumes[0]);
   return (
     <div className="w-full md:max-w-64 max-h-72 bg-card border shadow-card rounded-xl p-6 flex flex-col items-center justify-between gap-4">
       <div className="flex flex-col items-center justify-start gap-4">
         <FileUser className="size-10 text-card-foreground" />
         <div className="flex flex-col gap-1 items-center justify-center">
           <h1 className="text-lg font-bold text-card-foreground">
-            {curriculum.id
+            {resumes[0].id
               ? `${completionPercent}% preenchido!`
               : "Crie seu currículo!"}
           </h1>
@@ -36,17 +37,20 @@ const AlumniPercentCompletedCurriculumCard = ({
         </div>
       </div>
       <Button
-        variant="secondary"
-        className="text-card-foreground mt-2"
-        onClick={() => router.push("/dashboard/alumni/curriculum")}
+        variant={completionPercent === 100 ? "link" : "default"}
+        className={cn(
+          "font-semibold mt-2",
+          completionPercent === 100 ? "text-muted-foreground" : ""
+        )}
+        onClick={() => router.push("/dashboard/alumni/resume")}
       >
         {completionPercent === 100
           ? "Atualizar Currículo"
           : "Preencher Currículo"}
 
-        <ArrowRight className="size-4 text-muted-foreground -rotate-12" />
+        <ArrowRight className="size-4 -rotate-12" />
       </Button>
     </div>
   );
 };
-export default AlumniPercentCompletedCurriculumCard;
+export default AlumniPercentCompletedResumeCard;

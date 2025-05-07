@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Selector } from "./Selector";
 import { FileCheck, FileQuestion, FileUp, FileX, Trash } from "lucide-react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { JobApplication, JobType } from "@/types/jobs";
+import { JobApplicationT, JobT } from "@/types/jobs";
 import { toast } from "sonner";
 
 const status = [
@@ -50,39 +50,39 @@ const JobApplicationCard = ({
   handleDeleteJobApplication,
   handleUpdateJobApplicationStatus,
 }: {
-  jobApplication: JobApplication;
-  job: JobType;
+  jobApplication: JobApplicationT;
+  job: JobT;
   handleDeleteJobApplication: (applicationId: number) => Promise<boolean>;
   handleUpdateJobApplicationStatus: (
     applicationId: number,
     status: "applied" | "rejected" | "accepted"
   ) => Promise<boolean>;
 }) => {
-  const [jobApplicationStatus, setJobApplicationStatus] = useState<
+  const [JobApplicationTStatus, setJobApplicationTStatus] = useState<
     "applied" | "rejected" | "accepted"
   >("applied");
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setJobApplicationStatus(jobApplication.status);
+    setJobApplicationTStatus(jobApplication.status);
   }, [jobApplication]);
 
   const handleSubmit = async (
-    currentJobApplication: JobApplication,
+    currentJobApplicationT: JobApplicationT,
     newValue: "applied" | "rejected" | "accepted"
   ) => {
     try {
       setLoading(true);
 
-      if (newValue === currentJobApplication?.status)
+      if (newValue === currentJobApplicationT?.status)
         throw new Error("state is not change");
 
-      if (!currentJobApplication?.id) {
-        throw new Error("no currentJobApplication available");
+      if (!currentJobApplicationT?.id) {
+        throw new Error("no currentJobApplicationT available");
       }
       const response = await handleUpdateJobApplicationStatus(
-        currentJobApplication?.id,
+        currentJobApplicationT?.id,
         newValue
       );
 
@@ -95,7 +95,7 @@ const JobApplicationCard = ({
             toast.error("Estado não alterado!");
             break;
 
-          case "no currentJobApplication available":
+          case "no currentJobApplicationT available":
             toast.error("Não há ID de vaga disponível!");
             break;
 
@@ -113,7 +113,7 @@ const JobApplicationCard = ({
 
   const handleSetItemSelector = async (
     newValue: string,
-    state: JobApplication,
+    state: JobApplicationT,
     setState: Dispatch<SetStateAction<"applied" | "rejected" | "accepted">>
   ) => {
     if (
@@ -149,16 +149,16 @@ const JobApplicationCard = ({
           <p className="text-sm text-muted-foreground">Status:</p>
 
           <Selector
-            value={jobApplicationStatus}
+            value={JobApplicationTStatus}
             itens={status}
             label="Candidatura"
             onChange={(e) =>
-              handleSetItemSelector(e, jobApplication, setJobApplicationStatus)
+              handleSetItemSelector(e, jobApplication, setJobApplicationTStatus)
             }
           />
         </div>
         <span className="lg:ml-0 ">
-          <p className="text-sm text-muted-foreground">Atualizada em</p>
+          <p className="text-sm text-muted-foreground">Ultima atualização em</p>
           <p className="text-sm text-muted-foreground">
             {jobApplication?.updated_at
               ? formatDate(jobApplication?.updated_at)

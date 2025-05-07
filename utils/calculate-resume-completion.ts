@@ -1,24 +1,24 @@
-import { CurriculumType } from "@/types/curriculum";
+import { ResumeT } from "@/types/resume";
 
-export const calculateCurriculumCompletion = (
-  curriculum: CurriculumType
+export const calculateResumeCompletion = (
+  resume: ResumeT
 ): number => {
   const isLocationValid = (): boolean => {
     return (
-      !!curriculum.location &&
-      curriculum.location.state?.trim() !== "" &&
-      curriculum.location.city?.trim() !== ""
+      !!resume.location &&
+      resume.location.state?.trim() !== "" &&
+      resume.location.city?.trim() !== ""
     );
   };
 
   const areInterestingAreasValid = (): boolean => {
     if (
-      !curriculum.interesting_areas ||
-      curriculum.interesting_areas.length === 0
+      !resume.interesting_areas ||
+      resume.interesting_areas.length === 0
     ) {
       return false;
     }
-    return curriculum.interesting_areas.some((area) => {
+    return resume.interesting_areas.some((area) => {
       const isAreaValid = area.area?.trim() !== "";
       const areTechnologiesValid =
         (area.technologies?.length ?? 0) > 0 &&
@@ -28,10 +28,10 @@ export const calculateCurriculumCompletion = (
   };
 
   const areStudiesValid = (): boolean => {
-    if (!curriculum.studies || curriculum.studies.length === 0) {
+    if (!resume.studies || resume.studies.length === 0) {
       return false;
     }
-    return curriculum.studies.some((study) => {
+    return resume.studies.some((study) => {
       return (
         study.institution?.trim() !== "" &&
         study.degree?.trim() !== "" &&

@@ -1,6 +1,6 @@
 import JobCard from "@/components/common/jobs/curated/Job-card";
 import { Button } from "@/components/ui/button";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import { ArrowRight, Target } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -22,7 +22,7 @@ function getUTCWeekRange(date: Date): { start: Date; end: Date } {
   return { start, end };
 }
 
-function getNewJobsThisWeek(jobs: JobType[]) {
+function getNewJobsThisWeek(jobs: JobT[]) {
   const now = new Date();
   const currentWeek = getUTCWeekRange(now);
 
@@ -34,7 +34,7 @@ function getNewJobsThisWeek(jobs: JobType[]) {
   });
 }
 
-const CardShowAllNewJobsThisWeek = ({ jobs }: { jobs: JobType[] }) => {
+const CardShowAllNewJobsThisWeek = ({ jobs }: { jobs: JobT[] }) => {
   const router = useRouter();
   const newJobsCount = getNewJobsThisWeek(jobs);
 

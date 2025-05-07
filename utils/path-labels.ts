@@ -1,5 +1,6 @@
 const pathLabels: { [key: string]: string } = {
   users: "Usuários",
+ alumni: "Alumni",
   companies: "Empresas",
   jobs: "Vagas",
   curated: "Vagas curadas",
@@ -14,7 +15,7 @@ const pathLabels: { [key: string]: string } = {
   settings: "Configurações",
   profile: "Perfil",
   match: "Match de Vagas",
-  curriculum: "Meu Currículo",
+  resume: "Meu Currículo",
   applications: "Minhas Candidaturas",
   archives: "Vagas Arquivadas",
   meetings: "Reuniões",

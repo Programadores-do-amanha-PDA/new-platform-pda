@@ -1,9 +1,9 @@
 "use server";
-import { JobApplication } from "@/types/jobs";
+import { JobApplicationT } from "@/types/jobs";
 import { createClient } from "@/utils/supabase/server";
 
 export const createJobApplication = async (
-  applicationData: Partial<JobApplication>
+  applicationData: Partial<JobApplicationT>
 ) => {
   try {
     const supabase = await createClient();
@@ -26,9 +26,7 @@ export const getAllJobApplications = async () => {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from("job_applications")
-      .select("*, jobs!inner(*)");
+    const { data, error } = await supabase.from("job_applications").select("*");
     if (error) throw error;
 
     return data;
@@ -44,7 +42,7 @@ export const getAllJobApplicationsByUserId = async (userId: string) => {
 
     const { data, error } = await supabase
       .from("job_applications")
-      .select("*, jobs!inner(*)")
+      .select("*")
       .eq("user_id", userId);
     if (error) throw error;
 
@@ -93,7 +91,7 @@ export const getJobApplicationById = async (id: string) => {
 
 export const updateJobApplicationById = async (
   id: number,
-  applicationData: Partial<JobApplication>
+  applicationData: Partial<JobApplicationT>
 ) => {
   try {
     const supabase = await createClient();

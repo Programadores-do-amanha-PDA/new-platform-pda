@@ -44,15 +44,17 @@ export const getAllProfiles = async () => {
 };
 
 export const getAllProfilesFilteredByRole = async (role: RolesType) => {
+  console.log(role);
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "*, user_roles(id, role), classrooms:user_classrooms(classroom_id)"
+        "*, user_roles!inner(id, role), classrooms:user_classrooms(classroom_id)"
       )
       .eq("user_roles.role", role);
+
     if (error) throw error;
 
     return data as ProfileType[];

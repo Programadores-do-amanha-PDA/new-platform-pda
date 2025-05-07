@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Badge } from "@/components/ui/badge";
-import { JobDetailsType, JobType } from "@/types/jobs";
+import { JobDetailsT, JobT } from "@/types/jobs";
 import { DataTable } from "./data-table";
 
 const JobsDataTable = ({
@@ -22,12 +22,12 @@ const JobsDataTable = ({
   handleResendJobToCuration,
   loading,
 }: {
-  jobs: JobType[];
+  jobs: JobT[];
   handleDeleteJob: (id: string) => Promise<boolean>;
   handleResendJobToCuration: (jobId: string) => Promise<boolean>;
   loading: boolean;
 }) => {
-  const columns: ColumnDef<JobType>[] = [
+  const columns: ColumnDef<JobT>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -120,7 +120,7 @@ const JobsDataTable = ({
 
       cell: ({ row }) => {
         return row
-          .getValue<JobDetailsType>("details")
+          .getValue<JobDetailsT>("details")
           .languages?.map((language, i) => (
             <Badge variant="outline" className="!m-1" key={i}>
               {language}
@@ -134,7 +134,7 @@ const JobsDataTable = ({
 
       cell: ({ row }) => {
         return row
-          .getValue<JobDetailsType>("details")
+          .getValue<JobDetailsT>("details")
           .workplace_type?.map((w, i) => (
             <Badge variant="outline" className="!m-1" key={i}>
               {w}

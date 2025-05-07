@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { JobApplication, JobType } from "@/types/jobs";
+import { JobApplicationT, JobT } from "@/types/jobs";
 import { ArrowRight, BriefcaseBusiness } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -7,8 +7,8 @@ const AllAvailableJobsCard = ({
   jobs,
   jobApplications,
 }: {
-  jobs: JobType[];
-  jobApplications: JobApplication[];
+  jobs: JobT[];
+  jobApplications: JobApplicationT[];
 }) => {
   const router = useRouter();
 
@@ -39,8 +39,8 @@ const AllAvailableJobsCard = ({
         </div>
       </div>
       <Button
-        variant="secondary"
-        className="text-card-foreground mt-2"
+        variant="link"
+        className="text-muted-foreground font-semibold mt-2"
         onClick={() => router.push("/dashboard/alumni/jobs/all")}
       >
         Ver todas as vagas

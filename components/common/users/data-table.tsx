@@ -48,7 +48,7 @@ type DataTableProps = {
   handleDeleteUserRole: (userId: string) => Promise<boolean>;
   excludeRoles?: RolesType[];
   classrooms?: ClassroomType[];
-} & UserClassroomStackI;
+} & Partial<UserClassroomStackI>;
 
 export function DataTable({
   data,

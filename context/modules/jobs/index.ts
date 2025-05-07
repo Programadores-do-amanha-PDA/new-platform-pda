@@ -4,14 +4,15 @@ import { toast } from "sonner";
 import {
   createJob,
   deleteJob,
+  getAllCuratedJobs,
   getAllJobsWithApplications,
   updateJob,
 } from "@/app/actions/jobs";
 
-import { JobType, JobWithApplications } from "@/types/jobs";
+import { JobT, JobWithApplicationsT } from "@/types/jobs";
 
 const JobsStack = () => {
-  const [jobs, setJobs] = useState<JobWithApplications[]>([]);
+  const [jobs, setJobs] = useState<JobWithApplicationsT[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleGetAllJobs = async () => {
@@ -30,7 +31,23 @@ const JobsStack = () => {
     }
   };
 
-  const handleCreateJob = async (newJob: Partial<JobType>) => {
+  const handleGetAllCuratedJobs = async () => {
+    try {
+      setLoading(true);
+      const jobsResponse = await getAllCuratedJobs();
+      if (!jobsResponse) throw "no jobs response";
+      setJobs(jobsResponse);
+      return true;
+    } catch (error) {
+      console.error(error);
+      toast.error("Erro ao buscar as vagas. Tente novamente mais tarde!");
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateJob = async (newJob: Partial<JobT>) => {
     try {
       const jobCreated = await createJob(newJob);
 
@@ -46,7 +63,7 @@ const JobsStack = () => {
     }
   };
 
-  const handleUpdateJob = async (jobId: string, updates: Partial<JobType>) => {
+  const handleUpdateJob = async (jobId: string, updates: Partial<JobT>) => {
     try {
       const jobUpdated = await updateJob(jobId, updates);
 
@@ -182,6 +199,7 @@ const JobsStack = () => {
     jobs,
     jobsLoading: loading,
     handleGetAllJobs,
+    handleGetAllCuratedJobs,
     handleCreateJob,
     handleUpdateJob,
     handleCurateJob,
@@ -195,14 +213,20 @@ const JobsStack = () => {
 export default JobsStack;
 
 export interface JobsStackI {
-    jobs: JobWithApplications[];
-    jobsLoading: boolean;
-    handleGetAllJobs: () => Promise<boolean>;
-    handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
-    handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
-    handleDeleteJob: (id: string) => Promise<boolean>;
-    handleCurateJob: (jobId: string) => Promise<boolean>;
-    handleResendJobToCuration: (jobId: string) => Promise<boolean>;
-    handleArchiveJob: (jobId: string) => Promise<boolean>;
-    handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
+  jobs: JobWithApplicationsT[];
+  jobsLoading: boolean;
+  handleGetAllJobs: () => Promise<boolean>;
+  handleCreateJob: (job: Partial<JobT>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobT>) => Promise<boolean>;
+  handleDeleteJob: (id: string) => Promise<boolean>;
+  handleCurateJob: (jobId: string) => Promise<boolean>;
+  handleResendJobToCuration: (jobId: string) => Promise<boolean>;
+  handleArchiveJob: (jobId: string) => Promise<boolean>;
+  handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
+}
+
+export interface JobsStackAlumniI {
+  jobs: JobWithApplicationsT[];
+  jobsLoading: boolean;
+  handleGetAllCuratedJobs: () => Promise<boolean>;
 }

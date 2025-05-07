@@ -61,7 +61,7 @@ type InsertManyUsersDialogProps = {
   handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
   excludeRoles?: RolesType[];
   classrooms?: ClassroomType[];
-} & Omit<UserClassroomStackI, "handleDeleteUserClassroom">;
+} & Partial<Omit<UserClassroomStackI, "handleDeleteUserClassroom">>;
 
 const InsertManyUsersDialog = ({
   handleCreateNewUser,
@@ -198,14 +198,20 @@ const InsertManyUsersDialog = ({
             await handleAddUserRole(userCreatedId, role);
           }
 
-          if (user.userClassrooms && user.userClassrooms.length > 0) {
-            const uClassroom: UserClassroomT[] = user.userClassrooms.map(
-              (id) => ({
-                user_id: userCreatedId,
-                classroom_id: id,
-              })
-            );
-            await handleInsertUserClassrooms(uClassroom);
+          if (
+            classrooms &&
+            classrooms?.length > 0 &&
+            handleInsertUserClassrooms
+          ) {
+            if (user.userClassrooms && user.userClassrooms.length > 0) {
+              const uClassroom: UserClassroomT[] = user.userClassrooms.map(
+                (id) => ({
+                  user_id: userCreatedId,
+                  classroom_id: id,
+                })
+              );
+              await handleInsertUserClassrooms(uClassroom);
+            }
           }
         }
         setUsers((prevUsers) =>

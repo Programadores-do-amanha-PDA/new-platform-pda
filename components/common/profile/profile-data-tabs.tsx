@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
 import { updateAuthUser } from "@/app/actions/auth";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
+import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 
 const ProfileDataTabs = ({
   currentUser,
@@ -153,15 +154,15 @@ const ProfileDataTabs = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-between">
+    <div className="w-full flex flex-col justify-between">
       <form
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8 my-8"
+        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
         onSubmit={(e) => e.preventDefault()}
       >
         <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
         <Separator className="col-span-1 lg:col-span-2" />
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-          <Label htmlFor="name" className="text-left">
+          <Label htmlFor="name" className="text-left font-semibold text-base">
             Nome completo
           </Label>
           <Input
@@ -177,7 +178,7 @@ const ProfileDataTabs = ({
             htmlFor="bio"
             className="row-span-1 w-full flex justify-between items-center"
           >
-            <p className="w-max">Biografia</p>
+            <p className="w-max font-semibold text-base">Biografia</p>
             <p className="w-max text-sm">{bio.length}/190</p>
           </Label>
           <Textarea
@@ -187,16 +188,21 @@ const ProfileDataTabs = ({
             className="row-span-1 resize-none"
           />
         </div>
+
         <Separator className="col-span-1 lg:col-span-2" />
+
         <div className="col-span-1 lg:col-span-2">
-          <p className="text-left h-max text-base">Alterar email</p>
+          <p className="text-left h-max font-semibold text-base">
+            Alterar email
+          </p>
           <span className="text-sm text-muted-foreground">
             Para concluir a alteração de email você deve verificar sua caixa de
             entrada do email atual ou do novo email e aceitar a troca.
           </span>
         </div>
+        
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-          <Label htmlFor="email" className="text-left h-max">
+          <Label htmlFor="email" className="text-left h-max font-semibold">
             Email
           </Label>
           <Input
@@ -207,9 +213,11 @@ const ProfileDataTabs = ({
             className="col-span-3"
           />
         </div>
+
         <Separator className="col-span-1 lg:col-span-2" />
+
         <div className="col-span-1 lg:col-span-2">
-          <p className="text-left h-max text-base">Alterar senha</p>
+          <p className="text-left h-max font-semibold text-base">Alterar senha</p>
           <span className="text-sm text-muted-foreground">
             A senha precisa ter um mínimo de 7 caracteres, incluindo letras
             minúsculas, letras maiúsculas, números e caracteres especiais.
@@ -217,7 +225,7 @@ const ProfileDataTabs = ({
         </div>
 
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-          <Label htmlFor="password" className="text-left h-max">
+          <Label htmlFor="password" className="text-left h-max font-semibold">
             Nova senha
           </Label>
           <Input
@@ -230,7 +238,7 @@ const ProfileDataTabs = ({
         </div>
 
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
-          <Label htmlFor="password" className="text-left h-max">
+          <Label htmlFor="password" className="text-left h-max font-semibold">
             Confirme nova senha
           </Label>
           <Input
@@ -244,12 +252,12 @@ const ProfileDataTabs = ({
 
         <Separator className="col-span-1 lg:col-span-2" />
         <div className="grid grid-rows-2 items-center gap-4">
-          <Label>Seus cargos</Label>
+          <Label className="font-semibold text-base">Seus cargos</Label>
 
           <div className="col-span-3 flex gap-1">
             {currentUser.profile?.user_roles?.map((r, i) => (
-              <Badge variant="outline" key={i}>
-                {r.role}
+              <Badge variant="default" key={i}>
+                {rolesLabels.find((role) => role.value === r.role)?.label }
               </Badge>
             ))}
           </div>

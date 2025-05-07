@@ -1,5 +1,4 @@
 "use client";
-import { AppBar } from "@/components/common/app-bar";
 
 import { useAlumniStack } from "@/context/alumni/stack-context";
 
@@ -15,8 +14,6 @@ export default function HomeAdmin() {
   } = useAlumniStack();
   return (
     <main className="relative w-full flex flex-col p-6 gap-10 xl:p-8 bg-background h-max overflow-hidden">
-      <AppBar />
-
       <div className="flex gap-8 flex-wrap h-max">
         <div className="w-full flex flex-wrap justify-center md:justify-between gap-4">
           <CardShowAllNewJobsThisWeek jobs={jobs} />

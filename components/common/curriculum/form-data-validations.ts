@@ -1,12 +1,12 @@
 "use client";
 import {
-  CurriculumInterestingAreasType,
-  CurriculumLocationType,
-  CurriculumStudiesType,
-} from "@/types/curriculum";
+  ResumeInterestingAreasT,
+  ResumeLocationT,
+  ResumeStudiesT,
+} from "@/types/resume";
 import { toast } from "sonner";
 
-export const validateLocation = (location: CurriculumLocationType): boolean => {
+export const validateLocation = (location: ResumeLocationT): boolean => {
   if (location.state.trim() && !location.city.trim()) {
     toast.error("Se informar o estado, a cidade é obrigatória");
     return false;
@@ -15,7 +15,7 @@ export const validateLocation = (location: CurriculumLocationType): boolean => {
 };
 
 export const validateInterestingAreas = (
-  areas: CurriculumInterestingAreasType
+  areas: ResumeInterestingAreasT
 ): boolean => {
   for (let index = 0; index < areas.length; index++) {
     const area = areas[index];
@@ -38,7 +38,7 @@ export const validateInterestingAreas = (
   return true;
 };
 
-export const validateStudies = (studies: CurriculumStudiesType): boolean => {
+export const validateStudies = (studies: ResumeStudiesT): boolean => {
   for (let index = 0; index < studies.length; index++) {
     const study = studies[index];
 
@@ -78,9 +78,9 @@ export const validateStudies = (studies: CurriculumStudiesType): boolean => {
 };
 
 export const validateCurriculumForm = (
-  location: CurriculumLocationType,
-  interestingAreas: CurriculumInterestingAreasType,
-  studies: CurriculumStudiesType
+  location: ResumeLocationT,
+  interestingAreas: ResumeInterestingAreasT,
+  studies: ResumeStudiesT
 ): boolean => {
   return (
     validateLocation(location) &&

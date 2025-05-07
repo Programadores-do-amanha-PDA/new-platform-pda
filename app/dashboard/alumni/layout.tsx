@@ -5,10 +5,7 @@ import { useAuth } from "@/context/auth-context";
 import { cn } from "@/lib/utils";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/common/sidebar/app-sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { Briefcase, FileUser } from "lucide-react";
 import { AlumniStackProvider } from "@/context/alumni/stack-context";
 
 export default function RootLayout({
@@ -41,52 +38,11 @@ export default function RootLayout({
     );
   }
 
-  const data = {
-    user: user,
-    team: {
-      name: "Empregabilidade Já",
-      logo: () => (
-        <Avatar className="size-8">
-          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
-          <AvatarFallback>PdA</AvatarFallback>
-        </Avatar>
-      ),
-    },
-    userRole: userRole,
-    navMain: [
-      {
-        title: "Vagas",
-        url: "/dashboard/alumni/jobs",
-        icon: Briefcase,
-        items: [
-          {
-            title: "Todas as vagas",
-            url: "/dashboard/alumni/jobs/all",
-          },
-          {
-            title: "Realizar match",
-            url: "/dashboard/alumni/jobs/match",
-          },
-          {
-            title: "Minhas candidaturas",
-            url: "/dashboard/alumni/jobs/applications",
-          },
-        ],
-      },
-    ],
-    projects: [
-      {
-        name: "Meu currículo",
-        url: "/dashboard/alumni/curriculum",
-        icon: FileUser,
-      },
-    ],
-  };
-
   return (
     <SidebarProvider defaultOpen={true}>
-      <AppSidebar loading={!user || !userRole} data={data} />
-      <AlumniStackProvider user={user}>{children}</AlumniStackProvider>
+      <AlumniStackProvider userRole={userRole} user={user}>
+        {children}
+      </AlumniStackProvider>
     </SidebarProvider>
   );
 }

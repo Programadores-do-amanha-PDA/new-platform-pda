@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import { connectUseAPI, SendMessageOnDiscord } from "@/utils/utils_api";
 import { Check, LoaderCircle, Send } from "lucide-react";
 import { useState } from "react";
@@ -11,14 +11,14 @@ const JobCardDiscordSenderButton = ({
   job,
   handleJobIsOnDiscord,
 }: {
-  job: JobType;
+  job: JobT;
   handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
 }) => {
   const [isSendingMessage, setIsSendingMessage] = useState<boolean>(false);
 
   const NEXT_PUBLIC_JOBS_CHANNEL_ID = process.env.NEXT_PUBLIC_JOBS_CHANNEL_ID;
 
-  const handleSendJobOnDiscord = async (selectedJob: JobType) => {
+  const handleSendJobOnDiscord = async (selectedJob: JobT) => {
     setIsSendingMessage(true);
 
     toast.info("Estabelecendo a conexão coma  API...");

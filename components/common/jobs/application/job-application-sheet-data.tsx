@@ -15,7 +15,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { LoaderCircle } from "lucide-react";
-import { JobApplicationWithJob } from "@/types/jobs";
+import { JobApplicationWithJobT } from "@/types/jobs";
 import { Selector } from "./Selector";
 import { toast } from "sonner";
 
@@ -25,20 +25,20 @@ const status = [
   { value: "accepted", label: "Candidatura aceita" },
 ];
 
-type JobApplicationStatus = "applied" | "rejected" | "accepted";
+type JobApplicationTStatus = "applied" | "rejected" | "accepted";
 
-const JobApplicationSheetData = ({
-  handleUpdateJobApplication,
-  currentJobApplication,
+const JobApplicationTSheetData = ({
+  handleUpdateJobApplicationT,
+  currentJobApplicationT,
 }: {
-  handleUpdateJobApplication: (
+  handleUpdateJobApplicationT: (
     applicationId: number,
     status: "applied" | "rejected" | "accepted"
   ) => Promise<boolean>;
-  currentJobApplication?: JobApplicationWithJob;
+  currentJobApplicationT?: JobApplicationWithJobT;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [jobApplicationStatus, setJobApplicationStatus] = useState<
+  const [JobApplicationTStatus, setJobApplicationTStatus] = useState<
     "applied" | "rejected" | "accepted"
   >("applied");
 
@@ -46,15 +46,15 @@ const JobApplicationSheetData = ({
 
   const handleOpenChange = (open: boolean) => {
     console.log(open);
-    if (currentJobApplication) {
-      setJobApplicationStatus(currentJobApplication?.status);
+    if (currentJobApplicationT) {
+      setJobApplicationTStatus(currentJobApplicationT?.status);
     }
     setIsOpen(open);
   };
 
   const handleSetItemSelector = (
     newValue: string,
-    setState: Dispatch<SetStateAction<JobApplicationStatus>>
+    setState: Dispatch<SetStateAction<JobApplicationTStatus>>
   ) => {
     // Ensure the newValue is one of the allowed statuses
     if (
@@ -72,15 +72,15 @@ const JobApplicationSheetData = ({
     try {
       setLoading(true);
 
-      if (jobApplicationStatus === currentJobApplication?.status)
+      if (JobApplicationTStatus === currentJobApplicationT?.status)
         throw new Error("state is not change");
 
-      if (!currentJobApplication?.id) {
-        throw new Error("no currentJobApplication available");
+      if (!currentJobApplicationT?.id) {
+        throw new Error("no currentJobApplicationT available");
       }
-      const response = await handleUpdateJobApplication(
-        currentJobApplication?.id,
-        jobApplicationStatus
+      const response = await handleUpdateJobApplicationT(
+        currentJobApplicationT?.id,
+        JobApplicationTStatus
       );
 
       if (!response) throw new Error("no job application adding response");
@@ -95,7 +95,7 @@ const JobApplicationSheetData = ({
             toast.error("Estado não alterado!");
             break;
 
-          case "no currentJobApplication available":
+          case "no currentJobApplicationT available":
             toast.error("Não há ID de vaga disponível!");
             break;
 
@@ -135,7 +135,7 @@ const JobApplicationSheetData = ({
             <Input
               id="name"
               type="text"
-              value={currentJobApplication?.jobs?.title}
+              value={currentJobApplicationT?.jobs?.title}
               readOnly
               className="col-row-2"
             />
@@ -148,7 +148,7 @@ const JobApplicationSheetData = ({
             <Input
               id="company"
               type="company"
-              value={currentJobApplication?.jobs?.company}
+              value={currentJobApplicationT?.jobs?.company}
               readOnly
               className="row-span-2"
             />
@@ -162,11 +162,11 @@ const JobApplicationSheetData = ({
 
             <div className="row-span-2 col-span-1 flex gap-1 ">
               <Selector
-                value={jobApplicationStatus}
+                value={JobApplicationTStatus}
                 itens={status}
                 label="Candidatura"
                 onChange={(e) =>
-                  handleSetItemSelector(e, setJobApplicationStatus)
+                  handleSetItemSelector(e, setJobApplicationTStatus)
                 }
               />
             </div>
@@ -188,4 +188,4 @@ const JobApplicationSheetData = ({
   );
 };
 
-export default JobApplicationSheetData;
+export default JobApplicationTSheetData;

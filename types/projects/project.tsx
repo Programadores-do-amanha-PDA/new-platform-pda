@@ -16,7 +16,7 @@ export interface ClassroomProjectT {
   module: ClassroomProjectModuleT;
   project_type: ClassroomProjectTypeT;
   schedule_date: DateRange | undefined;
-  description: string;
+  description?: string;
   created_at: string;
 }
 

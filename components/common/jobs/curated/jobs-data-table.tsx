@@ -5,7 +5,7 @@ import { useState } from "react";
 import JobSheetData from "../job-sheet-data";
 import JobCard from "./Job-card";
 import { Input } from "@/components/ui/input";
-import { JobType, JobWithApplications } from "@/types/jobs";
+import { JobT, JobWithApplicationsT } from "@/types/jobs";
 import { Archive, FileArchive } from "lucide-react";
 import JobCardDiscordSenderButton from "./job-card-discord-sender-button";
 
@@ -16,8 +16,8 @@ const JobsDataTable = ({
   handleArchiveJob,
   handleJobIsOnDiscord,
 }: {
-  jobs: JobWithApplications[];
-  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+  jobs: JobWithApplicationsT[];
+  handleUpdateJob: (jobId: string, job: Partial<JobT>) => Promise<boolean>;
   handleResendJobToCuration: (jobId: string) => Promise<boolean>;
   handleArchiveJob: (jobId: string) => Promise<boolean>;
   handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;

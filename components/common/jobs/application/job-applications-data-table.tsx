@@ -12,24 +12,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { JobApplicationWithJob, JobType } from "@/types/jobs";
+import { JobApplicationWithJobT, JobT } from "@/types/jobs";
 import { DataTable } from "./data-table";
 import { Badge } from "@/components/ui/badge";
-import JobApplicationSheetData from "./job-application-sheet-data";
+import JobApplicationTSheetData from "./job-application-sheet-data";
 
-const JobApplicationsDataTable = ({
-  jobApplications,
-  handleDeleteJobApplication,
-  handleUpdateJobApplication,
+const JobApplicationTsDataTable = ({
+  JobApplications,
+  handleDeleteJobApplicationT,
+  handleUpdateJobApplicationT,
 }: {
-  jobApplications: JobApplicationWithJob[];
-  handleUpdateJobApplication: (
+  JobApplications: JobApplicationWithJobT[];
+  handleUpdateJobApplicationT: (
     applicationId: number,
     application: "applied" | "rejected" | "accepted"
   ) => Promise<boolean>;
-  handleDeleteJobApplication: (applicationId: number) => Promise<boolean>;
+  handleDeleteJobApplicationT: (applicationId: number) => Promise<boolean>;
 }) => {
-  const columns: ColumnDef<JobApplicationWithJob>[] = [
+  const columns: ColumnDef<JobApplicationWithJobT>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -66,7 +66,7 @@ const JobApplicationsDataTable = ({
       },
       cell: ({ row }) => {
         return (
-          <div className="lowercase">{row.getValue<JobType>("job").title}</div>
+          <div className="lowercase">{row.getValue<JobT>("job").title}</div>
         );
       },
     },
@@ -85,7 +85,7 @@ const JobApplicationsDataTable = ({
         );
       },
       cell: ({ row }) => (
-        <div className="lowercase">{row.getValue<JobType>("job").company}</div>
+        <div className="lowercase">{row.getValue<JobT>("job").company}</div>
       ),
     },
     {
@@ -178,7 +178,7 @@ const JobApplicationsDataTable = ({
       id: "actions",
       enableHiding: false,
       cell: ({ row }) => {
-        const jobApplication = row.original;
+        const JobApplicationT = row.original;
 
         return (
           <DropdownMenu>
@@ -196,12 +196,12 @@ const JobApplicationsDataTable = ({
                 <DropdownMenuLabel>Ações</DropdownMenuLabel>
                 <DropdownMenuSeparator />
               </div>
-              <JobApplicationSheetData
-                currentJobApplication={jobApplication}
-                handleUpdateJobApplication={handleUpdateJobApplication}
+              <JobApplicationTSheetData
+                currentJobApplicationT={JobApplicationT}
+                handleUpdateJobApplicationT={handleUpdateJobApplicationT}
               />
               <Button
-                onClick={() => handleDeleteJobApplication(jobApplication.id)}
+                onClick={() => handleDeleteJobApplicationT(JobApplicationT.id)}
                 variant="ghost"
                 className="!px-2 w-full h-max items-start justify-start text-start"
               >
@@ -214,7 +214,7 @@ const JobApplicationsDataTable = ({
     },
   ];
 
-  return <DataTable columns={columns} data={jobApplications} loading={false} />;
+  return <DataTable columns={columns} data={JobApplications} loading={false} />;
 };
 
-export default JobApplicationsDataTable;
+export default JobApplicationTsDataTable;

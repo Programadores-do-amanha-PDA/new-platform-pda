@@ -9,15 +9,17 @@ import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
 import { validateCurriculumForm } from "./form-data-validations";
 
-import {
-  CurriculumInterestingAreasType,
-  CurriculumLocationType,
-  CurriculumStudiesType,
-  CurriculumType,
-} from "@/types/curriculum";
 import { StatesCombobox } from "./StatesCombobox";
 import { StateCitiesCombobox } from "./state-cities-combobox";
 import axios from "axios";
+import {
+  ResumeInterestingAreasT,
+  ResumeStudiesT,
+  ResumeLocationT,
+  ResumeT,
+} from "@/types/resume";
+import { AuthUserWithProfileType } from "@/types/auth";
+import { useAuth } from "@/context/auth-context";
 
 const fetchAllBrazilianStates = async (
   setStates: (states: { id: number; nome: string; sigla: string }[]) => void
@@ -38,7 +40,7 @@ const fetchAllBrazilianStates = async (
 
 const fetchAllStatesCities = async (
   states: { id: number; nome: string; sigla: string }[],
-  location: CurriculumLocationType,
+  location: ResumeLocationT,
   setStateCities: (stateCities: { id: number; nome: string }[]) => void
 ) => {
   try {
@@ -59,21 +61,29 @@ const fetchAllStatesCities = async (
   }
 };
 
-const CurriculumFormData = ({
-  currentCurriculum,
-  handleUpdateCurriculum,
-  handleCreateCurriculum,
+const ResumeFormData = ({
+  currentResume,
+  handleUpdateResume,
+  handleCreateResume,
 }: {
-  currentCurriculum: CurriculumType | null;
-  handleUpdateCurriculum: (curriculumData: CurriculumType) => Promise<boolean>;
-  handleCreateCurriculum: (curriculumData: CurriculumType) => Promise<boolean>;
+  currentResume: ResumeT | null;
+  handleUpdateResume: (
+    id: string,
+    resumeData: Partial<ResumeT>
+  ) => Promise<boolean>;
+  handleCreateResume: (
+    resumeData: ResumeT,
+    user: AuthUserWithProfileType
+  ) => Promise<boolean>;
 }) => {
   const [openStateCombobox, setOpenStateCombobox] = useState(false);
   const [openCityCombobox, setOpenCityCombobox] = useState(false);
-  const [location, setLocation] = useState<CurriculumLocationType>({
+  const [location, setLocation] = useState<ResumeLocationT>({
     state: "",
     city: "",
   });
+
+  const { user } = useAuth();
 
   const [states, setStates] = useState<
     { id: number; nome: string; sigla: string }[]
@@ -84,22 +94,22 @@ const CurriculumFormData = ({
   >([]);
 
   const [interestingAreas, setInterestingAreas] =
-    useState<CurriculumInterestingAreasType>([]);
+    useState<ResumeInterestingAreasT>([]);
 
-  const [studies, setStudies] = useState<CurriculumStudiesType>([]);
+  const [studies, setStudies] = useState<ResumeStudiesT>([]);
 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setLocation(
-      currentCurriculum?.location || {
+      currentResume?.location || {
         state: "",
         city: "",
       }
     );
-    setInterestingAreas(currentCurriculum?.interesting_areas || []);
-    setStudies(currentCurriculum?.studies || []);
-  }, [currentCurriculum]);
+    setInterestingAreas(currentResume?.interesting_areas || []);
+    setStudies(currentResume?.studies || []);
+  }, [currentResume]);
 
   useEffect(() => {
     fetchAllBrazilianStates(setStates);
@@ -115,41 +125,42 @@ const CurriculumFormData = ({
     setLoading(true);
 
     try {
-      if (validateCurriculumForm(location, interestingAreas, studies))
-        if (!currentCurriculum?.id) {
-          const curriculumData = {
-            location: Object.prototype.hasOwnProperty.call(location, "state")
-              ? { ...location }
-              : { state: "", city: "" },
-            interesting_areas: [...interestingAreas],
-            studies: [...studies],
-          };
-          const response = await handleCreateCurriculum(curriculumData);
-          if (!response) throw new Error("no curriculum response");
+      if (!validateCurriculumForm(location, interestingAreas, studies) || !user)
+        throw new Error("invalid form");
 
-          toast.success("Currículo criado com sucesso!");
-        } else if (currentCurriculum?.id) {
-          const response = await handleUpdateCurriculum({
-            location,
-            interesting_areas: interestingAreas,
-            studies,
-            updated_at: new Date(),
-          });
-          if (!response) throw new Error("no curriculum response");
-          toast.success("Currículo atualizado com sucesso!");
-        } else {
-          toast.error(
-            "Erro ao criar ou atualizar o seu currículo. Tente novamente mais tarde!"
-          );
-        }
+      if (!currentResume?.id) {
+        const resumeData = {
+          location: Object.prototype.hasOwnProperty.call(location, "state")
+            ? { ...location }
+            : { state: "", city: "" },
+          interesting_areas: [...interestingAreas],
+          studies: [...studies],
+        };
+        const response = await handleCreateResume(resumeData, user);
+        if (!response) throw new Error("no resume response");
+
+        toast.success("Currículo criado com sucesso!");
+      } else if (currentResume?.id) {
+        const response = await handleUpdateResume(currentResume?.id, {
+          location,
+          interesting_areas: interestingAreas,
+          studies,
+          updated_at: new Date(),
+        });
+        if (!response) throw new Error("no resume response");
+        toast.success("Currículo atualizado com sucesso!");
+      } else {
+        toast.error(
+          "Erro ao criar ou atualizar o seu currículo. Tente novamente mais tarde!"
+        );
+      }
       setLoading(false);
-    } catch (error) {
-      console.log(error);
-      if (!currentCurriculum?.id) {
+    } catch {
+      if (!currentResume?.id) {
         toast.error(
           "Erro ao criar o seu currículo. Tente novamente mais tarde!"
         );
-      } else if (currentCurriculum?.id) {
+      } else if (currentResume?.id) {
         toast.error(
           "Erro ao atualizar o seu currículo. Tente novamente mais tarde!"
         );
@@ -557,10 +568,10 @@ const CurriculumFormData = ({
       >
         {loading && <LoaderCircle className="size-5 animate-spin" />}
         {loading
-          ? currentCurriculum?.id
+          ? currentResume?.id
             ? "Salvando mudanças"
             : "Criando currículo"
-          : currentCurriculum?.id
+          : currentResume?.id
           ? "Salvar mudanças"
           : "Criar currículo"}
       </Button>
@@ -568,4 +579,4 @@ const CurriculumFormData = ({
   );
 };
 
-export default CurriculumFormData;
+export default ResumeFormData;

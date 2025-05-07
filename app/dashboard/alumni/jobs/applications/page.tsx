@@ -1,5 +1,4 @@
 "use client";
-import { AppBar } from "@/components/common/app-bar";
 import JobApplicationCard from "@/components/common/jobs/application/job-application-card";
 import { Input } from "@/components/ui/input";
 import { useAlumniStack } from "@/context/alumni/stack-context";
@@ -7,6 +6,7 @@ import { useState } from "react";
 
 export default function AllJobsPage() {
   const {
+    jobsStack: { jobs },
     jobApplicationStack: {
       jobApplications,
       handleDeleteJobApplication,
@@ -14,16 +14,19 @@ export default function AllJobsPage() {
     },
   } = useAlumniStack();
 
-  const [jobApplicationSearch, setJobApplicationSearch] = useState<string>("");
+  const [jobApplicationSearch, setJobApplicationTSearch] = useState<string>("");
 
   const jobApplicationSearchFilter = jobApplicationSearch
     ? jobApplications.filter((jobApplication) => {
+      const currentJob = jobs.find(
+        (job) => job.id === jobApplication.job_id
+      );
         return (
-          jobApplication.jobs !== null &&
-          (jobApplication.jobs?.company
+          currentJob !== undefined &&
+          (currentJob.company
             .toLowerCase()
             .includes(jobApplicationSearch.toLowerCase()) ||
-            jobApplication.jobs?.title
+            currentJob.title
               .toLowerCase()
               .includes(jobApplicationSearch.toLowerCase()))
         );
@@ -32,24 +35,26 @@ export default function AllJobsPage() {
 
   return (
     <main className="relative w-full flex flex-col p-6 gap-10 xl:p-8">
-      <AppBar />
-
       <div className="h-max flex flex-col gap-8">
         <div className="flex gap-2 items-center justify-start max-w-96">
           <Input
             placeholder="Pesquisar pelo titulo ou empresa"
             value={jobApplicationSearch}
-            onChange={(e) => setJobApplicationSearch(e.target.value)}
+            onChange={(e) => setJobApplicationTSearch(e.target.value)}
           />
         </div>
         <ul className="w-full h-max flex flex-wrap gap-4 overflow-y-auto">
           {jobApplicationSearchFilter.map((jobApplication, i) => {
-            if (!jobApplication.jobs?.id) return null;
+            if (!jobApplication.id) return null;
+            const currentJob = jobs.find(
+              (job) => job.id === jobApplication.job_id
+            );
+            if (!currentJob) return null;
 
             return (
               <JobApplicationCard
                 key={i}
-                job={jobApplication.jobs}
+                job={currentJob}
                 jobApplication={jobApplication}
                 handleDeleteJobApplication={handleDeleteJobApplication}
                 handleUpdateJobApplicationStatus={

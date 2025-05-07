@@ -72,7 +72,7 @@ const UserClassroomStack = (
                   classrooms: [
                     ...(user.profile?.classrooms || []),
                     ...(user.profile?.classrooms?.filter(
-                      (uc) => !classroomsIds.includes(uc)
+                      (uc) => !classroomsIds.includes(uc.classroom_id)
                     ) || []),
                   ],
                 },

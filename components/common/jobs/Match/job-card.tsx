@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import { BookOpenText, Cpu, MapPin, Target } from "lucide-react";
 import { ReactElement } from "react";
 import JobMatchTable from "./job-match-table";
@@ -10,7 +10,7 @@ const JobCard = ({
   cardFooter,
   matchStatistics,
 }: {
-  job: JobType;
+  job: JobT;
   cardFooter: ReactElement;
   matchStatistics: {
     area: number;

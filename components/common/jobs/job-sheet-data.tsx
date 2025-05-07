@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { LoaderCircle, X } from "lucide-react";
 import { Selector } from "./curated/Selector";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 
 const technologies = [
   { value: "javascript", label: "JavaScript" },
@@ -66,9 +66,9 @@ const JobSheetData = ({
   currentJob,
   mode,
 }: {
-  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
-  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
-  currentJob?: JobType;
+  handleCreateJob: (job: Partial<JobT>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobT>) => Promise<boolean>;
+  currentJob?: JobT;
   mode: "edit" | "new";
 }) => {
   const [isOpen, setIsOpen] = useState(false);

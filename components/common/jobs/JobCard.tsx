@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import { BookOpenText, Cpu, MapPin } from "lucide-react";
 import { ReactElement } from "react";
 
@@ -8,7 +8,7 @@ const JobCard = ({
   job,
   cardFooter,
 }: {
-  job: JobType;
+  job: JobT;
   cardFooter: ReactElement;
 }) => {
   return (

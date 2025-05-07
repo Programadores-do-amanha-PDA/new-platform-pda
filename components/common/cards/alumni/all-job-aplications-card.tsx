@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { JobApplicationWithJob, JobType } from "@/types/jobs";
+import { JobApplicationWithJobT, JobT } from "@/types/jobs";
 import {
   ArrowRight,
   FileCheck,
@@ -49,11 +49,11 @@ const formatDate = (stringDate: string | undefined) => {
   }
 };
 
-const AlumniAllJobApplicationsCard = ({
+const AlumniAllJobApplicationTsCard = ({
   jobApplications,
 }: {
-  jobs: JobType[];
-  jobApplications: JobApplicationWithJob[];
+  jobs: JobT[];
+  jobApplications: JobApplicationWithJobT[];
 }) => {
   const router = useRouter();
   return (
@@ -72,29 +72,29 @@ const AlumniAllJobApplicationsCard = ({
       <ul className="w-full h-full flex flex-col gap-4 items-center">
         {jobApplications
           .filter((_, i) => i < 3)
-          .map((jobApplication, i) => {
+          .map((JobApplicationT, i) => {
             return (
               <li
                 key={i}
                 className="w-full  lg:max-h-16 rounded-2xl border flex flex-col gap-2 lg:flex-row justify-between lg:items-center p-2 px-4"
               >
                 <div className="flex gap-4 items-center">
-                  {applicationStatusIcon(jobApplication?.status)}
+                  {applicationStatusIcon(JobApplicationT?.status)}
 
                   <span className="w-full max-w-96 flex flex-col truncate">
                     <p className="font-bold text-card-foreground truncate">
-                      {jobApplication?.jobs?.title}
+                      {JobApplicationT?.jobs?.title}
                     </p>
                     <p className="text-sm">
-                      {jobApplication?.status
-                        ? applicationsStatusLabels[jobApplication.status]
+                      {JobApplicationT?.status
+                        ? applicationsStatusLabels[JobApplicationT.status]
                         : "Não informado"}
                     </p>
                   </span>
                 </div>
                 <span className="ml-10 lg:ml-0">
                   <p className="text-sm text-muted-foreground">
-                    {formatDate(jobApplication?.created_at)}
+                    {formatDate(JobApplicationT?.created_at)}
                   </p>
                 </span>
               </li>
@@ -102,8 +102,8 @@ const AlumniAllJobApplicationsCard = ({
           })}
       </ul>
       <Button
-        variant="secondary"
-        className="text-card-foreground mt-2"
+        variant="link"
+        className="text-muted-foreground mt-2 font-semibold"
         onClick={() => router.push("/dashboard/alumni/jobs/applications")}
       >
         Ver minhas candidaturas
@@ -112,4 +112,4 @@ const AlumniAllJobApplicationsCard = ({
     </div>
   );
 };
-export default AlumniAllJobApplicationsCard;
+export default AlumniAllJobApplicationTsCard;

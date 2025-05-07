@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import JobSheetData from "./job-sheet-data";
 
 export function DataTable({
@@ -35,11 +35,11 @@ export function DataTable({
   handleCreateJob,
   handleUpdateJob,
 }: {
-  data: JobType[];
-  columns: ColumnDef<JobType>[];
+  data: JobT[];
+  columns: ColumnDef<JobT>[];
   loading: boolean;
-  handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
-  handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
+  handleCreateJob: (job: Partial<JobT>) => Promise<boolean>;
+  handleUpdateJob: (jobId: string, job: Partial<JobT>) => Promise<boolean>;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(

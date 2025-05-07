@@ -11,7 +11,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { ChartData } from "@/types/charts";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 
 const chartConfig = {
   value: {
@@ -24,7 +24,7 @@ export function JobMatchChart({
   jobsMatch,
 }: {
   jobsMatch: {
-    job: JobType;
+    job: JobT;
     matchStatistics: {
       area: number;
       language: number;
@@ -66,13 +66,13 @@ export function JobMatchChart({
 
   return (
     <Card data-chart={id} className="flex flex-col h-max gap-4 bg-primary/15 border-primary">
-      <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-0 gap-4">
-        <CardTitle className="text-primary-foreground">Visão geral</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-center space-y-0 gap-4">
+        <CardTitle className="text-primary-foreground text-xl">Visão geral</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-1 justify-center pb-0">
+      <CardContent className="flex flex-1 justify-center">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[250px] w-full h-full"
+          className="mx-auto aspect-square max-h-[250px] max-w-[350px] w-full h-full"
         >
           <RadarChart data={chartData}>
             <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
