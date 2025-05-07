@@ -1,5 +1,5 @@
 "use server";
-import { JobType } from "@/types/jobs";
+import { JobT } from "@/types/jobs";
 import { createClient } from "@/utils/supabase/server";
 
 export const getAllJobs = async () => {
@@ -71,7 +71,7 @@ export const getJobByID = async (jobId: string) => {
   }
 };
 
-export const createJob = async (job: Partial<JobType>) => {
+export const createJob = async (job: Partial<JobT>) => {
   try {
     const supabase = await createClient();
     const key = process.env.NEXT_PUBLIC_PDA_JOBS_SEARCH_ID;
@@ -92,7 +92,7 @@ export const createJob = async (job: Partial<JobType>) => {
   }
 };
 
-export const updateJob = async (jobId: string, updates: Partial<JobType>) => {
+export const updateJob = async (jobId: string, updates: Partial<JobT>) => {
   try {
     const supabase = await createClient();
 

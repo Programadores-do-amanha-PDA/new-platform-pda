@@ -1,0 +1,51 @@
+import * as React from "react";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ClassroomProjectTypeT } from "@/types/projects/project";
+
+interface ProjectTypeSelectProps
+  extends React.HTMLAttributes<HTMLSelectElement> {
+  value: ClassroomProjectTypeT | "";
+  onValueChange: (newValue: ClassroomProjectTypeT) => void;
+  name?: string;
+}
+
+const projectTypes = [
+  { value: "mini_project", label: "Mini Projeto" },
+  { value: "end_module_project", label: "Projeto Final" },
+  { value: "end_module_english_project", label: "Projeto Final de Inglês" },
+];
+
+const ProjectTypeSelect = ({
+  value,
+  onValueChange,
+  name
+}: ProjectTypeSelectProps) => {
+  return (
+    <Select value={value} onValueChange={onValueChange} name={name}>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue placeholder="Selecione um tipo" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Módulos</SelectLabel>
+          {projectTypes.map((type) => (
+            <SelectItem key={"type-" + type.value} value={type.value}>
+              {type.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};
+
+export default ProjectTypeSelect;

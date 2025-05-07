@@ -1,56 +1,61 @@
 "use server";
 import { AuthUser } from "@supabase/supabase-js";
-import { getAllAlumniProfiles } from "@/app/actions/profiles";
+import {
+  getAllProfiles,
+  getAllProfilesFilteredByRole,
+} from "@/app/actions/profiles";
 import { createClientAdmin } from "@/utils/supabase/server";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth";
 
-export const getAllAlumni = async () => {
+export const getAllUsers = async (role?: RolesType) => {
   try {
     const supabase = await createClientAdmin();
     const {
       data: { users },
       error,
-    } = await supabase.auth.admin.listUsers();
+    } = await supabase.auth.admin.listUsers({ perPage: 10000 });
 
     if (error) throw error;
 
-    const alumniProfiles = await getAllAlumniProfiles();
+    if (!role) {
+      const profiles = await getAllProfiles();
+      if (!profiles) throw new Error("no users profile response");
 
-    if (!users || !alumniProfiles) {
-      throw new Error("users and alumni profiles is not available");
+      const usersWithPossibleProfiles = users.map((user) => {
+        const profile = profiles.find((profile) => profile.id === user.id);
+        return { user, profile };
+      });
+
+      const usersWithProfiles: AuthUserWithProfileType[] =
+        usersWithPossibleProfiles
+          .filter(({ profile }) => profile !== undefined)
+          .map(({ user, profile }) => ({ ...user, profile: profile! }))
+          .sort((a, b) => (a.created_at > b.created_at ? 1 : -1));
+
+      return usersWithProfiles;
+    } else if (role) {
+      const filteredProfiles = await getAllProfilesFilteredByRole(role);
+
+      if (!users || !filteredProfiles) {
+        throw new Error(`Users or profiles for role ${role} is not available`);
+      }
+
+      const allFilteredUsers: AuthUserWithProfileType[] = filteredProfiles
+        .map((profile) => {
+          const user = users?.find((p) => p.id === profile.id);
+          if (user) {
+            return {
+              ...user,
+              profile,
+            };
+          }
+          return null;
+        })
+        .filter((user): user is AuthUserWithProfileType => user !== null)
+        .sort((a, b) => (a.created_at > b.created_at ? 1 : -1));
+
+      return allFilteredUsers;
     }
-
-    const allAlumni: AuthUserWithProfileType[] = alumniProfiles
-      .map((alumni) => {
-        const user = users?.find((p) => p.id === alumni.id);
-        if (user) {
-          return {
-            ...user,
-            profile: alumni,
-          };
-        }
-        return null;
-      })
-      .filter((alumni): alumni is AuthUserWithProfileType => alumni !== null);
-
-    return allAlumni;
-  } catch (error) {
-    console.error("Error fetching all auth users:", error);
-    return false;
-  }
-};
-
-export const getAllUsers = async () => {
-  try {
-    const supabase = await createClientAdmin();
-    const {
-      data: { users },
-      error,
-    } = await supabase.auth.admin.listUsers();
-
-    if (error) throw error;
-
-    return users;
   } catch (error) {
     console.error("Error fetching all auth users:", error);
     return false;

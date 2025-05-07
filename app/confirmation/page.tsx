@@ -2,7 +2,7 @@
 import Image from "next/image";
 
 import Logo from "/public/assets/logos/Logo_PDA_Horizontal_FundoBranco.png";
-import { ResendConfirmationForm } from "@/components/confirmation/resend-confirmation-form";
+import { ResendConfirmationForm } from "@/components/common/confirmation/resend-confirmation-form";
 
 export default function ConfirmationPage() {
   return (

@@ -1,46 +1,36 @@
 "use client";
-import ProfilesDataTable from "@/components/users/profiles-data-table";
-import { AppBar } from "@/components/app-bar";
+import ProfilesDataTable from "@/components/common/users/profiles-data-table";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
-export default function Home() {
+export default function AllUsersPage() {
   const {
-    alumniStack: {
-      alumni,
-      handleDeleteAlumni,
-      handleCreateNewAlumni,
-      handleUpdateAlumni,
+    usersStack: {
+      users,
+      usersLoading,
+      handleDeleteUser,
+      handleCreateNewUser,
+      handleUpdateUser,
     },
     userRoleStack: {
       handleAddUserRole,
-      handleUpdateUserRole,
       handleDeleteUserRole,
+      handleUpdateUserRole,
     },
-    loading,
   } = useEmployerStack();
 
   return (
-    <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
-      <AppBar />
-
-      <div className="space-y-2">
+    <main className="relative w-full overflow-hidden flex flex-col p-4 gap-4">
+      <div className="w-full h-full flex relative overflow-y-auto">
         <ProfilesDataTable
-          users={alumni}
-          handleCreateNewUser={handleCreateNewAlumni}
-          handleUpdateUser={handleUpdateAlumni}
-          handleDeleteUser={handleDeleteAlumni}
+          users={users}
+          handleCreateNewUser={handleCreateNewUser}
+          handleUpdateUser={handleUpdateUser}
+          handleDeleteUser={handleDeleteUser}
           handleAddUserRole={handleAddUserRole}
-          handleUpdateUserRole={handleUpdateUserRole}
           handleDeleteUserRole={handleDeleteUserRole}
-          loading={loading}
-          excludeRoles={[
-            "admin",
-            "employer",
-            "student",
-            "class_manager",
-            "student",
-            "teacher",
-          ]}
+          handleUpdateUserRole={handleUpdateUserRole}
+          loading={usersLoading}
+          excludeRoles={["admin", "employer", "student", "teacher", "class_manager"]}
         />
       </div>
     </main>

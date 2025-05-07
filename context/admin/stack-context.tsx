@@ -1,122 +1,187 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import { toast } from "sonner";
-import LoadingComponent from "@/components/loading-component";
+import { Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
 
-import { AuthUser } from "@supabase/supabase-js";
-import {
-  createJob,
-  deleteJob,
-  getAllJobsWithApplications,
-  updateJob,
-} from "@/app/actions/jobs";
-import { getAllProfiles, getProfileById } from "@/app/actions/profiles";
+import { AppSidebar } from "@/components/common/sidebar/app-sidebar";
+import LoadingComponent from "@/components/common/loading-component";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import AppBar from "@/components/common/app-bar";
 
-import { JobType, JobWithApplications } from "@/types/jobs";
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
-import {
-  createUser,
-  deleteUser,
-  getAllUsers,
-  updateUser,
-} from "@/app/actions/auth_admin";
-import {
-  deleteUserRoleWithUserId,
-  insertUserRoleWithUserId,
-  updateUserRoleWIthUserId,
-} from "@/app/actions/roles";
+import pathLabels from "@/utils/path-labels";
+
+import UsersStack, { UsersStackI } from "../modules/users";
+import UserRolesStack, { UserRolesStackI } from "../modules/users/roles";
+import JobsStack, { JobsStackI } from "../modules/jobs";
+import ClassroomStack, { ClassroomStackI } from "../modules/classrooms";
+import CoodeshAssessmentsStack, {
+  CoodeshAssessmentI,
+} from "../modules/classrooms/coodesh/assessments";
+import CoodeshAPIAssessmentsStack, {
+  CoodeshAPIAssessmentsI,
+} from "../modules/classrooms/coodesh/api";
+import useZoomMeetingsStack, {
+  ZoomMeetingsStackI,
+} from "../modules/classrooms/zoom/meetings";
+import useZoomAPIMeetingsStack, {
+  ZoomAPIMeetingsStackI,
+} from "../modules/classrooms/zoom/api";
+import useZoomAccountsStack, {
+  ZoomAccountsStackI,
+} from "../modules/classrooms/zoom/accounts";
+import useClassroomProjects, {
+  ClassroomProjectsI,
+} from "../modules/classrooms/projects";
+
+import { AuthUserWithProfileType } from "@/types/auth";
+import UserClassroomStack, {
+  UserClassroomStackI,
+} from "../modules/users/classrooms";
 
 interface AdminStackContextProps {
-  usersStack: {
-    users: Partial<AuthUserWithProfileType>[];
-    handleCreateNewUser: (
-      user: Partial<AuthUser & { password: string }>
-    ) => Promise<string | false>;
-    handleUpdateUser: (
-      userID: string,
-      user: Partial<AuthUser & { password: string }>
-    ) => Promise<boolean>;
-    handleDeleteUser: (userId: string) => Promise<boolean>;
+  usersStack: UsersStackI;
+  userRoleStack: UserRolesStackI;
+  classroomsStack: ClassroomStackI & {
+    projects: ClassroomProjectsI;
+    coodesh: CoodeshAssessmentI & {
+      api: CoodeshAPIAssessmentsI;
+    };
+    zoom: {
+      accounts: ZoomAccountsStackI;
+      meetings: ZoomMeetingsStackI;
+      api: ZoomAPIMeetingsStackI;
+    };
+    users: UserClassroomStackI;
   };
-  userRoleStack: {
-    handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-    handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-    handleDeleteUserRole: (userId: string) => Promise<boolean>;
-  };
-  jobsStack: {
-    jobs: JobWithApplications[];
-    handleCreateJob: (job: Partial<JobType>) => Promise<boolean>;
-    handleUpdateJob: (jobId: string, job: Partial<JobType>) => Promise<boolean>;
-    handleDeleteJob: (id: string) => Promise<boolean>;
-    handleCurateJob: (jobId: string) => Promise<boolean>;
-    handleResendJobToCuration: (jobId: string) => Promise<boolean>;
-    handleArchiveJob: (jobId: string) => Promise<boolean>;
-    handleJobIsOnDiscord: (jobId: string) => Promise<boolean>;
-  };
+  jobsStack: JobsStackI;
   loading: boolean;
   setLoading: (loading: boolean) => void;
 }
 
-const AdminStackContext = createContext<AdminStackContextProps>({
-  usersStack: {
-    users: [],
-    handleCreateNewUser: () => Promise.resolve(false),
-    handleUpdateUser: () => Promise.resolve(false),
-    handleDeleteUser: () => Promise.resolve(false),
-  },
-  userRoleStack: {
-    handleAddUserRole: () => Promise.resolve(false),
-    handleUpdateUserRole: () => Promise.resolve(false),
-    handleDeleteUserRole: () => Promise.resolve(false),
-  },
-  jobsStack: {
-    jobs: [],
-    handleCreateJob: () => Promise.resolve(false),
-    handleUpdateJob: () => Promise.resolve(false),
-    handleDeleteJob: () => Promise.resolve(false),
-    handleCurateJob: () => Promise.resolve(false),
-    handleResendJobToCuration: () => Promise.resolve(false),
-    handleArchiveJob: () => Promise.resolve(false),
-    handleJobIsOnDiscord: () => Promise.resolve(false),
-  },
-  loading: true,
-  setLoading: () => {},
-});
+const AdminStackContext = createContext<AdminStackContextProps>(
+  {} as AdminStackContextProps
+);
 
 export const AdminStackProvider = ({
   children,
+  user,
+  userRole,
 }: {
   children: React.ReactNode;
+  user: AuthUserWithProfileType;
+  userRole: string;
 }) => {
-  const [users, setUsers] = useState<Partial<AuthUserWithProfileType>[]>([]);
-  const [jobs, setJobs] = useState<JobType[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Users
+  const {
+    users,
+    setUsers,
+    usersLoading,
+    handleCreateNewUser,
+    handleDeleteUser,
+    handleUpdateUser,
+    handleGetAllUsersWithProfiles,
+  } = UsersStack();
+
+  // User_Roles
+  const { handleAddUserRole, handleUpdateUserRole, handleDeleteUserRole } =
+    UserRolesStack(setUsers);
+
+  // Classrooms
+  const {
+    classrooms,
+    classroomsLoading,
+    handleGetAllClassrooms,
+    handleCreateClassroom,
+    handleUpdateClassroom,
+    handleDeleteClassroom,
+  } = ClassroomStack();
+
+  // User classrooms
+  const { handleInsertUserClassrooms, handleDeleteUserClassroom } =
+    UserClassroomStack(setUsers);
+
+  // Projects
+  const {
+    projects,
+    projectsLoading,
+    handleGetAllProjectsByClassroomId,
+    handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
+    handleCreateClassroomProject,
+    handleUpdateClassroomProject,
+    handleDeleteProject,
+  } = useClassroomProjects();
+
+  // Jobs
+  const {
+    jobs,
+    jobsLoading,
+    handleGetAllJobs,
+    handleCreateJob,
+    handleUpdateJob,
+    handleDeleteJob,
+    handleCurateJob,
+    handleResendJobToCuration,
+    handleArchiveJob,
+    handleJobIsOnDiscord,
+  } = JobsStack();
+
+  // Coodesh
+  const {
+    assessments,
+    assessmentsLoading,
+    handleGetAllCoodeshAssessmentByClassroomId,
+    handleCreateCoodeshAssessment,
+    handleUpdateCoodeshAssessment,
+  } = CoodeshAssessmentsStack();
+
+  // Coodesh API
+  const { coodeshAPIAssessments, handleGetCoodeshAPIAssessments } =
+    CoodeshAPIAssessmentsStack();
+
+  // Zoom API
+  const {
+    meetingsByAPI,
+    meetingsByAPILoading,
+    handleGetZoomMeAccountDataByAPI,
+    handleGetAllZoomMeetingsByAPI,
+    handleGetZoomMeetingByAPI,
+    handleGetAllParticipantsByMeetingIdFromAPI,
+    handleGetAllPollResultsByMeetingIdFromAPI,
+  } = useZoomAPIMeetingsStack();
+
+  // Zoom Accounts
+  const {
+    accounts,
+    accountsLoading,
+    handleGetAllZoomAccounts,
+    handleGetZoomAccountById,
+    handleCreateZoomAccount,
+    handleUpdateZoomAccountById,
+    handleDeleteZoomAccountById,
+  } = useZoomAccountsStack(handleGetZoomMeAccountDataByAPI);
+
+  // Zoom Meetings
+  const {
+    meetings,
+    meetingsLoading,
+    handleGetZoomMeetingById,
+    handleGetAllZoomMeetings,
+    handleCreateZoomMeeting,
+    handleUpdateZoomMeeting,
+    handleUpdateZoomMeetingOccurrence,
+    handleUpdateZoomMeetingPastInstance,
+    handleRefreshAndUpdateZoomMeeting,
+    handleDeleteZoomMeeting,
+  } = useZoomMeetingsStack({
+    handleGetZoomMeetingByAPI,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const usersResponse = await getAllUsers();
-        if (!usersResponse) throw "no users response";
-
-        const profilesResponse = await getAllProfiles();
-        if (!profilesResponse) throw "no users profile response";
-
-        const usersWithProfiles = usersResponse.map((user) => {
-          const userProfile = profilesResponse.find(
-            (profile) => profile.id === user.id
-          );
-
-          return {
-            ...user,
-            profile: userProfile,
-          };
-        });
-        setUsers(usersWithProfiles);
-
-        const jobsResponse = await getAllJobsWithApplications();
-        if (!jobsResponse) throw "no jobs response";
-        setJobs(jobsResponse);
+        await handleGetAllClassrooms();
       } catch (error) {
         console.error(error);
       } finally {
@@ -127,353 +192,139 @@ export const AdminStackProvider = ({
     fetchData();
   }, []);
 
-  // Users
-  const handleCreateNewUser = async (
-    userData: Partial<AuthUser & { password: string }>
-  ) => {
-    try {
-      if (
-        !userData.email ||
-        !userData.password ||
-        !userData.user_metadata ||
-        !userData.user_metadata.full_name ||
-        !userData.user_metadata.user_email
-      ) {
-        throw new Error("invalid user data");
-      }
-
-      const userResponse = await createUser(userData);
-      if (!userResponse) throw new Error("no user response");
-
-      const userProfileResponse = await getProfileById(userResponse.id);
-      if (!userProfileResponse) throw new Error("no user profile response");
-
-      setUsers((users) => [
-        ...users,
-        { ...userResponse, profile: userProfileResponse },
-      ]);
-      toast.success("Novo usuário criado com sucesso!");
-      return userResponse.id;
-    } catch (error) {
-      toast.error("Erro ao criar novo usuário!");
-      console.log(error);
-      return false;
-    }
-  };
-
-  const handleUpdateUser = async (
-    userID: string | undefined,
-    updates: Partial<AuthUser & { password: string }>
-  ) => {
-    try {
-      if (!userID || !updates) {
-        throw new Error("id and updates fields are required");
-      }
-
-      const userUpdatedResponse = await updateUser(userID, updates);
-      if (!userUpdatedResponse) throw new Error("no update user response");
-
-      setUsers((users) =>
-        users.map((currentUser) => {
-          if (currentUser.id === userID) {
-            const userUpdatedData: AuthUserWithProfileType = {
-              ...currentUser,
-              ...userUpdatedResponse,
-              profile: {
-                ...currentUser.profile,
-                email: userUpdatedResponse.user_metadata.user_email as string,
-                full_name: userUpdatedResponse.user_metadata
-                  .full_name as string,
-              },
-              user_metadata: {
-                ...currentUser.user_metadata,
-                ...userUpdatedResponse.user_metadata,
-              },
-            };
-
-            return userUpdatedData;
-          }
-          return currentUser;
-        })
-      );
-      toast.success("Usuário atualizado com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao atualizar o usuário!");
-      return false;
-    }
-  };
-
-  const handleDeleteUser = async (userId: string | undefined) => {
-    try {
-      if (!userId) throw new Error("user id is required to delete");
-
-      const response = await deleteUser(userId);
-      if (!response) throw new Error("no delete user response");
-
-      setUsers((users) => users.filter((user) => user.id !== userId));
-      toast.success("Usuário deletado com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao deletar usuário. tente novamente mais tarde!");
-      return false;
-    }
-  };
-
-  // User_Roles
-  const handleAddUserRole = async (userId: string, role: RolesType) => {
-    try {
-      if (!userId || !role) {
-        throw new Error("user id and role fields are required");
-      }
-      const response = await insertUserRoleWithUserId(userId, role);
-      if (!response) throw new Error("no insert user role response");
-
-      setUsers((users) =>
-        users.map((user) =>
-          user.id === userId && user.profile
-            ? {
-                ...user,
-                profile: {
-                  ...user.profile,
-                  id: user.profile.id || "",
-                  user_roles: [{ role: role }],
-                },
-              }
-            : user
-        )
-      );
-      toast.success("Cargo adicionado com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao adicionar cargo ao usuário!");
-      return false;
-    }
-  };
-
-  const handleUpdateUserRole = async (userId: string, role: RolesType) => {
-    try {
-      if (!userId || !role) {
-        throw new Error("role and id fields are required");
-      }
-      const responseData = await updateUserRoleWIthUserId(userId, role);
-      if (!responseData) {
-        throw new Error("no update user role data was returned");
-      }
-      setUsers((users) =>
-        users.map((user) =>
-          user.id === userId && user.profile
-            ? {
-                ...user,
-                profile: {
-                  ...user.profile,
-                  user_roles: [{ role }],
-                },
-              }
-            : user
-        )
-      );
-      toast.success("Cargo atualizado com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao atualizar cargo do usuário!");
-      return false;
-    }
-  };
-
-  const handleDeleteUserRole = async (userId: string) => {
-    try {
-      if (!userId) throw new Error("role and id fields are required");
-      const responseData = await deleteUserRoleWithUserId(userId);
-      if (!responseData)
-        throw new Error("no update user role data was returned");
-
-      setUsers((users) =>
-        users.map((user) =>
-          user.id === userId && user.profile
-            ? {
-                ...user,
-                profile: {
-                  ...user.profile,
-                  user_roles: [],
-                },
-              }
-            : user
-        )
-      );
-      toast.success("Cargo removido com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao remover cargo do usuário!");
-      return false;
-    }
-  };
-
-  // Jobs
-  const handleCreateJob = async (newJob: Partial<JobType>) => {
-    try {
-      const jobCreated = await createJob(newJob);
-
-      if (!jobCreated) throw "job is not created successfully";
-
-      setJobs((jobs) => [...jobs, jobCreated]);
-      toast.success("Sucesso ao criar a vaga!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao criar a vaga. Tente novamente mais tarde!");
-      return false;
-    }
-  };
-
-  const handleUpdateJob = async (jobId: string, updates: Partial<JobType>) => {
-    try {
-      const jobUpdated = await updateJob(jobId, updates);
-
-      if (!jobUpdated) throw new Error("job is not updated successfully");
-
-      setJobs((jobs) =>
-        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
-      );
-      toast.success("Sucesso ao editar vaga!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao editar vaga. Tente novamente mais tarde!");
-      return false;
-    }
-  };
-
-  const handleCurateJob = async (jobId: string) => {
-    try {
-      const jobUpdated = await updateJob(jobId, {
-        curated: true,
-        is_archived: false,
-      });
-
-      if (!jobUpdated) throw new Error("job is not updated successfully");
-
-      setJobs((jobs) =>
-        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
-      );
-
-      toast.success("Vaga aprovada com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao aprovar vaga. Tente novamente mais tarde!");
-      return false;
-    }
-  };
-
-  const handleResendJobToCuration = async (jobId: string) => {
-    try {
-      const jobUpdated = await updateJob(jobId, {
-        curated: false,
-        is_archived: false,
-      });
-
-      if (!jobUpdated) throw new Error("job is not updated successfully");
-
-      setJobs((jobs) =>
-        jobs.map((job) => (job.id === jobId ? jobUpdated : job))
-      );
-
-      toast.success("Vaga reenviada a curadoria com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
-      );
-      return false;
-    }
-  };
-
-  const handleJobIsOnDiscord = async (jobId: string) => {
-    try {
-      const jobUpdated = await updateJob(jobId, {
-        is_on_discord: true,
-      });
-
-      if (!jobUpdated) throw new Error("job is not updated successfully");
-
-      setJobs((jobs) =>
-        jobs.map((job) =>
-          job.id === jobId ? { ...job, is_on_discord: true } : job
-        )
-      );
-
-      toast.success("Vaga reenviada a curadoria com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
-      );
-      return false;
-    }
-  };
-
-  const handleArchiveJob = async (jobId: string | null) => {
-    try {
-      if (!jobId) throw new Error("Invalid job ID");
-
-      const response = await updateJob(jobId, {
-        curated: false,
-        is_archived: true,
-      });
-      if (!response) throw new Error("failed to update job");
-
-      setJobs((jobs) =>
-        jobs.map((job) =>
-          job.id === jobId ? { ...job, curated: false, is_archived: true } : job
-        )
-      );
-
-      toast.success("Vaga arquivada com sucesso!");
-      return true;
-    } catch (error) {
-      console.error("Error to curate job:", error);
-      toast.error("Erro ao arquivar a vaga.");
-      return false;
-    }
-  };
-
-  const handleDeleteJob = async (jobId: string | null) => {
-    try {
-      if (!jobId) throw new Error("Invalid job ID");
-
-      const response = await deleteJob(jobId);
-
-      if (!response) throw new Error("no delete job response");
-
-      setJobs((jobs) => jobs.filter((job) => job.id !== jobId));
-      toast.success("Vaga deletada com sucesso!");
-      return true;
-    } catch (error) {
-      console.log(error);
-      toast.error("Erro ao deletar vaga. tente novamente mais tarde!");
-      return false;
-    }
-  };
-
   if (loading) {
     return <LoadingComponent />;
   }
+
+  const classroomPeriodsIcons = {
+    morning: Sunrise,
+    afternoon: Sun,
+    evening: Moon,
+  };
+
+  const sidebarData = {
+    user: user,
+    userRole: userRole,
+    team: {
+      name: "Administrador",
+      logo: () => (
+        <Avatar className="size-8">
+          <AvatarImage src="/assets/logos/simbolo_pda_fundo_branco.png" />
+          <AvatarFallback>PdA</AvatarFallback>
+        </Avatar>
+      ),
+    },
+    navMain: [
+      {
+        title: "Usuários",
+        url: "/dashboard/admin/users",
+        ref: "users",
+        icon: Users,
+        items: [
+          {
+            title: "Todos os usuários",
+            url: "/dashboard/admin/users/all",
+          },
+        ],
+      },
+      {
+        title: "Vagas",
+        url: "/dashboard/admin/jobs",
+        ref: "jobs",
+        icon: Briefcase,
+        isActive: false,
+        items: [
+          {
+            title: "Vagas curadas",
+            url: "/dashboard/admin/jobs/curated",
+          },
+          {
+            title: "Curadoria de vagas",
+            url: "/dashboard/admin/jobs/curation",
+          },
+          {
+            title: "Vagas arquivadas",
+            url: "/dashboard/admin/jobs/archives",
+          },
+        ],
+      },
+    ],
+    classRooms: classrooms
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .flatMap((classroom) => ({
+        title: classroom.name,
+        ref: classroom.id,
+        url: `/dashboard/admin/classrooms/${classroom.id}`,
+        icon: classroomPeriodsIcons[classroom.period],
+        isActive: false,
+        items: [
+          {
+            title: "Projetos",
+            url: `/dashboard/admin/classrooms/${classroom.id}/projects`,
+          },
+          {
+            title: "⬆️ Coodesh",
+            url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
+          },
+          {
+            title: "⬆️ Zoom",
+            url: `/dashboard/admin/classrooms/${classroom.id}/zoom`,
+          },
+        ],
+      })),
+
+    projects: [],
+  };
+
+  const adminPathLabels = () => {
+    const classroomLabels: Record<string, string> = {};
+    const ZoomMeetings: Record<string, string> = {};
+    const CoodeshAssesments: Record<string, string> = {};
+    const ClassroomProjects: Record<string, string> = {};
+
+    if (classrooms.length > 0) {
+      classrooms.forEach(
+        (classroom) => (classroomLabels[classroom.id] = classroom.name)
+      );
+    }
+
+    if (meetings.length > 0) {
+      meetings.forEach(
+        (meeting) => (ZoomMeetings[meeting._id] = meeting.topic)
+      );
+    }
+    if (assessments.length > 0) {
+      assessments.forEach((assessment) => {
+        if (assessment.id && assessment.name) {
+          CoodeshAssesments[assessment.id] = assessment.name;
+        }
+      });
+    }
+
+    if (projects.length > 0) {
+      projects.forEach(
+        (project) => (ClassroomProjects[project.id] = project.title)
+      );
+    }
+
+    return {
+      ...pathLabels,
+      ...classroomLabels,
+      ...ZoomMeetings,
+      ...CoodeshAssesments,
+      ...ClassroomProjects,
+    };
+  };
 
   return (
     <AdminStackContext.Provider
       value={{
         usersStack: {
           users,
-          handleUpdateUser,
+          usersLoading,
+          handleGetAllUsersWithProfiles,
           handleCreateNewUser,
+          handleUpdateUser,
           handleDeleteUser,
         },
         userRoleStack: {
@@ -481,8 +332,75 @@ export const AdminStackProvider = ({
           handleUpdateUserRole,
           handleDeleteUserRole,
         },
+        classroomsStack: {
+          classrooms,
+          classroomsLoading,
+          handleGetAllClassrooms,
+          handleCreateClassroom,
+          handleUpdateClassroom,
+          handleDeleteClassroom,
+          projects: {
+            projects,
+            projectsLoading,
+            handleGetAllProjectsByClassroomId,
+            handleGetAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
+            handleCreateClassroomProject,
+            handleUpdateClassroomProject,
+            handleDeleteProject,
+          },
+          coodesh: {
+            assessments,
+            assessmentsLoading,
+            handleGetAllCoodeshAssessmentByClassroomId,
+            handleCreateCoodeshAssessment,
+            handleUpdateCoodeshAssessment,
+            api: {
+              coodeshAPIAssessments,
+              handleGetCoodeshAPIAssessments,
+            },
+          },
+          zoom: {
+            accounts: {
+              accounts,
+              accountsLoading,
+              handleGetAllZoomAccounts,
+              handleGetZoomAccountById,
+              handleCreateZoomAccount,
+              handleUpdateZoomAccountById,
+              handleDeleteZoomAccountById,
+            },
+            meetings: {
+              meetings,
+              meetingsLoading,
+              handleGetZoomMeetingById,
+              handleGetAllZoomMeetings,
+              handleCreateZoomMeeting,
+              handleUpdateZoomMeeting,
+              handleDeleteZoomMeeting,
+              handleRefreshAndUpdateZoomMeeting,
+              handleUpdateZoomMeetingOccurrence,
+              handleUpdateZoomMeetingPastInstance,
+            },
+
+            api: {
+              meetingsByAPI,
+              meetingsByAPILoading,
+              handleGetZoomMeAccountDataByAPI,
+              handleGetAllZoomMeetingsByAPI,
+              handleGetZoomMeetingByAPI,
+              handleGetAllParticipantsByMeetingIdFromAPI,
+              handleGetAllPollResultsByMeetingIdFromAPI,
+            },
+          },
+          users: {
+            handleInsertUserClassrooms,
+            handleDeleteUserClassroom,
+          },
+        },
         jobsStack: {
           jobs,
+          jobsLoading,
+          handleGetAllJobs,
           handleCreateJob,
           handleUpdateJob,
           handleDeleteJob,
@@ -495,7 +413,13 @@ export const AdminStackProvider = ({
         setLoading,
       }}
     >
-      {children}
+      <AppSidebar data={sidebarData} />
+      <div className="relative w-full h-full flex flex-col overflow-hidden">
+        <AppBar pathLabels={adminPathLabels()} />
+        <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
+          {children}
+        </div>
+      </div>
     </AdminStackContext.Provider>
   );
 };

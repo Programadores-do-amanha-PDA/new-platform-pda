@@ -1,32 +1,34 @@
-export type JobType = {
+export interface JobT {
   id: string;
   title: string;
   company: string;
   description?: string;
   link: string;
-  details?: JobDetailsType;
+  details?: JobDetailsT;
   created_at?: string;
   updated_at?: string;
   curated?: boolean;
   is_archived?: boolean;
   is_on_discord?: boolean;
-};
+}
 
-export type JobDetailsType = {
+export type JobDetailsT = {
   locale: string[];
   workplace_type: string[];
   languages: string[];
 };
 
-export type JobApplication = {
+export type JobApplicationStatusT = "applied" | "rejected" | "accepted";
+
+export interface JobApplicationT {
   id: number;
   job_id: string;
   user_id?: string;
-  status: "applied" | "rejected" | "accepted";
+  status: JobApplicationStatusT;
   created_at: string;
   updated_at?: string;
-};
+}
 
-export type JobApplicationWithJob = JobApplication & { jobs?: JobType };
+export type JobApplicationWithJobT = JobApplicationT & { jobs?: JobT };
 
-export type JobWithApplications = JobType & { applications?: JobApplication[] };
+export type JobWithApplicationsT = JobT & { applications?: JobApplicationT[] };

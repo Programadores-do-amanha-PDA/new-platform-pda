@@ -1,5 +1,5 @@
 "use server";
-import { ProfileType } from "@/types/auth";
+import { ProfileType, RolesType } from "@/types/auth";
 import { createClient } from "@/utils/supabase/server";
 
 export const createProfile = async (profileData: {
@@ -31,7 +31,7 @@ export const getAllProfiles = async () => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, created_at, updated_at, user_roles!inner(id, role)"
+        "id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(classroom_id)"
       );
 
     if (error) throw error;
@@ -43,21 +43,23 @@ export const getAllProfiles = async () => {
   }
 };
 
-export const getAllAlumniProfiles = async () => {
+export const getAllProfilesFilteredByRole = async (role: RolesType) => {
+  console.log(role);
   try {
     const supabase = await createClient();
 
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, created_at, updated_at, user_roles!inner(id, role)"
+        "*, user_roles!inner(id, role), classrooms:user_classrooms(classroom_id)"
       )
-      .eq("user_roles.role", "alumni");
+      .eq("user_roles.role", role);
+
     if (error) throw error;
 
     return data as ProfileType[];
   } catch (error) {
-    console.error("Error fetching all alumni profiles:", error);
+    console.error("Error fetching all filtered profiles:", error);
     return null;
   }
 };
@@ -69,11 +71,10 @@ export const getProfileById = async (id: string) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role)"
+        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(classroom_id)"
       )
       .eq("id", id)
       .single();
-    console.log(data);
 
     if (error) throw error;
 

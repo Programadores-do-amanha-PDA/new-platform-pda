@@ -1,12 +1,12 @@
 "use client";
-import ProfilesDataTable from "@/components/users/profiles-data-table";
-import { AppBar } from "@/components/app-bar";
+import ProfilesDataTable from "@/components/common/users/profiles-data-table";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 
 export default function AllUsersPage() {
   const {
     usersStack: {
       users,
+      usersLoading,
       handleDeleteUser,
       handleCreateNewUser,
       handleUpdateUser,
@@ -16,14 +16,15 @@ export default function AllUsersPage() {
       handleDeleteUserRole,
       handleUpdateUserRole,
     },
-    loading,
+    classroomsStack: {
+      classrooms,
+      users: { handleInsertUserClassrooms, handleDeleteUserClassroom },
+    },
   } = useAdminStackContext();
 
   return (
-    <main className="relative w-full flex flex-col p-6 gap-4 xl:p-8">
-      <AppBar />
-
-      <div className="space-y-2">
+    <main className="relative w-full overflow-hidden flex flex-col p-4 gap-4">
+      <div className="w-full h-full flex relative overflow-y-auto">
         <ProfilesDataTable
           users={users}
           handleCreateNewUser={handleCreateNewUser}
@@ -32,7 +33,10 @@ export default function AllUsersPage() {
           handleAddUserRole={handleAddUserRole}
           handleDeleteUserRole={handleDeleteUserRole}
           handleUpdateUserRole={handleUpdateUserRole}
-          loading={loading}
+          loading={usersLoading}
+          classrooms={classrooms}
+          handleInsertUserClassrooms={handleInsertUserClassrooms}
+          handleDeleteUserClassroom={handleDeleteUserClassroom}
         />
       </div>
     </main>

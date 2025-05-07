@@ -4,14 +4,27 @@ import { useRouter } from "next/navigation";
 import { useEmployerStack } from "@/context/employer/stack-context";
 
 import { Button } from "@/components/ui/button";
-import { AppBar } from "@/components/app-bar";
-import { RadialShapeChart } from "@/components/jobs/RadialShapeChart";
+import { RadialShapeChart } from "@/components/common/jobs/RadialShapeChart";
+import { useEffect } from "react";
+import LoadingComponent from "@/components/common/loading-component";
+import { useAuth } from "@/context/auth-context";
 
 export default function Home() {
   const router = useRouter();
   const {
-    jobsStack: { jobs },
+    jobsStack: { jobs, jobsLoading, handleGetAllJobs },
   } = useEmployerStack();
+  const { userRole } = useAuth();
+
+  useEffect(() => {
+    if (!jobs.length) {
+      handleGetAllJobs();
+    }
+  }, []);
+
+  if (jobsLoading) {
+    return <LoadingComponent />;
+  }
 
   const curatedChartData = [
     {
@@ -44,9 +57,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full flex flex-col p-6 gap-8 xl:p-8">
-      <AppBar />
-
+    <main className="relative w-full flex flex-col p-4 gap-8">
       <div className="flex items-center justify-start gap-4">
         <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
           <div className="h-full flex flex-col gap-6 justify-between items-center">
@@ -59,7 +70,7 @@ export default function Home() {
             </div>
             <Button
               className="font-semibold"
-              onClick={() => router.push("/dashboard/employer/jobs/curated")}
+              onClick={() => router.push(`/dashboard/${userRole}/jobs/curated`)}
             >
               Gerenciar vagas curadas
             </Button>
@@ -77,7 +88,9 @@ export default function Home() {
             </div>
             <Button
               className="font-semibold"
-              onClick={() => router.push("/dashboard/employer/jobs/curation")}
+              onClick={() =>
+                router.push(`/dashboard/${userRole}/jobs/curation`)
+              }
             >
               Gerenciar vagas não curadas
             </Button>

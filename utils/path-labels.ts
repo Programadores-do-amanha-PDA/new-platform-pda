@@ -1,0 +1,30 @@
+const pathLabels: { [key: string]: string } = {
+  users: "Usuários",
+ alumni: "Alumni",
+  companies: "Empresas",
+  jobs: "Vagas",
+  curated: "Vagas curadas",
+  curation: "Curadoria de Vagas",
+  dashboard: "Dashboard",
+  all_users: "Todos os Usuários",
+  all_alumni: "Todos os Alumni",
+  all_companies: "Todos as Empresas",
+  all_jobs: "Todas as Vagas",
+  all_projects: "Todos os Projetos",
+  all_applications: "Todas as Aplicações",
+  settings: "Configurações",
+  profile: "Perfil",
+  match: "Match de Vagas",
+  resume: "Meu Currículo",
+  applications: "Minhas Candidaturas",
+  archives: "Vagas Arquivadas",
+  meetings: "Reuniões",
+  classrooms: "Todas as Turmas",
+  coodesh: "⬆️ Coodesh",
+  zoom: "⬆️ Zoom",
+  assessments: "Avaliações",
+  accounts: "Contas",
+  projects: "Projetos"
+};
+
+export default pathLabels;

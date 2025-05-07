@@ -1,14 +1,16 @@
 "use client";
-import { AppBar } from "@/components/app-bar";
-import JobCard from "@/components/jobs/JobCard";
+import JobCard from "@/components/common/jobs/JobCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAlumniStack } from "@/context/alumni/stack-context";
-import { JobType } from "@/types/jobs";
+import { useAuth } from "@/context/auth-context";
+import { JobT } from "@/types/jobs";
 import { Flag } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AllJobsPage() {
+  const { user } = useAuth();
   const {
     jobsStack: { jobs },
     jobApplicationStack: { jobApplications, handleCreateJobApplication },
@@ -28,14 +30,17 @@ export default function AllJobsPage() {
       )
     : jobs;
 
-  const handleApplyToJob = async (job: JobType) => {
-    await handleCreateJobApplication({ job_id: job.id, status: "applied" });
+  const handleApplyToJob = async (job: JobT) => {
+    if (!user)
+      return toast.error("Você precisa estar logado para se candidatar!");
+    await handleCreateJobApplication(
+      { job_id: job.id, status: "applied" },
+      user
+    );
   };
 
   return (
     <main className="w-full h-full relative flex flex-col p-6 gap-4 xl:p-8 overflow-hidden">
-      <AppBar />
-
       <div className="h-full w-full flex flex-col gap-4 overflow-hidden">
         <div className="flex gap-2 items-center justify-start  w-full md:max-w-sm">
           <Input
@@ -47,7 +52,7 @@ export default function AllJobsPage() {
         <div className="flex h-full w-full overflow-y-auto">
           <ul className="w-full h-max flex flex-wrap gap-4 lg:gap-8 my-4 pr-4">
             {jobSearchFilter.map((job, i) => {
-              const jobApplicationExists = jobApplications.find(
+              const JobApplicationTExists = jobApplications.find(
                 (apply) => apply.job_id === job.id
               );
               return (
@@ -55,7 +60,7 @@ export default function AllJobsPage() {
                   key={i}
                   job={job}
                   cardFooter={
-                    !jobApplicationExists ? (
+                    !JobApplicationTExists ? (
                       <>
                         <Button
                           className="font-semibold"
