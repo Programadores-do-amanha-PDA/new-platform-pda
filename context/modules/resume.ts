@@ -40,7 +40,6 @@ const useResumesStack = () => {
       return true;
     } catch (error) {
       console.error("Error fetching user resume:", error);
-      toast.error("Failed to load resume. Please try again later.");
       return false;
     } finally {
       setLoading(false);

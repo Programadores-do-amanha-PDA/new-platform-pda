@@ -19,16 +19,16 @@ export async function signInWithPassword(userCredentials: UserAuthLogin) {
     );
     if (error) throw error;
 
-    return {error: false, data}
+    return { error: false, data };
   } catch (error) {
     if (
       error instanceof Error &&
       error.message === "Request failed with status code 403"
     ) {
-      return { error: true,  confirmation: true };
+      return { error: true, confirmation: true };
     } else {
       console.log("Error on signInWithPassword", error);
-      return {error: true, confirmation: false };
+      return { error: true, confirmation: false };
     }
   }
 }
@@ -72,7 +72,7 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
     const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-      redirectTo: PLATFORM_BASE_URL.concat("/login/reset"),
+      redirectTo: PLATFORM_BASE_URL.concat("/reset-password"),
     });
 
     if (error) throw error;
@@ -98,6 +98,28 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
     });
     if (error) throw error;
     return true;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
+};
+
+export const confirmSignInAndSetSession = async (
+  access_token: string,
+  refresh_token: string
+) => {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.setSession({
+      access_token,
+      refresh_token,
+    });
+    if (error) throw error;
+    return session;
   } catch (error) {
     console.error(error);
     return false;

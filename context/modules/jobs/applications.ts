@@ -60,10 +60,7 @@ const useJobApplicationsStack = () => {
 
       return true;
     } catch (error) {
-      console.error(error);
-      toast.error(
-        "Erro ao buscar as candidaturas. Tente novamente mais tarde!"
-      );
+      console.error("error fetching job applications:", error);
       return false;
     } finally {
       setLoading(false);

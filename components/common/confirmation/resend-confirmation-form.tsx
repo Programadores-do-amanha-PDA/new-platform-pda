@@ -64,7 +64,7 @@ export const ResendConfirmationForm = () => {
     <form onSubmit={handleSubmit}>
       <div className={cn("flex flex-col gap-6")}>
         <Card>
-          <CardHeader className="text-center">
+          <CardHeader className="">
             <CardTitle className="text-xl">
               Reenviar a confirmação de email
             </CardTitle>
@@ -75,30 +75,30 @@ export const ResendConfirmationForm = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-6">
-              <div className="grid gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    defaultValue={email}
-                    placeholder="m@example.com"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading || cooldown > 0}
-                  className="w-full font-bold"
-                >
-                  {loading
-                    ? "Enviando..."
-                    : cooldown > 0
-                    ? `Reenvie novamente em ${cooldown}s`
-                    : "Reenviar solicitação"}
-                </Button>
+              <div className="grid gap-4">
+                <Label htmlFor="email" className="font-semibold">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  name="email"
+                  defaultValue={email}
+                  placeholder="m@example.com"
+                  required
+                />
               </div>
+              <Button
+                type="submit"
+                disabled={loading || cooldown > 0}
+                className="w-full font-bold"
+              >
+                {loading
+                  ? "Enviando..."
+                  : cooldown > 0
+                  ? `Reenvie novamente em ${cooldown}s`
+                  : "Reenviar solicitação"}
+              </Button>
             </div>
           </CardContent>
         </Card>

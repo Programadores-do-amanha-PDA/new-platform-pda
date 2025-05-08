@@ -24,18 +24,7 @@ interface AuthContextProps {
   updateAuthState: (session: { access_token: string } | null) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextProps>({
-  user: null,
-  userRole: null,
-  loading: true,
-  redirectToRoleDashboard: () => {},
-  setUser: () => {},
-  setUserRole: () => {},
-  handleSignOut: () => Promise.resolve(),
-  handleResendAnEmailSignupConfirmation: () => Promise.resolve(false),
-  fetchSession: () => Promise.resolve(),
-  updateAuthState: () => Promise.resolve(),
-});
+const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
