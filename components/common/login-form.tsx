@@ -88,6 +88,7 @@ export const LoginForm = () => {
     setLoading(true);
     try {
       const response = await signInWithPassword(data);
+      console.log(response)
 
       if (response.error === true && response.confirmation === true) {
         toast.error("Confirme seu email para continuar.");

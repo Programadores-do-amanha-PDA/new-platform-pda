@@ -23,7 +23,8 @@ export async function signInWithPassword(userCredentials: UserAuthLogin) {
   } catch (error) {
     if (
       error instanceof Error &&
-      error.message === "Request failed with status code 403"
+      (error.message === "Request failed with status code 403" ||
+        error.message === "Email not confirmed")
     ) {
       return { error: true, confirmation: true };
     } else {
