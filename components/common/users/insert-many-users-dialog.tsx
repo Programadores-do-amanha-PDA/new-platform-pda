@@ -24,7 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { AuthUser } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { Badge } from "../../ui/badge";

@@ -32,7 +32,7 @@ import useClassroomProjects, {
   ClassroomProjectsI,
 } from "../modules/classrooms/projects";
 
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 import UserClassroomStack, {
   UserClassroomStackI,
 } from "../modules/users/classrooms";

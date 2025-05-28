@@ -13,7 +13,7 @@ import { NavMain } from "@/components/common/sidebar/nav-main";
 import { NavProjects } from "@/components/common/sidebar/nav-projects";
 import { NavUser } from "@/components/common/sidebar/nav-user";
 import { LucideIcon } from "lucide-react";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 import { Separator } from "../../ui/separator";
 
 interface AppSidebarProps {

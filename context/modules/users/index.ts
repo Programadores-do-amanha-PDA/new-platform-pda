@@ -4,9 +4,9 @@ import {
   updateUser,
   deleteUser,
 } from "@/app/actions/auth_admin";
-import { getManyAvatarUrlsByIds } from "@/app/actions/profile_avatar";
+import { getManyAvatarUrlsByIds } from "@/app/actions/profile-avatar";
 import { getProfileById } from "@/app/actions/profiles";
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { AuthUser } from "@supabase/supabase-js";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -3,7 +3,7 @@ import {
   insertUserRoleWithUserId,
   updateUserRoleWIthUserId,
 } from "@/app/actions/roles";
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";
 

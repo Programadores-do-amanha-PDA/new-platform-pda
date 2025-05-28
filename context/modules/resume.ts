@@ -8,7 +8,7 @@ import {
   updateUserResumeById,
   deleteUserResumeById,
 } from "@/app/actions/resume";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 
 const useResumesStack = () => {
   const [resumes, setResumes] = useState<ResumeT[]>([]);

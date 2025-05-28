@@ -1,4 +1,4 @@
-import { RolesType } from "@/types/auth";
+import { RolesType } from "@/types/auth-types";
 
 export const rolesLabels: { value: RolesType; label: string }[] = [
   { value: "admin", label: "Administrador" },

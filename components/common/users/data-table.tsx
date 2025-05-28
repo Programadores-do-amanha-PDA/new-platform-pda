@@ -14,7 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {

@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import BadgeSelector from "../badge-selector";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
 import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 import { ClassroomType } from "@/types/classrooms";

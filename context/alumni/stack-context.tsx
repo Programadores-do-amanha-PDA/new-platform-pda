@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext } from "react";
 
-import { AuthUserWithProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import useJobApplicationsStack, {
   useJobApplicationsStackI,
 } from "../modules/jobs/applications";

@@ -1,6 +1,6 @@
 import { Camera, Trash } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 
 import { Label } from "../../ui/label";
 import { Input } from "../../ui/input";
@@ -12,7 +12,7 @@ import {
   deleteUserAvatar,
   updateUserAvatar,
   uploadUserAvatar,
-} from "@/app/actions/profile_avatar";
+} from "@/app/actions/profile-avatar";
 import { toast } from "sonner";
 import { Button } from "../../ui/button";
 

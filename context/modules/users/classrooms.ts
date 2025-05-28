@@ -2,7 +2,7 @@ import {
   insertUserClassroom,
   deleteUserClassroom,
 } from "@/app/actions/user-classroom";
-import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, ProfileType } from "@/types/auth-types";
 import { UserClassroomT } from "@/types/user-classroom";
 import { Dispatch, SetStateAction } from "react";
 import { toast } from "sonner";

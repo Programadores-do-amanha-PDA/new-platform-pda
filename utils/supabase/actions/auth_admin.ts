@@ -1,6 +1,6 @@
 "use server"
 import { AuthUser } from "@supabase/supabase-js";
-import { createClientAdmin } from "../server";
+import { createClientAdmin } from "@/lib/supabase/server";
 
 export const adminGetAllUsers = async () => {
   try {

@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
 
-import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth";
+import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth-types";
 import { Badge } from "../../ui/badge";
 import UserSheetData from "./user-sheet-data";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";

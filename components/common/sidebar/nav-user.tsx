@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 export function NavUser({
   user,
   userRole,

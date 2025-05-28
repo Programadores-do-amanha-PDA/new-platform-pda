@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { cn } from "@/lib/utils";
-import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
+import { AuthUserWithProfileType, ProfileType } from "@/types/auth-types";
 import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/projects/project";
 import {
   ColumnDef,

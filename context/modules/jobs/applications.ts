@@ -14,7 +14,7 @@ import {
   getAllJobApplicationsByUserId,
   getAllJobApplications,
 } from "@/app/actions/job_applications";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 
 const useJobApplicationsStack = () => {
   const [jobApplications, setJobApplications] = useState<

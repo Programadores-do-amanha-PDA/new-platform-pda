@@ -18,7 +18,7 @@ import {
   ResumeLocationT,
   ResumeT,
 } from "@/types/resume";
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 import { useAuth } from "@/context/auth-context";
 
 const fetchAllBrazilianStates = async (

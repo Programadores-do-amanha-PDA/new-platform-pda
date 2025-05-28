@@ -1,4 +1,4 @@
-import { AuthUserWithProfileType } from "@/types/auth";
+import { AuthUserWithProfileType } from "@/types/auth-types";
 import { Button } from "../../ui/button";
 import { Separator } from "../../ui/separator";
 import { Badge } from "../../ui/badge";
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Textarea } from "../../ui/textarea";
 import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
-import { updateAuthUser } from "@/app/actions/auth";
+import { updateAuthUser } from "@/app/actions/(auth)";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
 import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
 
