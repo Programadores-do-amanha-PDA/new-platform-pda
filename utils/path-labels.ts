@@ -1,6 +1,6 @@
 const pathLabels: { [key: string]: string } = {
   users: "Usuários",
- alumni: "Alumni",
+  alumni: "Alumni",
   companies: "Empresas",
   jobs: "Vagas",
   curated: "Vagas curadas",
@@ -24,7 +24,8 @@ const pathLabels: { [key: string]: string } = {
   zoom: "⬆️ Zoom",
   assessments: "Avaliações",
   accounts: "Contas",
-  projects: "Projetos"
+  projects: "Projetos",
+  attendance: "Presenças",
 };
 
 export default pathLabels;

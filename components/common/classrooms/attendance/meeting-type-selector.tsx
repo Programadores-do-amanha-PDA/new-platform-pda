@@ -5,20 +5,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ZoomClassType } from "@/types/zoom/meetings";
 
 const meetingTypes = [
-  { id: "d", name: "Programação" },
-  { id: "e", name: "Inglês" },
-  { id: "s", name: "Soft Skills" },
-  { id: "c", name: "Comunidade" },
+  { id: "programming", name: "Programação" },
+  { id: "english", name: "Inglês" },
+  { id: "soft-skills", name: "Soft Skills" },
+  { id: "community", name: "Comunidade" },
 ];
 
 const MeetingTypeSelector = ({
   value,
   handleValueChange,
 }: {
-  value: string;
-  handleValueChange: (value: string) => void;
+  value: ZoomClassType | undefined;
+  handleValueChange: (value: ZoomClassType) => void;
 }) => {
   return (
     <Select value={value} onValueChange={handleValueChange}>

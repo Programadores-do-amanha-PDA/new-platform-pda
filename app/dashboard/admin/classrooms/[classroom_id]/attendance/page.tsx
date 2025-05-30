@@ -24,11 +24,15 @@ const AttendancePage = () => {
   const pastsMeetings: ZoomMeetingPastInstancesType[] = meetings
     .flatMap((meeting) => {
       if (meeting.type === 8) {
-        return meeting.past_instances;
+        return meeting.past_instances.flatMap((p) => ({
+          meetingId: meeting.id,
+          ...p,
+        }));
       } else if (
         new Date(meeting.start_time || 0).getTime() < new Date().getTime()
       ) {
         return {
+          meetingId: meeting.id,
           uuid: meeting.uuid,
           start_time: meeting.start_time || 0,
           participants: meeting.participants || [],
@@ -50,9 +54,6 @@ const AttendancePage = () => {
         ?.includes(classroom_id) &&
       user.profile?.user_roles?.map((r) => r.role).includes("student")
   );
-
-  //   const [justificationOpen, setJustificationOpen] = useState(false);
-  //   const [justificationText, setJustificationText] = useState('');
 
   return (
     <div className="w-full h-full p-6">

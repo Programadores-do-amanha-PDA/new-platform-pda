@@ -30,18 +30,19 @@ import { ZoomMeetingPastInstancesType } from "@/types/zoom/meetings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import MeetingTypeSelector from "./meeting-type-selector";
+import { useAdminStackContext } from "@/context/admin/stack-context";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileType>[];
   meetings: ZoomMeetingPastInstancesType[];
 }
 
-const AttendanceStatusOptions = [
-  { value: "P", label: "Presente", color: "text-green-500" },
-  { value: "F", label: "Falta", color: "text-red-500" },
-  { value: "PP", label: "Presença Parcial", color: "text-yellow-500" },
-  { value: "FJ", label: "Falta Justificada", color: "text-orange-500" },
-];
+const AttendanceStatusOptions = {
+  P: { label: "Presente", color: "text-green-500" },
+  F: { label: "Falta", color: "text-red-500" },
+  PP: { label: "Presença Parcial", color: "text-yellow-500" },
+  FJ: { label: "Falta Justificada", color: "text-orange-500" },
+};
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
   {
@@ -91,10 +92,10 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
           />
         </Avatar>
         <div className="w-full flex flex-col justify-center lowercase truncate">
-        <p className="text-sm font-bold capitalize">
-          {row.getValue<ProfileType>("profile").full_name}
-        </p>
-        <p>{row.getValue<ProfileType>("profile").email}</p>
+          <p className="text-sm font-bold capitalize">
+            {row.getValue<ProfileType>("profile").full_name}
+          </p>
+          <p>{row.getValue<ProfileType>("profile").email}</p>
         </div>
       </div>
     ),
@@ -123,6 +124,14 @@ export default function AttendanceTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+
+  const {
+    classroomsStack: {
+      zoom: {
+        meetings: { handleUpdateZoomMeetingPastInstance },
+      },
+    },
+  } = useAdminStackContext();
 
   const table = useReactTable({
     data: users,
@@ -180,17 +189,17 @@ export default function AttendanceTable({
                   );
                 })}
                 {meetings.length > 0 &&
-                  meetings.map((meeting, index) => {
+                  meetings.map((pastMeeting, index) => {
                     return (
                       <TableHead key={index} className="w-full h-max p-0 m-0">
                         <div className="w-full h-full flex flex-col justify-center items-center border-r border-border">
                           <div className="w-full h-11 flex justify-center items-center border-b border-border p-2">
                             <p className="font-bold">
-                              {new Date(meeting.start_time).getTime() ===
+                              {new Date(pastMeeting.start_time).getTime() ===
                               new Date().getTime()
                                 ? "Hoje"
                                 : new Date(
-                                    meeting.start_time
+                                    pastMeeting.start_time
                                   ).toLocaleDateString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -199,7 +208,17 @@ export default function AttendanceTable({
                             </p>
                           </div>
                           <div className="w-full h-11 flex justify-center items-center p-2">
-                            <MeetingTypeSelector />
+                            <MeetingTypeSelector
+                              value={pastMeeting.class_type}
+                              handleValueChange={(value) =>
+                                pastMeeting.meetingId &&
+                                handleUpdateZoomMeetingPastInstance(
+                                  pastMeeting.meetingId,
+                                  pastMeeting.uuid,
+                                  { class_type: value }
+                                )
+                              }
+                            />
                           </div>
                         </div>
                       </TableHead>
@@ -216,7 +235,10 @@ export default function AttendanceTable({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="p-0 h-full sticky left-0">
+                    <TableCell
+                      key={cell.id}
+                      className="p-0 h-full sticky left-0"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -258,28 +280,31 @@ export default function AttendanceTable({
                                 <p
                                   className={cn(
                                     "font-semibold",
-                                    AttendanceStatusOptions[0].color
+                                    AttendanceStatusOptions["P"].color
                                   )}
+                                  title={AttendanceStatusOptions["P"].label}
                                 >
-                                  {AttendanceStatusOptions[0].value}
+                                  P
                                 </p>
                               ) : attendanceMinutes >= 30 ? (
                                 <p
                                   className={cn(
                                     "font-semibold",
-                                    AttendanceStatusOptions[2].color
+                                    AttendanceStatusOptions["PP"].color
                                   )}
+                                  title={AttendanceStatusOptions["PP"].label}
                                 >
-                                  {AttendanceStatusOptions[2].value}
+                                  PP
                                 </p>
                               ) : (
                                 <p
                                   className={cn(
                                     "font-semibold",
-                                    AttendanceStatusOptions[1].color
+                                    AttendanceStatusOptions["F"].color
                                   )}
+                                  title={AttendanceStatusOptions["F"].label}
                                 >
-                                  {AttendanceStatusOptions[1].value}
+                                  F
                                 </p>
                               )}
                               {attendanceMinutes < 60 && (
@@ -301,12 +326,18 @@ export default function AttendanceTable({
                             <p
                               className={cn(
                                 "font-semibold",
-                                AttendanceStatusOptions[1].color
+                                AttendanceStatusOptions["F"].color
                               )}
+                              title={AttendanceStatusOptions["F"].label}
                             >
-                              {AttendanceStatusOptions[1].value}
+                              F
                             </p>
-                            <Button variant="ghost" size="icon" onClick={() => {}} className="ml-auto">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {}}
+                              className="ml-auto"
+                            >
                               <Pen className="size-3 stroke-muted-foreground" />
                             </Button>
                           </div>

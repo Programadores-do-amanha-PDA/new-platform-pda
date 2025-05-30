@@ -8,6 +8,7 @@ import {
 import { ZoomAccountType } from "@/types/zoom/accounts";
 import {
   ZoomMeetingOccurrenceType,
+  ZoomMeetingPastInstancesType,
   ZoomMeetingType,
 } from "@/types/zoom/meetings";
 import { useState } from "react";
@@ -159,13 +160,12 @@ const useZoomMeetingsStack = ({
   const handleUpdateZoomMeetingPastInstance = async (
     meetingId: number,
     pastInstanceId: string,
-    updates: Partial<ZoomMeetingOccurrenceType>
+    updates: Partial<ZoomMeetingPastInstancesType>
   ) => {
     try {
       if (!meetingId || !pastInstanceId || !updates) {
         throw new Error("id and updates fields are required");
       }
-      setLoading(true);
       const currentMeeting = meetings.find(
         (meeting) => meeting.id === meetingId
       );
@@ -175,6 +175,7 @@ const useZoomMeetingsStack = ({
             ? { ...past_instancie, ...updates }
             : past_instancie
       );
+      const loadingToastId = toast.loading("Atualizando reunião...");
       const updatedMeeting: ZoomMeetingType | false =
         await updateZoomMeetingById(meetingId, {
           past_instances: updatedPastsInstancies,
@@ -186,14 +187,13 @@ const useZoomMeetingsStack = ({
           meeting.id === meetingId ? updatedMeeting : meeting
         )
       );
+      toast.dismiss(loadingToastId);
       toast.success("Reunião atualizada com sucesso!");
       return true;
     } catch (error) {
       console.error(error);
       toast.error("Erro ao atualizar a reunião!");
       return false;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -330,7 +330,7 @@ export interface ZoomMeetingsStackI {
   handleUpdateZoomMeetingPastInstance: (
     meetingId: number,
     pastInstanceId: string,
-    updates: Partial<ZoomMeetingOccurrenceType>
+    updates: Partial<ZoomMeetingPastInstancesType>
   ) => Promise<boolean>;
   handleRefreshAndUpdateZoomMeeting: (
     meetingId: number,
