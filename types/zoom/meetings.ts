@@ -91,7 +91,15 @@ export interface ZoomMeetingPastInstancesType {
   poll_results?: ZoomMeetingPollResults[];
   participants?: ZoomMeetingParticipantType[];
   is_visible_on_schedule: boolean | undefined;
+  class_type?: ZoomClassType;
+  meetingId?: number;
 }
+
+export type ZoomClassType =
+  | "programming"
+  | "english"
+  | "soft-skills"
+  | "community";
 
 export interface ZoomMeetingTrackingFieldType {
   field: string;
