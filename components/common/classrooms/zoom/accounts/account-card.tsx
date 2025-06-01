@@ -42,7 +42,7 @@ const ZoomAccountCard = ({
       {expansive && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild className="w-max">
-            <Button variant={"outline"} size="sm">
+            <Button variant={"outline-solid"} size="sm">
               <Ellipsis className="size-5" />
             </Button>
           </DropdownMenuTrigger>

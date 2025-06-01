@@ -73,14 +73,14 @@ const JobCardDiscordSenderButton = ({
     <Button
       onClick={() => handleSendJobOnDiscord(job)}
       variant="outline"
-      className="!px-2 w-max h-max items-start justify-start text-start !bg-blue-200/80 relative"
+      className="px-2! w-max h-max items-start justify-start text-start bg-blue-200/80! relative"
       title="Publicar no Discord"
     >
       {isSendingMessage ? (
         <LoaderCircle className="size-4 animate-spin" />
       ) : (
         <div>
-          {job.is_on_discord && <Check className="!size-5 text-green-600 absolute -top-2 -right-2 stroke-2 bg-green-200/75 rounded-md p-[2px] shadow-sm" />}
+          {job.is_on_discord && <Check className="size-5! text-green-600 absolute -top-2 -right-2 stroke-2 bg-green-200/75 rounded-md p-[2px] shadow-xs" />}
           <Send className="size-4" />
         </div>
       )}

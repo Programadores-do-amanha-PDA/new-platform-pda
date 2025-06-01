@@ -42,8 +42,8 @@ const chartConfig = {
 
 export function ClassroomIconWithModulesChart() {
   return (
-    <Card className="flex flex-col w-max !p-6 gap-4 cursor-pointer">
-      <CardContent className="flex-1 w-full !p-0 relative">
+    <Card className="flex flex-col w-max p-6! gap-4 cursor-pointer">
+      <CardContent className="flex-1 w-full p-0! relative">
         <ChartContainer
           config={chartConfig}
           className="mx-auto aspect-square max-h-[160px] h-[160px]"
@@ -65,8 +65,8 @@ export function ClassroomIconWithModulesChart() {
         </ChartContainer>
         <Laptop className="absolute inset-x-0 inset-y-0 mx-auto my-auto size-14" />
       </CardContent>
-      <CardFooter className="flex-col gap-2 !p-0">
-        <CardTitle className="text-lg !font-bold">Turma 7</CardTitle>
+      <CardFooter className="flex-col gap-2 p-0!">
+        <CardTitle className="text-lg font-bold!">Turma 7</CardTitle>
       </CardFooter>
     </Card>
   );

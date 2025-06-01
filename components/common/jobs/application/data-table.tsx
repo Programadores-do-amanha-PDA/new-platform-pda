@@ -82,7 +82,7 @@ export function DataTable({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="!px-0">
+                    <TableHead key={header.id} className="px-0!">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

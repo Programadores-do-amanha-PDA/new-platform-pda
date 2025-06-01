@@ -1,3 +1,4 @@
+"use server";
 import { createClient } from "@/lib/supabase/server";
 
 export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
@@ -16,7 +17,6 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
     return true;
   } catch (error) {
     console.error(error);
-
     return false;
   }
 };

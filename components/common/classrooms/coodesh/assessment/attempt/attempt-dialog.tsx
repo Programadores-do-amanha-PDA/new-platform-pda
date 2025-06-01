@@ -53,12 +53,12 @@ const AttemptDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="!w-full !max-w-[700px] !max-h-[90vh] overflow-hidden px-0">
+      <DialogContent className="w-full! max-w-[700px]! max-h-[90vh]! overflow-hidden px-0">
         <DialogHeader className="w-full h-full overflow-hidden px-4">
           <DialogTitle>{attempt.name}</DialogTitle>
           <DialogDescription>{attempt.email}</DialogDescription>
         </DialogHeader>
-        <div className="w-full !max-h-[70vh] flex flex-col gap-8 mt-4 overflow-y-auto px-4">
+        <div className="w-full max-h-[70vh]! flex flex-col gap-8 mt-4 overflow-y-auto px-4">
           <header className="w-full flex justify-between gap-4">
             <div className="border rounded-md size-40">
               <AttemptScoreRadialChart

@@ -46,7 +46,7 @@ const TeamPage = () => {
             >
               Todas
             </p>
-            <Badge variant={statusFilter === "all" ? "default" : "outline"}>
+            <Badge variant={statusFilter === "all" ? "default" : "outline-solid"}>
               {classrooms.length}
             </Badge>
           </Button>
@@ -70,7 +70,7 @@ const TeamPage = () => {
                     </p>
                     <Badge
                       variant={
-                        statusFilter === classroomStatus ? "default" : "outline"
+                        statusFilter === classroomStatus ? "default" : "outline-solid"
                       }
                     >
                       {

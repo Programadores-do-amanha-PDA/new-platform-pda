@@ -259,7 +259,7 @@ const InsertAssessmentAttempts = ({
           </div>
         )}
 
-        <DrawerFooter className="!flex !flex-row justify-end gap-8">
+        <DrawerFooter className="!flex flex-row! justify-end gap-8">
           {stage === 0 && (
             <>
               <DrawerClose>

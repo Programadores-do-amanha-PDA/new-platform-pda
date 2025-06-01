@@ -1,167 +1,221 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 
-import { cn } from "@/lib/utils";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { LoaderCircle } from "lucide-react";
+
+import { signInWithPassword } from "@/app/actions/(auth)";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useRouter, useSearchParams } from "next/navigation";
-import { setSession, signInWithPassword } from "@/app/actions/(auth)";
-import Link from "next/link";
-import { useAuth } from "@/hooks/use-auth";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Session } from "@supabase/supabase-js";
+import Image from "next/image";
+import pdaSymbol from "@/assets/logos/simbolo_pda_fundo_branco.png";
+
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "Email é obrigatório")
+    .email("Email deve ter um formato válido")
+    .toLowerCase(),
+  password: z
+    .string()
+    .min(1, "Senha é obrigatória")
+    .min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
+
+interface LoginResponse {
+  error: boolean;
+  confirmation?: boolean;
+  data?: {
+    session: Session;
+  };
+  message?: string;
+}
 
 export const LoginForm = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { updateAuthState } = useAuth();
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const confirmSignIn = async () => {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      const access_token = params.get("access_token");
-      const refresh_token = params.get("refresh_token");
-      const type = params.get("type");
-      const expires_at = params.get("expires_at");
-      const errorCode = params.get("error_code");
+  const form = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onChange",
+  });
 
-      window.history.replaceState({}, document.title, window.location.pathname);
+  const {
+    handleSubmit,
+    formState: { isSubmitting, errors },
+    setError,
+  } = form;
 
-      if (expires_at && new Date(expires_at) < new Date()) {
-        toast.success("Token expirado! Tente realizar o login novamente.");
-        return;
-      } else if (errorCode === "otp_expired") {
-        toast.error(
-          "Código de verificação expirado. Por favor, solicite um novo."
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      const response: LoginResponse = await signInWithPassword(data);
+
+      console.log("Response:", response);
+
+      if (response.error && response.confirmation) {
+        toast.error("Confirme seu email para continuar.");
+        router.push(
+          `/resend-confirmation?email=${encodeURIComponent(data.email)}`
         );
         return;
-      } else if (
-        access_token &&
-        refresh_token &&
-        type === "signup" &&
-        expires_at
-      ) {
-        const session = await setSession(access_token, refresh_token);
-
-        if (!session) {
-          toast.error("Token invalido! Tente realizar o login novamente.");
-          return;
-        }
-
-        updateAuthState(session);
-        toast.success("Login feito com sucesso!");
-        router.push("/dashboard");
       }
-    };
 
-    confirmSignIn();
-  }, [searchParams, router]);
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const formData = new FormData(event.target as HTMLFormElement);
-    const data = {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-    };
-
-    setLoading(true);
-    try {
-      const response = await signInWithPassword(data);
-      console.log(response);
-
-      if (response.error === true && response.confirmation === true) {
-        toast.error("Confirme seu email para continuar.");
-        router.push("/confirmation?email=" + data.email);
-      } else if (response.confirmation === false && response.error === true)
-        throw new Error();
-      else if (response.error === false && response.data) {
-        updateAuthState(response.data?.session);
-        toast.success("Login feito com sucesso!");
-        router.push("/dashboard");
+      // Erro de autenticação (credenciais inválidas)
+      if (response.error && response.confirmation === false) {
+        setError("root", {
+          type: "manual",
+          message: response.message || "Credenciais inválidas",
+        });
+        toast.error("Email ou senha incorretos.");
+        return;
       }
-    } catch {
-      toast.error("Erro ao fazer login. Verifique suas credenciais.");
-    } finally {
-      setLoading(false);
+
+      // Login bem-sucedido
+      if (!response.error && response.data?.session) {
+        updateAuthState(response.data.session);
+        toast.success("Login realizado com sucesso!");
+        router.push("/dashboard");
+        return;
+      }
+
+      // Fallback para erros não tratados
+      throw new Error(response.message || "Erro desconhecido");
+    } catch (error) {
+      console.error("Erro no login:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao fazer login. Verifique suas credenciais.";
+
+      toast.error(errorMessage);
+      setError("root", {
+        type: "manual",
+        message: errorMessage,
+      });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className={cn("flex flex-col gap-6")}>
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">Bem-vindo de volta!</CardTitle>
-            <CardDescription>
-              Use suas credenciais para acessar sua conta.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6">
-              <div className="grid gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email" className="font-semibold">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password" className="font-semibold">
-                      Senha
-                    </Label>
+    <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
+        <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
+        <div className="flex flex-col gap-3">
+          <p className="text-4xl font-bold">Entrar</p>
+          <p className="text-muted-foreground">
+            Use suas credenciais para acessar sua conta
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-col gap-6">
+        <Form {...form}>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel className="font-semibold">Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="seu@email.com"
+                      autoComplete="email"
+                      disabled={isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <FormLabel className="font-semibold">Senha</FormLabel>
                     <Link
                       href="/reset-password"
-                      className="ml-auto text-sm hover:underline hover:underline-offset-4 text-muted-foreground"
+                      className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-4 transition-colors"
+                      tabIndex={-1}
                     >
-                      A senha não funciona?
+                      Esqueceu a senha?
                     </Link>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    name="password"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full font-bold"
-                >
-                  {loading ? "Carregando..." : "Entrar"}
-                </Button>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      disabled={isSubmitting}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {errors.root && (
+              <div className="text-sm text-destructive font-medium">
+                {errors.root.message}
               </div>
-              <div className="text-center text-sm">
-                <Link
-                  href="/confirmation"
-                  className="hover:underline hover:underline-offset-4 text-muted-foreground"
-                >
-                  Primeiro acesso?
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full font-semibold mt-2 cursor-pointer"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
+            </Button>
+          </form>
+        </Form>
+
+        <div className="flex gap-2 justify-center items-center mt-6 text-center">
+          <p className="text-sm text-muted-foreground">Primeiro acesso?</p>
+          <Link
+            href="/resend-confirmation"
+            className="text-sm font-medium text-primary hover:underline underline-offset-4 transition-colors"
+          >
+            Confirme seu email
+          </Link>
+        </div>
       </div>
-    </form>
+    </div>
   );
 };

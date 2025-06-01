@@ -65,7 +65,7 @@ const JobsDataTable = ({
                   <Button
                     onClick={() => handleResendJobToCuration(job.id)}
                     variant="outline"
-                    className="!px-2 w-max h-max items-start justify-start text-start !bg-orange-400/80"
+                    className="px-2! w-max h-max items-start justify-start text-start bg-orange-400/80!"
                     title="Reenviar para curadoria"
                   >
                     <FileArchive className="size-4" />
@@ -73,7 +73,7 @@ const JobsDataTable = ({
                   <Button
                     onClick={() => handleArchiveJob(job.id)}
                     variant="destructive"
-                    className="!px-2 w-max h-max items-start justify-start text-start"
+                    className="px-2! w-max h-max items-start justify-start text-start"
                     title="Arquivar Vaga"
                   >
                     <Archive className="size-4" />

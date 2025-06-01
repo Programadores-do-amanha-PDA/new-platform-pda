@@ -115,7 +115,7 @@ const JobApplicationTSheetData = ({
       <SheetTrigger asChild>
         <Button
           variant="ghost"
-          className="!px-2 w-max h-max items-start justify-start text-start"
+          className="px-2! w-max h-max items-start justify-start text-start"
         >
           Editar Candidatura
         </Button>

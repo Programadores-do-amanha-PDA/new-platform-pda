@@ -23,8 +23,8 @@ const MeetingTypeSelector = ({
 }) => {
   return (
     <Select value={value} onValueChange={handleValueChange}>
-      <SelectTrigger className="!h-7">
-        <SelectValue placeholder="Tipo de reunião" className="!h-7" />
+      <SelectTrigger className="h-7!">
+        <SelectValue placeholder="Tipo de reunião" className="h-7!" />
       </SelectTrigger>
       <SelectContent>
         {meetingTypes.map((type) => (

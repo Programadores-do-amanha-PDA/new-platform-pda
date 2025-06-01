@@ -11,7 +11,7 @@ export default function HomeAdmin() {
 
   return (
     <main className="relative w-full flex p-6 gap-4 xl:p-8">
-      <div className="w-max h-max bg-card flex flex-col gap-10 items-center justify-between rounded-lg shadow border p-6 relative">
+      <div className="w-max h-max bg-card flex flex-col gap-10 items-center justify-between rounded-lg shadow-sm border p-6 relative">
         <Image
           src={"/assets/images/UsersCardIllustration.svg"}
           width={300}
@@ -29,7 +29,7 @@ export default function HomeAdmin() {
         </Button>
       </div>
 
-      <div className="w-max h-max bg-card flex flex-col gap-10 items-center justify-between rounded-lg shadow border p-6 relative">
+      <div className="w-max h-max bg-card flex flex-col gap-10 items-center justify-between rounded-lg shadow-sm border p-6 relative">
         <Image
           src={"/assets/images/JobsCardIllustration.svg"}
           width={300}

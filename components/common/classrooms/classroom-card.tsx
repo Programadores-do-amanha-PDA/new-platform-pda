@@ -11,9 +11,9 @@ const classroomPeriodLabels = {
 
 const cardBadgeVariantByStatus: Record<
   ClassroomTypeStatus,
-  "outline" | "default" | "secondary" | "destructive"
+  "outline-solid" | "default" | "secondary" | "destructive"
 > = {
-  created: "outline",
+  created: "outline-solid",
   active: "default",
   finished: "secondary",
 };
@@ -28,7 +28,7 @@ const ClassroomCard = ({
   const router = useRouter();
   return (
     <li
-      className="min-w-64 !h-[112px] group bg-card flex flex-row gap-6 p-4 items-start rounded-xl border shadow-sm cursor-pointer"
+      className="min-w-64 h-[112px]! group bg-card flex flex-row gap-6 p-4 items-start rounded-xl border shadow-xs cursor-pointer"
       onClick={() => router.push(`classrooms/${classroom.id}`)}
     >
       <div className="mt-1">

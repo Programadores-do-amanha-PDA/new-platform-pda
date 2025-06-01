@@ -65,7 +65,7 @@ const JobMatchTable = ({
             )}
           </TableCell>
         </TableRow>
-        <TableRow className="!bg-primary/55">
+        <TableRow className="bg-primary/55!">
           <TableCell className="font-bold text-start w-max border-r ">
             Total
           </TableCell>

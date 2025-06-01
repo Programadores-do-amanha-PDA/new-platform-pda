@@ -25,7 +25,7 @@ export function Selector({
 }) {
   return (
     <Select onValueChange={onChange} value={value}>
-      <SelectTrigger className="!inline-flex !items-center !rounded-md !border !px-2.5 !py-0.5 !text-xs !font-semibold !transition-colors focus:!outline-none focus:!ring-2 focus:!ring-ring focus:!ring-offset-2 !text-foreground w-max gap-2">
+      <SelectTrigger className="inline-flex! items-center! rounded-md! border! px-2.5! py-0.5! text-xs! font-semibold! transition-colors! focus:outline-hidden! focus:ring-2! focus:ring-ring! focus:ring-offset-2! text-foreground! w-max gap-2">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

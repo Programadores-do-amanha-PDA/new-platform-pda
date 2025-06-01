@@ -329,8 +329,8 @@ const UserSheetData = ({
           variant={mode === "new" ? "default" : "ghost"}
           className={
             mode === "new"
-              ? "!px-4 w-max items-start justify-start font-semibold"
-              : "!px-2 w-full h-max items-start justify-start text-start"
+              ? "px-4! w-max items-start justify-start font-semibold"
+              : "px-2! w-full h-max items-start justify-start text-start"
           }
         >
           {mode === "new" ? "Adicionar usuário" : "Editar usuário"}
@@ -351,7 +351,7 @@ const UserSheetData = ({
           className="w-full h-full flex gap-4 py-4 overflow-hidden"
           onSubmit={(e) => e.preventDefault()}
         >
-          <div className="w-2/3 h-full flex flex-col gap-4 flex-grow">
+          <div className="w-2/3 h-full flex flex-col gap-4 grow">
             <div className="w-full flex flex-col gap-2">
               <Label htmlFor="name" className="font-semibold">
                 Nome
@@ -401,7 +401,7 @@ const UserSheetData = ({
             </div>
           </div>
           <Separator className="mx-4" orientation="vertical" />
-          <div className="w-1/3 h-full flex flex-col gap-4 flex-grow">
+          <div className="w-1/3 h-full flex flex-col gap-4 grow">
             <div className="flex flex-col gap-4">
               <p className="text-sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-left">
                 Cargo

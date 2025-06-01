@@ -25,12 +25,12 @@ const AllProjectsPage = ({ classroom_id }: { classroom_id: string }) => {
   return (
     <main className="relative w-full h-max p-4 flex flex-col gap-6 overflow-hidden">
       <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
-        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
+        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
           <Input
             id="search"
             type="text"
             placeholder="Buscando algo?"
-            className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
+            className="max-w-xs border-none! ring-0! shadow-none rounded-none!"
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
           />

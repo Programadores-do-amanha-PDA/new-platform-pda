@@ -63,7 +63,7 @@ export function TechnologyCombobox({
               {inputValue.length > 0 ? (
                 <Button
                   variant={"ghost"}
-                  className="relative w-full flex cursor-default gap-2 select-none items-center justify-start rounded-sm px-2 py-1.5 text-sm outline-none font-medium text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+                  className="relative w-full flex cursor-default gap-2 select-none items-center justify-start rounded-sm px-2 py-1.5 text-sm outline-hidden font-medium text-muted-foreground [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
                 >
                   <Plus className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   {inputValue}

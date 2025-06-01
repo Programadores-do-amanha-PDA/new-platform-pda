@@ -98,7 +98,7 @@ export function AttemptsDataTable({
       },
       cell: ({ row }) => (
         <div
-          className="capitalize !cursor-pointer hover:!underline"
+          className="capitalize cursor-pointer! hover:underline!"
           onClick={() => handleOpenChangeAttemptDialog(true, row.original)}
         >
           {row.getValue("name")}

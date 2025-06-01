@@ -127,7 +127,7 @@ const JobsDataTable = ({
         return row
           .getValue<JobDetailsT>("details")
           .languages?.map((language, i) => (
-            <Badge variant="outline" className="!m-1" key={i}>
+            <Badge variant="outline" className="m-1!" key={i}>
               {language}
             </Badge>
           ));
@@ -141,7 +141,7 @@ const JobsDataTable = ({
         return row
           .getValue<JobDetailsT>("details")
           .workplace_type?.map((w, i) => (
-            <Badge variant="outline" className="!m-1" key={i}>
+            <Badge variant="outline" className="m-1!" key={i}>
               {w}
             </Badge>
           ));
@@ -172,7 +172,7 @@ const JobsDataTable = ({
               <Button
                 onClick={async () => await handleCurateJob(job.id)}
                 variant="ghost"
-                className="!px-2 w-full h-max items-start justify-start text-start"
+                className="px-2! w-full h-max items-start justify-start text-start"
               >
                 Aprovar Vaga
               </Button>
@@ -185,7 +185,7 @@ const JobsDataTable = ({
               <Button
                 onClick={() => handleArchiveJob(job.id)}
                 variant="ghost"
-                className="!px-2 w-full h-max items-start justify-start text-start"
+                className="px-2! w-full h-max items-start justify-start text-start"
               >
                 Arquivar vaga
               </Button>

@@ -41,12 +41,12 @@ const AccountsPage = ({ classroom_id }: { classroom_id: string }) => {
   return (
     <div className="w-full h-full flex flex-col gap-6">
       <header className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
-        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
+        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
           <Input
             id="search"
             type="text"
             placeholder="Buscando algo?"
-            className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
+            className="max-w-xs border-none! ring-0! shadow-none rounded-none!"
             value={searchFilter}
             onChange={(e) => setSearchFilter(e.target.value)}
           />

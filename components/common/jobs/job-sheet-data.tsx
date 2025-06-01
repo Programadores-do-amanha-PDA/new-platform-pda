@@ -233,8 +233,8 @@ const JobSheetData = ({
           variant={mode === "new" ? "default" : "ghost"}
           className={
             mode === "new"
-              ? "!px-4 w-max items-start justify-start font-semibold"
-              : "!px-2 w-max h-max items-start justify-start text-start"
+              ? "px-4! w-max items-start justify-start font-semibold"
+              : "px-2! w-max h-max items-start justify-start text-start"
           }
         >
           {mode === "new" ? "Adicionar Vaga" : "Editar Vaga"}

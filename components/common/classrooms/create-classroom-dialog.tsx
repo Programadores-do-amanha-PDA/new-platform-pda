@@ -90,7 +90,7 @@ const CreateOrEditClassroomDialog = ({
       <DialogTrigger asChild>
         <Button
           className="font-semibold"
-          variant={currentClassroom ? "outline" : "default"}
+          variant={currentClassroom ? "outline-solid" : "default"}
         >
           {currentClassroom ? "Editar Turma" : "Adicionar Turma"}
         </Button>

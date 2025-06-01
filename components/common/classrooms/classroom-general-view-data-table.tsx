@@ -67,7 +67,7 @@ const ClassroomGeneralViewDataTable = ({
     {
       id: "select",
       header: ({ table }) => (
-        <div className="flex justify-center items-center !w-11">
+        <div className="flex justify-center items-center w-11!">
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
@@ -97,7 +97,7 @@ const ClassroomGeneralViewDataTable = ({
             <div
               className={cn(
                 "bg-black/55 rounded-full absolute top-0 right-0 bottom-0 left-0 m-auto hidden group-hover:flex justify-center items-center",
-                row.getIsSelected() && "!flex"
+                row.getIsSelected() && "flex!"
               )}
             >
               <Checkbox
@@ -346,7 +346,7 @@ const ClassroomGeneralViewDataTable = ({
       </div>
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
         <Table className="w-max">
-          <TableHeader className="sticky top-0 z-10 bg-background shadow">
+          <TableHeader className="sticky top-0 z-10 bg-background shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {

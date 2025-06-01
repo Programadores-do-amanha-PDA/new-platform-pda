@@ -97,7 +97,7 @@ const MeetingsSheetData = () => {
   return (
     <Sheet onOpenChange={handleOpen} open={openModal}>
       <SheetTrigger asChild>
-        <Button className="!px-4 w-max items-start justify-start font-semibold">
+        <Button className="px-4! w-max items-start justify-start font-semibold">
           Adicionar Reunião
         </Button>
       </SheetTrigger>

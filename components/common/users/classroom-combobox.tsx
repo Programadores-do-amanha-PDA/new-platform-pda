@@ -44,7 +44,7 @@ export function ClassroomCombobox({
           <Button
             variant="secondary"
             size="icon"
-            className="!w-max flex items-center justify-center !py-1 !h-max !px-2"
+            className="w-max! flex items-center justify-center py-1! h-max! px-2!"
           >
             <p key={value[0]} className="font-semibold flex gap-1 text-xs">
               {itens.find((item) => item.value === value[0])?.label}
@@ -53,15 +53,15 @@ export function ClassroomCombobox({
               </p>
             </p>
 
-            <ChevronDown className="!size-3.5 text-muted-foreground" />
+            <ChevronDown className="size-3.5! text-muted-foreground" />
           </Button>
         ) : (
           <Button
             variant="outline"
             size="icon"
-            className="flex items-center justify-center !py-1 !h-max !w-10"
+            className="flex items-center justify-center py-1! h-max! w-10!"
           >
-            <Plus className="!size-3 text-muted-foreground" />
+            <Plus className="size-3! text-muted-foreground" />
           </Button>
         )}
       </PopoverTrigger>

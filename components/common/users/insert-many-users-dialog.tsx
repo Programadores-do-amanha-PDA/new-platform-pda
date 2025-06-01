@@ -286,7 +286,7 @@ const InsertManyUsersDialog = ({
           <div className="grid w-full items-center gap-4 my-4">
             <Label
               htmlFor="csv-file"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2 w-max cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-9 px-4 py-2 w-max cursor-pointer"
             >
               Selecionar arquivo
             </Label>
@@ -301,7 +301,7 @@ const InsertManyUsersDialog = ({
         ) : (
           <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
             <Table className="w-full h-full">
-              <TableHeader className="sticky top-0 bg-background z-10 shadow">
+              <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
                 <TableRow>
                   <TableHead className="max-w-56 w-56 truncate font-semibold">
                     Nome
@@ -315,11 +315,11 @@ const InsertManyUsersDialog = ({
                       <Button
                         variant="outline"
                         size="icon"
-                        className="flex items-center justify-center !py-1 !h-max !w-10"
+                        className="flex items-center justify-center py-1! h-max! w-10!"
                         title="Gerar senha aleatória"
                         onClick={() => handleGenerateRandomPassword()}
                       >
-                        <Sparkles className="!size-3" />
+                        <Sparkles className="size-3!" />
                       </Button>
                     </div>
                   </TableHead>
@@ -389,7 +389,7 @@ const InsertManyUsersDialog = ({
                 {users &&
                   users.map((user, index) =>
                     user.status === "success" ? (
-                      <TableRow key={index} className={"!bg-green-100"}>
+                      <TableRow key={index} className={"bg-green-100!"}>
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.password}</TableCell>
@@ -424,9 +424,9 @@ const InsertManyUsersDialog = ({
                         key={index}
                         className={
                           user.status === "error"
-                            ? "!bg-red-100"
+                            ? "bg-red-100!"
                             : user.status !== undefined
-                            ? "!bg-yellow-100"
+                            ? "bg-yellow-100!"
                             : ""
                         }
                       >
@@ -559,7 +559,7 @@ const InsertManyUsersDialog = ({
           </div>
         )}
 
-        <DialogFooter className="!flex !flex-row justify-end gap-2">
+        <DialogFooter className="!flex flex-row! justify-end gap-2">
           {stage === 0 && (
             <DialogClose>
               <Button

@@ -140,11 +140,11 @@ export function DataTable({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className="shadow !rounded-t-lg overflow-hidden"
+                className="shadow rounded-t-lg! overflow-hidden"
               >
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="!px-0">
+                    <TableHead key={header.id} className="px-0!">
                       {header.isPlaceholder
                         ? null
                         : flexRender(

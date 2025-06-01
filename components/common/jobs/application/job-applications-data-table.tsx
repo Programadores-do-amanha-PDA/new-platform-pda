@@ -203,7 +203,7 @@ const JobApplicationTsDataTable = ({
               <Button
                 onClick={() => handleDeleteJobApplicationT(JobApplicationT.id)}
                 variant="ghost"
-                className="!px-2 w-full h-max items-start justify-start text-start"
+                className="px-2! w-full h-max items-start justify-start text-start"
               >
                 Deletar Candidatura
               </Button>

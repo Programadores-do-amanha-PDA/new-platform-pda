@@ -171,7 +171,7 @@ const JobApplicationCard = ({
           !loading ? handleDeleteJobApplication(jobApplication.id) : () => null
         }
         variant="destructive"
-        className="w-max h-full items-start justify-start text-start lg:!bg-transparent lg:shadow-none"
+        className="w-max h-full items-start justify-start text-start lg:bg-transparent! lg:shadow-none"
         title="Excluir candidatura"
       >
         <Trash className="size-5 lg:stroke-destructive" />

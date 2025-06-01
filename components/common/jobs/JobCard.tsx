@@ -24,7 +24,7 @@ const JobCard = ({
           </Avatar>
         </div>
 
-        <div className="!flex-grow-0 truncate">
+        <div className="grow-0! truncate">
           <h4 className="font-semibold group-hover:underline truncate">
             {job.title}
           </h4>
@@ -71,7 +71,7 @@ const JobCard = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between !mt-2 gap-4 pt-2">
+      <div className="flex items-center justify-between mt-2! gap-4 pt-2">
         {cardFooter}
       </div>
     </div>

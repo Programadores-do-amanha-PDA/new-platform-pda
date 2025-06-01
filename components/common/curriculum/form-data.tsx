@@ -256,7 +256,7 @@ const ResumeFormData = ({
                     ])
                   }
                   placeholder="Desenvolvimento Web..."
-                  className="!border-none !ring-0 bg-card !rounded-none w-full h-full"
+                  className="border-none! ring-0! bg-card rounded-none! w-full h-full"
                 />
 
                 <Button
@@ -268,7 +268,7 @@ const ResumeFormData = ({
                       prev.filter((_, i) => i !== interestingAreaIndex)
                     )
                   }
-                  className="h-full rounded-l-none !bg-zinc-100 text-destructive border-l border-input"
+                  className="h-full rounded-l-none bg-zinc-100! text-destructive border-l border-input"
                 >
                   <X className="size-5" />
                 </Button>
@@ -309,7 +309,7 @@ const ResumeFormData = ({
                             )
                           }
                           placeholder="Javascript..."
-                          className="!border-none !ring-0 bg-card !rounded-none w-full h-full"
+                          className="border-none! ring-0! bg-card rounded-none! w-full h-full"
                         />
 
                         <Button
@@ -332,7 +332,7 @@ const ResumeFormData = ({
                               )
                             )
                           }
-                          className="h-full rounded-l-none !bg-zinc-100 text-destructive border-l border-input"
+                          className="h-full rounded-l-none bg-zinc-100! text-destructive border-l border-input"
                         >
                           <X className="size-5" />
                         </Button>
@@ -412,7 +412,7 @@ const ResumeFormData = ({
                 onClick={() =>
                   setStudies((prev) => prev.filter((_, i) => i !== studyIndex))
                 }
-                className="h-full !rounded-none !bg-zinc-50 text-destructive border-l border-input"
+                className="h-full rounded-none! bg-zinc-50! text-destructive border-l border-input"
               >
                 <X className="size-5" />
               </Button>

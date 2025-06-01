@@ -25,7 +25,7 @@ const BadgeSelector = ({
 }) => {
   return (
     <Select onValueChange={onChange} value={value}>
-      <SelectTrigger className="!inline-flex !items-center !rounded-md !border !px-3 !py-1 !text-xs !font-semibold !transition-colors focus:!outline-none focus:!ring-2 focus:!ring-ring focus:!ring-offset-2 !text-foreground bg-background">
+      <SelectTrigger className="inline-flex! items-center! rounded-md! border! px-3! py-1! text-xs! font-semibold! transition-colors! focus:outline-hidden! focus:ring-2! focus:ring-ring! focus:ring-offset-2! text-foreground! bg-background">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>

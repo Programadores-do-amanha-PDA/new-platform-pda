@@ -59,7 +59,7 @@ export default function Home() {
   return (
     <main className="relative w-full flex flex-col p-4 gap-8">
       <div className="flex items-center justify-start gap-4">
-        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
+        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow-sm border p-6 relative">
           <div className="h-full flex flex-col gap-6 justify-between items-center">
             <div className="w-52 overflow-hidden flex items-center justify-center">
               <RadialShapeChart
@@ -77,7 +77,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
+        <div className="w-max h-max bg-card flex gap-20 items-center justify-between rounded-lg shadow-sm border p-6 relative">
           <div className="h-full flex flex-col gap-6 justify-between items-center">
             <div className="w-52 overflow-hidden flex items-center justify-center">
               <RadialShapeChart

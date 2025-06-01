@@ -99,7 +99,7 @@ const ProfilesDataTable = ({
                   {profile?.classrooms?.map((classroom, i) => (
                     <Badge
                       variant="outline"
-                      className="!mx-auto"
+                      className="mx-auto!"
                       key={`${i}-${classroom}`}
                     >
                       {classrooms?.find((c) => c.id === classroom.classroom_id)
@@ -173,7 +173,7 @@ const ProfilesDataTable = ({
             <div
               className={cn(
                 "bg-black/55 rounded-full absolute top-0 right-0 bottom-0 left-0 m-auto hidden group-hover:flex justify-center items-center",
-                row.getIsSelected() && "!flex"
+                row.getIsSelected() && "flex!"
               )}
             >
               <Checkbox
@@ -283,7 +283,7 @@ const ProfilesDataTable = ({
             {row
               .getValue<ProfileType>("profile")
               .user_roles?.map((userRole, i) => (
-                <Badge variant="outline" className="!mx-auto" key={i}>
+                <Badge variant="outline" className="mx-auto!" key={i}>
                   {rolesLabels.find((role) => role.value === userRole.role)
                     ?.label || userRole.role}
                 </Badge>
@@ -390,7 +390,7 @@ const ProfilesDataTable = ({
 
       cell: ({ row }) => (
         <div className="w-full flex justify-center items-center">
-          <Badge variant="outline" className="!m-1 truncate">
+          <Badge variant="outline" className="m-1! truncate">
             {row.getValue<UserMetadata>("user_metadata")?.email_verified ===
             true
               ? "Confirmado"
@@ -479,7 +479,7 @@ const ProfilesDataTable = ({
               {user.id && (
                 <Button
                   variant="ghost"
-                  className="!px-2 w-full h-max items-start justify-start text-start"
+                  className="px-2! w-full h-max items-start justify-start text-start"
                   onClick={() => handleDeleteUser(user.id || "")}
                 >
                   Deletar

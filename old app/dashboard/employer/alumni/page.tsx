@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { DonutChart } from "@/components/common/users/DonutChart";
-import { useAdminStackContext } from "@/context/admin/stack-context";
+import { useEmployerStack } from "@/context/employer/stack-context";
+import { useAuth } from "@/context/auth-context";
 
 export default function UserHomeDashboard() {
   const router = useRouter();
+  const {userRole} = useAuth()
   const {
     usersStack: { users },
-  } = useAdminStackContext();
+  } = useEmployerStack();
 
   const chartData = [
     {
@@ -78,8 +80,8 @@ export default function UserHomeDashboard() {
   };
 
   return (
-    <main className="relative w-full flex flex-col py-6 gap-10">
-      <div className="w-max h-72 bg-card flex gap-20 items-center justify-between rounded-lg shadow border p-6 relative">
+    <main className="relative w-full flex flex-col p-6 gap-10">
+      <div className="w-max h-72 bg-card flex gap-20 items-center justify-between rounded-lg shadow-sm border p-6 relative">
         <div className="h-full flex flex-col gap-6 justify-between items-center">
           <div className="w-52 overflow-hidden flex items-center justify-center">
             <DonutChart
@@ -91,7 +93,7 @@ export default function UserHomeDashboard() {
 
           <Button
             className="font-semibold"
-            onClick={() => router.push("/dashboard/admin/users/all")}
+            onClick={() => router.push(`/dashboard/${userRole}/alumni/all`)}
           >
             Gerenciar usuários
           </Button>
