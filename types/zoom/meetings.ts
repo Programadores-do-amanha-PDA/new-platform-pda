@@ -32,12 +32,14 @@ export interface ZoomMeetingType {
   registration_url: string;
   past_instances: ZoomMeetingPastInstancesType[];
   participants?: ZoomMeetingParticipantType[];
+  justifications?: ZoomMeetingJustificationType[];
   polls?: ZoomMeetingPollType[];
   poll_results?: ZoomMeetingPollResults[];
   account_id?: string;
   classroom_id?: string;
   is_visible_on_schedule?: boolean;
   synchronized_at?: string;
+  class_type?: ZoomClassType;
 }
 
 export interface ZoomMeetingOccurrenceType {
@@ -82,17 +84,19 @@ export interface ZoomMeetingSettingsType {
   meeting_authentication?: boolean;
   registrants_email_notification?: boolean;
   polling?: boolean;
+  class_type?: ZoomClassType;
 }
 
 export interface ZoomMeetingPastInstancesType {
-  uuid: string;
-  start_time: string;
   id: number;
+  uuid?: string;
+  meetingId?: number;
+  start_time: string;
   poll_results?: ZoomMeetingPollResults[];
   participants?: ZoomMeetingParticipantType[];
+  justifications?: ZoomMeetingJustificationType[];
   is_visible_on_schedule: boolean | undefined;
   class_type?: ZoomClassType;
-  meetingId?: number;
 }
 
 export type ZoomClassType =
@@ -118,6 +122,11 @@ export interface ZoomMeetingParticipantType {
   failover: boolean;
   status: string;
   internal_user: boolean;
+}
+export interface ZoomMeetingJustificationType {
+  id?: string;
+  user_email: string;
+  message: string;
 }
 
 export interface ZoomMeetingPollResults {

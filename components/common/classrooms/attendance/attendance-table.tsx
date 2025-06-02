@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, Pen } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +30,7 @@ import { ZoomMeetingPastInstancesType } from "@/types/zoom/meetings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import MeetingTypeSelector from "./meeting-type-selector";
-import { useAdminStackContext } from "@/context/admin/stack-context";
+import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileType>[];
@@ -41,7 +41,7 @@ const AttendanceStatusOptions = {
   P: { label: "Presente", color: "text-green-500" },
   F: { label: "Falta", color: "text-red-500" },
   PP: { label: "Presença Parcial", color: "text-yellow-500" },
-  FJ: { label: "Falta Justificada", color: "text-orange-500" },
+  FJ: { label: "Falta Justificada", color: "text-lime-600" },
 };
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
@@ -125,14 +125,6 @@ export default function AttendanceTable({
     []
   );
 
-  const {
-    classroomsStack: {
-      zoom: {
-        meetings: { handleUpdateZoomMeetingPastInstance },
-      },
-    },
-  } = useAdminStackContext();
-
   const table = useReactTable({
     data: users,
     columns: usersColumns,
@@ -208,17 +200,7 @@ export default function AttendanceTable({
                             </p>
                           </div>
                           <div className="w-full h-11 flex justify-center items-center p-2">
-                            <MeetingTypeSelector
-                              value={pastMeeting.class_type}
-                              handleValueChange={(value) =>
-                                pastMeeting.meetingId &&
-                                handleUpdateZoomMeetingPastInstance(
-                                  pastMeeting.meetingId,
-                                  pastMeeting.uuid,
-                                  { class_type: value }
-                                )
-                              }
-                            />
+                            <MeetingTypeSelector pastMeeting={pastMeeting} />
                           </div>
                         </div>
                       </TableHead>
@@ -252,6 +234,10 @@ export default function AttendanceTable({
                           (p) => p.user_email === row.original.email
                         );
 
+                      const isAttendanceJustified = meeting.justifications
+                        ?.map((j) => j.user_email)
+                        .includes(row.original.email || "");
+
                       if (
                         meetingAttendanceHistory &&
                         meetingAttendanceHistory.length > 0
@@ -275,42 +261,66 @@ export default function AttendanceTable({
                                 : ""
                             )}
                           >
-                            <div className="w-full h-full flex items-center justify-start px-4 gap-1">
-                              {attendanceMinutes >= 60 ? (
-                                <p
-                                  className={cn(
-                                    "font-semibold",
-                                    AttendanceStatusOptions["P"].color
-                                  )}
-                                  title={AttendanceStatusOptions["P"].label}
-                                >
-                                  P
-                                </p>
-                              ) : attendanceMinutes >= 30 ? (
-                                <p
-                                  className={cn(
-                                    "font-semibold",
-                                    AttendanceStatusOptions["PP"].color
-                                  )}
-                                  title={AttendanceStatusOptions["PP"].label}
-                                >
-                                  PP
-                                </p>
-                              ) : (
-                                <p
-                                  className={cn(
-                                    "font-semibold",
-                                    AttendanceStatusOptions["F"].color
-                                  )}
-                                  title={AttendanceStatusOptions["F"].label}
-                                >
-                                  F
-                                </p>
-                              )}
-                              {attendanceMinutes < 60 && (
-                                <p className="text-sm text-muted-foreground">
-                                  {attendanceMinutes}M
-                                </p>
+                            <div className="w-full h-full flex items-center justify-start gap-1 px-4">
+                              <div className="w-full h-full flex flex-col items-start justify-center gap-1">
+                                {attendanceMinutes >= 60 ? (
+                                  <p
+                                    className={cn(
+                                      "font-semibold",
+                                      AttendanceStatusOptions["P"].color
+                                    )}
+                                    title={AttendanceStatusOptions["P"].label}
+                                  >
+                                    P
+                                  </p>
+                                ) : attendanceMinutes >= 30 ? (
+                                  <p
+                                    className={cn(
+                                      "font-semibold",
+                                      !isAttendanceJustified
+                                        ? AttendanceStatusOptions["PP"].color
+                                        : AttendanceStatusOptions["FJ"].color
+                                    )}
+                                    title={
+                                      !isAttendanceJustified
+                                        ? AttendanceStatusOptions["PP"].label
+                                        : AttendanceStatusOptions["FJ"].label
+                                    }
+                                  >
+                                    {!isAttendanceJustified ? "PP" : "FJ"}
+                                  </p>
+                                ) : (
+                                  <p
+                                    className={cn(
+                                      "font-semibold",
+                                      !isAttendanceJustified
+                                        ? AttendanceStatusOptions["F"].color
+                                        : AttendanceStatusOptions["FJ"].color
+                                    )}
+                                    title={
+                                      !isAttendanceJustified
+                                        ? AttendanceStatusOptions["F"].label
+                                        : AttendanceStatusOptions["FJ"].label
+                                    }
+                                  >
+                                    {!isAttendanceJustified ? "F" : "FJ"}
+                                  </p>
+                                )}
+                                {attendanceMinutes < 60 && (
+                                  <p className="text-sm text-muted-foreground">
+                                    {attendanceMinutes}M
+                                  </p>
+                                )}
+                              </div>
+                              {attendanceMinutes < 60 && row.original.email && (
+                                <AttendanceJustificationDropdown
+                                  key={
+                                    "attendance-justifications-dropdown-" +
+                                    index
+                                  }
+                                  currentUserEmail={row.original.email}
+                                  currentMeeting={meeting}
+                                />
                               )}
                             </div>
                           </TableCell>
@@ -326,20 +336,27 @@ export default function AttendanceTable({
                             <p
                               className={cn(
                                 "font-semibold",
-                                AttendanceStatusOptions["F"].color
+                                !isAttendanceJustified
+                                  ? AttendanceStatusOptions["F"].color
+                                  : AttendanceStatusOptions["FJ"].color
                               )}
-                              title={AttendanceStatusOptions["F"].label}
+                              title={
+                                !isAttendanceJustified
+                                  ? AttendanceStatusOptions["F"].label
+                                  : AttendanceStatusOptions["FJ"].label
+                              }
                             >
-                              F
+                              {!isAttendanceJustified ? "F" : "FJ"}
                             </p>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {}}
-                              className="ml-auto"
-                            >
-                              <Pen className="size-3 stroke-muted-foreground" />
-                            </Button>
+                            {row.original.email && (
+                              <AttendanceJustificationDropdown
+                                key={
+                                  "attendance-justifications-dropdown-" + index
+                                }
+                                currentUserEmail={row.original.email}
+                                currentMeeting={meeting}
+                              />
+                            )}
                           </div>
                         </TableCell>
                       );

@@ -3,9 +3,7 @@ import AttendanceTable from "@/components/common/classrooms/attendance/attendanc
 import { useAdminStackContext } from "@/context/admin/stack-context";
 import { ZoomMeetingPastInstancesType } from "@/types/zoom/meetings";
 import { useParams } from "next/navigation";
-// import { AuthUserWithProfileType } from "@/types/auth";
-// import { useState } from "react";
-const AttendancePage = () => {
+const ClassroomAttendancePage = () => {
   const { classroom_id } = useParams<{ classroom_id: string }>();
 
   const {
@@ -33,10 +31,11 @@ const AttendancePage = () => {
       ) {
         return {
           meetingId: meeting.id,
-          uuid: meeting.uuid,
+          uuid: undefined,
           start_time: meeting.start_time || 0,
           participants: meeting.participants || [],
           poll_results: meeting.poll_results || [],
+          justifications: meeting.justifications || [],
         } as ZoomMeetingPastInstancesType;
       }
       return [];
@@ -62,4 +61,4 @@ const AttendancePage = () => {
   );
 };
 
-export default AttendancePage;
+export default ClassroomAttendancePage;

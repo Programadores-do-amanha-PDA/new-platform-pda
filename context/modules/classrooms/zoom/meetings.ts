@@ -162,6 +162,7 @@ const useZoomMeetingsStack = ({
     pastInstanceId: string,
     updates: Partial<ZoomMeetingPastInstancesType>
   ) => {
+    console.log(updates)
     try {
       if (!meetingId || !pastInstanceId || !updates) {
         throw new Error("id and updates fields are required");
@@ -172,7 +173,28 @@ const useZoomMeetingsStack = ({
       const updatedPastsInstancies = currentMeeting?.past_instances?.map(
         (past_instancie) =>
           past_instancie.uuid === pastInstanceId
-            ? { ...past_instancie, ...updates }
+            ? {
+                ...past_instancie,
+                ...updates,
+                participants: updates.participants
+                  ? [
+                      ...(past_instancie.participants || []),
+                      ...updates.participants,
+                    ]
+                  : past_instancie.participants,
+                poll_results: updates.poll_results
+                  ? [
+                      ...(past_instancie.poll_results || []),
+                      ...updates.poll_results,
+                    ]
+                  : past_instancie.poll_results,
+                justifications: updates.justifications
+                  ? [
+                      ...(past_instancie.justifications || []),
+                      ...updates.justifications,
+                    ]
+                  : past_instancie.justifications,
+              }
             : past_instancie
       );
       const loadingToastId = toast.loading("Atualizando reunião...");
