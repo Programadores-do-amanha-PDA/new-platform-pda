@@ -77,13 +77,16 @@ const MeetingsSheetData = () => {
         .includes(meetingsSearch.toLowerCase());
 
       if (!meetings?.length) return searchMatch;
-      return !meetings.map((att) => att.id).includes(meeting.id) && searchMatch;
+      return (
+        !meetings.map((att) => att.meeting_id).includes(meeting.meeting_id) &&
+        searchMatch
+      );
     }
 
-    return !meetings?.map((att) => att.id).includes(meeting.id);
+    return !meetings?.map((att) => att.meeting_id).includes(meeting.meeting_id);
   });
 
-  const handleAddMeeting = async (meeting: ZoomMeetingType) => {
+  const handleAddMeeting = async (meeting: Omit<ZoomMeetingType, "id">) => {
     setIsAddingMeeting(meeting.meeting_id);
     const account = accounts.find(
       (account) => account.id === meeting.account_id
@@ -137,7 +140,7 @@ const MeetingsSheetData = () => {
 
           {!loading ? (
             <ul className="p-2 h-full flex flex-col gap-4 overflow-y-auto">
-              {filteredMeetings.map((meeting: ZoomMeetingType) => (
+              {filteredMeetings.map((meeting) => (
                 <MeetingsSheetDataItem
                   key={meeting.meeting_id}
                   meeting={meeting}

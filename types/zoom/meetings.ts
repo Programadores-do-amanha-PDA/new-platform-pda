@@ -92,7 +92,7 @@ export interface ZoomMeetingPastInstancesType {
   uuid?: string;
   classroom_id: string | null;
   account_id: string | null;
-  meeting_id: number | null;
+  meeting_id: string | null;
   start_time: string;
   poll_results?: ZoomMeetingPollResults[];
   participants?: ZoomMeetingParticipantType[];

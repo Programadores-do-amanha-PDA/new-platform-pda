@@ -8,6 +8,7 @@ import {
 import { ZoomAccountType } from "@/types/zoom/accounts";
 import {
   ZoomMeetingOccurrenceType,
+  ZoomMeetingPastInstancesType,
   ZoomMeetingType,
 } from "@/types/zoom/meetings";
 import { useState } from "react";
@@ -15,11 +16,18 @@ import { toast } from "sonner";
 
 const useZoomMeetingsStack = ({
   handleGetZoomMeetingByAPI,
+  handleCreateManyZoomPastInstance,
 }: {
   handleGetZoomMeetingByAPI: (
-    account: Partial<ZoomAccountType>,
+    account: Omit<
+      ZoomAccountType,
+      "classroom_id" | "me" | "label" | "created_at"
+    >,
     id: number
-  ) => Promise<ZoomMeetingType | null>;
+  ) => Promise<Omit<ZoomMeetingType, "id"> | null>;
+  handleCreateManyZoomPastInstance: (
+    instanciesData: Partial<ZoomMeetingPastInstancesType>[]
+  ) => Promise<boolean>;
 }) => {
   const [meetings, setMeetings] = useState<ZoomMeetingType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,7 +54,7 @@ const useZoomMeetingsStack = ({
       setLoading(true);
       const meetingResponse = await getZoomMeetingById(id);
       if (!meetingResponse) throw "no meeting response";
-      return meetingResponse;
+      return meetingResponse as ZoomMeetingType;
     } catch (error) {
       console.error(error);
       return false;
@@ -56,35 +64,53 @@ const useZoomMeetingsStack = ({
   };
 
   const handleCreateZoomMeeting = async (
-    account: Partial<ZoomAccountType>,
+    account: Omit<ZoomAccountType, "me" | "label" | "created_at">,
     meetingData: Partial<ZoomMeetingType>
   ) => {
+    let loadingToastId;
     try {
       if (
         !meetingData.meeting_id ||
         !account.account_id ||
         !account.client_id ||
-        !account.client_secret
+        !account.client_secret ||
+        !account.classroom_id
       ) {
         toast.error("Dados obrigatórios da reunião estão faltando!");
         throw new Error("missing required meeting data");
       }
 
-      const meeting = await handleGetZoomMeetingByAPI(
+      loadingToastId = toast.loading("Pegando os dados da reunião...");
+      const allMeetingDataByAPI = await handleGetZoomMeetingByAPI(
         account,
         meetingData.meeting_id
       );
-      if (!meeting) throw new Error("no meeting response");
+      toast.dismiss(loadingToastId);
+      if (!allMeetingDataByAPI) throw new Error("no meeting response");
 
+      const { past_instances, ...meetingDataByAPI } = allMeetingDataByAPI;
+      loadingToastId = toast.loading("Salvando os dados da reunião...");
       const newMeeting = await createZoomMeetingByClassroomId({
         ...meetingData,
         account_id: account.id,
         classroom_id: account.classroom_id,
-        synchronized_at: new Date().toString(),
-        ...meeting,
+        synchronized_at: new Date().toISOString(),
+        ...meetingDataByAPI,
       });
-
+      toast.dismiss(loadingToastId);
       if (!newMeeting) throw new Error("no meeting create response");
+
+      if (meetingDataByAPI.type === 8 && past_instances.length > 0) {
+        await handleCreateManyZoomPastInstance(
+          past_instances.map((p) => ({
+            ...p,
+            account_id: account.id,
+            classroom_id: account.classroom_id,
+            meeting_id: newMeeting.id,
+            synchronized_at: new Date().toISOString(),
+          }))
+        );
+      }
 
       setMeetings((meetings) => [newMeeting, ...meetings]);
       toast.success(`Reunião "${newMeeting.topic}" criada com sucesso!`);
@@ -93,6 +119,8 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao criar nova reunião!");
       return false;
+    } finally {
+      toast.dismiss(loadingToastId);
     }
   };
 
@@ -159,7 +187,10 @@ const useZoomMeetingsStack = ({
 
   const handleRefreshAndUpdateZoomMeeting = async (
     id: string,
-    account: Partial<ZoomAccountType>
+    account: Omit<
+      ZoomAccountType,
+      "classroom_id" | "me" | "label" | "created_at"
+    >
   ) => {
     let loadingToastId;
     try {
@@ -267,26 +298,13 @@ const useZoomMeetingsStack = ({
 export default useZoomMeetingsStack;
 
 export interface ZoomMeetingsStackI {
-  meetings: ZoomMeetingType[];
+  meetings:  ZoomMeetingType[];
   meetingsLoading: boolean;
   handleGetAllZoomMeetings: (classroomId: string) => Promise<boolean>;
-  handleGetZoomMeetingById: (id: string) => Promise<ZoomMeetingType | boolean>;
-  handleCreateZoomMeeting: (
-    account: Partial<ZoomAccountType>,
-    meeting_id: Partial<ZoomMeetingType>
-  ) => Promise<string | false>;
-  handleUpdateZoomMeeting: (
-    id: string,
-    updates: Partial<ZoomMeetingType>
-  ) => Promise<boolean>;
-  handleUpdateZoomMeetingOccurrence: (
-    id: string,
-    occurrenceId: string,
-    updates: Partial<ZoomMeetingOccurrenceType>
-  ) => Promise<boolean>;
-  handleRefreshAndUpdateZoomMeeting: (
-    id: string,
-    account: Partial<ZoomAccountType>
-  ) => Promise<boolean>;
-  handleDeleteZoomMeeting: (id: string) => Promise<boolean>;
+  handleGetZoomMeetingById: (id: string) => Promise<false | ZoomMeetingType>;
+  handleCreateZoomMeeting:(account: Omit<ZoomAccountType, "me" | "label" | "created_at">, meetingData: Partial<ZoomMeetingType>) => Promise<string | false> ;
+  handleUpdateZoomMeeting:(id: string, updates: Partial<ZoomMeetingType>) => Promise<boolean>;
+  handleUpdateZoomMeetingOccurrence: (id: string, occurrenceId: string, updates: Partial<ZoomMeetingOccurrenceType>) => Promise<boolean>;
+  handleRefreshAndUpdateZoomMeeting: (id: string, account: Omit<ZoomAccountType, "classroom_id" | "me" | "label" | "created_at">) => Promise<boolean>;
+  handleDeleteZoomMeeting: (id: string) => Promise<boolean>
 }

@@ -13,9 +13,10 @@ import { ZoomAccountMeType, ZoomAccountType } from "@/types/zoom/accounts";
 
 const useZoomAccountsStack = (
   handleGetZoomMeAccountDataByAPI: (
-    account_id: string,
-    client_id: string,
-    client_secret: string
+    account: Omit<
+      ZoomAccountType,
+      "id" | "classroom_id" | "me" | "label" | "created_at"
+    >
   ) => Promise<false | Partial<ZoomAccountMeType>>
 ) => {
   const [accounts, setAccounts] = useState<ZoomAccountType[]>([]);
@@ -53,7 +54,7 @@ const useZoomAccountsStack = (
   };
 
   const handleCreateZoomAccount = async (
-    accountData: Partial<ZoomAccountType>
+    accountData: Omit<ZoomAccountType, "id" | "me" | "label" | "created_at">
   ) => {
     try {
       if (
@@ -68,11 +69,7 @@ const useZoomAccountsStack = (
       setLoading(true);
 
       toast.info("Verificando as credenciais da conta...");
-      const me = await handleGetZoomMeAccountDataByAPI(
-        accountData.account_id,
-        accountData.client_id,
-        accountData.client_secret
-      );
+      const me = await handleGetZoomMeAccountDataByAPI(accountData);
       if (!me) throw new Error("no me data");
 
       const newAccount = await createZoomAccountByClassroomId({
@@ -161,7 +158,7 @@ export interface ZoomAccountsStackI {
     accountId: string
   ) => Promise<ZoomAccountType | boolean>;
   handleCreateZoomAccount: (
-    accountData: Partial<ZoomAccountType>
+    accountData: Omit<ZoomAccountType, "id" | "me" | "label" | "created_at">
   ) => Promise<string | boolean>;
   handleUpdateZoomAccountById: (
     accountId: string,

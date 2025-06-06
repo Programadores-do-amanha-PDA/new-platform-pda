@@ -72,6 +72,7 @@ const createManyZoomPastInstance = async (
   try {
     const supabase = await createClient();
 
+    console.log(instancesData)
     if (!instancesData.length) {
       throw new Error("No instances provided");
     }
@@ -79,7 +80,7 @@ const createManyZoomPastInstance = async (
     if (
       instancesData.some(
         (instance) =>
-          !instance.classroom_id || !instance.account_id || !instance.uuid
+          !instance.classroom_id || !instance.account_id || !instance.uuid || !instance.meeting_id
       )
     ) {
       throw new Error("Missing required fields instances");

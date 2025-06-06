@@ -33,10 +33,17 @@ export const getAllMeetingsByAccount = async (ZOOM_ACCESS_TOKEN: string) => {
       nextPageToken = response.data.next_page_token;
     } while (nextPageToken);
 
-    return meetings;
+    return meetings.flatMap((meeting) => {
+      const { id, ...restMeetingData }: ZoomMeetingType = meeting;
+
+      return {
+        ...restMeetingData,
+        meeting_id: Number(id),
+      } as Omit<ZoomMeetingType, "id">;
+    }) as Omit<ZoomMeetingType, "id">[];
   } catch (error) {
     console.error("Error fetching meetings:", error);
-    throw error;
+    return null;
   }
 };
 
@@ -67,48 +74,22 @@ export const getMeetingById = async (
       ZOOM_ACCESS_TOKEN
     );
 
-    const meetingData = {
-      ...response.data,
-      meeting_id: response.data.id,
-      occurrences: response.data.occurrences
-        ? response.data.occurrences.map((o: ZoomMeetingOccurrenceType) => ({
+    const { id, ...restMeetingData }: ZoomMeetingType = response.data;
+
+    return {
+      ...restMeetingData,
+      meeting_id: Number(id),
+      occurrences: restMeetingData.occurrences
+        ? restMeetingData.occurrences.map((o: ZoomMeetingOccurrenceType) => ({
             ...o,
             is_visible_on_schedule: true,
           }))
         : [],
       polls: meetingPolls.polls,
-    } as ZoomMeetingType;
-
-    if (meetingData.type === 8) {
-      // Recurring meeting type
-      const pastInstances = await getPastMeetingInstances(
-        encodedMeetingId,
-        ZOOM_ACCESS_TOKEN
-      );
-      meetingData.past_instances = [];
-
-      for (const instance of pastInstances) {
-        if (!instance.uuid) continue;
-
-        const processedInstance = {
-          ...instance,
-          participants: await getPastedMeetingParticipants(
-            instance.uuid,
-            ZOOM_ACCESS_TOKEN
-          ),
-          poll_results: await getPastMeetingsPollResults(
-            instance.uuid,
-            ZOOM_ACCESS_TOKEN
-          ),
-        };
-        meetingData.past_instances.push(processedInstance);
-      }
-    }
-
-    return meetingData;
+    } as Omit<ZoomMeetingType, "id">;
   } catch (error) {
     console.error("Error fetching meeting details:", error);
-    throw error;
+    return null;
   }
 };
 
@@ -133,7 +114,7 @@ export const getPastMeetingInstances = async (
     return (response.data.meetings as ZoomMeetingPastInstancesType[]) || [];
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
-    return [];
+    return null;
   }
 };
 

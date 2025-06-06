@@ -9,6 +9,7 @@ import { useAdminStackContext } from "@/context/admin/stack-context";
 import {
   ZoomClassType,
   ZoomMeetingPastInstancesType,
+  ZoomMeetingType,
 } from "@/types/zoom/meetings";
 import { useState } from "react";
 
@@ -21,16 +22,18 @@ const meetingTypes = [
 
 const MeetingTypeSelector = ({
   pastMeeting,
+  type,
 }: {
-  pastMeeting: ZoomMeetingPastInstancesType;
+  pastMeeting: ZoomMeetingPastInstancesType | ZoomMeetingType;
+  type: "meeting" | "pastInstance";
 }) => {
   const [loading, setLoading] = useState(false);
   const {
     classroomsStack: {
       zoom: {
         meetings: {
-          handleUpdateZoomMeetingPastInstance,
           handleUpdateZoomMeeting,
+          pastInstances: { handleUpdateZoomPastInstance },
         },
       },
     },
@@ -38,18 +41,14 @@ const MeetingTypeSelector = ({
 
   const handleValueChange = async (value: ZoomClassType) => {
     setLoading(true);
-    if (pastMeeting.meetingId && !pastMeeting.uuid) {
-      await handleUpdateZoomMeeting(pastMeeting.meetingId, {
+    if (pastMeeting.id && type === "meeting") {
+      await handleUpdateZoomMeeting(pastMeeting.id, {
         class_type: value,
       });
       setLoading(false);
       return;
-    } else if (pastMeeting.meetingId && pastMeeting.uuid) {
-      await handleUpdateZoomMeetingPastInstance(
-        pastMeeting.meetingId,
-        pastMeeting.uuid,
-        { class_type: value }
-      );
+    } else if (pastMeeting.id && type === "pastInstance") {
+      await handleUpdateZoomPastInstance(pastMeeting.id, { class_type: value });
       setLoading(false);
       return;
     }

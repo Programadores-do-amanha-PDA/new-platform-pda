@@ -10,16 +10,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { useAdminStackContext } from "@/context/admin/stack-context";
-import { ZoomMeetingPastInstancesType } from "@/types/zoom/meetings";
+import {
+  ZoomMeetingPastInstancesType,
+  ZoomMeetingType,
+} from "@/types/zoom/meetings";
 import { Loader, Pen, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export function AttendanceJustificationDropdown({
   currentMeeting,
   currentUserEmail,
+  type,
 }: {
-  currentMeeting: ZoomMeetingPastInstancesType;
+  currentMeeting: ZoomMeetingPastInstancesType | ZoomMeetingType;
   currentUserEmail: string;
+  type: "meeting" | "pastInstance";
 }) {
   const [justification, setJustification] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -28,8 +33,8 @@ export function AttendanceJustificationDropdown({
     classroomsStack: {
       zoom: {
         meetings: {
-          handleUpdateZoomMeetingPastInstance,
           handleUpdateZoomMeeting,
+          pastInstances: { handleUpdateZoomPastInstance },
         },
       },
     },
@@ -47,8 +52,8 @@ export function AttendanceJustificationDropdown({
 
   const handleAddJustification = async () => {
     setLoading(true);
-    if (currentMeeting.meetingId && !currentMeeting.uuid) {
-      await handleUpdateZoomMeeting(currentMeeting.meetingId, {
+    if (currentMeeting.id && type === "meeting") {
+      await handleUpdateZoomMeeting(currentMeeting.id, {
         justifications: [
           {
             user_email: currentUserEmail,
@@ -58,19 +63,16 @@ export function AttendanceJustificationDropdown({
       });
       setLoading(false);
       return;
-    } else if (currentMeeting.meetingId && currentMeeting.uuid) {
-      await handleUpdateZoomMeetingPastInstance(
-        currentMeeting.meetingId,
-        currentMeeting.uuid,
-        {
-          justifications: [
-            {
-              user_email: currentUserEmail,
-              message: justification,
-            },
-          ],
-        }
-      );
+    } else if (currentMeeting.id && type === "pastInstance") {
+      await handleUpdateZoomPastInstance(currentMeeting.id, {
+        justifications: [
+          ...(currentMeeting.justifications || []),
+          {
+            user_email: currentUserEmail,
+            message: justification,
+          },
+        ],
+      });
       setLoading(false);
       return;
     }
@@ -78,8 +80,8 @@ export function AttendanceJustificationDropdown({
 
   const handleDeleteJustification = async () => {
     setDeleteLoading(true);
-    if (currentMeeting.meetingId && !currentMeeting.uuid) {
-      await handleUpdateZoomMeeting(currentMeeting.meetingId, {
+    if (currentMeeting.id && type === "meeting") {
+      await handleUpdateZoomMeeting(currentMeeting.id, {
         justifications:
           currentMeeting?.justifications?.filter(
             (j) => j.user_email !== currentUserEmail
@@ -87,17 +89,13 @@ export function AttendanceJustificationDropdown({
       });
       setDeleteLoading(false);
       return;
-    } else if (currentMeeting.meetingId && currentMeeting.uuid) {
-      await handleUpdateZoomMeetingPastInstance(
-        currentMeeting.meetingId,
-        currentMeeting.uuid,
-        {
-          justifications:
-            currentMeeting?.justifications?.filter(
-              (j) => j.user_email !== currentUserEmail
-            ) || [],
-        }
-      );
+    } else if (currentMeeting.id && type === "pastInstance") {
+      await handleUpdateZoomPastInstance(currentMeeting.id, {
+        justifications:
+          currentMeeting?.justifications?.filter(
+            (j) => j.user_email !== currentUserEmail
+          ) || [],
+      });
       setDeleteLoading(false);
       return;
     }

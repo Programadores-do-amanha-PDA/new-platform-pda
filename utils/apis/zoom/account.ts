@@ -3,7 +3,6 @@ import axiosZoomInstancie from ".";
 export const getMeAccount = async (ZOOM_ACCESS_TOKEN: string) => {
   try {
     if (!ZOOM_ACCESS_TOKEN) throw new Error("No access token provided");
-    console.log("ZOOM_ACCESS_TOKEN", ZOOM_ACCESS_TOKEN)
     const response = await axiosZoomInstancie.get("/users/me", {
       headers: {
         Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
@@ -14,6 +13,6 @@ export const getMeAccount = async (ZOOM_ACCESS_TOKEN: string) => {
     return response.data;
   } catch (error) {
     console.error("Error fetching account:", error);
-    throw error;
+    return null;
   }
 };

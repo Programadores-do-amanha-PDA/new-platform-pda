@@ -32,11 +32,14 @@ import useClassroomProjects, {
   ClassroomProjectsI,
 } from "../modules/classrooms/projects";
 
-import { AuthUserWithProfileType } from "@/types/auth";
 import UserClassroomStack, {
   UserClassroomStackI,
 } from "../modules/users/classrooms";
+import useZoomPastInstancesStack, {
+  ZoomPastInstancesStackI,
+} from "../modules/classrooms/zoom/meeting-past-instancies";
 
+import { AuthUserWithProfileType } from "@/types/auth";
 interface AdminStackContextProps {
   usersStack: UsersStackI;
   userRoleStack: UserRolesStackI;
@@ -47,7 +50,7 @@ interface AdminStackContextProps {
     };
     zoom: {
       accounts: ZoomAccountsStackI;
-      meetings: ZoomMeetingsStackI;
+      meetings: ZoomMeetingsStackI & { pastInstances: ZoomPastInstancesStackI };
       api: ZoomAPIMeetingsStackI;
     };
     users: UserClassroomStackI;
@@ -161,6 +164,17 @@ export const AdminStackProvider = ({
     handleDeleteZoomAccountById,
   } = useZoomAccountsStack(handleGetZoomMeAccountDataByAPI);
 
+  const {
+    pastInstances,
+    pastInstancesLoading,
+    handleCreateZoomPastInstance,
+    handleCreateManyZoomPastInstance,
+    handleGetZoomPastInstanceById,
+    handleGetAllZoomPastInstances,
+    handleUpdateZoomPastInstance,
+    handleDeleteZoomPastInstance,
+  } = useZoomPastInstancesStack();
+
   // Zoom Meetings
   const {
     meetings,
@@ -174,6 +188,7 @@ export const AdminStackProvider = ({
     handleDeleteZoomMeeting,
   } = useZoomMeetingsStack({
     handleGetZoomMeetingByAPI,
+    handleCreateManyZoomPastInstance,
   });
 
   useEffect(() => {
@@ -288,9 +303,7 @@ export const AdminStackProvider = ({
     }
 
     if (meetings.length > 0) {
-      meetings.forEach(
-        (meeting) => (ZoomMeetings[meeting.id] = meeting.topic)
-      );
+      meetings.forEach((meeting) => (ZoomMeetings[meeting.id] = meeting.topic));
     }
     if (assessments.length > 0) {
       assessments.forEach((assessment) => {
@@ -378,6 +391,15 @@ export const AdminStackProvider = ({
               handleDeleteZoomMeeting,
               handleRefreshAndUpdateZoomMeeting,
               handleUpdateZoomMeetingOccurrence,
+              pastInstances: {
+                pastInstances,
+                pastInstancesLoading,
+                handleGetZoomPastInstanceById,
+                handleGetAllZoomPastInstances,
+                handleCreateZoomPastInstance,
+                handleUpdateZoomPastInstance,
+                handleDeleteZoomPastInstance,
+              },
             },
 
             api: {

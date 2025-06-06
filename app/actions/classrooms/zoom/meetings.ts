@@ -39,6 +39,7 @@ const getZoomMeetingById = async (id: string) => {
 const createZoomMeetingByClassroomId = async (
   meetingData: Partial<ZoomMeetingType>
 ) => {
+  console.log(meetingData)
   try {
     const supabase = await createClient();
 
@@ -59,7 +60,7 @@ const createZoomMeetingByClassroomId = async (
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ZoomMeetingType;
   } catch (error) {
     console.error("Error creating zoom meeting:", error);
     return false;
@@ -70,6 +71,7 @@ const updateZoomMeetingById = async (
   id: string,
   updates: Partial<ZoomMeetingType>
 ) => {
+  console.log(id, updates)
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

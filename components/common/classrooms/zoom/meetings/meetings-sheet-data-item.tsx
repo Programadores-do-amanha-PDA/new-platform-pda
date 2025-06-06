@@ -14,12 +14,12 @@ const MeetingsSheetDataItem = ({
   isAddingMeeting,
   handleAddMeeting,
 }: {
-  meeting: ZoomMeetingType;
-  handleAddMeeting: (account_id: ZoomMeetingType) => void;
+  meeting: Omit<ZoomMeetingType, "id">;
+  handleAddMeeting: (meeting: Omit<ZoomMeetingType, "id">) => void;
   isAddingMeeting: number | null;
 }) => {
   return (
-    <li key={meeting.id} className="p-2 border rounded-lg">
+    <li className="p-2 border rounded-lg">
       <div className="flex items-center gap-4 justify-between">
         <div className="flex flex-col gap-1 truncate">
           <h2 className="font-semibold text-sm truncate" title={meeting.topic}>

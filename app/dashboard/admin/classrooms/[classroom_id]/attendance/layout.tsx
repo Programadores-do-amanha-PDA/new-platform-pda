@@ -15,7 +15,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const {
     classroomsStack: {
       zoom: {
-        meetings: { meetings, meetingsLoading, handleGetAllZoomMeetings },
+        meetings: {
+          meetings,
+          meetingsLoading,
+          handleGetAllZoomMeetings,
+          pastInstances: { pastInstances, handleGetAllZoomPastInstances },
+        },
       },
     },
   } = useAdminStackContext();
@@ -24,7 +29,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     if (meetings.length === 0) {
       handleGetAllZoomMeetings(classroom_id);
     }
-  }, [classroom_id]);
+    if (pastInstances.length === 0) {
+      handleGetAllZoomPastInstances(classroom_id);
+    }
+  }, [classroom_id, pastInstances]);
 
   if (meetingsLoading) return <LoadingComponent />;
 

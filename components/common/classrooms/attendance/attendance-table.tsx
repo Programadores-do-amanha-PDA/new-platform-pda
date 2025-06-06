@@ -26,15 +26,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AuthUserWithProfileType, ProfileType } from "@/types/auth";
-import { ZoomMeetingPastInstancesType } from "@/types/zoom/meetings";
+import {
+  ZoomMeetingPastInstancesType,
+  ZoomMeetingType,
+} from "@/types/zoom/meetings";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
 
+type ZoomMeetingWithType =
+  | (ZoomMeetingType & { meeting_type: "meeting" })
+  | (ZoomMeetingPastInstancesType & { meeting_type: "pastInstance" });
+
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileType>[];
-  meetings: ZoomMeetingPastInstancesType[];
+  pastMeetings: ZoomMeetingWithType[];
 }
 
 const AttendanceStatusOptions = {
@@ -50,7 +57,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
     header: ({ column }) => {
       const sortState = column.getIsSorted();
       return (
-        <div className="w-full h-full flex justify-start items-center border-r border-border px-2">
+        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r border-border px-2">
           <Button
             variant="ghost"
             className="text-left px-2 font-semibold"
@@ -77,7 +84,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full flex flex-row gap-2 justify-start items-center px-2 border-r border-border bg-background">
+      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r border-border bg-background">
         <Avatar>
           <AvatarFallback>
             {row
@@ -118,7 +125,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
 
 export default function AttendanceTable({
   users,
-  meetings,
+  pastMeetings,
 }: AttendanceTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -162,14 +169,14 @@ export default function AttendanceTable({
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
         <Table className="w-full h-full">
-          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden shadow-md">
-            {table.getHeaderGroups().map((headerGroup) => (
+          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden shadow-md max-h-[88px] !p-0">
+            {table.getHeaderGroups().map((headerGroup, headerGroupI) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="w-full h-max sticky left-0 bg-sidebar z-10 p-0"
+                      className="w-max h-max sticky left-0 bg-sidebar z-10 p-0"
                     >
                       {header.isPlaceholder
                         ? null
@@ -180,18 +187,20 @@ export default function AttendanceTable({
                     </TableHead>
                   );
                 })}
-                {meetings.length > 0 &&
-                  meetings.map((pastMeeting, index) => {
+
+                {pastMeetings.length > 0 ? (
+                  pastMeetings.map((pastMeeting, index) => {
                     return (
                       <TableHead key={index} className="w-full h-max p-0 m-0">
                         <div className="w-full h-full flex flex-col justify-center items-center border-r border-border">
                           <div className="w-full h-11 flex justify-center items-center border-b border-border p-2">
                             <p className="font-bold">
-                              {new Date(pastMeeting.start_time).getTime() ===
-                              new Date().getTime()
+                              {new Date(
+                                pastMeeting?.start_time || 0
+                              ).getTime() === new Date().getTime()
                                 ? "Hoje"
                                 : new Date(
-                                    pastMeeting.start_time
+                                    pastMeeting.start_time || 0
                                   ).toLocaleDateString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -200,18 +209,33 @@ export default function AttendanceTable({
                             </p>
                           </div>
                           <div className="w-full h-11 flex justify-center items-center p-2">
-                            <MeetingTypeSelector pastMeeting={pastMeeting} />
+                            <MeetingTypeSelector
+                              pastMeeting={pastMeeting}
+                              type={pastMeeting.meeting_type}
+                            />
                           </div>
                         </div>
                       </TableHead>
                     );
-                  })}
+                  })
+                ) : (
+                  <TableHead
+                    key={`past-meeting-${headerGroupI}`}
+                    className="w-full h-max !p-0 !m-0"
+                  >
+                    <div className="w-full h-full flex flex-col justify-center items-center border-r border-border">
+                      <div className="w-full h-[88px] flex justify-center items-center p-2">
+                        <p className="font-bold">Nenhuma Reunião</p>
+                      </div>
+                    </div>
+                  </TableHead>
+                )}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, rowI) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
@@ -227,8 +251,9 @@ export default function AttendanceTable({
                       )}
                     </TableCell>
                   ))}
-                  {meetings.length > 0 &&
-                    meetings.map((meeting, index) => {
+
+                  {pastMeetings.length > 0 ? (
+                    pastMeetings.map((meeting, index) => {
                       const meetingAttendanceHistory =
                         meeting?.participants?.filter(
                           (p) => p.user_email === row.original.email
@@ -255,13 +280,13 @@ export default function AttendanceTable({
                             key={index}
                             className={cn(
                               "border-r border-border",
-                              new Date(meeting.start_time).getTime() ===
+                              new Date(meeting.start_time || 0).getTime() ===
                                 new Date().getTime()
                                 ? "bg-amber-50"
                                 : ""
                             )}
                           >
-                            <div className="w-full h-full flex items-center justify-start gap-1 px-4">
+                            <div className="w-full h-full flex items-center justify-start gap-1 px-2">
                               <div className="w-full h-full flex flex-col items-start justify-center gap-1">
                                 {attendanceMinutes >= 60 ? (
                                   <p
@@ -320,6 +345,7 @@ export default function AttendanceTable({
                                   }
                                   currentUserEmail={row.original.email}
                                   currentMeeting={meeting}
+                                  type={meeting.meeting_type}
                                 />
                               )}
                             </div>
@@ -332,7 +358,7 @@ export default function AttendanceTable({
                           key={index}
                           className="border-r border-border"
                         >
-                          <div className="w-full h-full flex items-center justify-start gap-1 px-4">
+                          <div className="w-full h-full flex items-center justify-start gap-1 px-2">
                             <p
                               className={cn(
                                 "font-semibold",
@@ -355,12 +381,19 @@ export default function AttendanceTable({
                                 }
                                 currentUserEmail={row.original.email}
                                 currentMeeting={meeting}
+                                type={meeting.meeting_type}
                               />
                             )}
                           </div>
                         </TableCell>
                       );
-                    })}
+                    })
+                  ) : (
+                    <TableCell
+                      key={`no-meeting-${rowI}`}
+                      className="border-r border-border"
+                    ></TableCell>
+                  )}
                 </TableRow>
               ))
             ) : (
