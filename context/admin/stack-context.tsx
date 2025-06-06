@@ -170,7 +170,6 @@ export const AdminStackProvider = ({
     handleCreateZoomMeeting,
     handleUpdateZoomMeeting,
     handleUpdateZoomMeetingOccurrence,
-    handleUpdateZoomMeetingPastInstance,
     handleRefreshAndUpdateZoomMeeting,
     handleDeleteZoomMeeting,
   } = useZoomMeetingsStack({
@@ -290,7 +289,7 @@ export const AdminStackProvider = ({
 
     if (meetings.length > 0) {
       meetings.forEach(
-        (meeting) => (ZoomMeetings[meeting._id] = meeting.topic)
+        (meeting) => (ZoomMeetings[meeting.id] = meeting.topic)
       );
     }
     if (assessments.length > 0) {
@@ -379,7 +378,6 @@ export const AdminStackProvider = ({
               handleDeleteZoomMeeting,
               handleRefreshAndUpdateZoomMeeting,
               handleUpdateZoomMeetingOccurrence,
-              handleUpdateZoomMeetingPastInstance,
             },
 
             api: {

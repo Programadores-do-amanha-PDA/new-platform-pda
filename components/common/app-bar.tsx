@@ -2,7 +2,6 @@
 
 import { Fragment } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 
 import { useAuth } from "@/context/auth-context";
 
@@ -78,10 +77,11 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
               <Fragment key={item.href}>
                 <BreadcrumbItem>
                   {index < breadcrumbItems.length - 1 ? (
-                    <BreadcrumbLink asChild>
-                      <Link href={item.href} className="hover:underline">
-                        {item.label}
-                      </Link>
+                    <BreadcrumbLink
+                      href={item.href}
+                      className="hover:underline"
+                    >
+                      {item.label}
                     </BreadcrumbLink>
                   ) : (
                     <BreadcrumbPage>{item.label}</BreadcrumbPage>

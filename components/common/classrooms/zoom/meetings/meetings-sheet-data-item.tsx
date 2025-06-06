@@ -39,7 +39,7 @@ const MeetingsSheetDataItem = ({
           size="icon"
           disabled={isAddingMeeting !== null}
         >
-          {isAddingMeeting === meeting.id ? (
+          {isAddingMeeting === meeting.meeting_id ? (
             <LoaderCircle className="size-4 animate-spin" />
           ) : (
             <Plus className="size-4" />

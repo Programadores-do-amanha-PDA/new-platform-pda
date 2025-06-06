@@ -69,6 +69,7 @@ export const getMeetingById = async (
 
     const meetingData = {
       ...response.data,
+      meeting_id: response.data.id,
       occurrences: response.data.occurrences
         ? response.data.occurrences.map((o: ZoomMeetingOccurrenceType) => ({
             ...o,
@@ -87,6 +88,8 @@ export const getMeetingById = async (
       meetingData.past_instances = [];
 
       for (const instance of pastInstances) {
+        if (!instance.uuid) continue;
+
         const processedInstance = {
           ...instance,
           participants: await getPastedMeetingParticipants(

@@ -67,8 +67,8 @@ const ZoomMeetingsCard = ({
           <Link
             href={
               expansive
-                ? `${path}/${meeting._id}`
-                : `${path}/meetings/${meeting._id}`
+                ? `${path}/${meeting.id}`
+                : `${path}/meetings/${meeting.id}`
             }
             className="font-semibold truncate hover:underline cursor-pointer"
             title={meeting.topic}
@@ -88,7 +88,7 @@ const ZoomMeetingsCard = ({
             new Date(meeting.start_time).getTime() >= Date.now() && (
               <>
                 <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                  ID da Reunião: <p className="font-bold">{meeting.id}</p>
+                  ID da Reunião: <p className="font-bold">{meeting.meeting_id}</p>
                 </p>
                 <p className="text-sm h-4 text-muted-foreground flex gap-1">
                   Senha: <p className="font-bold">{meeting.password}</p>
@@ -171,8 +171,8 @@ const ZoomMeetingsCard = ({
         <Link
           href={
             expansive
-              ? `${path}/${meeting._id}`
-              : `${path}/meetings/${meeting._id}`
+              ? `${path}/${meeting.id}`
+              : `${path}/meetings/${meeting.id}`
           }
           className="font-semibold truncate hover:underline cursor-pointer"
           title={meeting.topic}
@@ -208,7 +208,7 @@ const ZoomMeetingsCard = ({
           new Date(meeting.start_time).getTime() >= Date.now() && (
             <>
               <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                ID da Reunião: <p className="font-bold">{meeting.id}</p>
+                ID da Reunião: <p className="font-bold">{meeting.meeting_id}</p>
               </p>
               <p className="text-sm h-4 text-muted-foreground flex gap-1">
                 Senha: <p className="font-bold">{meeting.password}</p>

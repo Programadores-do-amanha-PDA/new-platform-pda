@@ -21,12 +21,11 @@ const useZoomAPIMeetingsStack = () => {
       setLoading(true);
       if (!account_id || !client_id || !client_secret)
         throw "no account id provided";
+
       const { data } = await axios.post(`/api/zoom/${account_id}`, {
         client_id,
         client_secret,
       });
-      console.log(data);
-
       if (!data) throw "no me account response from API";
 
       return data.results as Partial<ZoomAccountMeType>;
@@ -62,6 +61,8 @@ const useZoomAPIMeetingsStack = () => {
       setMeetingsByAPI(
         data.results.map((m: ZoomMeetingType) => ({
           ...m,
+          meeting_id: m.id,
+          id: "",
           account_id: account.id,
         })) as ZoomMeetingType[]
       );

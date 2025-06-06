@@ -1,6 +1,6 @@
 export interface ZoomMeetingType {
-  _id: string;
-  id: number;
+  id: string;
+  meeting_id: number;
   agenda?: string;
   created_at: string;
   duration: number;
@@ -88,15 +88,19 @@ export interface ZoomMeetingSettingsType {
 }
 
 export interface ZoomMeetingPastInstancesType {
-  id: number;
+  id: string;
   uuid?: string;
-  meetingId?: number;
+  classroom_id: string | null;
+  account_id: string | null;
+  meeting_id: number | null;
   start_time: string;
   poll_results?: ZoomMeetingPollResults[];
   participants?: ZoomMeetingParticipantType[];
   justifications?: ZoomMeetingJustificationType[];
   is_visible_on_schedule: boolean | undefined;
-  class_type?: ZoomClassType;
+  class_type: ZoomClassType;
+  synchronized_at: string | null;
+  created_at: string;
 }
 
 export type ZoomClassType =

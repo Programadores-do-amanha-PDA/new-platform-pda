@@ -8,7 +8,6 @@ import {
 import { ZoomAccountType } from "@/types/zoom/accounts";
 import {
   ZoomMeetingOccurrenceType,
-  ZoomMeetingPastInstancesType,
   ZoomMeetingType,
 } from "@/types/zoom/meetings";
 import { useState } from "react";
@@ -19,7 +18,7 @@ const useZoomMeetingsStack = ({
 }: {
   handleGetZoomMeetingByAPI: (
     account: Partial<ZoomAccountType>,
-    meetingId: number
+    id: number
   ) => Promise<ZoomMeetingType | null>;
 }) => {
   const [meetings, setMeetings] = useState<ZoomMeetingType[]>([]);
@@ -42,10 +41,10 @@ const useZoomMeetingsStack = ({
     }
   };
 
-  const handleGetZoomMeetingById = async (meetingId: number) => {
+  const handleGetZoomMeetingById = async (id: string) => {
     try {
       setLoading(true);
-      const meetingResponse = await getZoomMeetingById(meetingId);
+      const meetingResponse = await getZoomMeetingById(id);
       if (!meetingResponse) throw "no meeting response";
       return meetingResponse;
     } catch (error) {
@@ -62,7 +61,7 @@ const useZoomMeetingsStack = ({
   ) => {
     try {
       if (
-        !meetingData.id ||
+        !meetingData.meeting_id ||
         !account.account_id ||
         !account.client_id ||
         !account.client_secret
@@ -71,7 +70,10 @@ const useZoomMeetingsStack = ({
         throw new Error("missing required meeting data");
       }
 
-      const meeting = await handleGetZoomMeetingByAPI(account, meetingData.id);
+      const meeting = await handleGetZoomMeetingByAPI(
+        account,
+        meetingData.meeting_id
+      );
       if (!meeting) throw new Error("no meeting response");
 
       const newMeeting = await createZoomMeetingByClassroomId({
@@ -95,19 +97,19 @@ const useZoomMeetingsStack = ({
   };
 
   const handleUpdateZoomMeeting = async (
-    meetingId: number,
+    id: string,
     updates: Partial<ZoomMeetingType>
   ) => {
     try {
-      if (!meetingId || !updates) {
+      if (!id || !updates) {
         throw new Error("id and updates fields are required");
       }
-      const updatedMeeting = await updateZoomMeetingById(meetingId, updates);
+      const updatedMeeting = await updateZoomMeetingById(id, updates);
       if (!updatedMeeting) throw new Error("no update meeting response");
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
-          meeting.id === meetingId ? updatedMeeting : meeting
+          meeting.id === id ? updatedMeeting : meeting
         )
       );
       toast.success("Reunião atualizada com sucesso!");
@@ -120,17 +122,15 @@ const useZoomMeetingsStack = ({
   };
 
   const handleUpdateZoomMeetingOccurrence = async (
-    meetingId: number,
+    id: string,
     occurrenceId: string,
     updates: Partial<ZoomMeetingOccurrenceType>
   ) => {
     try {
-      if (!meetingId || !occurrenceId || !updates) {
+      if (!id || !occurrenceId || !updates) {
         throw new Error("id and updates fields are required");
       }
-      const currentMeeting = meetings.find(
-        (meeting) => meeting.id === meetingId
-      );
+      const currentMeeting = meetings.find((meeting) => meeting.id === id);
       const updatedOccurrences = currentMeeting?.occurrences?.map(
         (occurrence) =>
           occurrence.occurrence_id === occurrenceId
@@ -138,78 +138,16 @@ const useZoomMeetingsStack = ({
             : occurrence
       );
       const updatedMeeting: ZoomMeetingType | false =
-        await updateZoomMeetingById(meetingId, {
+        await updateZoomMeetingById(id, {
           occurrences: updatedOccurrences,
         });
       if (!updatedMeeting) throw new Error("no update meeting response");
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
-          meeting.id === meetingId ? updatedMeeting : meeting
+          meeting.id === id ? updatedMeeting : meeting
         )
       );
-      toast.success("Reunião atualizada com sucesso!");
-      return true;
-    } catch (error) {
-      console.error(error);
-      toast.error("Erro ao atualizar a reunião!");
-      return false;
-    }
-  };
-
-  const handleUpdateZoomMeetingPastInstance = async (
-    meetingId: number,
-    pastInstanceId: string,
-    updates: Partial<ZoomMeetingPastInstancesType>
-  ) => {
-    console.log(updates)
-    try {
-      if (!meetingId || !pastInstanceId || !updates) {
-        throw new Error("id and updates fields are required");
-      }
-      const currentMeeting = meetings.find(
-        (meeting) => meeting.id === meetingId
-      );
-      const updatedPastsInstancies = currentMeeting?.past_instances?.map(
-        (past_instancie) =>
-          past_instancie.uuid === pastInstanceId
-            ? {
-                ...past_instancie,
-                ...updates,
-                participants: updates.participants
-                  ? [
-                      ...(past_instancie.participants || []),
-                      ...updates.participants,
-                    ]
-                  : past_instancie.participants,
-                poll_results: updates.poll_results
-                  ? [
-                      ...(past_instancie.poll_results || []),
-                      ...updates.poll_results,
-                    ]
-                  : past_instancie.poll_results,
-                justifications: updates.justifications
-                  ? [
-                      ...(past_instancie.justifications || []),
-                      ...updates.justifications,
-                    ]
-                  : past_instancie.justifications,
-              }
-            : past_instancie
-      );
-      const loadingToastId = toast.loading("Atualizando reunião...");
-      const updatedMeeting: ZoomMeetingType | false =
-        await updateZoomMeetingById(meetingId, {
-          past_instances: updatedPastsInstancies,
-        });
-      if (!updatedMeeting) throw new Error("no update meeting response");
-
-      setMeetings((meetings) =>
-        meetings.map((meeting) =>
-          meeting.id === meetingId ? updatedMeeting : meeting
-        )
-      );
-      toast.dismiss(loadingToastId);
       toast.success("Reunião atualizada com sucesso!");
       return true;
     } catch (error) {
@@ -220,49 +158,47 @@ const useZoomMeetingsStack = ({
   };
 
   const handleRefreshAndUpdateZoomMeeting = async (
-    meetingId: number,
+    id: string,
     account: Partial<ZoomAccountType>
   ) => {
+    let loadingToastId;
     try {
       if (
-        !meetingId ||
+        !id ||
         !account.account_id ||
         !account.client_id ||
         !account.client_secret
       ) {
         throw new Error("id and updates fields are required");
       }
-      toast.info("Atualizando dados da reunião...", {
-        duration: 50000,
-        closeButton: true,
-      });
 
-      const currentMeeting = meetings.find(
-        (meeting) => meeting.id === meetingId
-      );
-      const updatedMeeting = await handleGetZoomMeetingByAPI(
+      const currentMeeting = meetings.find((meeting) => meeting.id === id);
+      if (!currentMeeting || !currentMeeting.meeting_id)
+        throw new Error("no meeting found");
+
+      loadingToastId = toast.loading("Atualizando dados da reunião...");
+      const meetingData = await handleGetZoomMeetingByAPI(
         account,
-        meetingId
+        currentMeeting?.meeting_id
       );
-      if (!updatedMeeting) throw new Error("no meeting response");
+      if (!meetingData) throw new Error("no meeting response");
 
-      const newMeeting = await updateZoomMeetingById(meetingId, {
+      const updatedMeeting = await updateZoomMeetingById(id, {
         ...currentMeeting,
-        ...updatedMeeting,
+        ...meetingData,
         past_instances:
           currentMeeting && currentMeeting?.past_instances?.length > 0
             ? currentMeeting.past_instances.map((past_instance) => {
-                const updatedPastInstance =
-                  updatedMeeting?.past_instances?.find(
-                    (updatedInstance) =>
-                      updatedInstance.uuid === past_instance.uuid
-                  );
+                const updatedPastInstance = meetingData?.past_instances?.find(
+                  (updatedInstance) =>
+                    updatedInstance.uuid === past_instance.uuid
+                );
                 return updatedPastInstance
                   ? { ...past_instance, ...updatedPastInstance }
                   : past_instance;
               })
-            : updatedMeeting?.past_instances || [],
-        occurrences: updatedMeeting?.occurrences?.map((occurrence) => {
+            : meetingData?.past_instances || [],
+        occurrences: meetingData?.occurrences?.map((occurrence) => {
           const currentOccurrence = currentMeeting?.occurrences?.find(
             (currentOccurrence) =>
               currentOccurrence.occurrence_id === occurrence.occurrence_id
@@ -275,11 +211,11 @@ const useZoomMeetingsStack = ({
         synchronized_at: new Date().toISOString(),
       });
 
-      if (!newMeeting) throw new Error("no meeting create response");
+      if (!updatedMeeting) throw new Error("no meeting create response");
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
-          meeting._id === currentMeeting?._id ? newMeeting : meeting
+          meeting.id === currentMeeting?.id ? updatedMeeting : meeting
         )
       );
       toast.success("Dados da reunião atualizados com sucesso!");
@@ -288,18 +224,20 @@ const useZoomMeetingsStack = ({
       console.error(error);
       toast.error("Erro ao atualizar dados da reunião!");
       return false;
+    } finally {
+      toast.dismiss(loadingToastId);
     }
   };
 
-  const handleDeleteZoomMeeting = async (meetingId: number) => {
+  const handleDeleteZoomMeeting = async (id: string) => {
     try {
-      if (!meetingId) throw new Error("meeting id is required to delete");
+      if (!id) throw new Error("meeting id is required to delete");
       setLoading(true);
-      const response = await deleteZoomMeetingById(meetingId);
+      const response = await deleteZoomMeetingById(id);
       if (!response) throw new Error("no delete meeting response");
 
       setMeetings((meetings) =>
-        meetings.filter((meeting) => meeting.id !== meetingId)
+        meetings.filter((meeting) => meeting.id !== id)
       );
       toast.success("Reunião deletada com sucesso!");
       return true;
@@ -321,7 +259,6 @@ const useZoomMeetingsStack = ({
     handleCreateZoomMeeting,
     handleUpdateZoomMeeting,
     handleUpdateZoomMeetingOccurrence,
-    handleUpdateZoomMeetingPastInstance,
     handleRefreshAndUpdateZoomMeeting,
     handleDeleteZoomMeeting,
   };
@@ -333,30 +270,23 @@ export interface ZoomMeetingsStackI {
   meetings: ZoomMeetingType[];
   meetingsLoading: boolean;
   handleGetAllZoomMeetings: (classroomId: string) => Promise<boolean>;
-  handleGetZoomMeetingById: (
-    meetingId: number
-  ) => Promise<ZoomMeetingType | boolean>;
+  handleGetZoomMeetingById: (id: string) => Promise<ZoomMeetingType | boolean>;
   handleCreateZoomMeeting: (
     account: Partial<ZoomAccountType>,
     meeting_id: Partial<ZoomMeetingType>
   ) => Promise<string | false>;
   handleUpdateZoomMeeting: (
-    meetingId: number,
+    id: string,
     updates: Partial<ZoomMeetingType>
   ) => Promise<boolean>;
   handleUpdateZoomMeetingOccurrence: (
-    meetingId: number,
+    id: string,
     occurrenceId: string,
     updates: Partial<ZoomMeetingOccurrenceType>
   ) => Promise<boolean>;
-  handleUpdateZoomMeetingPastInstance: (
-    meetingId: number,
-    pastInstanceId: string,
-    updates: Partial<ZoomMeetingPastInstancesType>
-  ) => Promise<boolean>;
   handleRefreshAndUpdateZoomMeeting: (
-    meetingId: number,
+    id: string,
     account: Partial<ZoomAccountType>
   ) => Promise<boolean>;
-  handleDeleteZoomMeeting: (meetingId: number) => Promise<boolean>;
+  handleDeleteZoomMeeting: (id: string) => Promise<boolean>;
 }

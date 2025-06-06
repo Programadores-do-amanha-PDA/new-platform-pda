@@ -84,7 +84,7 @@ const MeetingsSheetData = () => {
   });
 
   const handleAddMeeting = async (meeting: ZoomMeetingType) => {
-    setIsAddingMeeting(meeting.id);
+    setIsAddingMeeting(meeting.meeting_id);
     const account = accounts.find(
       (account) => account.id === meeting.account_id
     );
@@ -139,7 +139,7 @@ const MeetingsSheetData = () => {
             <ul className="p-2 h-full flex flex-col gap-4 overflow-y-auto">
               {filteredMeetings.map((meeting: ZoomMeetingType) => (
                 <MeetingsSheetDataItem
-                  key={meeting.id}
+                  key={meeting.meeting_id}
                   meeting={meeting}
                   isAddingMeeting={isAddingMeeting}
                   handleAddMeeting={handleAddMeeting}

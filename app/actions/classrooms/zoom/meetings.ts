@@ -1,8 +1,5 @@
 "use server";
-import {
-  ZoomMeetingPastInstancesType,
-  ZoomMeetingType,
-} from "@/types/zoom/meetings";
+import { ZoomMeetingType } from "@/types/zoom/meetings";
 import { createClient } from "@/utils/supabase/server";
 
 const getAllZoomMeetingsByClassroomId = async (classroomId: string) => {
@@ -22,13 +19,13 @@ const getAllZoomMeetingsByClassroomId = async (classroomId: string) => {
   }
 };
 
-const getZoomMeetingById = async (meetingId: number) => {
+const getZoomMeetingById = async (id: string) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("classroom_zoom_meetings")
       .select()
-      .eq("id", meetingId)
+      .eq("id", id)
       .single();
 
     if (error) throw error;
@@ -70,7 +67,7 @@ const createZoomMeetingByClassroomId = async (
 };
 
 const updateZoomMeetingById = async (
-  meetingId: number,
+  id: string,
   updates: Partial<ZoomMeetingType>
 ) => {
   try {
@@ -78,7 +75,7 @@ const updateZoomMeetingById = async (
     const { data, error } = await supabase
       .from("classroom_zoom_meetings")
       .update(updates)
-      .eq("id", meetingId)
+      .eq("id", id)
       .select()
       .single();
 
@@ -90,39 +87,13 @@ const updateZoomMeetingById = async (
   }
 };
 
-const updateZoomMeetingPastInstanceByMeetingId = async (
-  meetingId: number | string,
-  pastInstanceId: string,
-  updates: Partial<ZoomMeetingPastInstancesType>
-) => {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("classroom_zoom_meetings")
-      .update(updates)
-      .eq("id", meetingId)
-      .eq(
-        "past_instances->uuid",
-        encodeURIComponent(encodeURIComponent(pastInstanceId))
-      )
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data as ZoomMeetingType;
-  } catch (error) {
-    console.error("Error updating zoom meeting:", error);
-    return false;
-  }
-};
-
-const deleteZoomMeetingById = async (meetingId: number) => {
+const deleteZoomMeetingById = async (id: string) => {
   try {
     const supabase = await createClient();
     const { error } = await supabase
       .from("classroom_zoom_meetings")
       .delete()
-      .eq("id", meetingId);
+      .eq("id", id);
 
     if (error) throw error;
     return true;
@@ -137,6 +108,5 @@ export {
   getZoomMeetingById,
   createZoomMeetingByClassroomId,
   updateZoomMeetingById,
-  updateZoomMeetingPastInstanceByMeetingId,
   deleteZoomMeetingById,
 };
