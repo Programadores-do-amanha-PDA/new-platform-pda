@@ -23,7 +23,9 @@ const ZoomMeetingsPage = () => {
   const {
     classroomsStack: {
       zoom: {
-        meetings: { meetings },
+        meetings: { meetings, pastInstances: {
+          pastInstances
+        } },
       },
     },
   } = useAdminStackContext();
@@ -71,6 +73,19 @@ const ZoomMeetingsPage = () => {
     <div className="w-full h-full flex flex-col gap-6 py-6 overflow-y-auto px-4">
       <div className="w-full h-full flex flex-col gap-6">
         <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
+          <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
+            <Input
+              id="search"
+              type="text"
+              placeholder="Buscando algo?"
+              className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+            />
+            <Label htmlFor="search">
+              <Search className="size-5 text-primary-foreground" />
+            </Label>
+          </div>
           <div className="w-max h-9 flex gap-4">
             {statusFilters.map((filter, index) => (
               <div key={filter} className="flex items-center gap-4">
@@ -97,20 +112,6 @@ const ZoomMeetingsPage = () => {
                 )}
               </div>
             ))}
-          </div>
-
-          <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-sm rounded-md border px-2">
-            <Input
-              id="search"
-              type="text"
-              placeholder="Buscando algo?"
-              className="max-w-xs !border-none !ring-0 shadow-none !rounded-none"
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-            />
-            <Label htmlFor="search">
-              <Search className="size-5 text-primary-foreground" />
-            </Label>
           </div>
           <MeetingsSheetData />
         </div>
@@ -140,15 +141,18 @@ const ZoomMeetingsPage = () => {
                 new Date(a.start_time ?? 0).getTime()
               );
             })
-            .map((meeting, i) => (
-              <ZoomMeetingsCard
+            .map((meeting, i) => {
+              const meetingPastInstancies = pastInstances.filter(p => p.meeting_id === meeting.id)
+
+               return <ZoomMeetingsCard
                 key={`meeting-${i}`}
                 meeting={meeting}
+                pastInstances={meetingPastInstancies}
                 allMeetingLoading={allMeetingLoading}
                 setAllMeetingLoading={setAllMeetingLoading}
                 expansive={true}
               />
-            ))}
+            })}
         </ul>
       </div>
     </div>

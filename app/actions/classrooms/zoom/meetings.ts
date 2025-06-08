@@ -71,7 +71,6 @@ const updateZoomMeetingById = async (
   id: string,
   updates: Partial<ZoomMeetingType>
 ) => {
-  console.log(id, updates)
   try {
     const supabase = await createClient();
     const { data, error } = await supabase

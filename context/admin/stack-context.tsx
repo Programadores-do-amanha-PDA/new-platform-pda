@@ -188,7 +188,9 @@ export const AdminStackProvider = ({
     handleDeleteZoomMeeting,
   } = useZoomMeetingsStack({
     handleGetZoomMeetingByAPI,
+    pastInstances,
     handleCreateManyZoomPastInstance,
+    handleUpdateZoomPastInstance
   });
 
   useEffect(() => {

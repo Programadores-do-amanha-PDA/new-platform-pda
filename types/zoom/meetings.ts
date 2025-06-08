@@ -34,7 +34,7 @@ export interface ZoomMeetingType {
   participants?: ZoomMeetingParticipantType[];
   justifications?: ZoomMeetingJustificationType[];
   polls?: ZoomMeetingPollType[];
-  poll_results?: ZoomMeetingPollResults[];
+  poll_results?: ZoomMeetingPollResultQuestionDetails[];
   account_id?: string;
   classroom_id?: string;
   is_visible_on_schedule?: boolean;
@@ -94,7 +94,7 @@ export interface ZoomMeetingPastInstancesType {
   account_id: string | null;
   meeting_id: string | null;
   start_time: string;
-  poll_results?: ZoomMeetingPollResults[];
+  poll_results?: ZoomMeetingPollResultQuestionDetails[];
   participants?: ZoomMeetingParticipantType[];
   justifications?: ZoomMeetingJustificationType[];
   is_visible_on_schedule: boolean | undefined;
@@ -135,7 +135,12 @@ export interface ZoomMeetingJustificationType {
 
 export interface ZoomMeetingPollResults {
   id: number;
-  questions: {
+  questions: ZoomMeetingPollResultQuestionDetails[];
+  start_time: string;
+  uuid: string;
+}
+
+export interface ZoomMeetingPollResultQuestionDetails {
     email: string;
     name: string;
     question_details: {
@@ -144,10 +149,7 @@ export interface ZoomMeetingPollResults {
       polling_id: string;
       question: string;
     }[];
-  }[];
-  start_time: string;
-  uuid: string;
-}
+  }
 
 export interface ZoomMeetingPollType {
   id: string;

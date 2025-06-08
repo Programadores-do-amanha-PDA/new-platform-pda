@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -157,6 +156,15 @@ export function MeetingsParticipantsChart({
             </SelectContent>
           </Select>
         </div>
+        <Link href={`${path}/meetings`}>
+          <Button
+            variant="link"
+            className="text-sm font-bold text-primary-foreground"
+          >
+            Ir para Reuniões
+            <ArrowRight className="-rotate-6" />
+          </Button>
+        </Link>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
@@ -246,17 +254,6 @@ export function MeetingsParticipantsChart({
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex justify-center items-center">
-        <Link href={`${path}/meetings`}>
-          <Button
-            variant="link"
-            className="text-sm font-bold text-primary-foreground"
-          >
-            Ir para Reuniões
-            <ArrowRight className="-rotate-6" />
-          </Button>
-        </Link>
-      </CardFooter>
     </Card>
   );
 }

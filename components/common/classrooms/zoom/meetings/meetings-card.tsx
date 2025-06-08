@@ -8,7 +8,10 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { ZoomMeetingType } from "@/types/zoom/meetings";
+import {
+  ZoomMeetingPastInstancesType,
+  ZoomMeetingType,
+} from "@/types/zoom/meetings";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -24,11 +27,13 @@ const meetingTypes = {
 
 const ZoomMeetingsCard = ({
   meeting,
+  pastInstances,
   allMeetingLoading,
   setAllMeetingLoading,
   expansive,
 }: {
   meeting: ZoomMeetingType;
+  pastInstances: ZoomMeetingPastInstancesType[];
   allMeetingLoading: boolean;
   setAllMeetingLoading: (v: boolean) => void;
   expansive: boolean;
@@ -88,7 +93,8 @@ const ZoomMeetingsCard = ({
             new Date(meeting.start_time).getTime() >= Date.now() && (
               <>
                 <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                  ID da Reunião: <p className="font-bold">{meeting.meeting_id}</p>
+                  ID da Reunião:{" "}
+                  <p className="font-bold">{meeting.meeting_id}</p>
                 </p>
                 <p className="text-sm h-4 text-muted-foreground flex gap-1">
                   Senha: <p className="font-bold">{meeting.password}</p>
@@ -112,17 +118,14 @@ const ZoomMeetingsCard = ({
                     </p>
                   </p>
                 )}
-                {meeting?.past_instances &&
-                meeting?.past_instances?.length > 0 ? (
+                {pastInstances && pastInstances?.length > 0 ? (
                   <p className="text-sm h-4 text-muted-foreground flex gap-1">
                     Reuniões finalizadas:
-                    <p className="font-bold">
-                      {meeting?.past_instances?.length}
-                    </p>
+                    <p className="font-bold">{pastInstances?.length}</p>
                   </p>
                 ) : (
                   <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                    Nenhum participante encontrado.
+                    Nenhuma reunião finalizada.
                   </p>
                 )}
 
@@ -281,11 +284,7 @@ const ZoomMeetingsCard = ({
                         {meeting?.poll_results?.length}
                       </p>
                     </p>
-                  ) : (
-                    <p className="text-sm h-4 text-muted-foreground flex gap-1">
-                      Nenhuma resposta encontrada.
-                    </p>
-                  )}
+                  ) : null}
                 </div>
 
                 <Button

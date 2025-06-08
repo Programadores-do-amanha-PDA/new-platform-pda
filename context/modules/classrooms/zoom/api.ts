@@ -1,5 +1,6 @@
 import {
   ZoomMeetingParticipantType,
+  ZoomMeetingPollResultQuestionDetails,
   ZoomMeetingPollResults,
   ZoomMeetingType,
 } from "@/types/zoom/meetings";
@@ -304,7 +305,9 @@ const useZoomAPIMeetingsStack = () => {
         toast.success(
           "Respostas das Polls da Reunião foram obtidas com sucesso!"
         );
-      return pollResults as ZoomMeetingPollResults[];
+      return pollResults.flatMap(
+        (p: ZoomMeetingPollResults) => p.questions
+      ) as ZoomMeetingPollResultQuestionDetails[];
     } catch (error) {
       console.error("Error fetching poll results:", error);
       toast.error("Falha ao buscar resultados de pesquisas da reunião.");
@@ -363,7 +366,7 @@ export interface ZoomAPIMeetingsStackI {
     >,
     meetingId: number,
     isRecurrent: boolean
-  ) => Promise<ZoomMeetingPollResults[]>;
+  ) => Promise<ZoomMeetingPollResultQuestionDetails[]>;
 }
 
 export default useZoomAPIMeetingsStack;

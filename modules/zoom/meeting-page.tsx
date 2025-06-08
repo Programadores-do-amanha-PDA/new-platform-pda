@@ -10,88 +10,245 @@ import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MeetingDataTable } from "@/components/common/classrooms/zoom/meetings/meeting/meeting-data-table";
-import { CalendarMinus, CalendarPlus, RefreshCw, Siren } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  CalendarMinus,
+  CalendarPlus,
+  RefreshCw,
+  Siren,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
-import { Checkbox } from "@/components/ui/checkbox";
 import RefreshButton from "@/components/common/refresh-button";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceType & {
-  topic: string;
-  meeting_id: string;
-  actions?: string;
-  handleUpdateOccurrence: (occurrence: MeetingOccurrence) => Promise<void>;
+  topic: string | undefined;
+  meeting_id: string | null;
 };
 
 type MeetingPastInstance = ZoomMeetingPastInstancesType & {
-  topic: string;
-  meeting_id: string;
-  duration: number;
-  handleUpdatePastInstance: (
-    pastInstance: MeetingPastInstance
-  ) => Promise<void>;
+  topic: string | undefined;
+  meeting_id: string | null;
+  duration: number | undefined;
+  handleUpdateZoomPastInstance: (
+    id: string,
+    updates: Partial<ZoomMeetingPastInstancesType>
+  ) => Promise<boolean>;
 };
 
 const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "topic",
-    header: "Reunião",
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Reunião
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {row.getValue("topic")}
+      </div>
+    ),
   },
   {
     accessorKey: "start_time",
-    header: "Data",
-    cell: ({ row }) =>
-      format(new Date(row.original.start_time!), "dd/MM/yyyy", {
-        locale: ptBR,
-      }),
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Data
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {format(new Date(row.original.start_time!), "dd/MM/yyyy", {
+          locale: ptBR,
+        })}
+      </div>
+    ),
   },
   {
     accessorKey: "duration",
-    header: "Duração",
-    cell: ({ row }) => `${row.getValue("duration")} min`,
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Duração
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {row.getValue("duration")} Minutos
+      </div>
+    ),
   },
   {
     accessorKey: "participants",
-    header: "Participantes",
-    cell: ({ row }) => row.original.participants?.length || 0,
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Participantes
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {row.original.participants?.length || 0}
+      </div>
+    ),
   },
   {
     accessorKey: "poll_results",
-    header: "Respostas",
-    cell: ({ row }) => row.original.poll_results?.length || 0,
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Respostas
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {row.original.poll_results?.length || 0}
+      </div>
+    ),
   },
   {
     id: "actions",
-    header: "Calendário",
+    header: () => {
+      return (
+        <div className="w-full truncate h-full flex justify-center items-center px-2">
+          <Button variant="ghost" className="text-left px-2 font-semibold">
+            Calendário
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }: { row: { original: MeetingPastInstance } }) => (
-      <div key={row.original.uuid}>
+      <div
+        key={row.original.uuid}
+        className="w-full h-full truncate flex justify-center items-center"
+      >
         <RefreshButton
-          handleClick={() =>
-            row.original.handleUpdatePastInstance(row.original)
+          handleClick={async () =>
+            void row.original.handleUpdateZoomPastInstance(row.original.id, {
+              is_visible_on_schedule: !row.original.is_visible_on_schedule,
+            })
           }
           variant={
             row.original.is_visible_on_schedule === undefined ||
@@ -115,70 +272,149 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
 
 const meetingOccurrencesColumns: ColumnDef<MeetingOccurrence>[] = [
   {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: "topic",
-    header: "Reunião",
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Reunião
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {row.getValue("topic")}
+      </div>
+    ),
   },
   {
     accessorKey: "start_time",
-    header: "Data/Hora",
-    cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
-      format(new Date(row.original.start_time), "Pp", { locale: ptBR }),
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Data & Hora
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }: { row: { original: MeetingOccurrence } }) => (
+      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {format(new Date(row.original.start_time), "Pp", { locale: ptBR })}
+      </div>
+    ),
   },
   {
     accessorKey: "status",
-    header: "Status",
-    cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
-      `${row.original.status === "available" ? "Disponível" : "Deletada"}`,
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Status
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
+    cell: ({ row }: { row: { original: MeetingOccurrence } }) => (
+      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
+        {`${row.original.status === "available" ? "Disponível" : "Deletada"}`}
+      </div>
+    ),
   },
   {
     accessorKey: "duration",
-    header: "Duração",
-    cell: ({ row }: { row: { original: MeetingOccurrence } }) =>
-      `${row.original.duration} minutos`,
-  },
-  {
-    accessorKey: "is_visible_on_schedule",
-    header: "Calendário",
+    header: ({ column }) => {
+      const sortState = column.getIsSorted();
+      return (
+        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r px-2">
+          <Button
+            variant="ghost"
+            className="text-left px-2 font-semibold"
+            onClick={() => {
+              if (!sortState) {
+                column.toggleSorting(false);
+              } else if (sortState === "asc") {
+                column.toggleSorting(true);
+              } else {
+                column.clearSorting();
+              }
+            }}
+          >
+            Duração
+            {sortState === "asc" ? (
+              <ArrowUp className="stroke-primary" />
+            ) : sortState === "desc" ? (
+              <ArrowDown className="stroke-primary" />
+            ) : (
+              <ArrowUpDown />
+            )}
+          </Button>
+        </div>
+      );
+    },
     cell: ({ row }: { row: { original: MeetingOccurrence } }) => (
-      <RefreshButton
-        variant={
-          row.original.is_visible_on_schedule === undefined ||
-          row.original.is_visible_on_schedule === true
-            ? "destructive"
-            : "default"
-        }
-        size="icon"
-        handleClick={() => row.original.handleUpdateOccurrence(row.original)}
-      >
-        {row.original.is_visible_on_schedule === undefined ||
-        row.original.is_visible_on_schedule === true ? (
-          <CalendarMinus className="size-4" />
-        ) : (
-          <CalendarPlus className="size-4" />
-        )}
-      </RefreshButton>
+      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r">{`${row.original.duration} minutos`}</div>
     ),
   },
 ];
@@ -193,14 +429,13 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
         meetings: {
           meetings,
           handleRefreshAndUpdateZoomMeeting,
-          handleUpdateZoomMeetingOccurrence,
-          handleUpdateZoomMeetingPastInstance,
+          pastInstances: { pastInstances, handleUpdateZoomPastInstance },
         },
       },
     },
   } = useAdminStackContext();
 
-  const currentMeeting = meetings?.find((m) => m._id === meeting_id);
+  const currentMeeting = meetings?.find((m) => m.id === meeting_id);
 
   const handleRefreshMeeting = async () => {
     setIsUpdating(true);
@@ -222,47 +457,6 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
     }
   };
 
-  const handleUpdateOccurrence = async (occurrence: MeetingOccurrence) => {
-    try {
-      const currentMeeting = meetings?.find(
-        (m) => m._id === occurrence.meeting_id
-      );
-      if (!currentMeeting) throw new Error("Meeting not found");
-
-      await handleUpdateZoomMeetingOccurrence(
-        currentMeeting.id,
-        occurrence.occurrence_id,
-        {
-          is_visible_on_schedule: !occurrence.is_visible_on_schedule,
-        }
-      );
-    } catch {
-      toast.error("Erro ao atualizar a reunião!");
-    }
-  };
-
-  const handleUpdatePastInstance = async (
-    pastInstance: MeetingPastInstance
-  ) => {
-    try {
-      const currentMeeting = meetings?.find(
-        (m) => m._id === pastInstance.meeting_id
-      );
-
-      if (!currentMeeting) throw new Error("Meeting not found");
-
-      await handleUpdateZoomMeetingPastInstance(
-        currentMeeting.id,
-        pastInstance.uuid,
-        {
-          is_visible_on_schedule: !pastInstance.is_visible_on_schedule,
-        }
-      );
-    } catch {
-      toast.error("Erro ao atualizar a reunião!");
-    }
-  };
-
   // Processamento das meetings
   const { meetingOccurrences, meetingPastInstances } = useMemo(() => {
     return {
@@ -270,20 +464,19 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
         ?.map((occurrence) => ({
           ...occurrence,
           topic: currentMeeting.topic,
-          meeting_id: currentMeeting._id,
-          handleUpdateOccurrence: handleUpdateOccurrence,
+          meeting_id: currentMeeting.id,
         }))
         .sort(
           (a, b) =>
             new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
         ),
-      meetingPastInstances: currentMeeting?.past_instances
+      meetingPastInstances: pastInstances
+        .filter((p) => p.meeting_id === currentMeeting?.id)
         ?.map((pastInstance) => ({
           ...pastInstance,
-          topic: currentMeeting.topic,
-          duration: currentMeeting.duration,
-          meeting_id: currentMeeting._id,
-          handleUpdatePastInstance: handleUpdatePastInstance,
+          topic: currentMeeting?.topic,
+          duration: currentMeeting?.duration,
+          handleUpdateZoomPastInstance,
         }))
         .sort(
           (a, b) =>
@@ -358,13 +551,13 @@ const ZoomMeetingPage = ({ meeting_id }: { meeting_id: string }) => {
           <TabsList className="w-max flex gap-2 overflow-hidden">
             {meetingOccurrences && meetingOccurrences?.length > 0 && (
               <TabsTrigger value="upcoming">
-                Futuras ({meetingOccurrences.length})
+                Reuniões Futuras ({meetingOccurrences.length})
               </TabsTrigger>
             )}
 
             {meetingPastInstances && meetingPastInstances.length > 0 && (
               <TabsTrigger value="completed">
-                Terminadas ({meetingPastInstances.length})
+                Reuniões Terminadas ({meetingPastInstances.length})
               </TabsTrigger>
             )}
           </TabsList>

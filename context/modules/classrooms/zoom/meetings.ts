@@ -16,7 +16,9 @@ import { toast } from "sonner";
 
 const useZoomMeetingsStack = ({
   handleGetZoomMeetingByAPI,
+  pastInstances,
   handleCreateManyZoomPastInstance,
+  handleUpdateZoomPastInstance,
 }: {
   handleGetZoomMeetingByAPI: (
     account: Omit<
@@ -25,8 +27,13 @@ const useZoomMeetingsStack = ({
     >,
     id: number
   ) => Promise<Omit<ZoomMeetingType, "id"> | null>;
+  pastInstances: ZoomMeetingPastInstancesType[];
   handleCreateManyZoomPastInstance: (
     instanciesData: Partial<ZoomMeetingPastInstancesType>[]
+  ) => Promise<boolean>;
+  handleUpdateZoomPastInstance: (
+    id: string,
+    updates: Partial<ZoomMeetingPastInstancesType>
   ) => Promise<boolean>;
 }) => {
   const [meetings, setMeetings] = useState<ZoomMeetingType[]>([]);
@@ -208,28 +215,17 @@ const useZoomMeetingsStack = ({
         throw new Error("no meeting found");
 
       loadingToastId = toast.loading("Atualizando dados da reunião...");
-      const meetingData = await handleGetZoomMeetingByAPI(
+      const updatedMeetingResponse = await handleGetZoomMeetingByAPI(
         account,
         currentMeeting?.meeting_id
       );
-      if (!meetingData) throw new Error("no meeting response");
+      if (!updatedMeetingResponse) throw new Error("no meeting response");
 
+      const { past_instances, ...updatedMeetingData } = updatedMeetingResponse;
       const updatedMeeting = await updateZoomMeetingById(id, {
         ...currentMeeting,
-        ...meetingData,
-        past_instances:
-          currentMeeting && currentMeeting?.past_instances?.length > 0
-            ? currentMeeting.past_instances.map((past_instance) => {
-                const updatedPastInstance = meetingData?.past_instances?.find(
-                  (updatedInstance) =>
-                    updatedInstance.uuid === past_instance.uuid
-                );
-                return updatedPastInstance
-                  ? { ...past_instance, ...updatedPastInstance }
-                  : past_instance;
-              })
-            : meetingData?.past_instances || [],
-        occurrences: meetingData?.occurrences?.map((occurrence) => {
+        ...updatedMeetingData,
+        occurrences: updatedMeetingData?.occurrences?.map((occurrence) => {
           const currentOccurrence = currentMeeting?.occurrences?.find(
             (currentOccurrence) =>
               currentOccurrence.occurrence_id === occurrence.occurrence_id
@@ -241,8 +237,66 @@ const useZoomMeetingsStack = ({
         }),
         synchronized_at: new Date().toISOString(),
       });
-
       if (!updatedMeeting) throw new Error("no meeting create response");
+
+  if (updatedMeeting.type === 8) {
+        const updatedPastInstances = pastInstances
+          .map((pastInstance) => {
+            const currentParticipants = new Set(
+              pastInstance?.participants?.map((p) => p?.user_email) ?? []
+            );
+            const currentPollResults = new Set(
+              pastInstance?.poll_results?.map((p) => p?.email) ?? []
+            );
+
+            const matchingInstance = past_instances.find(
+              (m) => m.uuid === pastInstance?.uuid
+            );
+
+            if (!matchingInstance) return null;
+
+            const hasParticipantChanges =
+              matchingInstance.participants?.length !==
+                pastInstance?.participants?.length ||
+              matchingInstance.participants?.some(
+                (p) => p?.user_email && !currentParticipants.has(p.user_email)
+              );
+
+            const hasPollResultChanges =
+              matchingInstance.poll_results?.length !==
+                pastInstance?.poll_results?.length ||
+              matchingInstance.poll_results?.some(
+                (p) => p?.email && !currentPollResults.has(p.email)
+              );
+
+            if (!hasParticipantChanges && !hasPollResultChanges) return null;
+
+            return {
+              id: pastInstance.id,
+              participants:
+                matchingInstance.participants || pastInstance?.participants,
+              poll_results:
+                matchingInstance.poll_results || pastInstance?.poll_results,
+            };
+          })
+          .filter(Boolean);
+
+        if (updatedPastInstances?.length > 0) {
+          for (const updatedPastInstance of updatedPastInstances) {
+            if (!updatedPastInstance) continue;
+            const { id, ...updates } = updatedPastInstance;
+            await handleUpdateZoomPastInstance(id, updates);
+          }
+        }
+
+        const newInstances = past_instances.filter(
+          (m) => m?.uuid && !pastInstances.some((p) => p?.uuid === m.uuid)
+        );
+
+        if (newInstances?.length) {
+          await handleCreateManyZoomPastInstance(newInstances);
+        }
+      }
 
       setMeetings((meetings) =>
         meetings.map((meeting) =>
@@ -298,13 +352,29 @@ const useZoomMeetingsStack = ({
 export default useZoomMeetingsStack;
 
 export interface ZoomMeetingsStackI {
-  meetings:  ZoomMeetingType[];
+  meetings: ZoomMeetingType[];
   meetingsLoading: boolean;
   handleGetAllZoomMeetings: (classroomId: string) => Promise<boolean>;
   handleGetZoomMeetingById: (id: string) => Promise<false | ZoomMeetingType>;
-  handleCreateZoomMeeting:(account: Omit<ZoomAccountType, "me" | "label" | "created_at">, meetingData: Partial<ZoomMeetingType>) => Promise<string | false> ;
-  handleUpdateZoomMeeting:(id: string, updates: Partial<ZoomMeetingType>) => Promise<boolean>;
-  handleUpdateZoomMeetingOccurrence: (id: string, occurrenceId: string, updates: Partial<ZoomMeetingOccurrenceType>) => Promise<boolean>;
-  handleRefreshAndUpdateZoomMeeting: (id: string, account: Omit<ZoomAccountType, "classroom_id" | "me" | "label" | "created_at">) => Promise<boolean>;
-  handleDeleteZoomMeeting: (id: string) => Promise<boolean>
+  handleCreateZoomMeeting: (
+    account: Omit<ZoomAccountType, "me" | "label" | "created_at">,
+    meetingData: Partial<ZoomMeetingType>
+  ) => Promise<string | false>;
+  handleUpdateZoomMeeting: (
+    id: string,
+    updates: Partial<ZoomMeetingType>
+  ) => Promise<boolean>;
+  handleUpdateZoomMeetingOccurrence: (
+    id: string,
+    occurrenceId: string,
+    updates: Partial<ZoomMeetingOccurrenceType>
+  ) => Promise<boolean>;
+  handleRefreshAndUpdateZoomMeeting: (
+    id: string,
+    account: Omit<
+      ZoomAccountType,
+      "classroom_id" | "me" | "label" | "created_at"
+    >
+  ) => Promise<boolean>;
+  handleDeleteZoomMeeting: (id: string) => Promise<boolean>;
 }

@@ -130,12 +130,16 @@ const useZoomPastInstancesStack = () => {
 
   const handleUpdateZoomPastInstance = async (
     id: string,
-    updates: Partial<ZoomMeetingPastInstancesType>
+    updates: Partial<ZoomMeetingPastInstancesType>,
+    showLoader?: boolean
   ) => {
+    let loaderToastId;
     try {
       if (!id || !updates) {
         throw new Error("id and updates fields are required");
       }
+      if (showLoader)
+        loaderToastId = toast.loading("Atualizando instancia passada...");
       const updatedInstance = await updateZoomPastInstanceById(id, updates);
       if (!updatedInstance) throw new Error("no update past instance response");
 
@@ -144,12 +148,15 @@ const useZoomPastInstancesStack = () => {
           instance.id === id ? updatedInstance : instance
         )
       );
+      if (showLoader || loaderToastId) toast.dismiss(loaderToastId);
       toast.success("Instância passada atualizada com sucesso!");
       return true;
     } catch (error) {
       console.error("Failed to update past instance:", error);
       toast.error("Erro ao atualizar a instância passada!");
       return false;
+    } finally {
+      if (loaderToastId) toast.dismiss(loaderToastId);
     }
   };
 

@@ -192,7 +192,7 @@ export default function AttendanceTable({
                   pastMeetings.map((pastMeeting, index) => {
                     return (
                       <TableHead key={index} className="w-full h-max p-0 m-0">
-                        <div className="w-full h-full flex flex-col justify-center items-center border-r border-border">
+                        <div className="w-40 max-w-56 h-full flex flex-col justify-center items-center border-r border-border">
                           <div className="w-full h-11 flex justify-center items-center border-b border-border p-2">
                             <p className="font-bold">
                               {new Date(
@@ -265,7 +265,7 @@ export default function AttendanceTable({
 
                       if (
                         meetingAttendanceHistory &&
-                        meetingAttendanceHistory.length > 0
+                        meetingAttendanceHistory.length > 1
                       ) {
                         const attendanceMinutes = Math.round(
                           meetingAttendanceHistory.reduce(
@@ -331,7 +331,7 @@ export default function AttendanceTable({
                                     {!isAttendanceJustified ? "F" : "FJ"}
                                   </p>
                                 )}
-                                {attendanceMinutes < 60 && (
+                                {attendanceMinutes > 1 && (
                                   <p className="text-sm text-muted-foreground">
                                     {attendanceMinutes}M
                                   </p>
