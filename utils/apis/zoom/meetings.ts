@@ -162,6 +162,7 @@ export const getPastedMeetingParticipants = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
+    console.log(response.data)
     if (response.status !== 200)
       throw new Error("Failed to fetch participants");
 

@@ -274,6 +274,10 @@ export const AdminStackProvider = ({
         icon: classroomPeriodsIcons[classroom.period],
         isActive: false,
         items: [
+                    {
+            title: "Presenças",
+            url: `/dashboard/admin/classrooms/${classroom.id}/attendance`,
+          },
           {
             title: "Projetos",
             url: `/dashboard/admin/classrooms/${classroom.id}/projects`,

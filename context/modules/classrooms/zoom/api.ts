@@ -226,8 +226,6 @@ const useZoomAPIMeetingsStack = () => {
       if (!meetingId) throw new Error("Meeting ID is missing");
 
       setLoading(true);
-      if (!isRecurrent)
-        loadingToast = toast.loading("Acessando a conta do Zoom...");
       const ZOOM_ACCESS_TOKEN = await getAccessToken(account);
       if (!ZOOM_ACCESS_TOKEN) {
         throw new Error("Failed to get access token");
@@ -250,6 +248,7 @@ const useZoomAPIMeetingsStack = () => {
         throw new Error("Invalid participants data from API");
       }
 
+      console.log(participants)
       if (!isRecurrent)
         toast.success("Os Participantes da Reunião foram obtidos com sucesso!");
       return participants as ZoomMeetingParticipantType[];
