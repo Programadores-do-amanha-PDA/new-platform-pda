@@ -1,9 +1,9 @@
 "use server";
-import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
 
 export const createCoodeshAssessment = async (
-  assessmentData: Partial<ClassroomCoodeshAssessment>
+  assessmentData: Partial<ClassroomCoodeshAssessmentT>
 ) => {
   try {
     const supabase = await createClient();
@@ -13,7 +13,7 @@ export const createCoodeshAssessment = async (
       .select();
 
     if (error) throw error;
-    return data[0] as ClassroomCoodeshAssessment;
+    return data[0] as ClassroomCoodeshAssessmentT;
   } catch (error) {
     console.error("Error creating classroom coodesh assessment:", error);
     return false;
@@ -30,7 +30,7 @@ export const getAllCoodeshAssessment = async (classRoomId: string) => {
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as ClassroomCoodeshAssessment[];
+    return data as ClassroomCoodeshAssessmentT[];
   } catch (error) {
     console.error("Error fetching all classroom coodesh assessments:", error);
     return false;
@@ -47,7 +47,7 @@ export const getCoodeshAssessmentById = async (id: number) => {
       .single();
 
     if (error) throw error;
-    return data as ClassroomCoodeshAssessment;
+    return data as ClassroomCoodeshAssessmentT;
   } catch (error) {
     console.error("Error fetching classroom coodesh assessment:", error);
     return false;
@@ -56,7 +56,7 @@ export const getCoodeshAssessmentById = async (id: number) => {
 
 export const updateCoodeshAssessment = async (
   id: string,
-  assessmentData: Partial<ClassroomCoodeshAssessment>
+  assessmentData: Partial<ClassroomCoodeshAssessmentT>
 ) => {
   console.log({ ...assessmentData, updated_at: new Date().toISOString() })
   try {
@@ -72,7 +72,7 @@ export const updateCoodeshAssessment = async (
     console.log(data, error);
 
     if (error) throw error;
-    return data as ClassroomCoodeshAssessment;
+    return data as ClassroomCoodeshAssessmentT;
   } catch (error) {
     console.error("Error updating classroom coodesh assessment:", error);
     return false;

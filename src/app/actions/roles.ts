@@ -1,7 +1,7 @@
 "use server";
-import { RolesType } from "@/types/auth-types";
-import { CustomJwtPayload } from "@/types/jwt";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { RolesT, JwtPayloadT } from "@/types/auth";
+import {} from "@/types/auth/user-role";
 import { jwtDecode } from "jwt-decode";
 
 export const getAllUserRoles = async () => {
@@ -21,15 +21,15 @@ export const getAllUserRoles = async () => {
 
 export const insertUserRoleWithUserId = async (
   user_id: string,
-  role: RolesType
+  role: RolesT
 ) => {
   try {
     const supabase = await createClient();
 
-    const {data, error } = await supabase
+    const { data, error } = await supabase
       .from("user_roles")
       .insert({ user_id: user_id, role: role })
-      .select()
+      .select();
 
     if (error) throw error;
 
@@ -88,7 +88,7 @@ export const getUserRole = async () => {
     if (error) throw error;
     if (!data || !data?.session) throw error;
 
-    const jwt = jwtDecode<CustomJwtPayload>(data.session.access_token);
+    const jwt = jwtDecode<JwtPayloadT>(data.session.access_token);
     const userRole = jwt.user_role;
 
     return userRole;

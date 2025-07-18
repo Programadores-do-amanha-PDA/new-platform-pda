@@ -1,8 +1,6 @@
 import { ResumeT } from "@/types/resume";
 
-export const calculateResumeCompletion = (
-  resume: ResumeT
-): number => {
+export const calculateResumeCompletion = (resume: ResumeT): number => {
   const isLocationValid = (): boolean => {
     return (
       !!resume.location &&
@@ -12,13 +10,10 @@ export const calculateResumeCompletion = (
   };
 
   const areInterestingAreasValid = (): boolean => {
-    if (
-      !resume.interesting_areas ||
-      resume.interesting_areas.length === 0
-    ) {
+    if (!resume.interesting_areas || resume.interesting_areas.length === 0) {
       return false;
     }
-    return resume.interesting_areas.some((area) => {
+    return resume.interesting_areas?.some((area) => {
       const isAreaValid = area.area?.trim() !== "";
       const areTechnologiesValid =
         (area.technologies?.length ?? 0) > 0 &&

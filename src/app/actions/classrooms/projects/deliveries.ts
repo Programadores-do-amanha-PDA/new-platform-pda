@@ -1,5 +1,5 @@
 "use server";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { ClassroomProjectDeliveryT } from "@/types/projects/delivery";
 
 export const createClassroomProjectDelivery = async (

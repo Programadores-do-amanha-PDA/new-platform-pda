@@ -1,9 +1,5 @@
 "use server";
-import {
-  ZoomMeetingPastInstancesType,
-  ZoomMeetingOccurrenceType,
-} from "../../../types/zoom/meetings";
-import { ZoomMeetingType } from "@/types/zoom/meetings";
+import { ZoomMeetingOccurrenceT, ZoomMeetingPastInstancesT, ZoomMeetingT } from "@/types/zoom";
 import axiosZoomInstancie from ".";
 import { encodeUUID } from "@/utils/encode-UUID";
 
@@ -70,13 +66,13 @@ export const getMeetingById = async (
     const meetingData = {
       ...response.data,
       occurrences: response.data.occurrences
-        ? response.data.occurrences.map((o: ZoomMeetingOccurrenceType) => ({
+        ? response.data.occurrences.map((o: ZoomMeetingOccurrenceT) => ({
             ...o,
             is_visible_on_schedule: true,
           }))
         : [],
       polls: meetingPolls.polls,
-    } as ZoomMeetingType;
+    } as ZoomMeetingT;
 
     if (meetingData.type === 8) {
       // Recurring meeting type
@@ -127,7 +123,7 @@ export const getPastMeetingInstances = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    return (response.data.meetings as ZoomMeetingPastInstancesType[]) || [];
+    return (response.data.meetings as ZoomMeetingPastInstancesT[]) || [];
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
     return [];

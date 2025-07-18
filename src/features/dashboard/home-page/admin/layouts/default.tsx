@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AdminStackProvider } from "@/providers/admin/stack-provider";
+import UsersStoreProvider from "@/providers/users-store-provider";
 
-export default async function DashboardLayout({
+export default async function AdminDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,7 +13,7 @@ export default async function DashboardLayout({
   return (
     <main className="border-grid flex flex-1 flex-col w-full h-full">
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AdminStackProvider>{children}</AdminStackProvider>
+        <UsersStoreProvider>{children}</UsersStoreProvider>
       </SidebarProvider>
     </main>
   );

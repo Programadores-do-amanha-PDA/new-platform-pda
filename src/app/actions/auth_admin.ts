@@ -5,9 +5,9 @@ import {
   getAllProfilesFilteredByRole,
 } from "@/app/actions/profiles";
 import { createClientAdmin } from "@/lib/supabase/server";
-import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth-types";
+import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types/auth";
 
-export const getAllUsers = async (role?: RolesType) => {
+export const getAllUsers = async (role?: RolesT) => {
   try {
     const supabase = await createClientAdmin();
     const {
@@ -22,11 +22,13 @@ export const getAllUsers = async (role?: RolesType) => {
       if (!profiles) throw new Error("no users profile response");
 
       const usersWithPossibleProfiles = users.map((user) => {
-        const profile = profiles.find((profile: ProfileType) => profile.id === user.id);
+        const profile = profiles.find(
+          (profile: ProfileT) => profile.id === user.id
+        );
         return { user, profile };
       });
 
-      const usersWithProfiles: AuthUserWithProfileType[] =
+      const usersWithProfiles: AuthUserWithProfileT[] =
         usersWithPossibleProfiles
           .filter(({ profile }) => profile !== undefined)
           .map(({ user, profile }) => ({ ...user, profile: profile! }))
@@ -40,7 +42,7 @@ export const getAllUsers = async (role?: RolesType) => {
         throw new Error(`Users or profiles for role ${role} is not available`);
       }
 
-      const allFilteredUsers: AuthUserWithProfileType[] = filteredProfiles
+      const allFilteredUsers: AuthUserWithProfileT[] = filteredProfiles
         .map((profile) => {
           const user = users?.find((p) => p.id === profile.id);
           if (user) {
@@ -51,10 +53,10 @@ export const getAllUsers = async (role?: RolesType) => {
           }
           return null;
         })
-        .filter((user): user is AuthUserWithProfileType => user !== null)
+        .filter((user): user is AuthUserWithProfileT => user !== null)
         .sort((a, b) => (a.created_at > b.created_at ? 1 : -1));
 
-      return allFilteredUsers;
+      return allFilteredUsers as AuthUserWithProfileT[];
     }
   } catch (error) {
     console.error("Error fetching all auth users:", error);
@@ -72,7 +74,7 @@ export const getUserByID = async (userId: string) => {
 
     if (error) throw error;
 
-    return user;
+    return user as AuthUser;
   } catch (error) {
     console.error("Error fetching all auth users:", error);
     return false;

@@ -1,6 +1,6 @@
 "use server";
-import { UserClassroomT } from "@/types/user-classroom";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { UserClassroomT } from "@/types/auth";
 
 export const getAllUsersClassrooms = async () => {
   try {
@@ -72,7 +72,7 @@ export const insertUserClassroom = async (
 
     if (error) throw error;
 
-    return data;
+    return data as UserClassroomT[];
   } catch (error) {
     console.error("Error on insert user classroom", error);
     return null;

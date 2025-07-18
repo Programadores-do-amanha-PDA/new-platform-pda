@@ -1,9 +1,9 @@
 "use server";
 import {
-  ZoomMeetingPastInstancesType,
-  ZoomMeetingType,
+  ZoomMeetingPastInstancesT,
+  ZoomMeetingT,
 } from "@/types/zoom/meetings";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 const getAllZoomMeetingsByClassroomId = async (classroomId: string) => {
   try {
@@ -40,7 +40,7 @@ const getZoomMeetingById = async (meetingId: number) => {
 };
 
 const createZoomMeetingByClassroomId = async (
-  meetingData: Partial<ZoomMeetingType>
+  meetingData: Partial<ZoomMeetingT>
 ) => {
   try {
     const supabase = await createClient();
@@ -71,7 +71,7 @@ const createZoomMeetingByClassroomId = async (
 
 const updateZoomMeetingById = async (
   meetingId: number,
-  updates: Partial<ZoomMeetingType>
+  updates: Partial<ZoomMeetingT>
 ) => {
   try {
     const supabase = await createClient();
@@ -83,7 +83,7 @@ const updateZoomMeetingById = async (
       .single();
 
     if (error) throw error;
-    return data as ZoomMeetingType;
+    return data as ZoomMeetingT;
   } catch (error) {
     console.error("Error updating zoom meeting:", error);
     return false;
@@ -93,7 +93,7 @@ const updateZoomMeetingById = async (
 const updateZoomMeetingPastInstanceByMeetingId = async (
   meetingId: number | string,
   pastInstanceId: string,
-  updates: Partial<ZoomMeetingPastInstancesType>
+  updates: Partial<ZoomMeetingPastInstancesT>
 ) => {
   try {
     const supabase = await createClient();
@@ -109,7 +109,7 @@ const updateZoomMeetingPastInstanceByMeetingId = async (
       .single();
 
     if (error) throw error;
-    return data as ZoomMeetingType;
+    return data as ZoomMeetingT;
   } catch (error) {
     console.error("Error updating zoom meeting:", error);
     return false;

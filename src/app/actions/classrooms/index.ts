@@ -1,9 +1,9 @@
 "use server";
-import { ClassroomType } from "@/types/classrooms";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { ClassroomT } from "@/types/classrooms";
 
 export const createClassroom = async (
-  classroomData: Partial<ClassroomType>
+  classroomData: Partial<ClassroomT>
 ) => {
   try {
     const supabase = await createClient();
@@ -15,7 +15,7 @@ export const createClassroom = async (
 
     if (error) throw error;
 
-    return data[0] as ClassroomType;
+    return data[0] as ClassroomT;
   } catch (error) {
     console.error("Error creating team:", error);
     return false;
@@ -33,7 +33,7 @@ export const getAllClassrooms = async () => {
 
     if (error) throw error;
 
-    return data as ClassroomType[];
+    return data as ClassroomT[];
   } catch (error) {
     console.error("Error fetching all classrooms:", error);
     return false;
@@ -52,7 +52,7 @@ export const getClassroomsById = async (id: string) => {
 
     if (error) throw error;
 
-    return data as ClassroomType;
+    return data as ClassroomT;
   } catch (error) {
     console.error("Error fetching team:", error);
     return false;
@@ -61,7 +61,7 @@ export const getClassroomsById = async (id: string) => {
 
 export const updateClassroom = async (
   id: string,
-  classroomData: Partial<ClassroomType>
+  classroomData: Partial<ClassroomT>
 ) => {
   try {
     const supabase = await createClient();
@@ -80,7 +80,7 @@ export const updateClassroom = async (
 
     if (error) throw error;
 
-    return data[0] as ClassroomType;
+    return data[0] as ClassroomT;
   } catch (error) {
     console.error("Error updating team:", error);
     return false;

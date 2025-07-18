@@ -1,6 +1,6 @@
 "use server";
-import { ProfileType, RolesType } from "@/types/auth-types";
 import { createClient } from "@/lib/supabase/server";
+import { ProfileT, RolesT } from "@/types/auth";
 
 export const createProfile = async (profileData: {
   full_name: string;
@@ -36,14 +36,14 @@ export const getAllProfiles = async () => {
 
     if (error) throw error;
 
-    return data;
+    return data as ProfileT[];
   } catch (error) {
     console.error("Error fetching all alumni profiles:", error);
     return null;
   }
 };
 
-export const getAllProfilesFilteredByRole = async (role: RolesType) => {
+export const getAllProfilesFilteredByRole = async (role: RolesT) => {
   console.log(role);
   try {
     const supabase = await createClient();
@@ -57,7 +57,7 @@ export const getAllProfilesFilteredByRole = async (role: RolesType) => {
 
     if (error) throw error;
 
-    return data as ProfileType[];
+    return data as ProfileT[];
   } catch (error) {
     console.error("Error fetching all filtered profiles:", error);
     return null;
@@ -78,7 +78,7 @@ export const getProfileById = async (id: string) => {
 
     if (error) throw error;
 
-    return data;
+    return data as ProfileT;
   } catch (error) {
     console.error("Error fetching profile:", error);
     return null;

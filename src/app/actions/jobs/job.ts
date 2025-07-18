@@ -1,6 +1,6 @@
 "use server";
-import { JobT } from "@/types/jobs";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
+import { JobT, JobWithApplicationsT } from "@/types/jobs";
 
 export const getAllJobs = async () => {
   try {
@@ -10,7 +10,7 @@ export const getAllJobs = async () => {
 
     if (error) throw error;
 
-    return data;
+    return data as JobT[];
   } catch (error) {
     console.error("Error fetching all jobs search:", error);
     return null;
@@ -27,7 +27,7 @@ export const getAllJobsWithApplications = async () => {
 
     if (error) throw error;
 
-    return data;
+    return data as JobWithApplicationsT[];
   } catch (error) {
     console.error("Error fetching all jobs search:", error);
     return null;
@@ -45,7 +45,7 @@ export const getAllCuratedJobs = async () => {
 
     if (error) throw error;
 
-    return data;
+    return data as JobT[];
   } catch (error) {
     console.error("Error fetching all curated jobs search:", error);
     return null;
@@ -64,7 +64,7 @@ export const getJobByID = async (jobId: string) => {
 
     if (error) throw error;
 
-    return data;
+    return data as JobT;
   } catch (error) {
     console.error("Error fetching job:", error);
     return null;

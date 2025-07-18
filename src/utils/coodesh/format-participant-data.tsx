@@ -1,21 +1,21 @@
 import Papa from "papaparse";
 import {
-  ActionPlanRow,
-  IntegrityRow,
-  ParticipantData,
-  ResultsRow,
+  ActionPlanRowT,
+  IntegrityRowT,
+  ParticipantDataT,
+  ResultsRowT,
 } from "@/types/coodesh/attempts";
 
 export function formatParticipantsData(
   resultsCsv: string,
   integrityCsv: string,
   actionPlansCsv: string
-): ParticipantData[] {
-  const results = parseCsv<ResultsRow>(resultsCsv);
-  const integrity = parseCsv<IntegrityRow>(integrityCsv);
-  const actionPlans = parseCsv<ActionPlanRow>(actionPlansCsv);
+): ParticipantDataT[] {
+  const results = parseCsv<ResultsRowT>(resultsCsv);
+  const integrity = parseCsv<IntegrityRowT>(integrityCsv);
+  const actionPlans = parseCsv<ActionPlanRowT>(actionPlansCsv);
 
-  const participantsMap = new Map<string, ParticipantData>();
+  const participantsMap = new Map<string, ParticipantDataT>();
 
   // Processar results.csv agrupando múltiplas entradas
   results.forEach((result) => {

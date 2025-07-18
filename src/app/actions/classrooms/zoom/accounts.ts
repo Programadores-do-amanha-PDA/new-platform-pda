@@ -1,6 +1,6 @@
 "use server";
-import { ZoomAccountType } from "@/types/zoom/accounts";
-import { createClient } from "@/utils/supabase/server";
+import { ZoomAccountT } from "@/types/zoom/accounts";
+import { createClient } from "@/lib/supabase/server";
 
 const getAllZoomAccountsByClassroomId = async (classroomId: string) => {
   try {
@@ -29,7 +29,7 @@ const getZoomAccountById = async (accountId: string) => {
       .single();
 
     if (error) throw error;
-    return data as ZoomAccountType;
+    return data as ZoomAccountT;
   } catch (error) {
     console.error("Error fetching zoom account by ID:", error);
     return false;
@@ -37,7 +37,7 @@ const getZoomAccountById = async (accountId: string) => {
 };
 
 const createZoomAccountByClassroomId = async (
-  accountData: Partial<ZoomAccountType>
+  accountData: Partial<ZoomAccountT>
 ) => {
   try {
     const supabase = await createClient();
@@ -66,7 +66,7 @@ const createZoomAccountByClassroomId = async (
 
 const updateZoomAccountById = async (
   accountId: string,
-  updates: Partial<ZoomAccountType>
+  updates: Partial<ZoomAccountT>
 ) => {
   try {
     const supabase = await createClient();
