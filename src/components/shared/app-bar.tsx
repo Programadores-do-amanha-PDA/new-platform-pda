@@ -1,10 +1,9 @@
 "use client";
-
 import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { useAuth } from "@/context/auth-context";
+import useAuth from "@/hooks/use-auth";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -25,7 +24,6 @@ interface AppBarProps {
 const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   const path = usePathname();
   const segments = path.split("/").filter(Boolean);
-  // const lastSegment = segments[segments.length - 1] || "Inicio";
 
   const role = segments[1] || "";
   const parts = segments.slice(2);

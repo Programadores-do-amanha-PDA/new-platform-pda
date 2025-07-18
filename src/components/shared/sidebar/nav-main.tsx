@@ -1,11 +1,13 @@
 "use client";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronRight } from "lucide-react";
+
+import Link from "next/link";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -15,31 +17,19 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-export function NavMain({
+
+import { SidebarNavItemT } from "@/types/sidebar";
+
+export default function NavMain({
   items,
   title,
 }: {
-  items: {
-    title: string;
-    ref?: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-      title: string;
-      url: string;
-      items?: {
-        title: string;
-        url: string;
-      }[];
-    }[];
-  }[];
+  items: SidebarNavItemT[];
   title: string;
 }) {
   const router = useRouter();
   const path = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>

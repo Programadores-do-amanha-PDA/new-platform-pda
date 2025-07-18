@@ -1,21 +1,22 @@
 "use client";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useRouter } from "next/navigation";
-export function TeamSwitcher({
+
+import { TeamInfoT } from "@/types/sidebar";
+import { RolesT } from "@/types/auth";
+
+export default function TeamSwitcher({
   team,
   userRole,
 }: {
-  team: {
-    name: string;
-    logo: React.ElementType;
-  };
-  userRole: string;
+  team: TeamInfoT;
+  userRole: RolesT;
 }) {
   const router = useRouter();
 
@@ -32,7 +33,9 @@ export function TeamSwitcher({
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-bold">Plataforma PdA</span>
-            <span className="truncate text-xs text-muted-foreground">{team.name}</span>
+            <span className="truncate text-xs text-muted-foreground">
+              {team.name}
+            </span>
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>

@@ -1,5 +1,9 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { EllipsisVertical, LogOut, User } from "lucide-react";
+
+import useAuth from "@/hooks/use-auth";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -16,15 +20,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/context/auth-context";
-import { useRouter } from "next/navigation";
-import { AuthUserWithProfileType } from "@/types/auth-types";
-export function NavUser({
+
+import { AuthUserWithProfileT, RolesT } from "@/types/auth";
+
+export default function NavUser({
   user,
   userRole,
 }: {
-  user: AuthUserWithProfileType;
-  userRole: string;
+  user: AuthUserWithProfileT;
+  userRole: RolesT;
 }) {
   const router = useRouter();
   const { handleSignOut } = useAuth();
