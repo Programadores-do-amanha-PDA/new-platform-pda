@@ -12,6 +12,6 @@ export interface UserRoleT {
   user_id?: string;
 }
 
-export interface JwtPayload {
-  user_role: "admin" | "employer" | "alumni" | null;
+export interface JwtPayloadT {
+  user_role: RolesT | null;
 }

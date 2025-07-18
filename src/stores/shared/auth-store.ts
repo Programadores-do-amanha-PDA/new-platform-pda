@@ -4,17 +4,17 @@ import { jwtDecode } from "jwt-decode";
 import { getAuthUser, getSession } from "@/app/actions/(auth)/auth";
 import { getProfileById } from "@/app/actions/profiles";
 import { getAvatarUrlById } from "@/app/actions/profile-avatar";
-import { AuthUserWithProfileT, JwtPayload, ProfileT } from "@/types/auth";
+import { AuthUserWithProfileT, JwtPayloadT, ProfileT, RolesT } from "@/types/auth";
 
 interface AuthState {
   user: AuthUserWithProfileT | null;
-  userRole: "admin" | "employer" | "alumni" | null;
+  userRole: RolesT | null
   loading: boolean;
 }
 
 interface AuthActions {
   setUser: (user: AuthUserWithProfileT | null) => void;
-  setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
+  setUserRole: (role: RolesT | null) => void;
   getUserProfile: (jwt: string) => Promise<void>;
   updateAuthState: (session: { access_token: string } | null) => Promise<void>;
   fetchSession: () => Promise<void>;
@@ -78,7 +78,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return;
           }
 
-          const jwt = jwtDecode<JwtPayload>(session.access_token);
+          const jwt = jwtDecode<JwtPayloadT>(session.access_token);
           if (!jwt?.user_role) {
             set({ ...initialState, loading: false });
             return;

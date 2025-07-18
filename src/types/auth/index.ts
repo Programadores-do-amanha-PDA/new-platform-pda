@@ -1,6 +1,6 @@
 import { UserAuthLogin, User, ProfileT, AuthUserWithProfileT } from "./user";
 import { UserClassroomT } from "./user-classroom";
-import { RolesT, UserRoleT, JwtPayload } from "./user-role";
+import { RolesT, UserRoleT, JwtPayloadT } from "./user-role";
 
 export type {
   UserAuthLogin,
@@ -10,5 +10,5 @@ export type {
   UserClassroomT,
   RolesT,
   UserRoleT,
-  JwtPayload,
+  JwtPayloadT,
 };

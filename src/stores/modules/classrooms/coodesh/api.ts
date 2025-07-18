@@ -1,0 +1,64 @@
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import axios from "axios";
+import { toast } from "sonner";
+import { AssessmentPayloadT } from "@/types/coodesh";
+
+
+interface CoodeshAPIAssessmentState {
+  apiAssessments: AssessmentPayloadT[];
+  loading: boolean;
+}
+
+interface CoodeshAPIAssessmentActions {
+  setApiAssessments: (assessments: AssessmentPayloadT[]) => void;
+  getApiAssessments: () => Promise<boolean>;
+  reset: () => void;
+}
+
+const initialState: CoodeshAPIAssessmentState = {
+  apiAssessments: [],
+  loading: false,
+};
+
+export const useCoodeshAPIAssessmentStore = create<
+  CoodeshAPIAssessmentState & CoodeshAPIAssessmentActions
+>()(
+  devtools(
+    (set, get) => ({
+      ...initialState,
+
+      setApiAssessments: (apiAssessments) => set({ apiAssessments }),
+
+      getApiAssessments: async () => {
+        try {
+          set({ loading: true });
+          const assessments = await axios.get("/api/coodesh/assessments");
+          console.log(assessments.data.assessments);
+
+          if (!assessments) throw "no assessments fetched successfully";
+
+          set({
+            apiAssessments: [
+              ...get().apiAssessments,
+              assessments.data.assessments.payload,
+            ],
+            loading: false,
+          });
+
+          return true;
+        } catch (error) {
+          console.log(error);
+          toast.error("Erro ao buscar avaliações! Tente novamente mais tarde!");
+          set({ loading: false });
+          return false;
+        }
+      },
+
+      reset: () => {
+        set(initialState);
+      },
+    }),
+    { name: "CoodeshAPIAssessmentStore" }
+  )
+);
