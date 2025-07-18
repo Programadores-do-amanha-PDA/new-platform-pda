@@ -1,4 +1,7 @@
-"use client";
+import { useRouter } from "next/navigation";
+
+import { useAuthStore } from "@/stores/shared/auth-store";
+
 import {
   exchangeAuthCode,
   signOut,
@@ -8,10 +11,8 @@ import {
   requestPasswordResetWithUserEmail,
   resendAnEmailSignupConfirmation,
 } from "@/app/actions/(auth)/emails";
-import { useAuthStore } from "@/stores/auth-store";
-import { useRouter } from "next/navigation";
 
-export const useAuth = () => {
+export default function useAuth() {
   const store = useAuthStore();
   const router = useRouter();
 
@@ -53,4 +54,4 @@ export const useAuth = () => {
     handleUpdateUser,
     handleSignOut,
   };
-};
+}

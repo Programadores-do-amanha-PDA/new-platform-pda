@@ -1,16 +1,17 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { toast } from "sonner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 
-import { signInWithPassword } from "@/app/actions/(auth)";
-import { useAuth } from "@/hooks/use-auth";
+import useAuth from "@/hooks/use-auth";
 
+import { signInWithPassword } from "@/app/actions/(auth)";
+
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {

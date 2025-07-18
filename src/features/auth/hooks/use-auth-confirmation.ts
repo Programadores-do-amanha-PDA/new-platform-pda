@@ -4,7 +4,7 @@ import { useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { setSession } from "@/app/actions/(auth)";
-import { useAuth } from "@/hooks/use-auth";
+import useAuth from "@/hooks/use-auth";
 
 /**
  * Hook to handle authentication confirmation and password reset flows
@@ -40,7 +40,7 @@ import { useAuth } from "@/hooks/use-auth";
  * - token_expired: Notifies about expired tokens
  * - otp_expired: Notifies about expired verification codes
  */
-export const useAuthConfirmation = () => {
+export default function useAuthConfirmation() {
   const router = useRouter();
   const { updateAuthState, handleExchangeAuthCode } = useAuth();
   const pathname = usePathname();
@@ -162,4 +162,4 @@ export const useAuthConfirmation = () => {
 
     processAuthParams();
   }, [router, updateAuthState, handleResetPassword]);
-};
+}

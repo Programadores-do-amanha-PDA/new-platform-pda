@@ -1,22 +1,20 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { jwtDecode } from "jwt-decode";
-import { AuthUserWithProfileType, JwtPayload } from "@/types/auth-types";
 import { getAuthUser, getSession } from "@/app/actions/(auth)/auth";
 import { getProfileById } from "@/app/actions/profiles";
 import { getAvatarUrlById } from "@/app/actions/profile-avatar";
+import { AuthUserWithProfileT, JwtPayload, ProfileT } from "@/types/auth";
 
 interface AuthState {
-  user: AuthUserWithProfileType | null;
+  user: AuthUserWithProfileT | null;
   userRole: "admin" | "employer" | "alumni" | null;
   loading: boolean;
-  isRedirecting: boolean;
 }
 
 interface AuthActions {
-  setUser: (user: AuthUserWithProfileType | null) => void;
+  setUser: (user: AuthUserWithProfileT | null) => void;
   setUserRole: (role: "admin" | "employer" | "alumni" | null) => void;
-  setIsRedirecting: (value: boolean) => void;
   getUserProfile: (jwt: string) => Promise<void>;
   updateAuthState: (session: { access_token: string } | null) => Promise<void>;
   fetchSession: () => Promise<void>;
@@ -27,7 +25,6 @@ const initialState: AuthState = {
   user: null,
   userRole: null,
   loading: true,
-  isRedirecting: true,
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -37,7 +34,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       setUser: (user) => set({ user }),
       setUserRole: (userRole) => set({ userRole }),
-      setIsRedirecting: (isRedirecting) => set({ isRedirecting }),
 
       getUserProfile: async (jwt) => {
         try {
@@ -56,7 +52,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             set({
               user: {
                 ...user,
-                profile: { ...userProfile, avatarUrl: userAvatarUrl },
+                profile: {
+                  ...(userProfile as ProfileT),
+                  avatarUrl: userAvatarUrl,
+                },
               },
               loading: false,
             });
@@ -68,7 +67,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: null,
             userRole: null,
             loading: false,
-            isRedirecting: false,
           });
         }
       },
@@ -76,20 +74,20 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       updateAuthState: async (session) => {
         try {
           if (!session) {
-            set({ ...initialState, loading: false, isRedirecting: false });
+            set({ ...initialState, loading: false });
             return;
           }
 
           const jwt = jwtDecode<JwtPayload>(session.access_token);
           if (!jwt?.user_role) {
-            set({ ...initialState, loading: false, isRedirecting: false });
+            set({ ...initialState, loading: false });
             return;
           }
 
           set({ userRole: jwt.user_role });
           await get().getUserProfile(session.access_token);
         } catch {
-          set({ ...initialState, loading: false, isRedirecting: false });
+          set({ ...initialState, loading: false });
         }
       },
 

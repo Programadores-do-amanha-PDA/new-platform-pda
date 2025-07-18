@@ -1,20 +1,22 @@
 "use client";
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "@/styles/globals.css";
-import { useAuthConfirmation } from "@/features/auth/hooks/use-auth-confirmation";
+import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
-const geistSans = localFont({
-  src: "../../assets/fonts/GeistVF.woff",
+import AuthStoreProvider from "@/providers/auth-store-provider";
+import "@/styles/globals.css";
+import useAuthConfirmation from "@/features/auth/hooks/use-auth-confirmation";
+
+const IBMPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
   variable: "--font-geist-sans",
-  weight: "100 900",
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
 });
 
-const geistMono = localFont({
-  src: "../../assets/fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const IBMPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+  weight: ["100", "200", "300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -30,11 +32,13 @@ export default function RootLayout({
   useAuthConfirmation();
 
   return (
-    <html lang="pt-BR" className="w-full h-full flex bg-blue-200">
+    <html lang="pt-BR" className="w-full h-full flex">
       <body
-        className={`w-full h-full flex bg-red-200 ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} antialiased`}
       >
-        <main className="w-full h-full flex">{children}</main>
+        <AuthStoreProvider>
+          <main className="w-full h-full flex">{children}</main>
+        </AuthStoreProvider>
         <Toaster closeButton richColors />
       </body>
     </html>
