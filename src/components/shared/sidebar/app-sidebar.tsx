@@ -21,7 +21,7 @@ export default function AppSidebar({ ...props }: AppSidebarPropsT) {
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         {props.data.team && (
-          <TeamSwitcher team={props.data.team} userRole={props.data.userRole} />
+          <TeamSwitcher team={props.data.team}/>
         )}
       </SidebarHeader>
       <SidebarContent>
@@ -39,7 +39,7 @@ export default function AppSidebar({ ...props }: AppSidebarPropsT) {
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={props.data.user} userRole={props.data.userRole} />
+        <NavUser user={props.data.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

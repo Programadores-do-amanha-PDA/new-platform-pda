@@ -21,15 +21,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { AuthUserWithProfileT, RolesT } from "@/types/auth";
+import { AuthUserWithProfileT } from "@/types/auth";
 
-export default function NavUser({
-  user,
-  userRole,
-}: {
-  user: AuthUserWithProfileT;
-  userRole: RolesT;
-}) {
+export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
   const router = useRouter();
   const { handleSignOut } = useAuth();
   const { isMobile } = useSidebar();
@@ -93,7 +87,7 @@ export default function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem
-                onClick={() => router.push(`/dashboard/${userRole}/profile`)}
+                onClick={() => router.push(`/dashboard/profile`)}
               >
                 <User />
                 Perfil

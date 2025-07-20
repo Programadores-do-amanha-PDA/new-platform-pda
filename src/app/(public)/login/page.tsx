@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
 
-import womanArt from "@/assets/images/login/woman-login-art.png";
 import { LoginForm } from "@/features/auth/components/login-form";
 import BinaryRainBackground from "@/components/shared/binary-rain-background";
+import womanArt from "/public/assets/images/login/woman-login-art.png";
 
 export default function LoginPage() {
   return (

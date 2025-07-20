@@ -12,9 +12,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "../../ui/button";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
 import {
   Table,
   TableBody,
@@ -24,24 +21,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
-import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
-import { AuthUser } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { Badge } from "../../ui/badge";
-import BadgeSelector from "../badge-selector";
-import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
-import { ClassroomType } from "@/types/classrooms";
 import { ClassroomCombobox } from "./classroom-combobox";
-import { UserClassroomT } from "@/types/user-classroom";
 import { emailRegex, passwordRegex } from "@/utils/regex/users";
-import { UserClassroomStackI } from "@/context/modules/users/classrooms";
+import { AuthUserWithProfileT, RolesT, UserClassroomT } from "@/types/auth";
+import { ClassroomT } from "@/types/classrooms";
+import { useUsersStore } from "@/stores/modules/users/users-store";
+import { useRolesStore } from "@/stores/modules/users/user-roles-store";
+import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { rolesLabelsOptions } from "@/utils/user-roles-labels";
+import BadgeSelector from "@/components/shared/badge-selector";
 
 interface UserData {
   name: string;
   email: string;
   password?: string;
   status?: "success" | "error" | "warning";
-  userRoles?: RolesType[];
+  userRoles?: RolesT[];
   userClassrooms?: string[];
 }
 
@@ -55,28 +55,25 @@ interface UserRow {
 }
 
 type InsertManyUsersDialogProps = {
-  handleCreateNewUser: (
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<string | false>;
-  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-  excludeRoles?: RolesType[];
-  classrooms?: ClassroomType[];
-} & Partial<Omit<UserClassroomStackI, "handleDeleteUserClassroom">>;
+  excludeRoles?: RolesT[];
+  classrooms?: ClassroomT[];
+};
 
 const InsertManyUsersDialog = ({
-  handleCreateNewUser,
-  handleAddUserRole,
   excludeRoles,
   classrooms,
-  handleInsertUserClassrooms,
 }: InsertManyUsersDialogProps) => {
   const [open, setOpen] = useState(false);
 
   const [users, setUsers] = useState<UserData[]>([]);
-  const [allUsersRole, setAllUsersRole] = useState<RolesType[]>([]);
+  const [allUsersRole, setAllUsersRole] = useState<RolesT[]>([]);
   const [allUsersClassroom, setAllUsersClassroom] = useState<string[]>([]);
   const [stage, setStage] = useState<0 | 1 | 2>(0);
   const [loading, setLoading] = useState(false);
+
+  const { createNewUser } = useUsersStore();
+  const { addUserRole } = useRolesStore();
+  const { createUserClassrooms } = useUserClassroomsStore();
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -143,10 +140,10 @@ const InsertManyUsersDialog = ({
     setUsers((users) =>
       users.map((user) => ({
         ...user,
-        userRoles: [newRoleName as RolesType],
+        userRoles: [newRoleName as RolesT],
       }))
     );
-    setAllUsersRole([newRoleName as RolesType]);
+    setAllUsersRole([newRoleName as RolesT]);
   };
 
   const handleSetClassroomsForAll = (newClassroom: string[]) => {
@@ -182,7 +179,7 @@ const InsertManyUsersDialog = ({
         if (!emailRegex.test(user.email)) throw "Invalid email";
         if (!passwordRegex.test(user.password)) throw "Invalid password";
 
-        const data: Partial<AuthUserWithProfileType & { password: string }> = {
+        const data: Partial<AuthUserWithProfileT & { password: string }> = {
           email: user.email,
           password: user.password,
           user_metadata: {
@@ -190,19 +187,15 @@ const InsertManyUsersDialog = ({
             user_email: user.email,
           },
         };
-        const userCreatedId = await handleCreateNewUser(data);
+        const userCreatedId = await createNewUser(data);
 
         if (userCreatedId) {
           if (user.userRoles && user.userRoles.length > 0) {
             const role = user.userRoles[0];
-            await handleAddUserRole(userCreatedId, role);
+            await addUserRole(userCreatedId, role);
           }
 
-          if (
-            classrooms &&
-            classrooms?.length > 0 &&
-            handleInsertUserClassrooms
-          ) {
+          if (classrooms && classrooms?.length > 0 && createUserClassrooms) {
             if (user.userClassrooms && user.userClassrooms.length > 0) {
               const uClassroom: UserClassroomT[] = user.userClassrooms.map(
                 (id) => ({
@@ -210,7 +203,7 @@ const InsertManyUsersDialog = ({
                   classroom_id: id,
                 })
               );
-              await handleInsertUserClassrooms(uClassroom);
+              await createUserClassrooms(uClassroom);
             }
           }
         }
@@ -334,7 +327,7 @@ const InsertManyUsersDialog = ({
                           className="flex justify-between gap-2 w-max"
                         >
                           <p>
-                            {rolesLabels.find(
+                            {rolesLabelsOptions.find(
                               (role) => role.value === allUsersRole[0]
                             )?.label || allUsersRole[0]}
                           </p>
@@ -347,7 +340,7 @@ const InsertManyUsersDialog = ({
                         </Badge>
                       ) : (
                         <BadgeSelector
-                          items={rolesLabels}
+                          items={rolesLabelsOptions}
                           excludeItens={allUsersRole.concat(excludeRoles || [])}
                           label="Adicionar cargo"
                           value={allUsersRole[0]}
@@ -396,7 +389,7 @@ const InsertManyUsersDialog = ({
                         <TableCell>
                           {user.userRoles && user.userRoles.length > 0 && (
                             <Badge variant="secondary">
-                              {rolesLabels.find(
+                              {rolesLabelsOptions.find(
                                 (r) =>
                                   user.userRoles &&
                                   r.value === user.userRoles[0]
@@ -487,8 +480,9 @@ const InsertManyUsersDialog = ({
                                 className="flex justify-between gap-2 w-max"
                               >
                                 <p>
-                                  {rolesLabels.find((role) => role.value === r)
-                                    ?.label || r}
+                                  {rolesLabelsOptions.find(
+                                    (role) => role.value === r
+                                  )?.label || r}
                                 </p>
                                 <X
                                   onClick={() =>
@@ -507,7 +501,7 @@ const InsertManyUsersDialog = ({
                           ) : (
                             <div className="w-full h-full flex justify-center items-center">
                               <BadgeSelector
-                                items={rolesLabels}
+                                items={rolesLabelsOptions}
                                 excludeItens={excludeRoles || []}
                                 label="Adicionar cargo"
                                 onChange={(role) =>
@@ -516,7 +510,7 @@ const InsertManyUsersDialog = ({
                                       index === i
                                         ? {
                                             ...u,
-                                            userRoles: [role as RolesType],
+                                            userRoles: [role as RolesT],
                                           }
                                         : u
                                     )

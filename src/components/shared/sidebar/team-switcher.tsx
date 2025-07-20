@@ -9,15 +9,8 @@ import {
 } from "@/components/ui/sidebar";
 
 import { TeamInfoT } from "@/types/sidebar";
-import { RolesT } from "@/types/auth";
 
-export default function TeamSwitcher({
-  team,
-  userRole,
-}: {
-  team: TeamInfoT;
-  userRole: RolesT;
-}) {
+export default function TeamSwitcher({ team }: { team: TeamInfoT }) {
   const router = useRouter();
 
   return (
@@ -26,7 +19,7 @@ export default function TeamSwitcher({
         <SidebarMenuButton
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-          onClick={() => router.push(`/dashboard/${userRole}`)}
+          onClick={() => router.push(`/dashboard/`)}
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar">
             <team.logo />

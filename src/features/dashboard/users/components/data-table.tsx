@@ -14,7 +14,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { AuthUserWithProfileType, RolesType } from "@/types/auth-types";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -25,44 +24,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import UserSheetData from "./user-sheet-data";
-import { AuthUser } from "@supabase/supabase-js";
-import { ClassroomType } from "@/types/classrooms";
-import InsertManyUsersDialog from "./insert-many-users-dialog";
-import { UserClassroomStackI } from "@/context/modules/users/classrooms";
+import { AuthUserWithProfileT } from "@/types/auth";
 
 type DataTableProps = {
-  data: Partial<AuthUserWithProfileType>[];
-  columns: ColumnDef<Partial<AuthUserWithProfileType>>[];
+  data: Partial<AuthUserWithProfileT>[];
+  columns: ColumnDef<Partial<AuthUserWithProfileT>>[];
   loading: boolean;
-  handleCreateNewUser: (
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<string | false>;
-  defaultRoleValue: RolesType;
-  handleUpdateUser: (
-    userID: string,
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<boolean>;
-  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-  handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-  handleDeleteUserRole: (userId: string) => Promise<boolean>;
-  excludeRoles?: RolesType[];
-  classrooms?: ClassroomType[];
-} & Partial<UserClassroomStackI>;
+  headerRightOptions?: React.ReactNode;
+};
 
 export function DataTable({
   data,
   columns,
   loading,
-  handleCreateNewUser,
-  handleUpdateUser,
-  handleAddUserRole,
-  handleUpdateUserRole,
-  handleDeleteUserRole,
-  excludeRoles,
-  classrooms,
-  handleInsertUserClassrooms,
-  handleDeleteUserClassroom,
+  headerRightOptions,
 }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -110,28 +85,7 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        <div className="flex gap-4">
-          <InsertManyUsersDialog
-            handleAddUserRole={handleAddUserRole}
-            handleCreateNewUser={handleCreateNewUser}
-            excludeRoles={excludeRoles}
-            classrooms={classrooms}
-            handleInsertUserClassrooms={handleInsertUserClassrooms}
-          />
-
-          <UserSheetData
-            mode="new"
-            handleCreateNewUser={handleCreateNewUser}
-            handleUpdateUser={handleUpdateUser}
-            handleAddUserRole={handleAddUserRole}
-            handleUpdateUserRole={handleUpdateUserRole}
-            handleDeleteUserRole={handleDeleteUserRole}
-            excludeRoles={excludeRoles}
-            classrooms={classrooms}
-            handleInsertUserClassrooms={handleInsertUserClassrooms}
-            handleDeleteUserClassroom={handleDeleteUserClassroom}
-          />
-        </div>
+        {headerRightOptions}
       </div>
 
       <div className="w-full h-full flex border rounded-lg overflow-hidden">

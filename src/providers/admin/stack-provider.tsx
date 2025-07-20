@@ -45,7 +45,8 @@ export const AdminStackProvider = ({
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      if (!loadInitialData || !user || !userRole) return;
+      if (!loadInitialData || !user || !userRole || userRole !== "admin")
+        return;
 
       setLoading(true);
       try {
@@ -75,7 +76,6 @@ export const AdminStackProvider = ({
 
   const sidebarData: SidebarDataT = generateSidebarConfig(
     user,
-    userRole,
     classroomStore.classrooms
   );
 

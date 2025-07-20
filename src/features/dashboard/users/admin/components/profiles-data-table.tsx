@@ -1,144 +1,45 @@
 "use client";
-import { ColumnDef } from "@tanstack/react-table";
-
-import { DataTable } from "./data-table";
-import { Checkbox } from "../../ui/checkbox";
-import { Button } from "../../ui/button";
-import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../ui/dropdown-menu";
-
-import { AuthUserWithProfileType, ProfileType, RolesType } from "@/types/auth-types";
-import { Badge } from "../../ui/badge";
-import UserSheetData from "./user-sheet-data";
-import { AuthUser, UserMetadata } from "@supabase/supabase-js";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { ClassroomType } from "@/types/classrooms";
-import { UserClassroomStackI } from "@/context/modules/users/classrooms";
-import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
+import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types/auth";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
+
+import { UserMetadata } from "@supabase/supabase-js";
+import { deleteUser } from "@/app/actions/auth_admin";
+import { DataTable } from "../../components/data-table";
+import { useClassroomStore } from "@/stores/modules/classrooms";
+import { useUsersStore } from "@/stores/modules/users/users-store";
+import InsertManyUsersDialog from "../../components/insert-many-users-dialog";
+import UserSheetData from "../../components/user-sheet-data";
+import { useRolesStore } from "@/stores/modules/users/user-roles-store";
+import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 
 type ProfilesDataTableProps = {
-  users: Partial<AuthUserWithProfileType>[];
-  handleCreateNewUser: (
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<string | false>;
-  handleDeleteUser: (id: string) => Promise<boolean>;
-  handleUpdateUser: (
-    userID: string,
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<boolean>;
-  handleAddUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-  handleUpdateUserRole: (userId: string, role: RolesType) => Promise<boolean>;
-  handleDeleteUserRole: (userId: string) => Promise<boolean>;
-  excludeRoles?: RolesType[];
-  defaultRoleValue?: RolesType;
+  excludeRoles?: RolesT[];
+  defaultRoleValue?: RolesT;
   loading: boolean;
-  classrooms?: ClassroomType[];
-} & Partial<UserClassroomStackI>;
+};
 
 const ProfilesDataTable = ({
-  users,
-  handleDeleteUser,
-  handleCreateNewUser,
-  handleUpdateUser,
-  handleAddUserRole,
-  handleUpdateUserRole,
-  handleDeleteUserRole,
   loading,
   excludeRoles,
-  classrooms,
-  handleInsertUserClassrooms,
-  handleDeleteUserClassroom,
-  defaultRoleValue,
 }: ProfilesDataTableProps) => {
-  const classroomColumns: ColumnDef<Partial<AuthUserWithProfileType>>[] =
-    classrooms && classrooms.length > 0
-      ? [
-          {
-            id: "classrooms",
-            header: ({ column }) => {
-              const sortState = column.getIsSorted();
-              return (
-                <div className="flex justify-center align-center w-full">
-                  <Button
-                    variant="ghost"
-                    className="text-center px-2 font-semibold"
-                    onClick={() => {
-                      if (!sortState) {
-                        column.toggleSorting(false);
-                      } else if (sortState === "asc") {
-                        column.toggleSorting(true);
-                      } else {
-                        column.clearSorting();
-                      }
-                    }}
-                  >
-                    Turmas
-                    {sortState === "asc" ? (
-                      <ArrowUp className="stroke-primary" />
-                    ) : sortState === "desc" ? (
-                      <ArrowDown className="stroke-primary" />
-                    ) : (
-                      <ArrowUpDown />
-                    )}
-                  </Button>
-                </div>
-              );
-            },
+  const { classrooms } = useClassroomStore();
+  const { users, createNewUser, updateUser } = useUsersStore();
+  const { addUserRole, updateUserRole, deleteUserRole } = useRolesStore();
 
-            cell: ({ row }) => {
-              const { profile } = row.original;
-              return (
-                <div className="flex justify-center align-center w-full">
-                  {profile?.classrooms?.map((classroom, i) => (
-                    <Badge
-                      variant="outline"
-                      className="mx-auto!"
-                      key={`${i}-${classroom}`}
-                    >
-                      {classrooms?.find((c) => c.id === classroom.classroom_id)
-                        ?.name || ""}
-                    </Badge>
-                  ))}
-                </div>
-              );
-            },
-            sortingFn: (rowA, rowB) => {
-              const classroomsA = rowA.original?.profile?.classrooms || [
-                { classroom_id: "" },
-              ];
-              const classroomsB = rowB.original?.profile?.classrooms || [
-                { classroom_id: "" },
-              ];
-
-              const classroomsStrA = classroomsA
-                .map(
-                  (c) =>
-                    classrooms?.find((cr) => cr.id === c.classroom_id)?.name
-                )
-                .sort()
-                .join(",");
-              const classroomsStrB = classroomsB
-                .map(
-                  (c) =>
-                    classrooms?.find((cr) => cr.id === c.classroom_id)?.name
-                )
-                .sort()
-                .join(",");
-
-              return classroomsStrA.localeCompare(classroomsStrB);
-            },
-          },
-        ]
-      : [];
-
-  const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
+  const columns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -161,14 +62,14 @@ const ProfilesDataTable = ({
           <Avatar className="relative group">
             <AvatarFallback>
               {row
-                .getValue<ProfileType>("profile")
+                .getValue<ProfileT>("profile")
                 .full_name.split(" ")
                 .filter((word, i) => i < 2)
                 .map((word) => word[0].toUpperCase())
                 .join("") || "U"}
             </AvatarFallback>
             <AvatarImage
-              src={row.getValue<ProfileType>("profile").avatarUrl || ""}
+              src={row.getValue<ProfileT>("profile").avatarUrl || ""}
             />
             <div
               className={cn(
@@ -225,9 +126,9 @@ const ProfilesDataTable = ({
       cell: ({ row }) => (
         <div className="w-full flex flex-col lowercase truncate">
           <p className="text-sm font-bold capitalize">
-            {row.getValue<ProfileType>("profile").full_name}
+            {row.getValue<ProfileT>("profile").full_name}
           </p>
-          <p>{row.getValue<ProfileType>("profile").email}</p>
+          <p>{row.getValue<ProfileT>("profile").email}</p>
         </div>
       ),
       sortingFn: (rowA, rowB) => {
@@ -236,7 +137,7 @@ const ProfilesDataTable = ({
         return nameA?.localeCompare(nameB);
       },
       filterFn: (row, id, filterValue) => {
-        const profile = row.getValue(id) as ProfileType;
+        const profile = row.getValue(id) as ProfileT;
         const searchTerm = filterValue.toLowerCase();
 
         return (
@@ -281,11 +182,12 @@ const ProfilesDataTable = ({
         return (
           <div className="flex justify-center align-center w-full">
             {row
-              .getValue<ProfileType>("profile")
+              .getValue<ProfileT>("profile")
               .user_roles?.map((userRole, i) => (
                 <Badge variant="outline" className="mx-auto!" key={i}>
-                  {rolesLabels.find((role) => role.value === userRole.role)
-                    ?.label || userRole.role}
+                  {rolesLabelsOptions.find(
+                    (role) => role.value === userRole.role
+                  )?.label || userRole.role}
                 </Badge>
               ))}
           </div>
@@ -447,6 +349,9 @@ const ProfilesDataTable = ({
         );
       },
     },
+  ];
+
+  const actionsColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
       id: "actions",
       enableHiding: false,
@@ -463,7 +368,7 @@ const ProfilesDataTable = ({
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <UserSheetData
+              {/* <UserSheetData
                 mode="edit"
                 currentUser={user}
                 handleAddUserRole={handleAddUserRole}
@@ -475,12 +380,12 @@ const ProfilesDataTable = ({
                 classrooms={classrooms}
                 handleInsertUserClassrooms={handleInsertUserClassrooms}
                 handleDeleteUserClassroom={handleDeleteUserClassroom}
-              />
+              /> */}
               {user.id && (
                 <Button
                   variant="ghost"
                   className="px-2! w-full h-max items-start justify-start text-start"
-                  onClick={() => handleDeleteUser(user.id || "")}
+                  onClick={() => deleteUser(user.id || "")}
                 >
                   Deletar
                 </Button>
@@ -492,21 +397,113 @@ const ProfilesDataTable = ({
     },
   ];
 
+  const classroomColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] =
+    classrooms && classrooms.length > 0
+      ? [
+          {
+            id: "classrooms",
+            header: ({ column }) => {
+              const sortState = column.getIsSorted();
+              return (
+                <div className="flex justify-center align-center w-full">
+                  <Button
+                    variant="ghost"
+                    className="text-center px-2 font-semibold"
+                    onClick={() => {
+                      if (!sortState) {
+                        column.toggleSorting(false);
+                      } else if (sortState === "asc") {
+                        column.toggleSorting(true);
+                      } else {
+                        column.clearSorting();
+                      }
+                    }}
+                  >
+                    Turmas
+                    {sortState === "asc" ? (
+                      <ArrowUp className="stroke-primary" />
+                    ) : sortState === "desc" ? (
+                      <ArrowDown className="stroke-primary" />
+                    ) : (
+                      <ArrowUpDown />
+                    )}
+                  </Button>
+                </div>
+              );
+            },
+
+            cell: ({ row }) => {
+              const { profile } = row.original;
+              return (
+                <div className="flex justify-center align-center w-full">
+                  {profile?.classrooms?.map((classroom, i) => (
+                    <Badge
+                      variant="outline"
+                      className="mx-auto!"
+                      key={`${i}-${classroom}`}
+                    >
+                      {classrooms?.find((c) => c.id === classroom.classroom_id)
+                        ?.name || ""}
+                    </Badge>
+                  ))}
+                </div>
+              );
+            },
+            sortingFn: (rowA, rowB) => {
+              const classroomsA = rowA.original?.profile?.classrooms || [
+                { classroom_id: "" },
+              ];
+              const classroomsB = rowB.original?.profile?.classrooms || [
+                { classroom_id: "" },
+              ];
+
+              const classroomsStrA = classroomsA
+                .map(
+                  (c) =>
+                    classrooms?.find((cr) => cr.id === c.classroom_id)?.name
+                )
+                .sort()
+                .join(",");
+              const classroomsStrB = classroomsB
+                .map(
+                  (c) =>
+                    classrooms?.find((cr) => cr.id === c.classroom_id)?.name
+                )
+                .sort()
+                .join(",");
+
+              return classroomsStrA.localeCompare(classroomsStrB);
+            },
+          },
+        ]
+      : [];
+
+  const headerOptions = (
+    <div className="flex gap-4">
+      <InsertManyUsersDialog
+        excludeRoles={excludeRoles}
+        classrooms={classrooms}
+      />
+
+      <UserSheetData
+        mode="new"
+        handleCreateNewUser={createNewUser}
+        handleUpdateUser={updateUser}
+        handleAddUserRole={addUserRole}
+        handleUpdateUserRole={updateUserRole}
+        handleDeleteUserRole={deleteUserRole}
+        excludeRoles={excludeRoles}
+        classrooms={classrooms}
+      />
+    </div>
+  );
+
   return (
     <DataTable
-      columns={[...columns, ...classroomColumns]}
+      columns={[...columns, ...classroomColumns, ...actionsColumns]}
       data={users}
       loading={loading}
-      defaultRoleValue={defaultRoleValue || "alumni"}
-      handleAddUserRole={handleAddUserRole}
-      handleUpdateUserRole={handleUpdateUserRole}
-      handleDeleteUserRole={handleDeleteUserRole}
-      handleCreateNewUser={handleCreateNewUser}
-      handleUpdateUser={handleUpdateUser}
-      excludeRoles={excludeRoles}
-      classrooms={classrooms}
-      handleInsertUserClassrooms={handleInsertUserClassrooms}
-      handleDeleteUserClassroom={handleDeleteUserClassroom}
+      headerRightOptions={headerOptions}
     />
   );
 };

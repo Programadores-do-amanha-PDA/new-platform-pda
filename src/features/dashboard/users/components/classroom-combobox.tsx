@@ -39,7 +39,7 @@ export function ClassroomCombobox({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger>
         {value.length > 0 ? (
           <Button
             variant="secondary"

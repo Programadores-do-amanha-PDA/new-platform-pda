@@ -4,7 +4,7 @@ import { Briefcase, Moon, Sun, Sunrise, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { ClassroomT } from "@/types/classrooms";
-import { AuthUserWithProfileT, RolesT } from "@/types/auth";
+import { AuthUserWithProfileT } from "@/types/auth";
 import { ZoomMeetingT } from "@/types/zoom/meetings";
 import { SidebarDataT } from "@/types/sidebar";
 import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
@@ -18,12 +18,10 @@ export const classroomPeriodsIcons = {
 
 export const generateSidebarConfig = (
   user: AuthUserWithProfileT,
-  userRole: RolesT,
   classrooms: ClassroomT[]
 ): SidebarDataT => {
   return {
     user,
-    userRole,
     team: {
       name: "Administrador",
       logo: () => (
@@ -36,34 +34,34 @@ export const generateSidebarConfig = (
     navMain: [
       {
         title: "Usuários",
-        url: "/dashboard/admin/users",
+        url: "/dashboard/users",
         ref: "users",
         icon: Users,
         items: [
           {
             title: "Todos os usuários",
-            url: "/dashboard/admin/users/all",
+            url: "/dashboard/users/all",
           },
         ],
       },
       {
         title: "Vagas",
-        url: "/dashboard/admin/jobs",
+        url: "/dashboard/jobs",
         ref: "jobs",
         icon: Briefcase,
         isActive: false,
         items: [
           {
             title: "Vagas curadas",
-            url: "/dashboard/admin/jobs/curated",
+            url: "/dashboard/jobs/curated",
           },
           {
             title: "Curadoria de vagas",
-            url: "/dashboard/admin/jobs/curation",
+            url: "/dashboard/jobs/curation",
           },
           {
             title: "Vagas arquivadas",
-            url: "/dashboard/admin/jobs/archives",
+            url: "/dashboard/jobs/archives",
           },
         ],
       },
@@ -73,7 +71,7 @@ export const generateSidebarConfig = (
       .map((classroom) => ({
         title: classroom.name,
         ref: classroom.id,
-        url: `/dashboard/admin/classrooms/${classroom.id}`,
+        url: `/dashboard/classrooms/${classroom.id}`,
         icon: classroomPeriodsIcons[
           classroom.period as keyof typeof classroomPeriodsIcons
         ],
@@ -81,15 +79,15 @@ export const generateSidebarConfig = (
         items: [
           {
             title: "Projetos",
-            url: `/dashboard/admin/classrooms/${classroom.id}/projects`,
+            url: `/dashboard/classrooms/${classroom.id}/projects`,
           },
           {
             title: "⬆️ Coodesh",
-            url: `/dashboard/admin/classrooms/${classroom.id}/coodesh`,
+            url: `/dashboard/classrooms/${classroom.id}/coodesh`,
           },
           {
             title: "⬆️ Zoom",
-            url: `/dashboard/admin/classrooms/${classroom.id}/zoom`,
+            url: `/dashboard/classrooms/${classroom.id}/zoom`,
           },
         ],
       })),

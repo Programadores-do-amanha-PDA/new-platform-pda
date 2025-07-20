@@ -26,8 +26,8 @@ interface UsersCombinedActions {
     deleteUser: (userId: string | undefined) => Promise<boolean>;
 
     // User classroom actions
-    handleInsertUserClassrooms: (usersClassrooms: UserClassroomT[]) => Promise<boolean>;
-    handleDeleteUserClassroom: (userId: string, classroomsIds: string[]) => Promise<boolean>;
+    createUserClassrooms: (usersClassrooms: UserClassroomT[]) => Promise<boolean>;
+    deleteUserClassroom: (userId: string, classroomsIds: string[]) => Promise<boolean>;
 
     // User role actions
     addUserRole: (userId: string, role: RolesT) => Promise<boolean>;
@@ -69,8 +69,8 @@ export const useUsersCombinedStore = create<UsersCombinedState & UsersCombinedAc
             },
 
             // User classroom actions
-            handleInsertUserClassrooms: async (usersClassrooms) => {
-                const success = await useUserClassroomsStore.getState().handleInsertUserClassrooms(usersClassrooms);
+            createUserClassrooms: async (usersClassrooms) => {
+                const success = await useUserClassroomsStore.getState().createUserClassrooms(usersClassrooms);
                 if (success) {
                     // Sync updated classroom data back to users store
                     const updatedUsers = useUserClassroomsStore.getState().users;
@@ -79,8 +79,8 @@ export const useUsersCombinedStore = create<UsersCombinedState & UsersCombinedAc
                 return success;
             },
 
-            handleDeleteUserClassroom: async (userId, classroomsIds) => {
-                const success = await useUserClassroomsStore.getState().handleDeleteUserClassroom(userId, classroomsIds);
+            deleteUserClassroom: async (userId, classroomsIds) => {
+                const success = await useUserClassroomsStore.getState().deleteUserClassroom(userId, classroomsIds);
                 if (success) {
                     // Sync updated classroom data back to users store
                     const updatedUsers = useUserClassroomsStore.getState().users;

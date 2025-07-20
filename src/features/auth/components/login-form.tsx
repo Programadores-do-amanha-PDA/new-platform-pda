@@ -24,7 +24,8 @@ import {
 } from "@/components/ui/form";
 import { Session } from "@supabase/supabase-js";
 import Image from "next/image";
-import pdaSymbol from "@/assets/logos/simbolo_pda_fundo_branco.png";
+
+import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 const loginSchema = z.object({
   email: z
@@ -172,7 +173,6 @@ export const LoginForm = () => {
                   <FormControl>
                     <Input
                       type="password"
-                      placeholder="••••••••"
                       autoComplete="current-password"
                       disabled={isSubmitting}
                       {...field}

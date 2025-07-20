@@ -12,7 +12,7 @@ export default function AuthStoreProvider({
 
   useEffect(() => {
     fetchSession();
-  }, [fetchSession]);
+  }, []);
 
   if (loading) {
     return <PageLoader />;
