@@ -42,6 +42,7 @@ export function ClassroomCombobox({
       <PopoverTrigger>
         {value.length > 0 ? (
           <Button
+            type="button"
             variant="secondary"
             size="icon"
             className="w-max! flex items-center justify-center py-1! h-max! px-2!"
@@ -57,6 +58,7 @@ export function ClassroomCombobox({
           </Button>
         ) : (
           <Button
+            type="button"
             variant="outline"
             size="icon"
             className="flex items-center justify-center py-1! h-max! w-10!"

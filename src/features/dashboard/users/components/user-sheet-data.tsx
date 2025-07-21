@@ -30,12 +30,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { AuthUser, UserMetadata } from "@supabase/supabase-js";
+import { UserMetadata } from "@supabase/supabase-js";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { ClassroomCombobox } from "./classroom-combobox";
-import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
 import { AuthUserWithProfileT, RolesT, UserClassroomT } from "@/types/auth";
-import { ClassroomT } from "@/types/classrooms";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
@@ -47,40 +45,34 @@ import {
   UserFormData,
   NewUserFormData,
 } from "../schemas/user-form-schema";
+import { useClassroomStore } from "@/stores/modules/classrooms";
+import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
+import { cn } from "@/lib/utils";
 
 type UserSheetDataProps = {
   mode: "new" | "edit";
   currentUser?: Partial<AuthUserWithProfileT>;
   excludeRoles?: RolesT[];
-  handleCreateNewUser: (
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<string | false>;
-  handleUpdateUser: (
-    userID: string,
-    user: Partial<AuthUser & { password: string }>
-  ) => Promise<boolean>;
-  handleAddUserRole: (userId: string, role: RolesT) => Promise<boolean>;
-  handleUpdateUserRole: (userId: string, role: RolesT) => Promise<boolean>;
-  handleDeleteUserRole: (userId: string) => Promise<boolean>;
-  classrooms?: ClassroomT[];
 };
 
 const UserSheetData = ({
   mode,
   currentUser,
   excludeRoles,
-  handleCreateNewUser,
-  handleUpdateUser,
-  handleAddUserRole,
-  handleUpdateUserRole,
-  handleDeleteUserRole,
-  classrooms,
 }: UserSheetDataProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { createUserClassrooms, deleteUserClassroom } =
-    useUserClassroomsStore();
+  const { classrooms } = useClassroomStore();
+  const {
+    createNewUser,
+    updateUser,
+    createUserClassrooms,
+    deleteUserClassroom,
+    addUserRole,
+    updateUserRole,
+    deleteUserRole,
+  } = useUsersCombinedStore();
 
   const form = useForm({
     resolver: zodResolver(mode === "new" ? newUserFormSchema : userFormSchema),
@@ -128,7 +120,12 @@ const UserSheetData = ({
     }
   };
 
-  const handleSetUserRoles = (newRole: string) => {
+  const handleSetUserRoles = (newRole: string | null) => {
+    if (newRole === null) {
+      setValue("userRoles", []);
+      return;
+    }
+
     const currentRoles = userRoles || [];
     if (!currentRoles.includes(newRole as RolesT)) {
       setValue("userRoles", [...currentRoles, newRole as RolesT]);
@@ -175,7 +172,7 @@ const UserSheetData = ({
       },
     };
 
-    const userCreatedId = await handleCreateNewUser(userData);
+    const userCreatedId = await createNewUser(userData);
     if (!userCreatedId) {
       throw new Error("Falha ao criar usuário");
     }
@@ -184,7 +181,7 @@ const UserSheetData = ({
     if (data.userRoles.length > 0) {
       try {
         const role = data.userRoles[0] as RolesT;
-        const roleSuccess = await handleAddUserRole(userCreatedId, role);
+        const roleSuccess = await addUserRole(userCreatedId, role);
         if (!roleSuccess) {
           throw new Error("Falha ao atribuir cargo");
         }
@@ -249,7 +246,7 @@ const UserSheetData = ({
 
     // Update user data if there are changes
     if (Object.keys(updateData).length > 0) {
-      const userUpdateResponse = await handleUpdateUser(userId, updateData);
+      const userUpdateResponse = await updateUser(userId, updateData);
       if (!userUpdateResponse) {
         throw new Error("Falha ao atualizar dados do usuário");
       }
@@ -260,7 +257,7 @@ const UserSheetData = ({
       currentUser?.profile?.user_roles?.map((r) => r.role) || [];
 
     if (currentUserRoles.length === 0 && data.userRoles.length === 1) {
-      const roleSuccess = await handleAddUserRole(
+      const roleSuccess = await addUserRole(
         userId,
         data.userRoles[0] as RolesT
       );
@@ -270,13 +267,13 @@ const UserSheetData = ({
       data.userRoles.length === 1 &&
       !currentUserRoles.includes(data.userRoles[0] as RolesT)
     ) {
-      const roleSuccess = await handleUpdateUserRole(
+      const roleSuccess = await updateUserRole(
         userId,
         data.userRoles[0] as RolesT
       );
       if (!roleSuccess) throw new Error("Erro ao atualizar cargo");
     } else if (currentUserRoles.length === 1 && data.userRoles.length === 0) {
-      const roleSuccess = await handleDeleteUserRole(userId);
+      const roleSuccess = await deleteUserRole(userId);
       if (!roleSuccess) throw new Error("Erro ao remover cargo");
     }
 
@@ -355,14 +352,15 @@ const UserSheetData = ({
 
   return (
     <Dialog onOpenChange={handleOpenChange} open={isOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger className="w-full!">
         <Button
           variant={mode === "new" ? "default" : "ghost"}
-          className={
+          className={cn(
+            "cursor-pointer",
             mode === "new"
               ? "px-4! w-max items-start justify-start font-semibold"
-              : "px-2! w-full h-max items-start justify-start text-start"
-          }
+              : "px-2! w-full! h-max items-start justify-start text-start"
+          )}
         >
           {mode === "new" ? "Adicionar usuário" : "Editar usuário"}
         </Button>
@@ -456,14 +454,16 @@ const UserSheetData = ({
                         variant="secondary"
                         key={i}
                         className="flex justify-between gap-2"
+                        onClick={() => handleSetUserRoles(null)}
                       >
-                        <p>
+                        <p className="font-semibold">
                           {rolesLabelsOptions.find((role) => role.value === r)
                             ?.label || r}
                         </p>
+
                         <X
-                          onClick={() => handleSetUserRoles(r)}
-                          className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
+                          className="size-3.5! text-destructive hover:text-destructive !cursor-pointer"
+                          strokeWidth={2}
                         />
                       </Badge>
                     ))}

@@ -16,13 +16,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { UserMetadata } from "@supabase/supabase-js";
-import { deleteUser } from "@/app/actions/auth_admin";
 import { DataTable } from "../../components/data-table";
 import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import InsertManyUsersDialog from "../../components/insert-many-users-dialog";
 import UserSheetData from "../../components/user-sheet-data";
-import { useRolesStore } from "@/stores/modules/users/user-roles-store";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 
 type ProfilesDataTableProps = {
@@ -36,8 +34,7 @@ const ProfilesDataTable = ({
   excludeRoles,
 }: ProfilesDataTableProps) => {
   const { classrooms } = useClassroomStore();
-  const { users, createNewUser, updateUser } = useUsersStore();
-  const { addUserRole, updateUserRole, deleteUserRole } = useRolesStore();
+  const { users, deleteUser } = useUsersStore();
 
   const columns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
@@ -359,32 +356,24 @@ const ProfilesDataTable = ({
         const user = row.original;
         return (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger>
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Abrir Menu</span>
                 <MoreHorizontal />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-bold">Ações</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {/* <UserSheetData
+              <UserSheetData
                 mode="edit"
                 currentUser={user}
-                handleAddUserRole={handleAddUserRole}
-                handleUpdateUserRole={handleUpdateUserRole}
-                handleDeleteUserRole={handleDeleteUserRole}
-                handleCreateNewUser={handleCreateNewUser}
-                handleUpdateUser={handleUpdateUser}
                 excludeRoles={excludeRoles}
-                classrooms={classrooms}
-                handleInsertUserClassrooms={handleInsertUserClassrooms}
-                handleDeleteUserClassroom={handleDeleteUserClassroom}
-              /> */}
+              />
               {user.id && (
                 <Button
                   variant="ghost"
-                  className="px-2! w-full h-max items-start justify-start text-start"
+                  className="cursor-pointer px-2! w-full h-max items-start justify-start text-start"
                   onClick={() => deleteUser(user.id || "")}
                 >
                   Deletar
@@ -485,22 +474,15 @@ const ProfilesDataTable = ({
         classrooms={classrooms}
       />
 
-      <UserSheetData
-        mode="new"
-        handleCreateNewUser={createNewUser}
-        handleUpdateUser={updateUser}
-        handleAddUserRole={addUserRole}
-        handleUpdateUserRole={updateUserRole}
-        handleDeleteUserRole={deleteUserRole}
-        excludeRoles={excludeRoles}
-        classrooms={classrooms}
-      />
+      <UserSheetData mode="new" excludeRoles={excludeRoles} />
     </div>
   );
 
+  const allColumns = [...columns, ...classroomColumns, ...actionsColumns];
+
   return (
     <DataTable
-      columns={[...columns, ...classroomColumns, ...actionsColumns]}
+      columns={allColumns}
       data={users}
       loading={loading}
       headerRightOptions={headerOptions}

@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 import BadgeSelector from "@/components/shared/badge-selector";
+import { cn } from "@/lib/utils";
 
 interface UserData {
   name: string;
@@ -258,7 +259,7 @@ const InsertManyUsersDialog = ({
       <DialogTrigger>
         <Button variant={"secondary"}>Inserir via CSV</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[85vw] w-max overflow-hidden">
+      <DialogContent className="max-w-[85vw]! w-max! overflow-hidden">
         <DialogHeader>
           <DialogTitle>Inserir usuários via CSV</DialogTitle>
           <DialogDescription>
@@ -296,14 +297,18 @@ const InsertManyUsersDialog = ({
             <Table className="w-full h-full">
               <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
                 <TableRow>
-                  <TableHead className="max-w-56 w-56 truncate font-semibold">
-                    Nome
+                  <TableHead className="max-w-56 w-56 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-start items-center border-r ">
+                      Nome
+                    </div>
                   </TableHead>
-                  <TableHead className="max-w-56 w-56 truncate font-semibold">
-                    Email
+                  <TableHead className="max-w-56 w-56 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-start items-center border-r">
+                      Email
+                    </div>
                   </TableHead>
-                  <TableHead className="max-w-56 w-56 truncate font-semibold">
-                    <div className="w-full flex items-center justify-between pr-2 gap-2">
+                  <TableHead className="max-w-56 w-56 truncate font-semibold p-0!">
+                    <div className="w-full h-full! p-2 flex items-center justify-between pr-2 gap-2 border-r">
                       Senha
                       <Button
                         variant="outline"
@@ -317,26 +322,26 @@ const InsertManyUsersDialog = ({
                     </div>
                   </TableHead>
 
-                  <TableHead className="max-w-36 w-36 truncate font-semibold">
-                    <div className="w-full flex items-center justify-between pr-2 gap-2">
+                  <TableHead className="max-w-36 w-36 p-0! truncate font-semibold">
+                    <div className="w-full h-full! p-2 flex items-center justify-between pr-2 gap-2 border-r">
                       {allUsersRole.length === 0 && "Cargo"}
 
                       {allUsersRole.length === 1 ? (
                         <Badge
                           variant="secondary"
-                          className="flex justify-between gap-2 w-max"
+                          className="flex justify-between gap-2 cursor-pointer!"
+                          onClick={handleRemoveRolesForAll}
                         >
-                          <p>
+                          <p className="font-semibold">
                             {rolesLabelsOptions.find(
                               (role) => role.value === allUsersRole[0]
                             )?.label || allUsersRole[0]}
                           </p>
-                          {stage !== 2 && (
-                            <X
-                              onClick={handleRemoveRolesForAll}
-                              className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
-                            />
-                          )}
+
+                          <X
+                            className="size-3.5! text-destructive hover:text-destructive !cursor-pointer"
+                            strokeWidth={2}
+                          />
                         </Badge>
                       ) : (
                         <BadgeSelector
@@ -351,8 +356,13 @@ const InsertManyUsersDialog = ({
                   </TableHead>
 
                   {classrooms && classrooms.length > 0 && (
-                    <TableHead className="max-w-36 w-36 truncate font-semibold">
-                      <div className="w-full flex items-center justify-between pr-2 gap-2">
+                    <TableHead className="max-w-36 w-36 truncate font-semibold p-0!">
+                      <div
+                        className={cn(
+                          "w-full h-full p-2 flex items-center justify-between pr-2 gap-2",
+                          allUsersRole.length && "justify-center"
+                        )}
+                      >
                         {allUsersClassroom.length === 0 && "Turmas"}
                         {stage !== 2 ? (
                           <ClassroomCombobox
@@ -423,68 +433,68 @@ const InsertManyUsersDialog = ({
                             : ""
                         }
                       >
-                        <TableCell>
-                          <Input
-                            type="text"
-                            value={user.name}
-                            className="bg-background"
-                            onChange={(e) =>
-                              setUsers((prevUsers) =>
-                                prevUsers.map((u, i) =>
-                                  index === i
-                                    ? { ...u, name: e.target.value }
-                                    : u
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-56 w-56">
+                            <Input
+                              type="text"
+                              value={user.name}
+                              className="bg-background"
+                              onChange={(e) =>
+                                setUsers((prevUsers) =>
+                                  prevUsers.map((u, i) =>
+                                    index === i
+                                      ? { ...u, name: e.target.value }
+                                      : u
+                                  )
                                 )
-                              )
-                            }
-                          />
+                              }
+                            />
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Input
-                            type="email"
-                            value={user.email}
-                            className="bg-background"
-                            onChange={(e) =>
-                              setUsers((prevUsers) =>
-                                prevUsers.map((u, i) =>
-                                  index === i
-                                    ? { ...u, email: e.target.value }
-                                    : u
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-56 w-56">
+                            <Input
+                              type="email"
+                              value={user.email}
+                              className="bg-background"
+                              onChange={(e) =>
+                                setUsers((prevUsers) =>
+                                  prevUsers.map((u, i) =>
+                                    index === i
+                                      ? { ...u, email: e.target.value }
+                                      : u
+                                  )
                                 )
-                              )
-                            }
-                          />
+                              }
+                            />
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          <Input
-                            type="password"
-                            value={user.password}
-                            className="bg-background"
-                            onChange={(e) =>
-                              setUsers((prevUsers) =>
-                                prevUsers.map((u, i) =>
-                                  index === i
-                                    ? { ...u, password: e.target.value }
-                                    : u
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-56 w-56">
+                            <Input
+                              type="password"
+                              value={user.password}
+                              className="bg-background"
+                              onChange={(e) =>
+                                setUsers((prevUsers) =>
+                                  prevUsers.map((u, i) =>
+                                    index === i
+                                      ? { ...u, password: e.target.value }
+                                      : u
+                                  )
                                 )
-                              )
-                            }
-                          />
+                              }
+                            />
+                          </div>
                         </TableCell>
-                        <TableCell>
-                          {user.userRoles?.length ? (
-                            user?.userRoles?.map((r, i) => (
-                              <Badge
-                                variant="secondary"
-                                key={i}
-                                className="flex justify-between gap-2 w-max"
-                              >
-                                <p>
-                                  {rolesLabelsOptions.find(
-                                    (role) => role.value === r
-                                  )?.label || r}
-                                </p>
-                                <X
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-36 w-36">
+                            {user.userRoles?.length ? (
+                              user?.userRoles?.map((r, i) => (
+                                <Badge
+                                  key={i}
+                                  variant="secondary"
+                                  className="flex justify-between gap-2 cursor-pointer!"
                                   onClick={() =>
                                     setUsers((prevUsers) =>
                                       prevUsers.map((u, i) =>
@@ -494,35 +504,45 @@ const InsertManyUsersDialog = ({
                                       )
                                     )
                                   }
-                                  className="size-3.5 cursor-pointer text-muted-foreground hover:text-destructive"
-                                />
-                              </Badge>
-                            ))
-                          ) : (
-                            <div className="w-full h-full flex justify-center items-center">
-                              <BadgeSelector
-                                items={rolesLabelsOptions}
-                                excludeItens={excludeRoles || []}
-                                label="Adicionar cargo"
-                                onChange={(role) =>
-                                  setUsers((prevUsers) =>
-                                    prevUsers.map((u, i) =>
-                                      index === i
-                                        ? {
-                                            ...u,
-                                            userRoles: [role as RolesT],
-                                          }
-                                        : u
+                                >
+                                  <p className="font-semibold">
+                                    {rolesLabelsOptions.find(
+                                      (role) => role.value === r
+                                    )?.label || r}
+                                  </p>
+
+                                  <X
+                                    className="size-3.5! text-destructive hover:text-destructive !cursor-pointer"
+                                    strokeWidth={2}
+                                  />
+                                </Badge>
+                              ))
+                            ) : (
+                              <div className="w-full h-full flex justify-center items-center">
+                                <BadgeSelector
+                                  items={rolesLabelsOptions}
+                                  excludeItens={excludeRoles || []}
+                                  label="Adicionar cargo"
+                                  onChange={(role) =>
+                                    setUsers((prevUsers) =>
+                                      prevUsers.map((u, i) =>
+                                        index === i
+                                          ? {
+                                              ...u,
+                                              userRoles: [role as RolesT],
+                                            }
+                                          : u
+                                      )
                                     )
-                                  )
-                                }
-                              />
-                            </div>
-                          )}
+                                  }
+                                />
+                              </div>
+                            )}
+                          </div>
                         </TableCell>
                         {classrooms && classrooms.length > 0 && (
-                          <TableCell>
-                            <div className="w-full h-full flex justify-center items-center">
+                          <TableCell className="p-0!">
+                            <div className="h-14! flex justify-center items-center p-2 max-w-36 w-36">
                               <ClassroomCombobox
                                 itens={classrooms?.map((c) => ({
                                   label: c.name,
