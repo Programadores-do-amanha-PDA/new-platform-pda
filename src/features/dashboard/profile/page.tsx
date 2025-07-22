@@ -1,6 +1,6 @@
 "use client";
-import ProfileDataTabs from "@/components/common/profile/profile-data-tabs";
-import { useAuth } from "@/context/auth-context";
+import useAuth from "@/hooks/use-auth";
+import ProfileDataTabs from "./components/profile-data-tabs";
 
 export default function Page() {
   const { user, fetchSession } = useAuth();

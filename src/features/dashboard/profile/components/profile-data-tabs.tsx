@@ -1,23 +1,23 @@
-import { AuthUserWithProfileType } from "@/types/auth-types";
-import { Button } from "../../ui/button";
-import { Separator } from "../../ui/separator";
-import { Badge } from "../../ui/badge";
 import { LoaderCircle } from "lucide-react";
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
 import { useEffect, useState } from "react";
-import { Textarea } from "../../ui/textarea";
 import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
 import { updateAuthUser } from "@/app/actions/(auth)";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
-import { rolesLabels } from "@/utils/supabase/enumeratedTypes/roles";
+import { AuthUserWithProfileT } from "@/types/auth";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { rolesLabelsOptions } from "@/utils/user-roles-labels";
+import { Button } from "@/components/ui/button";
 
 const ProfileDataTabs = ({
   currentUser,
   onUpdateUser,
 }: {
-  currentUser: AuthUserWithProfileType;
+  currentUser: AuthUserWithProfileT;
   onUpdateUser: () => void;
 }) => {
   const [fullName, setFullName] = useState("");
@@ -200,7 +200,7 @@ const ProfileDataTabs = ({
             entrada do email atual ou do novo email e aceitar a troca.
           </span>
         </div>
-        
+
         <div className="grid grid-rows-[20px_1fr] items-center gap-4">
           <Label htmlFor="email" className="text-left h-max font-semibold">
             Email
@@ -217,7 +217,9 @@ const ProfileDataTabs = ({
         <Separator className="col-span-1 lg:col-span-2" />
 
         <div className="col-span-1 lg:col-span-2">
-          <p className="text-left h-max font-semibold text-base">Alterar senha</p>
+          <p className="text-left h-max font-semibold text-base">
+            Alterar senha
+          </p>
           <span className="text-sm text-muted-foreground">
             A senha precisa ter um mínimo de 7 caracteres, incluindo letras
             minúsculas, letras maiúsculas, números e caracteres especiais.
@@ -257,7 +259,10 @@ const ProfileDataTabs = ({
           <div className="col-span-3 flex gap-1">
             {currentUser.profile?.user_roles?.map((r, i) => (
               <Badge variant="default" key={i}>
-                {rolesLabels.find((role) => role.value === r.role)?.label }
+                {
+                  rolesLabelsOptions.find((role) => role.value === r.role)
+                    ?.label
+                }
               </Badge>
             ))}
           </div>

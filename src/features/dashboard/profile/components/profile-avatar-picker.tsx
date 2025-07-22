@@ -1,9 +1,5 @@
 import { Camera, Trash } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "../../ui/avatar";
-import { AuthUserWithProfileType } from "@/types/auth-types";
 
-import { Label } from "../../ui/label";
-import { Input } from "../../ui/input";
 import { ChangeEvent, useState } from "react";
 
 import ProfileAvatarCropper from "./profile-avatar-cropper";
@@ -14,13 +10,17 @@ import {
   uploadUserAvatar,
 } from "@/app/actions/profile-avatar";
 import { toast } from "sonner";
-import { Button } from "../../ui/button";
+import { AuthUserWithProfileT } from "@/types/auth";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export const ProfileAvatarPicker = ({
   user,
   onUpdateUser,
 }: {
-  user: AuthUserWithProfileType;
+  user: AuthUserWithProfileT;
   onUpdateUser: () => void;
 }) => {
   const [newProfileImage, setNewProfileImage] = useState<string>("");
