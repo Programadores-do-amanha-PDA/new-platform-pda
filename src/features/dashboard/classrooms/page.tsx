@@ -1,15 +1,13 @@
 "use client";
 import { useState } from "react";
 
-import { useAdminStackContext } from "@/context/admin/stack-context";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import CreateOrEditClassroomDialog from "@/components/common/classrooms/create-classroom-dialog";
-import ClassroomCard from "@/components/common/classrooms/classroom-card";
-
-import { ClassroomTypeStatus } from "@/types/classrooms";
+import { ClassroomStatusT } from "@/types/classrooms";
+import { useClassroomStore } from "@/stores/modules/classrooms";
+import ClassroomFormDialog from "./components/classroom-form-dialog";
+import ClassroomCard from "./components/classroom-card";
 
 const classroomStatusLabels = {
   created: "Criado",
@@ -18,12 +16,11 @@ const classroomStatusLabels = {
 };
 
 const TeamPage = () => {
-  const [statusFilter, setStatusFilter] = useState<ClassroomTypeStatus | "all">(
+  const [statusFilter, setStatusFilter] = useState<ClassroomStatusT | "all">(
     "all"
   );
-  const {
-    classroomsStack: { classrooms },
-  } = useAdminStackContext();
+
+  const { classrooms } = useClassroomStore();
 
   const filteredClassrooms =
     statusFilter === "all"
@@ -46,7 +43,7 @@ const TeamPage = () => {
             >
               Todas
             </p>
-            <Badge variant={statusFilter === "all" ? "default" : "outline-solid"}>
+            <Badge variant={statusFilter === "all" ? "default" : "outline"}>
               {classrooms.length}
             </Badge>
           </Button>
@@ -70,7 +67,7 @@ const TeamPage = () => {
                     </p>
                     <Badge
                       variant={
-                        statusFilter === classroomStatus ? "default" : "outline-solid"
+                        statusFilter === classroomStatus ? "default" : "outline"
                       }
                     >
                       {
@@ -86,7 +83,7 @@ const TeamPage = () => {
               )
             )}
         </div>
-        <CreateOrEditClassroomDialog />
+        <ClassroomFormDialog />
       </header>
 
       <ul className="w-full max-h-full flex flex-row flex-wrap justify-start overflow-y-auto gap-4 p-4">

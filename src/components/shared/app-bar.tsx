@@ -25,13 +25,12 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   const path = usePathname();
   const segments = path.split("/").filter(Boolean);
 
-  const role = segments[1] || "";
-  const parts = segments.slice(2);
+  const parts = segments.slice(1);
   const { user } = useAuth();
 
   const breadcrumbItems = parts.reduce(
     (acc, part, index) => {
-      const href = `/dashboard/${role}/${parts.slice(0, index + 1).join("/")}`;
+      const href = `/dashboard/${parts.slice(0, index + 1).join("/")}`;
       let label = "";
       if (part === "all") {
         label = pathLabels[part.concat("_", parts[index - 1])] || part;
@@ -45,7 +44,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
       {
         label: "Inicio",
         title: `Olá ${user?.profile?.full_name.split(" ", 1)[0]} 👋🏿`,
-        href: `/dashboard/${role}`,
+        href: `/dashboard`,
       },
     ]
   );

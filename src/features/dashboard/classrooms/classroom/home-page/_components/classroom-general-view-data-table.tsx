@@ -1,3 +1,9 @@
+"use client";
+import { useState } from "react";
+
+import { useUsersStore } from "@/stores/modules/users/users-store";
+import { useProjectStore } from "@/stores/modules/classrooms/projects";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,9 +23,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useAdminStackContext } from "@/context/admin/stack-context";
+
 import { cn } from "@/lib/utils";
-import { AuthUserWithProfileType, ProfileType } from "@/types/auth-types";
+import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
 import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/projects/project";
 import {
   ColumnDef,
@@ -34,7 +40,6 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
-import { useState } from "react";
 
 const projectsShortLabels = {
   mini_project: "MP",
@@ -52,18 +57,14 @@ const ClassroomGeneralViewDataTable = ({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const {
-    usersStack: { users },
-    classroomsStack: {
-      projects: { projects },
-    },
-  } = useAdminStackContext();
+  const { users } = useUsersStore();
+  const { projects } = useProjectStore();
 
   const classroomProjects = projects.filter(
     (project) => project.classroom_id === classroom_id
   ) as ClassroomProjectWithDeliveriesAndCorrectionsT[];
 
-  const columns: ColumnDef<Partial<AuthUserWithProfileType>>[] = [
+  const columns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
       id: "select",
       header: ({ table }) => (
@@ -85,14 +86,14 @@ const ClassroomGeneralViewDataTable = ({
           <Avatar className="relative group">
             <AvatarFallback>
               {row
-                .getValue<ProfileType>("profile")
+                .getValue<ProfileT>("profile")
                 .full_name.split(" ")
                 .filter((word, i) => i < 2)
                 .map((word) => word[0].toUpperCase())
                 .join("") || "U"}
             </AvatarFallback>
             <AvatarImage
-              src={row.getValue<ProfileType>("profile").avatarUrl || ""}
+              src={row.getValue<ProfileT>("profile").avatarUrl || ""}
             />
             <div
               className={cn(
@@ -149,9 +150,9 @@ const ClassroomGeneralViewDataTable = ({
       cell: ({ row }) => (
         <div className="w-full flex flex-col lowercase truncate px-2">
           <p className="text-sm font-bold capitalize">
-            {row.getValue<ProfileType>("profile").full_name}
+            {row.getValue<ProfileT>("profile").full_name}
           </p>
-          <p>{row.getValue<ProfileType>("profile").email}</p>
+          <p>{row.getValue<ProfileT>("profile").email}</p>
         </div>
       ),
       sortingFn: (rowA, rowB) => {
@@ -160,7 +161,7 @@ const ClassroomGeneralViewDataTable = ({
         return nameA?.localeCompare(nameB);
       },
       filterFn: (row, id, filterValue) => {
-        const profile = row.getValue(id) as ProfileType;
+        const profile = row.getValue(id) as ProfileT;
         const searchTerm = filterValue.toLowerCase();
 
         return (
