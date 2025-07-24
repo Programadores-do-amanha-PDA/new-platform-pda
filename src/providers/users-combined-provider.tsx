@@ -27,7 +27,7 @@ export default function UsersCombinedProvider({
     if (loadUsers) {
       getAllUsersWithProfiles(initialRole);
     }
-  }, [getAllUsersWithProfiles, initialRole, loadUsers]);
+  }, []);
 
   if (isLoading() && loadUsers) {
     return <PageLoader />;

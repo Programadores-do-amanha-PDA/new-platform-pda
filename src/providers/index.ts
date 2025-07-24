@@ -1,3 +1,13 @@
-export { ClassroomDataLoaderProvider, useClassroomDataLoader } from "./classroom-data-loader-provider";
-export { UsersCombinedProvider } from "./users-combined-provider";
-export { UsersStoreProvider } from "./users-store-provider";
+import {
+  ClassroomDataLoaderProvider,
+  useClassroomDataLoader,
+} from "./classroom-data-loader-provider";
+import UsersCombinedProvider from "./users-combined-provider";
+import UsersStoreProvider from "./users-store-provider";
+
+export {
+  ClassroomDataLoaderProvider,
+  useClassroomDataLoader,
+  UsersCombinedProvider,
+  UsersStoreProvider,
+};

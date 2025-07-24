@@ -24,7 +24,7 @@ export default function UsersStoreProvider({
     if (loadUsers) {
       getAllUsersWithProfiles(initialRole);
     }
-  }, [getAllUsersWithProfiles, initialRole, loadUsers]);
+  }, []);
 
   if (loading && loadUsers) {
     return <PageLoader />;

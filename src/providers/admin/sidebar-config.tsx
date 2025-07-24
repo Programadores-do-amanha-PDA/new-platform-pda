@@ -78,6 +78,10 @@ export const generateSidebarConfig = (
         isActive: false,
         items: [
           {
+            title: "Presenças",
+            url: `/dashboard/classrooms/${classroom.id}/attendance`,
+          },
+          {
             title: "Projetos",
             url: `/dashboard/classrooms/${classroom.id}/projects`,
           },
@@ -114,7 +118,7 @@ export const generatePathLabels = (
   }
 
   if (meetings.length > 0) {
-    meetings.forEach((meeting) => (zoomMeetings[meeting._id] = meeting.topic));
+    meetings.forEach((meeting) => (zoomMeetings[meeting.id] = meeting.topic));
   }
 
   if (assessments.length > 0) {

@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ZoomClassType } from "@/types/zoom/meetings";
+import { ZoomClassT } from "@/types/zoom/meetings";
 
 const meetingTypes = [
   { id: "programming", name: "Programação" },
@@ -18,17 +18,17 @@ const MeetingTypeSelector = ({
   value,
   handleValueChange,
 }: {
-  value: ZoomClassType | undefined;
-  handleValueChange: (value: ZoomClassType) => void;
+  value: ZoomClassT | undefined;
+  handleValueChange: (value: ZoomClassT) => void;
 }) => {
   return (
     <Select value={value} onValueChange={handleValueChange}>
-      <SelectTrigger className="h-7!">
+      <SelectTrigger className="h-7! w-full">
         <SelectValue placeholder="Tipo de reunião" className="h-7!" />
       </SelectTrigger>
       <SelectContent>
         {meetingTypes.map((type) => (
-          <SelectItem key={type.id} value={type.name}>
+          <SelectItem key={type.id} value={type.id}>
             {type.name}
           </SelectItem>
         ))}
@@ -36,4 +36,5 @@ const MeetingTypeSelector = ({
     </Select>
   );
 };
+
 export default MeetingTypeSelector;

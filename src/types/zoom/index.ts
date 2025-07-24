@@ -4,7 +4,7 @@ import {
   ZoomMeetingOccurrenceT,
   ZoomMeetingRecurrenceT,
   ZoomMeetingSettingsT,
-  ZoomMeetingPastInstancesT,
+  ZoomMeetingJustificationT,
   ZoomClassT,
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
@@ -13,6 +13,8 @@ import {
   ZoomMeetingPollQuestionPromptT,
 } from "./meetings";
 
+import { ZoomMeetingPastInstanceT } from "./past-instances";
+
 export type {
   ZoomAccountT,
   ZoomAccountMeT,
@@ -20,11 +22,12 @@ export type {
   ZoomMeetingOccurrenceT,
   ZoomMeetingRecurrenceT,
   ZoomMeetingSettingsT,
-  ZoomMeetingPastInstancesT,
+  ZoomMeetingJustificationT,
   ZoomClassT,
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
   ZoomMeetingPollT,
   ZoomMeetingPollQuestionT,
   ZoomMeetingPollQuestionPromptT,
+  ZoomMeetingPastInstanceT,
 };

@@ -1,6 +1,6 @@
 export interface ZoomMeetingT {
-  _id: string;
-  id: number;
+  id: string;
+  meeting_id: number;
   agenda?: string;
   created_at: string;
   duration: number;
@@ -30,14 +30,15 @@ export interface ZoomMeetingT {
   dynamic_host_key: string;
   creation_source: string;
   registration_url: string;
-  past_instances: ZoomMeetingPastInstancesT[];
   participants?: ZoomMeetingParticipantT[];
+  justifications?: ZoomMeetingJustificationT[];
   polls?: ZoomMeetingPollT[];
-  poll_results?: ZoomMeetingPollResultsT[];
+  poll_results?: ZoomMeetingPollQuestionT[];
   account_id?: string;
   classroom_id?: string;
   is_visible_on_schedule?: boolean;
   synchronized_at?: string;
+  class_type?: ZoomClassT;
 }
 
 export interface ZoomMeetingOccurrenceT {
@@ -58,7 +59,6 @@ export interface ZoomMeetingRecurrenceT {
   monthly_week?: number;
   monthly_week_day?: number;
 }
-
 export interface ZoomMeetingSettingsT {
   host_video?: boolean;
   participant_video?: boolean;
@@ -84,15 +84,10 @@ export interface ZoomMeetingSettingsT {
   polling?: boolean;
 }
 
-export interface ZoomMeetingPastInstancesT {
-  uuid: string;
-  start_time: string;
-  id: number;
-  poll_results?: ZoomMeetingPollResultsT[];
-  participants?: ZoomMeetingParticipantT[];
-  is_visible_on_schedule: boolean | undefined;
-  class_type?: ZoomClassT;
-  meetingId?: number;
+export interface ZoomMeetingJustificationT {
+  id?: string;
+  user_email: string;
+  message: string;
 }
 
 export type ZoomClassT =

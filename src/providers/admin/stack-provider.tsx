@@ -7,8 +7,7 @@ import PageLoader from "@/components/shared/page-loader";
 import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
-import { useZoomAPIStore } from "@/stores/modules/classrooms/zoom/api";
-import { createZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useJobStore } from "@/stores/modules/jobs";
 import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
 
@@ -17,10 +16,6 @@ import { AppSidebar } from "@/components/shared/sidebar";
 
 import { SidebarDataT } from "@/types/sidebar";
 import useAuth from "@/hooks/use-auth";
-
-const useZoomMeetingStore = createZoomMeetingStore({
-  getMeetingByAPI: useZoomAPIStore.getState().getMeetingByAPI,
-});
 
 interface AdminStackProviderProps {
   children: React.ReactNode;
@@ -61,7 +56,7 @@ export const AdminStackProvider = ({
     };
 
     fetchInitialData();
-  }, [user, userRole]);
+  }, []);
 
   if (!user || !userRole)
     return (

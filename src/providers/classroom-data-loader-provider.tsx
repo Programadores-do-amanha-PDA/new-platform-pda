@@ -1,14 +1,20 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
 import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 import { useCoodeshAPIAssessmentStore } from "@/stores/modules/classrooms/coodesh/api";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
 import { useZoomAPIStore } from "@/stores/modules/classrooms/zoom/api";
-import { createZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { createZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
+import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
 
 interface ClassroomDataLoaderContextType {
@@ -36,14 +42,8 @@ export function ClassroomDataLoaderProvider({
   const projectStore = useProjectStore();
   const deliveryStore = useDeliveryStore();
   const zoomAPIStore = useZoomAPIStore();
-
-  const zoomAccountStore = createZoomAccountStore({
-    getZoomMeAccountDataByAPI: zoomAPIStore.getZoomMeAccountDataByAPI,
-  })();
-
-  const zoomMeetingStore = createZoomMeetingStore({
-    getMeetingByAPI: zoomAPIStore.getMeetingByAPI,
-  })();
+  const zoomAccountStore = useZoomAccountStore();
+  const zoomMeetingStore = useZoomMeetingStore();
 
   const isLoading =
     classroomStore.loading ||
@@ -55,7 +55,7 @@ export function ClassroomDataLoaderProvider({
     zoomAccountStore.loading ||
     zoomMeetingStore.loading;
 
-  const loadAllData = async () => {
+  const loadAllData = useCallback(async () => {
     if (!classroomId) return;
 
     try {
@@ -68,11 +68,18 @@ export function ClassroomDataLoaderProvider({
 
       await zoomAccountStore.getAllAccounts(classroomId);
       await zoomMeetingStore.getAllMeetings(classroomId);
-
     } catch (error) {
       console.error("Error loading classroom data:", error);
     }
-  };
+  }, [
+    classroomId,
+    classroomStore,
+    coodeshAssessmentStore,
+    coodeshAPIStore,
+    projectStore,
+    zoomAccountStore,
+    zoomMeetingStore,
+  ]);
 
   useEffect(() => {
     loadAllData();
