@@ -10,34 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import DateIntervalPicker from "@/components/common/date-interval-picker";
-
-import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
+import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
+import DateIntervalPicker from "@/components/shared/date-interval-picker";
+import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 
 type AssessmentsClassroomListCardProps = {
-  assessment: ClassroomCoodeshAssessment;
-  handleUpdateCoodeshAssessment: (
-    assessment: ClassroomCoodeshAssessment,
-    assessmentData: Partial<ClassroomCoodeshAssessment>
-  ) => Promise<boolean>;
+  assessment: ClassroomCoodeshAssessmentT;
   expansive: boolean;
 };
 
 const AssessmentsClassroomListCard = ({
   assessment,
-  handleUpdateCoodeshAssessment,
   expansive,
 }: AssessmentsClassroomListCardProps) => {
   const path = usePathname();
-
   const [loading, setLoading] = useState(false);
-
   const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
   const [isVisibleOnSchedule, setIsVisibleOnSchedule] =
     useState<boolean>(false);
   const [acceptLateDeliveries, setAcceptLateDeliveries] =
     useState<boolean>(false);
 
+  const { updateAssessment } = useCoodeshAssessmentStore();
   useEffect(() => {
     if (assessment?.schedule_date?.from && assessment?.schedule_date?.to) {
       setScheduleDate({
@@ -71,7 +65,7 @@ const AssessmentsClassroomListCard = ({
     try {
       if (!assessment.id) throw new Error("Assessment ID is required");
 
-      await handleUpdateCoodeshAssessment(assessment, {
+      await updateAssessment(assessment, {
         accept_late_deliveries: acceptLateDeliveries,
         is_visible_on_schedule: isVisibleOnSchedule,
         schedule_date: scheduleDate,
@@ -88,7 +82,11 @@ const AssessmentsClassroomListCard = ({
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
           <Link
-            href={expansive ? `${path}/${assessment.id}` : `${path}/assessments/${assessment.id}`}
+            href={
+              expansive
+                ? `${path}/${assessment.id}`
+                : `${path}/assessments/${assessment.id}`
+            }
             className="font-semibold truncate hover:underline cursor-pointer"
             title={assessment.name}
           >

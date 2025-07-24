@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomTypeStatus } from "@/types/classrooms";
+import { ClassroomStatusT } from "@/types/classrooms";
 
 const classroomStatusLabels = [
   { id: "created", label: "Criada" },
@@ -21,8 +21,8 @@ const ClassroomStatusSelector = ({
   value,
   handleOnchange,
 }: {
-  value: ClassroomTypeStatus;
-  handleOnchange: (value: ClassroomTypeStatus) => void;
+  value: ClassroomStatusT;
+  handleOnchange: (value: ClassroomStatusT) => void;
 }) => {
   return (
     <Select onValueChange={handleOnchange} value={value}>
@@ -41,6 +41,6 @@ const ClassroomStatusSelector = ({
       </SelectContent>
     </Select>
   );
-}
+};
 
 export default ClassroomStatusSelector;

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-
+import { toast } from "sonner";
+import { Upload, LoaderCircle } from "lucide-react";
 import {
   Drawer,
   DrawerClose,
@@ -18,26 +19,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ClassroomCoodeshAssessment } from "@/types/coodesh/assessments";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import { Upload } from "lucide-react";
 import { formatParticipantsData } from "@/utils/coodesh/format-participant-data";
-
-import { ParticipantData } from "@/types/coodesh/attempts";
+import { ClassroomCoodeshAssessmentT } from "@/types/coodesh/assessments";
+import { ParticipantDataT } from "@/types/coodesh/attempts";
 
 const InsertAssessmentAttempts = ({
   assessment,
-  handleUpdateCoodeshAssessment,
+  updateAssessment,
 }: {
-  assessment: ClassroomCoodeshAssessment | undefined;
-  handleUpdateCoodeshAssessment: (
-    assessment: ClassroomCoodeshAssessment,
-    assessmentData: Partial<ClassroomCoodeshAssessment>
+  assessment: ClassroomCoodeshAssessmentT | undefined;
+  updateAssessment: (
+    assessment: ClassroomCoodeshAssessmentT,
+    assessmentData: Partial<ClassroomCoodeshAssessmentT>
   ) => Promise<boolean>;
 }) => {
   const [open, setOpen] = useState(false);
@@ -48,7 +44,7 @@ const InsertAssessmentAttempts = ({
   const [integrityCsv, setIntegrityCsv] = useState<string | null>(null);
   const [actionPlansCsv, setActionPlansCsv] = useState<string | null>(null);
 
-  const [participantData, setParticipantData] = useState<ParticipantData[]>();
+  const [participantData, setParticipantData] = useState<ParticipantDataT[]>();
 
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -136,7 +132,7 @@ const InsertAssessmentAttempts = ({
         ),
       ];
 
-      await handleUpdateCoodeshAssessment(assessment, {
+      await updateAssessment(assessment, {
         participants_data: finalParticipants,
       });
 

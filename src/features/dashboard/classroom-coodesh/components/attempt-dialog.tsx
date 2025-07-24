@@ -1,3 +1,5 @@
+"use client";
+import { ExternalLink, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -15,16 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import { Button } from "@/components/ui/button";
-
-import { ActionPlanRow, ParticipantData } from "@/types/coodesh/attempts";
-
+import { MarkdownRenderer } from "@/components/shared/shiki-markdown";
 import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
-import { ExternalLink, SquareArrowOutUpRight } from "lucide-react";
-import { MarkdownRenderer } from "@/components/common/shiki-markdown";
+import { ActionPlanRowT, ParticipantDataT } from "@/types/coodesh/attempts";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   challenge_start: "Início do Desafio",
@@ -47,10 +45,8 @@ const AttemptDialog = ({
 }: {
   open: boolean;
   onClose: (open: boolean) => void;
-  attempt: ParticipantData;
+  attempt: ParticipantDataT;
 }) => {
-  // "challenge_start", "fullscreen_enter", "idle", "active", "viewed_question", "challenge_finish", "tab_exit", "back_to_challenges_page", "copy_content"
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-full! max-w-[700px]! max-h-[90vh]! overflow-hidden px-0">
@@ -301,7 +297,7 @@ const AttemptDialog = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {attempt.actionPlans.map((plan: ActionPlanRow) => (
+                    {attempt.actionPlans.map((plan: ActionPlanRowT) => (
                       <TableRow key={`plan-${plan.id}`}>
                         <TableCell className="font-medium truncate">
                           {plan.challenge}

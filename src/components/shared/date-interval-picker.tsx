@@ -29,7 +29,7 @@ const DateIntervalPicker = ({
         <PopoverTrigger asChild>
           <Button
             id="date"
-            variant={"outline-solid"}
+            variant={"outline"}
             className={cn(
               "w-[250px] justify-start text-left font-normal",
               !date && "text-muted-foreground"

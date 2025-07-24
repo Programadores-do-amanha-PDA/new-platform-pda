@@ -7,7 +7,7 @@ import {
   RadialBarChart,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { ChartData } from "@/types/charts";
+import { ChartDataT } from "@/types/charts";
 
 const chartConfig = {
   score: {
@@ -22,7 +22,7 @@ const chartConfig = {
 export function AttemptScoreRadialChart({
   chartData,
 }: {
-  chartData: ChartData;
+  chartData: ChartDataT[];
 }) {
   // Garante que o valor esteja entre 0 e 100
   const normalizedValue = Math.min(Math.max(chartData[0].value, 0), 100);

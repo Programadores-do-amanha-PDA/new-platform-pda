@@ -1,10 +1,10 @@
-import { IntegrityRow } from "@/types/coodesh/attempts";
+import { IntegrityRowT } from "@/types/coodesh/attempts";
 import { ShieldCheck } from "lucide-react";
 
 const AttemptIntegrityCard = ({
   integrityEvents,
 }: {
-  integrityEvents: IntegrityRow[];
+  integrityEvents: IntegrityRowT[];
 }) => {
   if (integrityEvents.filter((event) => event.suspect === "Yes").length === 0) {
     return (

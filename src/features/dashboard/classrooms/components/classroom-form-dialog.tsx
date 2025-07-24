@@ -1,4 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
+import { LoaderCircle } from "lucide-react";
+import { useClassroomStore } from "@/stores/modules/classrooms";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -18,16 +25,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import ClassroomPeriodSelector from "./classroom-period-selector";
+import ClassroomStatusSelector from "./classroom-status-selector";
 import { ClassroomT } from "@/types/classrooms";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import ClassroomPeriodSelector from "../../../../../components/common/classrooms/classroom-period-selector";
-import ClassroomStatusSelector from "../../../../../components/common/classrooms/classroom-status-selector";
-import { toast } from "sonner";
-import { LoaderCircle } from "lucide-react";
-import { useClassroomStore } from "@/stores/modules/classrooms";
 
 const classroomFormSchema = z.object({
   name: z

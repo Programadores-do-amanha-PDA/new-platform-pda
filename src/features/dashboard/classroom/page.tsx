@@ -1,7 +1,7 @@
 "use client";
 
 import { useClassroomStore } from "@/stores/modules/classrooms";
-import ClassroomFormDialog from "../../components/classroom-form-dialog";
+import ClassroomFormDialog from "../classrooms/components/classroom-form-dialog";
 import { useParams } from "next/navigation";
 
 const ClassroomHomePage = () => {

@@ -14,46 +14,37 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { useAdminStackContext } from "@/context/admin/stack-context";
 
-import { AssessmentPayloadType } from "@/types/coodesh/assessments";
+import { AssessmentPayloadT } from "@/types/coodesh";
+import { useCoodeshAPIAssessmentStore } from "@/stores/modules/classrooms/coodesh/api";
+import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 
 const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [assessmentsSearch, setAssessmentsSearch] = useState<string>("");
-  const {
-    classroomsStack: {
-      classrooms,
-      coodesh: {
-        handleCreateCoodeshAssessment,
-        api: { coodeshAPIAssessments, handleGetCoodeshAPIAssessments },
-      },
-    },
-  } = useAdminStackContext();
 
-  const attachedAssessments = classrooms.find(
-    (team) => team.id === classroom_id
-  )?.classroom_coodesh_assessments;
+  const { apiAssessments, getApiAssessments } = useCoodeshAPIAssessmentStore();
+  const { assessments, createAssessment } = useCoodeshAssessmentStore();
 
   const handleOpen = async (open: boolean) => {
     setOpenModal(open);
-    if (open === true && coodeshAPIAssessments.length === 0) {
+    if (open === true && apiAssessments.length === 0) {
       setLoading(true);
-      await handleGetCoodeshAPIAssessments();
+      await getApiAssessments();
       setLoading(false);
     }
   };
 
-  const filteredAssessments = coodeshAPIAssessments.filter((assessment) => {
+  const filteredAssessments = apiAssessments.filter((assessment) => {
     if (assessmentsSearch) {
-      if (!attachedAssessments?.length) {
+      if (!assessments?.length) {
         return assessment.name
           .toLowerCase()
           .includes(assessmentsSearch.toLowerCase());
-      } else if (attachedAssessments.length) {
+      } else if (assessments.length) {
         return (
-          !attachedAssessments
+          !assessments
             .map((att) => att.assessment_id)
             .includes(assessment.assessment_id) &&
           assessment.name
@@ -62,10 +53,10 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
         );
       }
     } else {
-      if (!attachedAssessments?.length) {
+      if (!assessments?.length) {
         return assessment;
-      } else if (attachedAssessments) {
-        return !attachedAssessments
+      } else if (assessments) {
+        return !assessments
           .map((att) => att.assessment_id)
           .includes(assessment.assessment_id);
       }
@@ -98,7 +89,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
           {!loading ? (
             <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2 overflow-y-auto">
               {filteredAssessments.map(
-                (assessmentPayload: AssessmentPayloadType) => (
+                (assessmentPayload: AssessmentPayloadT) => (
                   <li
                     key={assessmentPayload.assessment_id}
                     className="p-2 border rounded-lg"
@@ -117,7 +108,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                       </div>
                       <Button
                         onClick={() =>
-                          handleCreateCoodeshAssessment({
+                          createAssessment({
                             ...assessmentPayload,
                             classroom_id: classroom_id,
                           })
@@ -132,11 +123,11 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                 )
               )}
 
-              {coodeshAPIAssessments.filter(
+              {apiAssessments.filter(
                 (p) =>
                   !(
-                    attachedAssessments &&
-                    attachedAssessments
+                    assessments &&
+                    assessments
                       .map((att) => att.assessment_id)
                       .includes(p.assessment_id)
                   )
@@ -155,8 +146,8 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
               {filteredAssessments.filter(
                 (p) =>
                   !(
-                    attachedAssessments &&
-                    attachedAssessments
+                    assessments &&
+                    assessments
                       .map((att) => att.assessment_id)
                       .includes(p.assessment_id)
                   )

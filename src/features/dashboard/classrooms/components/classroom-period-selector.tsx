@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomPeriodsType } from "@/types/classrooms";
+import { ClassroomPeriodsT } from "@/types/classrooms";
 
 const classroomPeriodLabels = {
   morning: "Manhã",
@@ -39,11 +39,16 @@ const ClassroomPeriodSelector = ({
   value,
   handleOnchange,
 }: {
-  value: string;
-  handleOnchange: (value: ClassroomPeriodsType) => void;
+  value?: ClassroomPeriodsT;
+  handleOnchange: (value: ClassroomPeriodsT) => void;
 }) => {
   return (
-    <Select onValueChange={handleOnchange} value={value}>
+    <Select
+      onValueChange={(value: string) =>
+        handleOnchange(value as ClassroomPeriodsT)
+      }
+      value={value || undefined}
+    >
       <SelectTrigger className="max-w-80 w-[190px]">
         <SelectValue className="w-full" placeholder="Selecione um período" />
       </SelectTrigger>

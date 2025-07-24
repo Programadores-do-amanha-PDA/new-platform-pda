@@ -4,7 +4,7 @@ import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
-import AttendanceTable from "./_components/attendance-table";
+import AttendanceTable from "./components/attendance-table";
 import { ZoomMeetingT } from "@/types/zoom";
 
 export default function AttendancePage() {

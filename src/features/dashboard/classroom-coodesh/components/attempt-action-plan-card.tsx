@@ -1,10 +1,11 @@
-import { ActionPlanRow } from "@/types/coodesh/attempts";
+"use client"
 import { Map } from "lucide-react";
+import { ActionPlanRowT } from "@/types/coodesh/attempts";
 
 const AttemptActionPlanCard = ({
   actionPlans,
 }: {
-  actionPlans: ActionPlanRow[];
+  actionPlans: ActionPlanRowT[];
 }) => {
   if (actionPlans.length === 0) {
     return (
