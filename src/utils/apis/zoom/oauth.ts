@@ -1,4 +1,5 @@
 "use server";
+import { ZoomAccountT } from "@/types/zoom";
 import { cookies } from "next/headers";
 
 type TokenData = {
@@ -16,11 +17,10 @@ export async function getAccessToken({
   account_id,
   client_id,
   client_secret,
-}: {
-  account_id: string;
-  client_id: string;
-  client_secret: string;
-}): Promise<string> {
+}: Omit<
+  ZoomAccountT,
+  "me" | "label" | "id" | "created_at" | "label" | "classroom_id"
+>): Promise<string> {
   const cookieStore = cookies();
 
   try {

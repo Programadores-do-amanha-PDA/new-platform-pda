@@ -1,5 +1,5 @@
 "use server";
-import { ZoomMeetingOccurrenceT, ZoomMeetingPastInstancesT, ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/zoom";
 import axiosZoomInstancie from ".";
 import { encodeUUID } from "@/utils/encode-UUID";
 
@@ -29,10 +29,17 @@ export const getAllMeetingsByAccount = async (ZOOM_ACCESS_TOKEN: string) => {
       nextPageToken = response.data.next_page_token;
     } while (nextPageToken);
 
-    return meetings;
+    return meetings.flatMap((meeting) => {
+      const { id, ...restMeetingData }: ZoomMeetingT = meeting;
+
+      return {
+        ...restMeetingData,
+        meeting_id: Number(id),
+      } as Omit<ZoomMeetingT, "id">;
+    }) as Omit<ZoomMeetingT, "id">[];
   } catch (error) {
     console.error("Error fetching meetings:", error);
-    throw error;
+    return null;
   }
 };
 
@@ -40,68 +47,36 @@ export const getAllMeetingsByAccount = async (ZOOM_ACCESS_TOKEN: string) => {
  * Fetches detailed information about a specific meeting, including past instances.
  */
 export const getMeetingById = async (
-  meetingId: string,
+  meetingId: number,
   ZOOM_ACCESS_TOKEN: string
 ) => {
   try {
-    const encodedMeetingId = encodeUUID(meetingId);
-    const response = await axiosZoomInstancie.get(
-      `/meetings/${encodedMeetingId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
-        },
-      }
-    );
+    const response = await axiosZoomInstancie.get(`/meetings/${meetingId}`, {
+      headers: {
+        Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
+      },
+    });
 
     if (response.status !== 200) {
       throw new Error("Failed to fetch meeting details");
     }
 
     const meetingPolls = await getPastMeetingPolls(
-      encodedMeetingId,
+      meetingId,
       ZOOM_ACCESS_TOKEN
     );
 
-    const meetingData = {
-      ...response.data,
-      occurrences: response.data.occurrences
-        ? response.data.occurrences.map((o: ZoomMeetingOccurrenceT) => ({
-            ...o,
-            is_visible_on_schedule: true,
-          }))
-        : [],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, created_at, ...restMeetingData }: ZoomMeetingT = response.data;
+
+    return {
+      ...restMeetingData,
+      meeting_id: Number(id),
       polls: meetingPolls.polls,
-    } as ZoomMeetingT;
-
-    if (meetingData.type === 8) {
-      // Recurring meeting type
-      const pastInstances = await getPastMeetingInstances(
-        encodedMeetingId,
-        ZOOM_ACCESS_TOKEN
-      );
-      meetingData.past_instances = [];
-
-      for (const instance of pastInstances) {
-        const processedInstance = {
-          ...instance,
-          participants: await getPastedMeetingParticipants(
-            instance.uuid,
-            ZOOM_ACCESS_TOKEN
-          ),
-          poll_results: await getPastMeetingsPollResults(
-            instance.uuid,
-            ZOOM_ACCESS_TOKEN
-          ),
-        };
-        meetingData.past_instances.push(processedInstance);
-      }
-    }
-
-    return meetingData;
+    } as Omit<ZoomMeetingT, "id">;
   } catch (error) {
     console.error("Error fetching meeting details:", error);
-    throw error;
+    return null;
   }
 };
 
@@ -123,10 +98,10 @@ export const getPastMeetingInstances = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    return (response.data.meetings as ZoomMeetingPastInstancesT[]) || [];
+    return (response.data.meetings as ZoomMeetingPastInstanceT[]) || [];
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
-    return [];
+    return null;
   }
 };
 
@@ -174,6 +149,7 @@ export const getPastedMeetingParticipants = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
+    console.log(response.data);
     if (response.status !== 200)
       throw new Error("Failed to fetch participants");
 
@@ -188,13 +164,12 @@ export const getPastedMeetingParticipants = async (
  * Fetches polls for a meeting.
  */
 export const getPastMeetingPolls = async (
-  meetingId: string,
+  meetingId: number,
   ZOOM_ACCESS_TOKEN: string
 ) => {
   try {
-    const encodedMeetingId = encodeUUID(meetingId);
     const response = await axiosZoomInstancie.get(
-      `/meetings/${encodedMeetingId}/polls`,
+      `/meetings/${meetingId}/polls`,
       {
         headers: {
           Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
@@ -205,6 +180,12 @@ export const getPastMeetingPolls = async (
     if (response.status !== 200) throw new Error("Failed to fetch polls");
     return response.data;
   } catch (error) {
+    // If meeting polls are disabled (code 4400), return null instead of throwing
+    const { response } = error as { response: { data: { code: number } } };
+    if (response?.data?.code === 4400) {
+      console.warn("Meeting polls disabled for this account");
+      return { polls: [] };
+    }
     console.error("Error fetching polls:", error);
     throw error;
   }

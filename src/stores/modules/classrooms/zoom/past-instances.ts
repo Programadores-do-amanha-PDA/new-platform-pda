@@ -6,6 +6,7 @@ import {
   getPastInstanceById,
   getPastInstanceByUuid,
   createPastInstance,
+  createMultiplePastInstances,
   updatePastInstanceById,
   updatePastInstanceByUuid,
   deletePastInstanceById,
@@ -30,6 +31,9 @@ interface ZoomMeetingPastInstanceActions {
   ) => Promise<ZoomMeetingPastInstanceT | boolean>;
   createPastInstance: (
     pastInstanceData: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>
+  ) => Promise<boolean>;
+  createMultiplePastInstances: (
+    pastInstancesData: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>[]
   ) => Promise<boolean>;
   updatePastInstanceById: (
     pastInstanceId: string,
@@ -146,6 +150,55 @@ export const useZoomMeetingPastInstanceStore = create<
         } catch (error) {
           console.error("Error creating past instance:", error);
           toast.error("Erro ao criar nova instância passada!");
+          return false;
+        }
+      },
+
+      createMultiplePastInstances: async (pastInstancesData) => {
+        try {
+          if (!pastInstancesData || pastInstancesData.length === 0) {
+            toast.error("Nenhuma instância passada foi fornecida!");
+            throw new Error("No past instances data provided");
+          }
+
+          // Validar se todos os itens têm os campos obrigatórios
+          for (const pastInstanceData of pastInstancesData) {
+            if (
+              !pastInstanceData.classroom_id ||
+              !pastInstanceData.meeting_id ||
+              !pastInstanceData.uuid
+            ) {
+              toast.error(
+                "Dados obrigatórios estão faltando em uma ou mais instâncias!"
+              );
+              throw new Error(
+                "Missing required fields: classroom_id, meeting_id, or uuid in one or more instances"
+              );
+            }
+          }
+
+          const loadingToastId = toast.loading(
+            `Criando ${pastInstancesData.length} instâncias passadas...`
+          );
+
+          const newPastInstances = await createMultiplePastInstances(
+            pastInstancesData
+          );
+          if (!newPastInstances)
+            throw new Error("no multiple past instances create response");
+
+          set({
+            pastInstances: [...newPastInstances, ...get().pastInstances],
+          });
+
+          toast.dismiss(loadingToastId);
+          toast.success(
+            `${newPastInstances.length} instâncias passadas criadas com sucesso!`
+          );
+          return true;
+        } catch (error) {
+          console.error("Error creating multiple past instances:", error);
+          toast.error("Erro ao criar múltiplas instâncias passadas!");
           return false;
         }
       },

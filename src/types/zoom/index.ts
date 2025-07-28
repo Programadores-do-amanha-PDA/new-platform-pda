@@ -11,6 +11,7 @@ import {
   ZoomMeetingPollT,
   ZoomMeetingPollQuestionT,
   ZoomMeetingPollQuestionPromptT,
+  ZoomMeetingWithPastInstancies
 } from "./meetings";
 
 import { ZoomMeetingPastInstanceT } from "./past-instances";
@@ -30,4 +31,5 @@ export type {
   ZoomMeetingPollQuestionT,
   ZoomMeetingPollQuestionPromptT,
   ZoomMeetingPastInstanceT,
+  ZoomMeetingWithPastInstancies
 };

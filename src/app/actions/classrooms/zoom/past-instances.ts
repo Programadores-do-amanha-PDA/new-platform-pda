@@ -142,6 +142,38 @@ const updatePastInstanceByUuid = async (
   }
 };
 
+const createMultiplePastInstances = async (
+  pastInstancesData: Partial<Omit<ZoomMeetingPastInstanceT, "id | create_at">>[]
+) => {
+  try {
+    const supabase = await createClient();
+
+    // Validar se todos os itens têm os campos obrigatórios
+    for (const pastInstanceData of pastInstancesData) {
+      if (
+        !pastInstanceData.classroom_id ||
+        !pastInstanceData.meeting_id ||
+        !pastInstanceData.uuid
+      ) {
+        throw new Error(
+          "Missing required fields: classroom_id, meeting_id, or uuid in one or more instances"
+        );
+      }
+    }
+
+    const { data, error } = await supabase
+      .from("classroom_zoom_meeting_past_instancies")
+      .insert(pastInstancesData)
+      .select();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("Error creating multiple past instances:", error);
+    return false;
+  }
+};
+
 const deletePastInstanceById = async (pastInstanceId: string) => {
   try {
     const supabase = await createClient();
@@ -164,6 +196,7 @@ export {
   getPastInstanceById,
   getPastInstanceByUuid,
   createPastInstance,
+  createMultiplePastInstances,
   updatePastInstanceById,
   updatePastInstanceByUuid,
   deletePastInstanceById,

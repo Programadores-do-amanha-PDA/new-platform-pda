@@ -41,14 +41,9 @@ const createZoomMeetingByClassroomId = async (
 ) => {
   try {
     const supabase = await createClient();
-
-    if (
-      !meetingData.classroom_id ||
-      !meetingData.topic ||
-      !meetingData.start_time
-    ) {
+    if (!meetingData.classroom_id || !meetingData.topic) {
       throw new Error(
-        "Missing required fields: classroom_id, topic, or start_time"
+        "Missing required fields"
       );
     }
 

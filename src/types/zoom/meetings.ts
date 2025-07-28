@@ -1,3 +1,5 @@
+import { ZoomMeetingPastInstanceT } from ".";
+
 export interface ZoomMeetingT {
   id: string;
   meeting_id: number;
@@ -33,9 +35,9 @@ export interface ZoomMeetingT {
   participants?: ZoomMeetingParticipantT[];
   justifications?: ZoomMeetingJustificationT[];
   polls?: ZoomMeetingPollT[];
-  poll_results?: ZoomMeetingPollQuestionT[];
-  account_id?: string;
-  classroom_id?: string;
+  poll_results?: ZoomMeetingPollResultsT[];
+  account_id: string;
+  classroom_id: string;
   is_visible_on_schedule?: boolean;
   synchronized_at?: string;
   class_type?: ZoomClassT;
@@ -169,3 +171,5 @@ export interface ZoomMeetingPollQuestionPromptT {
   prompt_question: string;
   prompt_right_answers: string[];
 }
+
+export type ZoomMeetingWithPastInstancies = ZoomMeetingT & {past_instances: ZoomMeetingPastInstanceT[]};

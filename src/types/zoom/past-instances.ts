@@ -3,11 +3,11 @@ import { ZoomMeetingParticipantT, ZoomMeetingPollResultsT, ZoomClassT, ZoomMeeti
 export interface ZoomMeetingPastInstanceT {
   id: string;
   classroom_id: string; 
-  account_id?: string;
+  account_id: string;
   meeting_id: string;
   uuid: string; 
   start_time?: string; 
-  class_type?: ZoomClassT; 
+  class_type: ZoomClassT; 
   participants?: ZoomMeetingParticipantT[]; 
   poll_results?: ZoomMeetingPollResultsT[];
   synchronized_at?: string; 
