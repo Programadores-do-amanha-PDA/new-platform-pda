@@ -284,42 +284,165 @@ export const useZoomMeetingStore = create<
           ) {
             throw new Error("id and updates fields are required");
           }
+
           toast.info("Atualizando dados da reunião...", {
             duration: 50000,
             closeButton: true,
           });
 
           const currentMeeting = get().meetings.find(
-            (meeting) => meeting.id === meeting.id
+            (m) => m.id === meeting.id
           );
-          const updatedMeeting = await useZoomAPIStore
+
+          if (!currentMeeting) {
+            throw new Error("Meeting not found in current meetings");
+          }
+
+          // Buscar dados atualizados da reunião da API do Zoom
+          const updatedMeetingData = await useZoomAPIStore
             .getState()
             .getMeetingByAPI(account, meeting.meeting_id);
-          if (!updatedMeeting) throw new Error("no meeting response");
 
-          const newMeeting = await updateZoomMeetingById(meeting.id, {
-            ...currentMeeting,
-            ...updatedMeeting,
-            occurrences: updatedMeeting?.occurrences?.map((occurrence) => {
-              const currentOccurrence = currentMeeting?.occurrences?.find(
-                (currentOccurrence) =>
-                  currentOccurrence.occurrence_id === occurrence.occurrence_id
-              );
+          if (!updatedMeetingData) throw new Error("no meeting response");
 
-              return currentOccurrence
-                ? { ...occurrence, ...currentOccurrence }
-                : occurrence;
-            }),
-            synchronized_at: new Date().toISOString(),
-          });
+          // Verificar se é reunião recorrente (tipo 8)
+          if (updatedMeetingData.type === 8) {
+            // Para reuniões recorrentes, atualizar a reunião principal
+            const meetingWithPastInstances = updatedMeetingData as Omit<
+              ZoomMeetingWithPastInstancies,
+              "id" | "created_at"
+            >;
+            const { past_instances, ...restOfMeeting } =
+              meetingWithPastInstances;
 
-          if (!newMeeting) throw new Error("no meeting create response");
+            const updatedMeeting = await updateZoomMeetingById(meeting.id, {
+              ...currentMeeting,
+              ...restOfMeeting,
+              occurrences: updatedMeetingData?.occurrences?.map(
+                (occurrence) => {
+                  const currentOccurrence = currentMeeting?.occurrences?.find(
+                    (currentOccurrence) =>
+                      currentOccurrence.occurrence_id ===
+                      occurrence.occurrence_id
+                  );
+                  return currentOccurrence
+                    ? { ...occurrence, ...currentOccurrence }
+                    : occurrence;
+                }
+              ),
+              synchronized_at: new Date().toISOString(),
+            });
 
-          set({
-            meetings: get().meetings.map((meeting) =>
-              meeting.id === currentMeeting?.id ? newMeeting : meeting
-            ),
-          });
+            if (!updatedMeeting) throw new Error("no meeting update response");
+
+            // Verificar se há novas instâncias passadas para salvar
+            if ("past_instances" in updatedMeetingData && past_instances) {
+              const existingPastInstances =
+                await useZoomMeetingPastInstanceStore
+                  .getState()
+                  .getAllPastInstancesByMeeting(meeting.id);
+
+              if (existingPastInstances) {
+                const currentPastInstances =
+                  useZoomMeetingPastInstanceStore.getState().pastInstances;
+                const existingUuids = new Set(
+                  currentPastInstances.map((instance) => instance.uuid)
+                );
+
+                // Filtrar apenas as novas instâncias que não existem no Supabase
+                const newPastInstances = past_instances.filter(
+                  (instance) => !existingUuids.has(instance.uuid)
+                );
+
+                if (newPastInstances.length > 0) {
+                  const pastInstancesData = newPastInstances.map(
+                    (instance) => ({
+                      classroom_id: account.classroom_id!,
+                      account_id: account.id!,
+                      meeting_id: meeting.id,
+                      uuid: instance.uuid,
+                      start_time: instance.start_time,
+                      class_type: instance.class_type,
+                      participants: instance.participants || [],
+                      poll_results: instance.poll_results || [],
+                      justifications: instance.justifications || [],
+                      synchronized_at: new Date().toISOString(),
+                      is_visible_on_schedule: instance.is_visible_on_schedule,
+                    })
+                  );
+
+                  await useZoomMeetingPastInstanceStore
+                    .getState()
+                    .createMultiplePastInstances(pastInstancesData);
+
+                  toast.success(
+                    `${newPastInstances.length} novas instâncias passadas foram salvas!`
+                  );
+                }
+              }
+            }
+
+            set({
+              meetings: get().meetings.map((m) =>
+                m.id === currentMeeting.id ? updatedMeeting : m
+              ),
+            });
+          } else {
+            // Para reuniões não recorrentes, atualizar participantes e polls se a reunião já aconteceu
+            const meetingStartTime = new Date(
+              updatedMeetingData.start_time || 0
+            ).getTime();
+            const currentTime = new Date().getTime();
+
+            let finalMeetingData = { ...updatedMeetingData };
+
+            if (meetingStartTime < currentTime) {
+              // Reunião já aconteceu - buscar participantes e polls atualizados
+              const participants = await useZoomAPIStore
+                .getState()
+                .getAllParticipantsByMeetingIdFromAPI(
+                  account,
+                  meeting.meeting_id
+                );
+
+              const pollResults = await useZoomAPIStore
+                .getState()
+                .getAllPollResultsByMeetingIdFromAPI(
+                  account,
+                  meeting.meeting_id
+                );
+
+              finalMeetingData = {
+                ...finalMeetingData,
+                participants: participants || [],
+                poll_results: pollResults || [],
+              };
+            }
+
+            const updatedMeeting = await updateZoomMeetingById(meeting.id, {
+              ...currentMeeting,
+              ...finalMeetingData,
+              occurrences: finalMeetingData?.occurrences?.map((occurrence) => {
+                const currentOccurrence = currentMeeting?.occurrences?.find(
+                  (currentOccurrence) =>
+                    currentOccurrence.occurrence_id === occurrence.occurrence_id
+                );
+                return currentOccurrence
+                  ? { ...occurrence, ...currentOccurrence }
+                  : occurrence;
+              }),
+              synchronized_at: new Date().toISOString(),
+            });
+
+            if (!updatedMeeting) throw new Error("no meeting update response");
+
+            set({
+              meetings: get().meetings.map((m) =>
+                m.id === currentMeeting.id ? updatedMeeting : m
+              ),
+            });
+          }
+
           toast.success("Dados da reunião atualizados com sucesso!");
           return true;
         } catch (error) {

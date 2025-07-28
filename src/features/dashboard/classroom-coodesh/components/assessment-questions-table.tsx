@@ -320,7 +320,7 @@ export function AssessmentQuestionsTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="p-0! h-full!"
+                  className="p-0! h-full! !border-none"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-0! h-full!">

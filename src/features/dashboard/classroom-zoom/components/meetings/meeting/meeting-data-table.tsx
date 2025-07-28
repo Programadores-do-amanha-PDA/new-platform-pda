@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
 import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -14,11 +14,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
 
 export function MeetingDataTable<TData, TValue>({
@@ -29,17 +29,20 @@ export function MeetingDataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-  })
+  });
 
   return (
     <div className="rounded-md border w-full h-full max-h-[70vh] flex flex-col overflow-y-auto mt-0">
       <Table>
-        <TableHeader className="sticky top-0 bg-background">
+        <TableHeader className="sticky top-0 bg-white z-10 p-0!">
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow
+              key={headerGroup.id}
+              className="shadow rounded-t-lg! overflow-hidden p-0!"
+            >
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="p-0!">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -47,7 +50,7 @@ export function MeetingDataTable<TData, TValue>({
                           header.getContext()
                         )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -58,9 +61,10 @@ export function MeetingDataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className="p-0! h-full! !border-none"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="p-0! h-full! ">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -76,5 +80,5 @@ export function MeetingDataTable<TData, TValue>({
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
