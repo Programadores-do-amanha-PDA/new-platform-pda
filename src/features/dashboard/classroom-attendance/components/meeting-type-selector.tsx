@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ZoomClassT } from "@/types/zoom/meetings";
+import { ZoomClassT } from "@/types/classroom-zoom/meetings";
 
 const meetingTypes = [
   { id: "programming", name: "Programação" },

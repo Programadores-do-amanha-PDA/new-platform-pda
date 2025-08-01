@@ -26,13 +26,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
-import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import MeetingTypeSelector from "./meeting-type-selector";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingT } from "@/types/classroom-zoom";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -190,7 +190,10 @@ export default function AttendanceTable({
                 {meetings.length > 0 &&
                   meetings.map((pastMeeting, index) => {
                     return (
-                      <TableHead key={index} className="w-full h-max p-0 m-0">
+                      <TableHead
+                        key={`TableHead-${pastMeeting.id}-${index}`}
+                        className="w-full h-max p-0 m-0"
+                      >
                         <div className="w-full h-full  flex flex-col justify-center items-center border-r border-border">
                           <div className="w-full h-11 max-w-[155px]! flex justify-center items-center border-b border-border px-2">
                             <p className="font-bold">
@@ -209,6 +212,7 @@ export default function AttendanceTable({
                           </div>
                           <div className="w-[155px]! h-11 flex justify-center items-center p-2">
                             <MeetingTypeSelector
+                              key={`MeetingTypeSelector-${pastMeeting.id}-${index}`}
                               value={pastMeeting.class_type}
                               handleValueChange={(value) =>
                                 updatePastInstanceByUuid(pastMeeting.uuid, {
@@ -263,7 +267,7 @@ export default function AttendanceTable({
 
                         return (
                           <TableCell
-                            key={index}
+                            key={`TableCell-${meeting.id}-${index}`}
                             className={cn(
                               "border-r border-border",
                               new Date(meeting.start_time || 0).getTime() ===
@@ -314,9 +318,7 @@ export default function AttendanceTable({
                               </div>
                               {row.original.email && (
                                 <AttendanceJustificationDropdown
-                                  key={
-                                    "AttendanceJustificationDropdown-" + row.id
-                                  }
+                                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
                                   currentMeeting={meeting}
                                   currentUserEmail={row.original.email}
                                   type={meeting.meeting_type}
@@ -329,7 +331,7 @@ export default function AttendanceTable({
 
                       return (
                         <TableCell
-                          key={index}
+                          key={`TableCell-${meeting.id}-${index}`}
                           className="border-r border-border"
                         >
                           <div className="w-full max-w-[155px]! h-full flex items-center justify-between gap-1 px-2">
@@ -344,9 +346,7 @@ export default function AttendanceTable({
                             </p>
                             {row.original.email && (
                               <AttendanceJustificationDropdown
-                                key={
-                                  "AttendanceJustificationDropdown-" + row.id
-                                }
+                                key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
                                 currentMeeting={meeting}
                                 currentUserEmail={row.original.email}
                                 type={meeting.meeting_type}

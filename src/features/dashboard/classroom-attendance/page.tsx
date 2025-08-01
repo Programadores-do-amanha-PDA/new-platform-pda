@@ -3,9 +3,9 @@ import { useParams } from "next/navigation";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useUsersStore } from "@/stores/modules/users/users-store";
-import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import AttendanceTable from "./components/attendance-table";
-import { ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingT } from "@/types/classroom-zoom";
 
 export default function AttendancePage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();

@@ -11,7 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/classroom-zoom";
 import { Loader, Pen, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 

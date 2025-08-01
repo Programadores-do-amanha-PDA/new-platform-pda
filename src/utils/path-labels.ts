@@ -26,6 +26,8 @@ const pathLabels: { [key: string]: string } = {
   accounts: "Contas",
   projects: "Projetos",
   attendance: "Presenças",
+  activities: "Atividades",
+  overview: "Visão Geral"
 };
 
 export default pathLabels;
