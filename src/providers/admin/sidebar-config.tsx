@@ -5,10 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { ClassroomT } from "@/types/classrooms";
 import { AuthUserWithProfileT } from "@/types/auth";
-import { ZoomMeetingT } from "@/types/zoom/meetings";
+import { ZoomMeetingT } from "@/types/classroom-zoom/meetings";
 import { SidebarDataT } from "@/types/sidebar";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
-import { ClassroomProjectT } from "@/types/projects";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
+import { ClassroomProjectT } from "@/types/classroom-projects";
 
 export const classroomPeriodsIcons = {
   morning: Sunrise,
@@ -78,8 +78,16 @@ export const generateSidebarConfig = (
         isActive: false,
         items: [
           {
+            title: "Visão Geral",
+            url: `/dashboard/classrooms/${classroom.id}/overview`,
+          },
+          {
             title: "Presenças",
             url: `/dashboard/classrooms/${classroom.id}/attendance`,
+          },
+          {
+            title: "Atividades",
+            url: `/dashboard/classrooms/${classroom.id}/activities`,
           },
           {
             title: "Projetos",

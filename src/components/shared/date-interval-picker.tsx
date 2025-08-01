@@ -26,8 +26,9 @@ const DateIntervalPicker = ({
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover modal={true}>
-        <PopoverTrigger asChild>
+        <PopoverTrigger>
           <Button
+            type="button"
             id="date"
             variant={"outline"}
             className={cn(

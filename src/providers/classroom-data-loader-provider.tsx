@@ -14,6 +14,7 @@ import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
+import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;
@@ -37,6 +38,7 @@ export function ClassroomDataLoaderProvider({
   const zoomAccountStore = useZoomAccountStore();
   const zoomMeetingStore = useZoomMeetingStore();
   const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
+  const classroomActivityStore = useClassroomActivityStore();
 
   const isLoading =
     classroomStore.loading ||
@@ -45,7 +47,8 @@ export function ClassroomDataLoaderProvider({
     deliveryStore.loading ||
     zoomAccountStore.loading ||
     zoomMeetingStore.loading ||
-    zoomMeetingPastInstanceStore.loading;
+    zoomMeetingPastInstanceStore.loading ||
+    classroomActivityStore.loading;
 
   const loadAllData = useCallback(async () => {
     if (!classroomId) return;
@@ -55,13 +58,15 @@ export function ClassroomDataLoaderProvider({
 
       await coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId);
 
-      await projectStore.getAllProjectsByClassroomId(classroomId);
+      await projectStore.getAllProjectsWithDeliveriesAndCorrections(classroomId);
 
       await zoomAccountStore.getAllAccounts(classroomId);
       await zoomMeetingStore.getAllMeetings(classroomId);
       await zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
         classroomId
       );
+
+      await classroomActivityStore.getAllActivitiesByClassroom(classroomId);
     } catch (error) {
       console.error("Error loading classroom data:", error);
     }
@@ -73,6 +78,7 @@ export function ClassroomDataLoaderProvider({
     zoomAccountStore,
     zoomMeetingStore,
     zoomMeetingPastInstanceStore,
+    classroomActivityStore,
   ]);
 
   useEffect(() => {
