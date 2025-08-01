@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
 import { ArrowUpDown } from "lucide-react";
 import {
   calculateAccuracyByChallenge,

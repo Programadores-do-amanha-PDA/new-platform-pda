@@ -39,8 +39,8 @@ import {
   IntegrityRowT,
   ParticipantDataT,
   ResultsRowT,
-} from "@/types/coodesh";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh/assessments";
+} from "@/types/classroom-coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh/assessments";
 
 export function AttemptsDataTable({
   assessment,
@@ -463,7 +463,6 @@ export function AttemptsDataTable({
           attempt={selectedAttempt}
           open={isAttemptDialogOpen}
           onClose={() => setIsAttemptDialogOpen(false)}
-          // onConfirm={handleDeleteAttempt}
         />
       )}
     </>

@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
 
 export const createCoodeshAssessment = async (
   assessmentData: Partial<ClassroomCoodeshAssessmentT>

@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatParticipantsData } from "@/utils/coodesh/format-participant-data";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh/assessments";
-import { ParticipantDataT } from "@/types/coodesh/attempts";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh/assessments";
+import { ParticipantDataT } from "@/types/classroom-coodesh/attempts";
 
 const InsertAssessmentAttempts = ({
   assessment,

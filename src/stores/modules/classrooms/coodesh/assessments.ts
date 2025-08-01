@@ -7,7 +7,7 @@ import {
   getAllCoodeshAssessment,
   updateCoodeshAssessment,
 } from "@/app/actions/classrooms/coodesh/assessments";
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
 
 
 interface CoodeshAssessmentState {

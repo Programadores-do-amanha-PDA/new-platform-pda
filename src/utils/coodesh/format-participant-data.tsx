@@ -4,7 +4,7 @@ import {
   IntegrityRowT,
   ParticipantDataT,
   ResultsRowT,
-} from "@/types/coodesh/attempts";
+} from "@/types/classroom-coodesh/attempts";
 
 export function formatParticipantsData(
   resultsCsv: string,

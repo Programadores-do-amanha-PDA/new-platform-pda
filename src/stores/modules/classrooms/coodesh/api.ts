@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import axios from "axios";
 import { toast } from "sonner";
-import { AssessmentPayloadT } from "@/types/coodesh";
+import { AssessmentPayloadT } from "@/types/classroom-coodesh";
 
 
 interface CoodeshAPIAssessmentState {

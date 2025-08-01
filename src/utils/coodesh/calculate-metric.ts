@@ -1,4 +1,4 @@
-import { ParticipantDataT } from "@/types/coodesh/attempts";
+import { ParticipantDataT } from "@/types/classroom-coodesh/attempts";
 
 interface MetricResult {
   [key: string]: number;

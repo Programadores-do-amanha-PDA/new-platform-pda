@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { ClassroomCoodeshAssessmentT } from "@/types/coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
 import DateIntervalPicker from "@/components/shared/date-interval-picker";
 import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 

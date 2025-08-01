@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 
-import { AssessmentPayloadT } from "@/types/coodesh";
+import { AssessmentPayloadT } from "@/types/classroom-coodesh";
 import { useCoodeshAPIAssessmentStore } from "@/stores/modules/classrooms/coodesh/api";
 import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 

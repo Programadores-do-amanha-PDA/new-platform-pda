@@ -22,7 +22,7 @@ import { MarkdownRenderer } from "@/components/shared/shiki-markdown";
 import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
-import { ActionPlanRowT, ParticipantDataT } from "@/types/coodesh/attempts";
+import { ActionPlanRowT, ParticipantDataT } from "@/types/classroom-coodesh/attempts";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   challenge_start: "Início do Desafio",
