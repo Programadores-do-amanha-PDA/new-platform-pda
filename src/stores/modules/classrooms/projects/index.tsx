@@ -11,7 +11,7 @@ import {
 import {
   ClassroomProjectT,
   ClassroomProjectWithDeliveriesAndCorrectionsT,
-} from "@/types/projects/project";
+} from "@/types/classroom-projects/project";
 
 interface ProjectState {
   projects:
