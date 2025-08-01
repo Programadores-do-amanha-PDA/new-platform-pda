@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ZoomAccountT } from "@/types/zoom/accounts";
+import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
 
 const ZoomAccountCard = ({
   account,

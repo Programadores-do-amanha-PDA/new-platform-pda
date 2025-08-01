@@ -1,5 +1,5 @@
 "use server";
-import { ZoomAccountT } from "@/types/zoom";
+import { ZoomAccountT } from "@/types/classroom-zoom";
 import { cookies } from "next/headers";
 
 type TokenData = {

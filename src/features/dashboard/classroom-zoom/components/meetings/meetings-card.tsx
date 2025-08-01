@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ZoomMeetingT } from "@/types/zoom/meetings";
+import { ZoomMeetingT } from "@/types/classroom-zoom/meetings";
 import { cn } from "@/lib/utils";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
@@ -162,7 +162,7 @@ export default function ZoomMeetingsCard({
     <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <Link
-          href={`/dashboard/zoom/${classroom_id}/meetings/${meeting.id}`}
+          href={`/dashboard/classrooms/${classroom_id}/zoom/meetings/${meeting.id}`}
           className="font-semibold truncate hover:underline cursor-pointer"
           title={meeting.topic}
         >

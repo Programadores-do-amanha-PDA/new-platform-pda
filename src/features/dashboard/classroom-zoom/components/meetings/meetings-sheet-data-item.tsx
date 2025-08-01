@@ -1,7 +1,7 @@
 "use client";
 import { LoaderCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ZoomMeetingT } from "@/types/zoom/meetings";
+import { ZoomMeetingT } from "@/types/classroom-zoom/meetings";
 
 const meetingTypes = {
   1: "Reunião instantânea",

@@ -1,5 +1,5 @@
 "use server";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/classroom-zoom";
 import axiosZoomInstancie from ".";
 import { encodeUUID } from "@/utils/encode-UUID";
 

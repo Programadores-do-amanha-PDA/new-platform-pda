@@ -6,10 +6,10 @@ import {
   ZoomMeetingPollResultsT,
   ZoomMeetingT,
   ZoomMeetingWithPastInstancies,
-} from "@/types/zoom/meetings";
-import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
+} from "@/types/classroom-zoom/meetings";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { toast } from "sonner";
-import { ZoomAccountMeT, ZoomAccountT } from "@/types/zoom/accounts";
+import { ZoomAccountMeT, ZoomAccountT } from "@/types/classroom-zoom/accounts";
 import {
   getAllMeetingsByAccount,
   getMeetingById,

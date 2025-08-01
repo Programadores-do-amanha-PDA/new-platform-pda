@@ -7,12 +7,12 @@ import {
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
-import { ZoomAccountT } from "@/types/zoom/accounts";
+import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
 import {
   ZoomMeetingOccurrenceT,
   ZoomMeetingT,
   ZoomMeetingWithPastInstancies,
-} from "@/types/zoom/meetings";
+} from "@/types/classroom-zoom/meetings";
 import { toast } from "sonner";
 import { useZoomAPIStore } from "./api";
 import { useZoomMeetingPastInstanceStore } from "./past-instances";

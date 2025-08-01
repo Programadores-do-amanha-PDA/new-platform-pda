@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ZoomAccountT } from "@/types/zoom/accounts";
+import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
 
 export default function AccountDialog({
   classroom_id,

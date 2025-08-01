@@ -5,198 +5,123 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowDown, ArrowUp, ArrowUpDown, RefreshCw } from "lucide-react";
+import { ArrowUpDown, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import {
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
-} from "@/types/zoom/meetings";
+} from "@/types/classroom-zoom/meetings";
 import { cn } from "@/lib/utils";
 
 const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Nome</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Nome
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("name")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("name")}</p>
       </div>
     ),
   },
   {
     accessorKey: "email",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Email</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Email
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("email")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("email")}</p>
       </div>
     ),
   },
   {
     accessorKey: "content_answer",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Conteúdo</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Conteúdo
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("content_answer")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("content_answer")}</p>
       </div>
     ),
   },
   {
     accessorKey: "facilitation_answer",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Facilitação</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Facilitação
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("facilitation_answer")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("facilitation_answer")}</p>
       </div>
     ),
   },
   {
     accessorKey: "self_answer",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Auto-Avaliação</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Auto-Avaliação
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("self_answer")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("self_answer")}</p>
       </div>
     ),
   },
@@ -208,152 +133,96 @@ const meetingParticipantsColumns: ColumnDef<
   {
     accessorKey: "name",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Nome</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Nome
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.getValue("name")}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.getValue("name")}</p>
       </div>
     ),
   },
   {
     accessorKey: "user_email",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Email</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Email
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.original.user_email}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">{row.original.user_email}</p>
       </div>
     ),
   },
   {
     accessorKey: "duration",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Presença</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Presença
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {Math.floor(row.original.duration / 60) > 60
-          ? `${Math.floor(row.original.duration / 60 / 60)} Horas`
-          : `${Math.floor(row.original.duration / 60)} Minutos`}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">
+          {Math.floor(row.original.duration / 60) > 60
+            ? `${Math.floor(row.original.duration / 60 / 60)} Horas`
+            : `${Math.floor(row.original.duration / 60)} Minutos`}
+        </p>
       </div>
     ),
   },
   {
     accessorKey: "absence",
     header: ({ column }) => {
-      const sortState = column.getIsSorted();
       return (
-        <div className="w-full max-w-sm truncate h-full flex justify-start items-center border-r px-2">
+        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <p>Ausência</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
+            size="icon"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Ausência
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
-            ) : (
-              <ArrowUpDown />
-            )}
+            <ArrowUpDown />
           </Button>
         </div>
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full max-w-sm truncate flex flex-row gap-2 justify-start items-center p-2 border-r">
-        {row.original.absence > 60
-          ? `${Math.floor(row.original.absence / 60)} Horas`
-          : `${row.original.absence} Minutos`}
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <p className="font-medium">
+          {row.original.absence > 60
+            ? `${Math.floor(row.original.absence / 60)} Horas`
+            : `${row.original.absence} Minutos`}
+        </p>
       </div>
     ),
   },
@@ -500,7 +369,7 @@ export default function ZoomPastMeetingPage({
           {currentMeeting.poll_results && (
             <TabsContent
               value="completed"
-              className="w-full h-full bg-red-400 overflow-hidden"
+              className="w-full h-full overflow-hidden"
             >
               <MeetingDataTable
                 columns={meetingPollResultsColumns}

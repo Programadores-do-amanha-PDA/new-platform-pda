@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import MeetingsSheetDataItem from "./meetings-sheet-data-item";
-import { ZoomMeetingT } from "@/types/zoom";
+import { ZoomMeetingT } from "@/types/classroom-zoom";
 
 export default function MeetingsSheetData() {
   const [openModal, setOpenModal] = useState<boolean>(false);

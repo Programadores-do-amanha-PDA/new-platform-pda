@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import AccountDialog from "../components/accounts/account-dialog";
 import ZoomAccountCard from "../components/accounts/account-card";
-import { ZoomAccountT } from "@/types/zoom";
+import { ZoomAccountT } from "@/types/classroom-zoom";
 
 export default function AccountsPage() {
   const params = useParams();

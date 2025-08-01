@@ -11,7 +11,7 @@ import {
   updatePastInstanceByUuid,
   deletePastInstanceById,
 } from "@/app/actions/classrooms/zoom/past-instances";
-import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { toast } from "sonner";
 
 interface ZoomMeetingPastInstanceState {

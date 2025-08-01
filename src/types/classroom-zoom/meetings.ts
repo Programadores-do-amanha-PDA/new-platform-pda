@@ -118,19 +118,14 @@ export interface ZoomMeetingParticipantT {
 }
 
 export interface ZoomMeetingPollResultsT {
-  id: number;
-  questions: {
-    email: string;
-    name: string;
-    question_details: {
-      answer: string;
-      date_time: string;
-      polling_id: string;
-      question: string;
-    }[];
+  email: string;
+  name: string;
+  question_details: {
+    answer: string;
+    date_time: string;
+    polling_id: string;
+    question: string;
   }[];
-  start_time: string;
-  uuid: string;
 }
 
 export interface ZoomMeetingPollT {
@@ -172,4 +167,6 @@ export interface ZoomMeetingPollQuestionPromptT {
   prompt_right_answers: string[];
 }
 
-export type ZoomMeetingWithPastInstancies = ZoomMeetingT & {past_instances: ZoomMeetingPastInstanceT[]};
+export type ZoomMeetingWithPastInstancies = ZoomMeetingT & {
+  past_instances: ZoomMeetingPastInstanceT[];
+};

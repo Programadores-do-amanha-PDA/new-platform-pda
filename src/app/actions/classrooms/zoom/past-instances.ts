@@ -1,5 +1,5 @@
 "use server";
-import { ZoomMeetingPastInstanceT } from "@/types/zoom/past-instances";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { createClient } from "@/lib/supabase/server";
 
 const getAllPastInstancesByClassroomId = async (classroomId: string) => {

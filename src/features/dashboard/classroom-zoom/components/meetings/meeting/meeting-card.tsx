@@ -8,7 +8,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 
-import { ZoomMeetingType } from "@/types/zoom/meetings";
+import { ZoomMeetingType } from "@/types/classroom-zoom/meetings";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
