@@ -98,7 +98,10 @@ export const getPastMeetingInstances = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    return (response.data.meetings as ZoomMeetingPastInstanceT[]) || [];
+    return (
+      (response.data.meetings?.filter(Boolean) as ZoomMeetingPastInstanceT[]) ||
+      []
+    );
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
     return null;
@@ -149,11 +152,10 @@ export const getPastedMeetingParticipants = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    console.log(response.data);
     if (response.status !== 200)
       throw new Error("Failed to fetch participants");
 
-    return response.data.participants;
+    return response.data.participants?.filter(Boolean);
   } catch (error) {
     console.error("Error fetching participants:", error);
     throw error;
@@ -178,7 +180,7 @@ export const getPastMeetingPolls = async (
       }
     );
     if (response.status !== 200) throw new Error("Failed to fetch polls");
-    return response.data;
+    return response.data?.filter(Boolean);
   } catch (error) {
     // If meeting polls are disabled (code 4400), return null instead of throwing
     const { response } = error as { response: { data: { code: number } } };
@@ -211,7 +213,7 @@ export const getPastMeetingsPollResults = async (
     );
     if (response.status !== 200)
       throw new Error("Failed to fetch poll results");
-    return response.data.questions;
+    return response.data.questions?.filter(Boolean);
   } catch (error) {
     console.error("Error fetching poll results:", error);
     throw error;

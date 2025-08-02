@@ -1,4 +1,5 @@
 "use server";
+import { AssessmentT } from "@/types";
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -16,7 +17,7 @@ const getCoodeshAPIAssessments = async () => {
       throw new Error("Failed to fetch assessments");
     }
 
-    return response.data;
+    return response.data as AssessmentT;
   } catch (error) {
     console.error(error);
     throw false;
