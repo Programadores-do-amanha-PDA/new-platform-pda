@@ -33,6 +33,7 @@ import MeetingTypeSelector from "./meeting-type-selector";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
 import { ZoomMeetingT } from "@/types/classroom-zoom";
+import AttendancePaginationControl from "./attendance-pagination-control";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -129,8 +130,14 @@ export default function AttendanceTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [displayedMeetingsCount, setDisplayedMeetingsCount] =
+    React.useState(31);
 
   const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
+
+  const displayedMeetings = React.useMemo(() => {
+    return meetings.slice(0, displayedMeetingsCount);
+  }, [meetings, displayedMeetingsCount]);
 
   const table = useReactTable({
     data: users,
@@ -156,8 +163,8 @@ export default function AttendanceTable({
   });
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 overflow-hidden">
-      <div className="flex items-center py-4">
+    <div className="w-full h-full flex flex-col gap-2">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
@@ -165,6 +172,11 @@ export default function AttendanceTable({
             table.getColumn("email")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
+        />
+        <AttendancePaginationControl
+          totalMeetings={meetings.length}
+          displayedCount={displayedMeetingsCount}
+          onCountChange={setDisplayedMeetingsCount}
         />
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
@@ -187,8 +199,8 @@ export default function AttendanceTable({
                     </TableHead>
                   );
                 })}
-                {meetings.length > 0 &&
-                  meetings.map((pastMeeting, index) => {
+                {displayedMeetings.length > 0 &&
+                  displayedMeetings.map((pastMeeting, index) => {
                     return (
                       <TableHead
                         key={`TableHead-${pastMeeting.id}-${index}`}
@@ -246,8 +258,8 @@ export default function AttendanceTable({
                       )}
                     </TableCell>
                   ))}
-                  {meetings.length > 0 &&
-                    meetings.map((meeting, index) => {
+                  {displayedMeetings.length > 0 &&
+                    displayedMeetings.map((meeting, index) => {
                       const meetingAttendanceHistory =
                         meeting?.participants?.filter(
                           (p) => p.user_email === row.original.email

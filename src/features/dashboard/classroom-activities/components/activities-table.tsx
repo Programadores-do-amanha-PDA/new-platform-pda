@@ -12,9 +12,21 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown, Plus } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  MoreHorizontal,
+  Trash2,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -35,6 +47,7 @@ import { Badge } from "@/components/ui/badge";
 import { useParams } from "next/navigation";
 import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
 import { ParticipationStatusOptions } from "../utils/participation-status-options";
+import ActivitiesPaginationControl from "./activities-pagination-control";
 
 interface ActivitiesTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -122,8 +135,20 @@ export default function ActivitiesTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [displayedActivitiesCount, setDisplayedActivitiesCount] =
+    React.useState(Math.min(activities.length, 10));
 
-  const { updateActivityById, createActivity } = useClassroomActivityStore();
+  const { updateActivityById, deleteActivity } = useClassroomActivityStore();
+
+  // Update displayed count when activities change
+  React.useEffect(() => {
+    setDisplayedActivitiesCount(Math.min(activities.length, 10));
+  }, [activities.length]);
+
+  // Get the activities to display based on pagination
+  const displayedActivities = React.useMemo(() => {
+    return activities.slice(0, displayedActivitiesCount);
+  }, [activities, displayedActivitiesCount]);
 
   const table = useReactTable({
     data: users,
@@ -148,17 +173,6 @@ export default function ActivitiesTable({
     },
   });
 
-  const handleCreateNewActivity = async () => {
-    if (!classroom_id) return;
-
-    await createActivity({
-      classroom_id,
-      class_type: "programming",
-      participants_email: [],
-      is_visible_on_schedule: true,
-    });
-  };
-
   return (
     <div className="w-full h-full flex flex-col gap-2 overflow-hidden">
       <div className="flex items-center justify-between py-4">
@@ -170,13 +184,12 @@ export default function ActivitiesTable({
           }
           className="max-w-sm"
         />
-        <div className="flex gap-2">
-          <Button onClick={handleCreateNewActivity} className="gap-2">
-            <Plus className="size-4" />
-            Nova Atividade
-          </Button>
-          <InsertManyActivitiesDialog classroomId={classroom_id} />
-        </div>
+        <InsertManyActivitiesDialog classroomId={classroom_id} />
+        <ActivitiesPaginationControl
+          totalActivities={activities.length}
+          displayedCount={displayedActivitiesCount}
+          onCountChange={setDisplayedActivitiesCount}
+        />
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
         <Table className="w-full h-full">
@@ -198,12 +211,12 @@ export default function ActivitiesTable({
                     </TableHead>
                   );
                 })}
-                {activities.length > 0 &&
-                  activities.map((activity, index) => {
+                {displayedActivities.length > 0 &&
+                  displayedActivities.map((activity, index) => {
                     return (
                       <TableHead key={index} className="w-full h-max p-0 m-0">
                         <div className="w-full h-full flex flex-col justify-center items-center border-r border-border">
-                          <div className="w-full h-11 max-w-[155px] flex justify-center items-center border-b border-border px-2">
+                          <div className="w-full h-11 max-w-[155px] flex justify-between items-center border-b border-border px-2 pl-4">
                             <p className="font-bold text-center">
                               {new Date(activity.created_at).toLocaleDateString(
                                 "pt-BR",
@@ -214,6 +227,24 @@ export default function ActivitiesTable({
                                 }
                               )}
                             </p>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="size-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  variant="destructive"
+                                  onClick={() => deleteActivity(activity.id)}
+                                  className="cursor-pointer"
+                                >
+                                  <Trash2 className="size-4 mr-2" />
+                                  Deletar atividade
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                           <div className="w-[155px] h-11 flex justify-center items-center p-2">
                             <ActivityTypeSelector
@@ -257,8 +288,8 @@ export default function ActivitiesTable({
                       )}
                     </TableCell>
                   ))}
-                  {activities.length > 0 &&
-                    activities.map((activity, index) => {
+                  {displayedActivities.length > 0 &&
+                    displayedActivities.map((activity, index) => {
                       const userEmail = row.original.email;
                       console.log(userEmail);
                       const hasParticipated =

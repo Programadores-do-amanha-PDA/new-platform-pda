@@ -20,12 +20,12 @@ const ActivityTypeSelector = ({
       value={value}
       onValueChange={(value) => handleValueChange(value as ActivityTClassT)}
     >
-      <SelectTrigger className="h-7 w-full">
+      <SelectTrigger className="h-7 w-full cursor-pointer">
         <SelectValue placeholder="Tipo de atividade" className="h-7" />
       </SelectTrigger>
       <SelectContent>
         {activityTypes.map((type) => (
-          <SelectItem key={type.id} value={type.id}>
+          <SelectItem key={type.id} value={type.id} className="cursor-pointer">
             {type.name}
           </SelectItem>
         ))}

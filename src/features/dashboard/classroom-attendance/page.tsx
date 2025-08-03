@@ -46,14 +46,16 @@ export default function AttendancePage() {
           new Date(meeting.start_time || 0).getTime() < Date.now()
       )
       .flatMap((meeting) => ({ ...meeting, meeting_type: "meeting" })),
-  ].sort(
-    (a, b) =>
-      new Date(b.start_time || 0).getTime() -
-      new Date(a.start_time || 0).getTime()
-  );
+  ]
+    .sort(
+      (a, b) =>
+        new Date(b.start_time || 0).getTime() -
+        new Date(a.start_time || 0).getTime()
+    )
+    .filter((m) => m.is_visible_on_schedule === true);
 
   return (
-    <div className="w-full h-full p-6">
+    <div className="w-full h-full p-4">
       <AttendanceTable
         users={classroomUsers}
         meetings={

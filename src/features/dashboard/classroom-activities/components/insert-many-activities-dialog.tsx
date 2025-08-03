@@ -1,7 +1,8 @@
 import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
-import { emailRegex } from "@/utils/regex/users";
-
+import { LoaderCircle, Upload } from "lucide-react";
+import { toast } from "sonner";
+import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import {
   Dialog,
   DialogClose,
@@ -20,16 +21,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { LoaderCircle, Upload } from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import ActivityTypeSelector from "./activity-type-selector";
 import { Switch } from "@/components/ui/switch";
 import { ActivityTClassT } from "@/types";
+import { emailRegex } from "@/utils/regex/users";
 
 interface StudentData {
   email: string;
@@ -37,8 +36,7 @@ interface StudentData {
 }
 
 interface ActivityRow {
-  email?: string;
-  Email?: string;
+  [key: string]: string | undefined;
 }
 
 type InsertManyActivitiesDialogProps = {
@@ -80,14 +78,26 @@ const InsertManyActivitiesDialog = ({
             return;
           }
 
-          const parsedStudents = (results.data as ActivityRow[])
-            .map((row: ActivityRow) => {
-              const email = row.email || row.Email || "";
-              return {
-                email: email.trim(),
-              };
-            })
-            .filter((student) => isValidEmail(student.email));
+          // Extrair todos os emails únicos de todas as colunas
+          const uniqueEmails = new Set<string>();
+
+          (results.data as ActivityRow[]).forEach((row: ActivityRow) => {
+            // Percorrer todas as colunas da linha
+            Object.values(row).forEach((value) => {
+              if (value && typeof value === "string") {
+                const trimmedValue = value.trim();
+                // Verificar se o valor é um email válido
+                if (isValidEmail(trimmedValue)) {
+                  uniqueEmails.add(trimmedValue);
+                }
+              }
+            });
+          });
+
+          // Converter Set para array de objetos StudentData
+          const parsedStudents = Array.from(uniqueEmails).map((email) => ({
+            email,
+          }));
 
           setStudents(parsedStudents);
           setStage(1);
@@ -160,7 +170,7 @@ const InsertManyActivitiesDialog = ({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className="gap-2">
+        <Button className="gap-2">
           <Upload className="size-4" />
           Importar CSV
         </Button>
@@ -174,7 +184,8 @@ const InsertManyActivitiesDialog = ({
                 Selecione um arquivo CSV para carregar os emails dos
                 participantes da atividade
                 <p>
-                  O arquivo deve conter a coluna: <b>Email</b>
+                  O sistema irá buscar automaticamente por todos os emails
+                  válidos em <b>qualquer coluna</b> do arquivo
                 </p>
               </>
             )}

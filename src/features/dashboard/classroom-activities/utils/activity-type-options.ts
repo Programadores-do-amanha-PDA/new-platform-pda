@@ -1,4 +1,4 @@
-import { ActivityTClassT } from "@/types/classroom-activities/activities";
+import { ActivityTClassT } from "@/types";
 
 export const activityTypes: { id: ActivityTClassT; name: string }[] = [
   { id: "programming", name: "Programação" },
