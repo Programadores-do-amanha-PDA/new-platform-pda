@@ -1,14 +1,12 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import pathLabels from "@/utils/path-labels";
-import { generateSidebarConfig, generatePathLabels } from "./sidebar-config";
+import { generateSidebarConfig, generatePathLabels, generateNoAccessSidebarConfig } from "./sidebar-config";
 import PageLoader from "@/components/shared/page-loader";
 
-import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useJobStore } from "@/stores/modules/jobs";
 import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
 
 import AppBar from "@/components/shared/app-bar";
@@ -16,6 +14,8 @@ import { AppSidebar } from "@/components/shared/sidebar";
 
 import { SidebarDataT } from "@/types/sidebar";
 import useAuth from "@/hooks/use-auth";
+import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
+import NoAccessPage from "@/components/shared/no-access-page";
 
 interface AdminStackProviderProps {
   children: React.ReactNode;
@@ -35,7 +35,6 @@ export const AdminStackProvider = ({
   const projectStore = useProjectStore();
   const coodeshAssessmentStore = useCoodeshAssessmentStore();
   const zoomMeetingStore = useZoomMeetingStore();
-  const jobStore = useJobStore();
   const usersCombinedStore = useUsersCombinedStore();
 
   useEffect(() => {
@@ -46,7 +45,6 @@ export const AdminStackProvider = ({
       setLoading(true);
       try {
         await classroomStore.getAllClassrooms();
-        await jobStore.getAllJobs();
         await usersCombinedStore.getAllUsersWithProfiles();
       } catch (error) {
         console.error("Error loading initial data:", error);
@@ -69,6 +67,21 @@ export const AdminStackProvider = ({
     return <PageLoader />;
   }
 
+  if (userRole !== "admin") {
+    const sidebarData: SidebarDataT = generateNoAccessSidebarConfig(user)
+    return (
+      <>
+        <AppSidebar data={sidebarData} />
+        <div className="relative w-full h-full flex flex-col bg-background !rounded-lg ml-1 shadow overflow-hidden">
+          <AppBar pathLabels={pathLabels} />
+          <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
+            <NoAccessPage />
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const sidebarData: SidebarDataT = generateSidebarConfig(
     user,
     classroomStore.classrooms
@@ -85,7 +98,7 @@ export const AdminStackProvider = ({
   return (
     <>
       <AppSidebar data={sidebarData} />
-      <div className="relative w-full h-full flex flex-col overflow-hidden">
+      <div className="relative w-full h-full flex flex-col bg-background !rounded-lg ml-1 shadow overflow-hidden">
         <AppBar pathLabels={adminPathLabels} />
         <div className="w-full h-full flex flex-col gap-10 overflow-hidden">
           {children}

@@ -6,8 +6,7 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { useClassroomStore } from "@/stores/modules/classrooms";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
@@ -15,6 +14,7 @@ import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
+import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;
