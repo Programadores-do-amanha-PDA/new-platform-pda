@@ -1,16 +1,19 @@
 "use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { Upload, LoaderCircle } from "lucide-react";
+
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -22,9 +25,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatParticipantsData } from "@/utils/coodesh/format-participant-data";
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh/assessments";
-import { ParticipantDataT } from "@/types/classroom-coodesh/attempts";
+
+import { ClassroomCoodeshAssessmentT, ParticipantDataT } from "@/types";
+import { formatParticipantsData } from "../utils/format-participant-data";
 
 const InsertAssessmentAttempts = ({
   assessment,
@@ -160,24 +163,34 @@ const InsertAssessmentAttempts = ({
   };
 
   return (
-    <Drawer open={open} onOpenChange={handleOpenChange}>
-      <DrawerTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger>
         <Button>
           <Upload className="size-5" />
           Carregar arquivos de respostas
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>
-            {stage === 0 && "Cargar arquivos de respostas"}
-            {stage === 1 && "Revisar e salvar os dados de respostas"}
-          </DrawerTitle>
-        </DrawerHeader>
+      </DialogTrigger>
+      <DialogContent className="max-w-[85vw]! w-max! overflow-hidden">
+        <DialogHeader>
+          <DialogTitle>Carregar arquivos de respostas</DialogTitle>
+          <DialogDescription>
+            {stage === 0 && (
+              <>
+                Selecione os arquivos CSV para carregar os dados das tentativas
+                <p>
+                  São necessários os arquivos: <b>Respostas</b>,{" "}
+                  <b>Integridade</b> e <b>Plano de ação</b>
+                </p>
+              </>
+            )}
+            {stage === 1 &&
+              "Revise os dados dos participantes a serem inseridos"}
+          </DialogDescription>
+        </DialogHeader>
 
         {stage === 0 ? (
-          <div className="flex gap-6 p-4">
-            <div className="flex flex-col gap-4 max-w-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-4">
+            <div className="flex flex-col gap-4">
               <Label className="font-semibold" htmlFor="resultsFile">
                 Respostas
               </Label>
@@ -189,7 +202,7 @@ const InsertAssessmentAttempts = ({
                 placeholder="Selecione um arquivo CSV"
               />
             </div>
-            <div className="flex flex-col gap-4 max-w-xs">
+            <div className="flex flex-col gap-4">
               <Label className="font-semibold" htmlFor="integrityFile">
                 Integridade
               </Label>
@@ -201,7 +214,7 @@ const InsertAssessmentAttempts = ({
                 placeholder="Selecione um arquivo CSV"
               />
             </div>
-            <div className="flex flex-col gap-4 max-w-xs">
+            <div className="flex flex-col gap-4">
               <Label className="font-semibold" htmlFor="actionPlanFile">
                 Plano de ação
               </Label>
@@ -215,22 +228,34 @@ const InsertAssessmentAttempts = ({
             </div>
           </div>
         ) : (
-          <div className="w-full max-h-96 overflow-y-auto px-4 my-6">
-            <Table>
-              <TableHeader>
+          <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
+            <Table className="w-full h-full">
+              <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
                 <TableRow>
-                  <TableHead className="max-w-56 w-56 truncate">Nome</TableHead>
-                  <TableHead className="max-w-56 w-56 truncate">
-                    Email
+                  <TableHead className="max-w-56 w-56 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-start items-center border-r">
+                      Nome
+                    </div>
                   </TableHead>
-                  <TableHead className="max-w-56 w-56 truncate">
-                    Respostas
+                  <TableHead className="max-w-56 w-56 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-start items-center border-r">
+                      Email
+                    </div>
                   </TableHead>
-                  <TableHead className="max-w-56 w-56 truncate">
-                    Registros de Integridade
+                  <TableHead className="max-w-32 w-32 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-center items-center border-r">
+                      Respostas
+                    </div>
                   </TableHead>
-                  <TableHead className="max-w-56 w-56 truncate">
-                    Planos de ação
+                  <TableHead className="max-w-32 w-32 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-center items-center border-r">
+                      Integridade
+                    </div>
+                  </TableHead>
+                  <TableHead className="max-w-32 w-32 truncate font-semibold p-0!">
+                    <div className="w-full h-full p-2 flex justify-center items-center">
+                      Planos de ação
+                    </div>
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -241,13 +266,37 @@ const InsertAssessmentAttempts = ({
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((participant) => (
                       <TableRow key={participant.email}>
-                        <TableCell>{participant.name}</TableCell>
-                        <TableCell>{participant.email}</TableCell>
-                        <TableCell>{participant.results.length}</TableCell>
-                        <TableCell>
-                          {participant.integrityEvents.length}
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-start items-center border-r p-2 max-w-56 w-56">
+                            {participant.name}
+                          </div>
                         </TableCell>
-                        <TableCell>{participant.actionPlans.length}</TableCell>
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-start items-center border-r p-2 max-w-56 w-56">
+                            {participant.email}
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-32 w-32">
+                            <span className="font-semibold">
+                              {participant.results.length}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center border-r p-2 max-w-32 w-32">
+                            <span className="font-semibold">
+                              {participant.integrityEvents.length}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="p-0!">
+                          <div className="h-14! flex justify-center items-center p-2 max-w-32 w-32">
+                            <span className="font-semibold">
+                              {participant.actionPlans.length}
+                            </span>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
               </TableBody>
@@ -255,12 +304,17 @@ const InsertAssessmentAttempts = ({
           </div>
         )}
 
-        <DrawerFooter className="!flex flex-row! justify-end gap-8">
+        <DialogFooter className="!flex flex-row! justify-end gap-2">
           {stage === 0 && (
             <>
-              <DrawerClose>
-                <Button variant="outline">Cancelar</Button>
-              </DrawerClose>
+              <DialogClose>
+                <Button
+                  variant="outline"
+                  className="font-semibold text-muted-foreground"
+                >
+                  Cancelar
+                </Button>
+              </DialogClose>
 
               <Button
                 onClick={handleExtractParticipantData}
@@ -268,6 +322,7 @@ const InsertAssessmentAttempts = ({
                   stage === 0 &&
                   (!resultsCsv || !integrityCsv || !actionPlansCsv)
                 }
+                className="font-semibold"
               >
                 Extrair dados
               </Button>
@@ -282,20 +337,25 @@ const InsertAssessmentAttempts = ({
                   return;
                 }}
                 variant="outline"
+                className="font-semibold text-muted-foreground"
               >
-                Trocar arquivos csv
+                Trocar arquivos CSV
               </Button>
               {participantData && participantData.length > 0 && (
-                <Button onClick={() => (!loading ? handleSubmit() : null)}>
+                <Button
+                  onClick={() => (!loading ? handleSubmit() : null)}
+                  className="font-semibold"
+                  disabled={loading}
+                >
                   {loading && <LoaderCircle className="size-5 animate-spin" />}
                   Inserir {participantData.length} dados
                 </Button>
               )}
             </>
           )}
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

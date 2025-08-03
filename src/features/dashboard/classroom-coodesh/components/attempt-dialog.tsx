@@ -1,5 +1,5 @@
 "use client";
-import { ExternalLink, SquareArrowOutUpRight } from "lucide-react";
+import { Eye, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,21 +22,8 @@ import { MarkdownRenderer } from "@/components/shared/shiki-markdown";
 import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
-import { ActionPlanRowT, ParticipantDataT } from "@/types/classroom-coodesh/attempts";
-
-const EVENT_TYPE_LABELS: Record<string, string> = {
-  challenge_start: "Início do Desafio",
-  fullscreen_enter: "Entrou em Tela Cheia",
-  fullscreen_leave: "Saiu da Tela Cheia",
-  idle: "Inatividade",
-  active: "Ativo",
-  viewed_question: "Visualizou Questão",
-  challenge_finish: "Finalizou Desafio",
-  tab_exit: "Saiu da Guia",
-  back_to_challenges_page: "Voltou à Página",
-  copy_content: "Copiou Conteúdo",
-  paste_content: "Colou Conteúdo",
-};
+import { ActionPlanRowT, ParticipantDataT } from "@/types";
+import { EVENT_TYPE_LABELS } from "../utils/event-type";
 
 const AttemptDialog = ({
   open,
@@ -62,7 +49,7 @@ const AttemptDialog = ({
                   {
                     label: "Pontuação",
                     value: 90,
-                    fill: "var(--color-primary)",
+                    fill: "var(--primary)",
                   },
                 ]}
               />
@@ -307,15 +294,15 @@ const AttemptDialog = ({
                         </TableCell>
                         <TableCell className="max-w-xs">
                           <Dialog>
-                            <DialogTrigger asChild>
+                            <DialogTrigger>
                               <Button
                                 variant="ghost"
-                                size="sm"
+                                size="icon"
                                 className="text-left hover:bg-muted w-full justify-start"
                                 disabled={!plan.actionPlanText}
                               >
                                 {plan.actionPlanText ? (
-                                  <ExternalLink className="size-5" />
+                                  <Eye className="size-5" />
                                 ) : (
                                   "N/A"
                                 )}

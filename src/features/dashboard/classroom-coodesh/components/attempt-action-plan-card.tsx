@@ -1,6 +1,6 @@
 "use client"
 import { Map } from "lucide-react";
-import { ActionPlanRowT } from "@/types/classroom-coodesh/attempts";
+import { ActionPlanRowT } from "@/types";
 
 const AttemptActionPlanCard = ({
   actionPlans,

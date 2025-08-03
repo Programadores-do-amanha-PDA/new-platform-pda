@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { jwtDecode } from "jwt-decode";
-import { getAuthUser, getSession } from "@/app/actions/(auth)/auth";
+import { getAuthUser, getSession } from "@/app/actions/auth";
 import { getProfileById } from "@/app/actions/profiles";
 import { getAvatarUrlById } from "@/app/actions/profile-avatar";
-import { AuthUserWithProfileT, JwtPayloadT, ProfileT, RolesT } from "@/types/auth";
+import { AuthUserWithProfileT, JwtPayloadT, ProfileT, RolesT } from "@/types";
 
 interface AuthState {
   user: AuthUserWithProfileT | null;
@@ -103,7 +103,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       },
 
       reset: () => {
-        set(initialState);
+        set({ ...initialState, loading: false });
       },
     }),
     { name: "AuthStore" }

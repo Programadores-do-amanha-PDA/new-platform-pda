@@ -1,18 +1,21 @@
 "use client";
+
 import { useState } from "react";
-import { Search } from "lucide-react";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import AssessmentsClassroomListCard from "../components/assessments-classroom-list-card";
 import AssessmentsSheetData from "../components/assessments-sheet-data";
+import { useCoodeshAssessmentStore } from "../stores/assessments";
 
-export default function AssessmentsPage({
-  classroom_id,
-}: {
-  classroom_id: string;
-}) {
+export default function AssessmentsPage() {
+  const { classroom_id } = useParams();
   const [searchFilter, setSearchFilter] = useState<string>("");
+
+  // Ensure classroom_id is a string
+  const classroomId = Array.isArray(classroom_id)
+    ? classroom_id[0]
+    : classroom_id;
 
   const { assessments } = useCoodeshAssessmentStore();
 
@@ -23,20 +26,16 @@ export default function AssessmentsPage({
   return (
     <div className="relative w-full h-max p-4 flex flex-col gap-6 overflow-hidden">
       <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
-        <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
-          <Input
-            id="search"
-            type="text"
-            placeholder="Buscando algo?"
-            className="max-w-xs border-none! ring-0! shadow-none rounded-none!"
-            value={searchFilter}
-            onChange={(e) => setSearchFilter(e.target.value)}
-          />
-          <Label htmlFor="search">
-            <Search className="size-5 text-primary-foreground" />
-          </Label>
-        </div>
-        <AssessmentsSheetData classroom_id={classroom_id} />
+        <Input
+          id="search"
+          type="text"
+          placeholder="Buscando algo?"
+          className="max-w-xs"
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+        />
+
+        <AssessmentsSheetData classroom_id={classroomId} />
       </header>
 
       <ul className="p-2 h-full w-full flex flex-col sm:flex-row sm:flex-wrap gap-4 overflow-y-auto pr-4">

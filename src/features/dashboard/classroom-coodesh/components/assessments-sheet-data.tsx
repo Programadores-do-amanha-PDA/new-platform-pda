@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { LoaderCircle, Plus } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { useCoodeshAssessmentStore } from "../stores/assessments";
+import { useCoodeshAPIAssessmentStore } from "../stores/api";
 import {
   Sheet,
   SheetClose,
@@ -14,10 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-
-import { AssessmentPayloadT } from "@/types/classroom-coodesh";
-import { useCoodeshAPIAssessmentStore } from "@/stores/modules/classrooms/coodesh/api";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+import { AssessmentPayloadT } from "@/types";
 
 const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -78,7 +76,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
             Anexe abaixo as avaliações da Coodesh que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
-        <main className="h-full flex flex-col gap-4 xl:gap-6 py-2">
+        <main className="h-full flex flex-col gap-4 xl:gap-6 p-2">
           <div>
             <Input
               placeholder="Procurando por algo?"
@@ -105,6 +103,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                         <p className="text-xs text-gray-500 truncate">
                           {assessmentPayload.description}
                         </p>
+                        <p className="text-xs text-gray-500 truncate"></p>
                       </div>
                       <Button
                         onClick={() =>

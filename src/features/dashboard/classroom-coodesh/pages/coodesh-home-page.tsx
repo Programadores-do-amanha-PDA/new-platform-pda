@@ -1,11 +1,12 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 import { AttemptsChallengeScoreChart } from "../components/attempts-challenge-score-chart";
 import AssessmentsClassroomListCard from "../components/assessments-classroom-list-card";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+import { useCoodeshAssessmentStore } from "../stores/assessments";
 
 const CoodeshHomePage = () => {
   const { assessments } = useCoodeshAssessmentStore();
@@ -19,8 +20,8 @@ const CoodeshHomePage = () => {
           .map((assessment) => assessment.participants_data || [])
           .flat()}
       />
-      <div className="w-full h-full flex flex-wrap items-start gap-4 px-6 overflow-hidden">
-        <header className="w-full flex justify-between gap-4">
+      <div className="w-full h-full flex flex-col justify-start items-start gap-4 px-6 overflow-hidden">
+        <header className="w-full h-12 flex justify-between gap-4">
           <p className="text-lg font-bold mb-4">Avaliações da turma</p>
           <Link href={`${path}/assessments`}>
             <Button
@@ -34,7 +35,7 @@ const CoodeshHomePage = () => {
         </header>
 
         {assessments.length > 0 && (
-          <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto">
+          <ul className="w-full h-max max-h-full flex flex-wrap items-start gap-4 overflow-y-auto">
             {assessments
               ?.sort(
                 (a, b) =>

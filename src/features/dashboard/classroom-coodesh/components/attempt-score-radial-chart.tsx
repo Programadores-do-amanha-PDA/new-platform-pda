@@ -7,7 +7,7 @@ import {
   RadialBarChart,
 } from "recharts";
 import { ChartConfig, ChartContainer } from "@/components/ui/chart";
-import { ChartDataT } from "@/types/charts";
+import { ChartDataT } from "@/types";
 
 const chartConfig = {
   score: {

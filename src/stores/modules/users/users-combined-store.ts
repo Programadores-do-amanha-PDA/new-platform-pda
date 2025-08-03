@@ -1,11 +1,11 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { useUsersStore } from "./users-store";
-import { useUserClassroomsStore } from "./user-classrooms-store";
 import { useRolesStore } from "./user-roles-store";
 import { AuthUserWithProfileT, RolesT } from "@/types/auth";
 import { UserClassroomT } from "@/types/auth/user-classroom";
 import { AuthUser } from "@supabase/supabase-js";
+import { useUserClassroomsStore } from "./user-classrooms-store";
 
 /**
  * Combined store that provides access to all user-related functionality

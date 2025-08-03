@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { toast } from "sonner";
 import {
   getZoomMeetingById,
   getAllZoomMeetingsByClassroomId,
@@ -7,15 +8,14 @@ import {
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
+import { useZoomAPIStore } from "./api";
+import { useZoomMeetingPastInstanceStore } from "./past-instances";
+import { ZoomAccountT } from "@/types";
 import {
   ZoomMeetingOccurrenceT,
   ZoomMeetingT,
   ZoomMeetingWithPastInstancies,
-} from "@/types/classroom-zoom/meetings";
-import { toast } from "sonner";
-import { useZoomAPIStore } from "./api";
-import { useZoomMeetingPastInstanceStore } from "./past-instances";
+} from "@/types";
 
 interface ZoomMeetingState {
   meetings: ZoomMeetingT[];

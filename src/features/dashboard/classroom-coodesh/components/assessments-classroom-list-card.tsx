@@ -1,18 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { DateRange } from "react-day-picker";
 import { LoaderCircle } from "lucide-react";
 
+import { useCoodeshAssessmentStore } from "../stores/assessments";
+import { calculateOverallAccuracy } from "../utils/calculate-metric";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
 import DateIntervalPicker from "@/components/shared/date-interval-picker";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
+
+import { ClassroomCoodeshAssessmentT } from "@/types";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 type AssessmentsClassroomListCardProps = {
   assessment: ClassroomCoodeshAssessmentT;
@@ -32,6 +36,47 @@ const AssessmentsClassroomListCard = ({
     useState<boolean>(false);
 
   const { updateAssessment } = useCoodeshAssessmentStore();
+
+  useEffect(() => {
+    if (assessment?.schedule_date?.from && assessment?.schedule_date?.to) {
+      setScheduleDate({
+        from: new Date(assessment?.schedule_date?.from),
+        to: new Date(assessment?.schedule_date?.to),
+      });
+    }
+    if (assessment.is_visible_on_schedule) {
+      setIsVisibleOnSchedule(assessment.is_visible_on_schedule);
+    }
+    if (assessment.accept_late_deliveries) {
+      setAcceptLateDeliveries(assessment.accept_late_deliveries);
+    }
+  }, [assessment]);
+
+  // Calcular se o assessment já passou do período de entrega
+  const isExpired = useMemo(() => {
+    if (!assessment.schedule_date?.to) return false;
+    return new Date() > new Date(assessment.schedule_date.to);
+  }, [assessment.schedule_date?.to]);
+
+  // Calcular métricas para assessments expirados
+  const assessmentMetrics = useMemo(() => {
+    if (!isExpired || !assessment.participants_data) {
+      return null;
+    }
+
+    const totalResponses = assessment.participants_data.length;
+    const totalActionPlans = assessment.participants_data.reduce(
+      (sum, participant) => sum + participant.actionPlans.length,
+      0
+    );
+    const averageScore = calculateOverallAccuracy(assessment.participants_data);
+
+    return {
+      totalResponses,
+      totalActionPlans,
+      averageScore,
+    };
+  }, [isExpired, assessment.participants_data]);
   useEffect(() => {
     if (assessment?.schedule_date?.from && assessment?.schedule_date?.to) {
       setScheduleDate({
@@ -81,37 +126,85 @@ const AssessmentsClassroomListCard = ({
     <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
         <div className="flex flex-col gap-1 truncate">
-          <Link
-            href={
-              expansive
-                ? `${path}/${assessment.id}`
-                : `${path}/assessments/${assessment.id}`
-            }
-            className="font-semibold truncate hover:underline cursor-pointer"
-            title={assessment.name}
-          >
-            {assessment.name}
-          </Link>
-          <p
-            className="text-sm h-5 text-gray-500"
-            title={assessment.description}
-          >
-            {assessment.description}
-          </p>
-          <p className="text-sm h-5 text-gray-500 flex gap-1">
-            Duração:
-            <p className="font-bold">
-              {assessment.duration}{" "}
-              {assessment.duration_unit === "hour" ? "horas" : "minutos"}
+          <div className="flex items-center gap-2">
+            <Link
+              href={
+                expansive
+                  ? `${path}/${assessment.id}`
+                  : `${path}/assessments/${assessment.id}`
+              }
+              className="font-semibold truncate hover:underline cursor-pointer"
+              title={assessment.name}
+            >
+              {assessment.name}
+            </Link>
+          </div>
+          {assessment.description && (
+            <p
+              className="text-sm h-5 text-gray-500"
+              title={assessment.description}
+            >
+              {assessment.description}
             </p>
-          </p>
-          <p className="text-sm h-5 text-gray-500 flex gap-1">
-            Questões:
-            <p className="font-bold">{assessment.questions.length}</p>
-          </p>
+          )}
+          {assessment.duration && (
+            <p className="text-sm h-5 text-gray-500 flex gap-1">
+              Duração:
+              <p className="font-bold">
+                {assessment.duration}{" "}
+                {assessment.duration_unit === "hour" ? "horas" : "minutos"}
+              </p>
+            </p>
+          )}
+
+          {assessment.questions.length && (
+            <p className="text-sm h-5 text-gray-500 flex gap-1">
+              Questões:
+              <p className="font-bold">{assessment.questions.length}</p>
+            </p>
+          )}
+
+          {isExpired && (
+            <p className="text-sm h-5 text-gray-500 flex gap-1">
+              Status:
+              <Badge className="text-xs bg-orange-200 text-orange-800">
+                Finalizado
+              </Badge>
+            </p>
+          )}
+
+          {/* Mostrar métricas para assessments expirados */}
+          {expansive && isExpired && assessmentMetrics && (
+            <div className="w-full h-max flex flex-col gap-1 mt-3 py-3 rounded-lg bg-orange-50">
+              <h4 className="text-sm font-semibold text-gray-700 px-3">
+                Resultados
+              </h4>
+              <Separator />
+              <div className="flex flex-col gap-2 p-3 py-2">
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-gray-600">Respostas:</span>
+                  <span className="text-sm font-bold">
+                    {assessmentMetrics.totalResponses}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-gray-600">Planos de ação</span>
+                  <span className="text-sm font-bold">
+                    {assessmentMetrics.totalActionPlans}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-gray-600">Média geral</span>
+                  <span className="text-sm font-bold">
+                    {assessmentMetrics.averageScore.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      {expansive && (
+      {expansive && !isExpired && (
         <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
           <div className="w-full flex flex-col gap-6">
             <div className="w-full flex flex-col gap-2">

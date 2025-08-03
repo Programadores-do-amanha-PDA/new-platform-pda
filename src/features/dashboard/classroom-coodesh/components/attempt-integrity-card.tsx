@@ -1,5 +1,6 @@
-import { IntegrityRowT } from "@/types/classroom-coodesh/attempts";
+"use client";
 import { ShieldCheck } from "lucide-react";
+import { IntegrityRowT } from "@/types";
 
 const AttemptIntegrityCard = ({
   integrityEvents,

@@ -25,10 +25,10 @@ export interface ProjectItemT {
 }
 
 export interface SidebarDataT {
-  team: TeamInfoT;
-  navMain: SidebarNavItemT[];
+  team?: TeamInfoT;
+  navMain?: SidebarNavItemT[];
   classRooms?: SidebarNavItemT[];
-  projects: ProjectItemT[];
+  projects?: ProjectItemT[];
   user: AuthUserWithProfileT;
 }
 

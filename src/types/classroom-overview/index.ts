@@ -1,5 +1,3 @@
-export type SortOrder = "none" | "asc" | "desc";
-
 export type StudentPresenceIndicators = {
   general: number;
   programming: number;
@@ -24,15 +22,6 @@ export type StudentOverview = {
   activities: number;
   coodesh: StudentCoodeshIndicators;
   projects: StudentProjectIndicators;
-};
-
-export type ColumnVisibility = {
-  [key: string]: boolean;
-};
-
-export type SortConfig = {
-  key: string | null;
-  direction: SortOrder;
 };
 
 export type ClassroomOverviewData = {

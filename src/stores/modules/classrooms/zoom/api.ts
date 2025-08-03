@@ -9,16 +9,16 @@ import {
 } from "@/types/classroom-zoom/meetings";
 import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { toast } from "sonner";
-import { ZoomAccountMeT, ZoomAccountT } from "@/types/classroom-zoom/accounts";
+import { ZoomAccountMeT, ZoomAccountT } from "@/types";
 import {
   getAllMeetingsByAccount,
   getMeetingById,
   getPastedMeetingParticipants,
   getPastMeetingsPollResults,
   getPastMeetingInstances,
-} from "@/utils/apis/zoom/meetings";
-import { getAccessToken } from "@/utils/apis/zoom/oauth";
-import { getMeAccount } from "@/utils/apis/zoom/account";
+} from "@/app/apis/zoom/meetings";
+import { getAccessToken } from "@/app/apis/zoom/oauth";
+import { getMeAccount } from "@/app/apis/zoom/account";
 
 interface ZoomAPIState {
   meetingsByAPI: ZoomMeetingT[];
@@ -130,7 +130,6 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
 
           if (!meetings) throw new Error("no meetings response from API");
 
-          console.log(meetings);
           set({
             meetingsByAPI: meetings.map((m) => ({
               ...m,
@@ -381,7 +380,7 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
           );
           return pollResults.flatMap(
             (p) => p.questions
-          ) as ZoomMeetingPollResultsT[];
+          ).filter(Boolean) as ZoomMeetingPollResultsT[];
         } catch (error) {
           console.error("Error fetching poll results:", error);
           toast.error("Falha ao buscar resultados de pesquisas da reunião.");

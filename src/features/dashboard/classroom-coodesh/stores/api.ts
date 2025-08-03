@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import axios from "axios";
 import { toast } from "sonner";
-import { AssessmentPayloadT } from "@/types/classroom-coodesh";
-
+import { AssessmentPayloadT, AssessmentT } from "@/types";
+import { getCoodeshAPIAssessments } from "@/app/apis/coodesh/assessments";
 
 interface CoodeshAPIAssessmentState {
   apiAssessments: AssessmentPayloadT[];
@@ -33,16 +32,13 @@ export const useCoodeshAPIAssessmentStore = create<
       getApiAssessments: async () => {
         try {
           set({ loading: true });
-          const assessments = await axios.get("/api/coodesh/assessments");
-          console.log(assessments.data.assessments);
+          const assessments: AssessmentT = await getCoodeshAPIAssessments();
+          console.log(assessments);
 
           if (!assessments) throw "no assessments fetched successfully";
 
           set({
-            apiAssessments: [
-              ...get().apiAssessments,
-              assessments.data.assessments.payload,
-            ],
+            apiAssessments: [...get().apiAssessments, ...assessments.payload],
             loading: false,
           });
 

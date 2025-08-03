@@ -1,4 +1,5 @@
 "use client";
+
 import * as React from "react";
 import {
   Column,
@@ -14,6 +15,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { ArrowUpDown } from "lucide-react";
+
 import {
   Table,
   TableBody,
@@ -24,12 +27,12 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
-import { ArrowUpDown } from "lucide-react";
+
+import { ClassroomCoodeshAssessmentT } from "@/types";
 import {
   calculateAccuracyByChallenge,
   calculateAverageDurationByChallenge,
-} from "@/utils/coodesh/calculate-metric";
+} from "../utils/calculate-metric";
 
 type Question = ClassroomCoodeshAssessmentT["questions"][number];
 
@@ -280,8 +283,8 @@ export function AssessmentQuestionsTable({
   });
 
   return (
-    <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
-      <div className="flex items-center justify-between py-4 sticky">
+    <div className="w-full h-full flex flex-col flex-1 gap-4 overflow-hidden">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por algo?"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}

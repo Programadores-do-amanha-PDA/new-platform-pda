@@ -8,7 +8,7 @@ import {
   updateActivityById,
   deleteActivityById,
 } from "@/app/actions/classrooms/activities/activity";
-import { ClassroomActivityT } from "@/types/classroom-activities/activities";
+import { ClassroomActivityT } from "@/types";
 import { toast } from "sonner";
 
 interface ClassroomActivityState {
@@ -178,7 +178,6 @@ export const useClassroomActivityStore = create<
         try {
           if (!activityId) throw new Error("activity id is required to delete");
 
-          set({ loading: true });
           const response = await deleteActivityById(activityId);
           if (!response) throw new Error("no delete activity response");
 
@@ -193,8 +192,6 @@ export const useClassroomActivityStore = create<
           console.error("Error deleting activity:", error);
           toast.error("Erro ao deletar atividade. Tente novamente mais tarde!");
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 

@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import {
   ColumnDef,
@@ -13,6 +14,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,13 +36,14 @@ import {
 } from "@/components/ui/table";
 import InsertAssessmentAttempts from "./insert-assessment-attemts";
 import AttemptDialog from "./attempt-dialog";
+
 import {
   ActionPlanRowT,
   IntegrityRowT,
   ParticipantDataT,
   ResultsRowT,
-} from "@/types/classroom-coodesh";
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh/assessments";
+  ClassroomCoodeshAssessmentT,
+} from "@/types";
 
 export function AttemptsDataTable({
   assessment,
@@ -352,112 +355,113 @@ export function AttemptsDataTable({
   };
 
   return (
-    <>
-      <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
-        <div className="flex items-center justify-between py-4 sticky">
-          <Input
-            placeholder="Filtrar emails..."
-            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("email")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-          {assessment && (
-            <div className="flex justify-between items-center gap-4">
-              <InsertAssessmentAttempts
-                assessment={assessment}
-                updateAssessment={updateAssessment}
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Abrir menu</span>
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel className="font-semibold">
-                    Ações
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {assessment &&
-                    assessment?.participants_data &&
-                    assessment.participants_data.length > 0 && (
-                      <DropdownMenuItem
-                        onClick={() =>
-                          updateAssessment(assessment, {
-                            participants_data: [],
-                          })
-                        }
-                      >
-                        Deletar todos os dados
-                      </DropdownMenuItem>
-                    )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
-        <div className="w-full h-full flex border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader className="sticky top-0 bg-white z-10 p-0!">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow
-                  key={headerGroup.id}
-                  className="shadow rounded-t-lg! overflow-hidden p-0!"
-                >
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id} className="p-0!">
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    className="p-0! h-full! border-0!"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="p-0! h-full!  border-0!"
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    Nenhuma resposta encontrada.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
+    <div className="w-full h-full flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <Input
+          placeholder="Procurando por alguém?"
+          value={
+            ((table.getColumn("email")?.getFilterValue() as string) ||
+              (table.getColumn("name")?.getFilterValue() as string)) ??
+            ""
+          }
+          onChange={(event) =>
+            table.getColumn("email")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        {assessment && (
+          <div className="flex justify-between items-center gap-4">
+            <InsertAssessmentAttempts
+              assessment={assessment}
+              updateAssessment={updateAssessment}
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Abrir menu</span>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="font-semibold">
+                  Ações
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {assessment &&
+                  assessment?.participants_data &&
+                  assessment.participants_data.length > 0 && (
+                    <DropdownMenuItem
+                      onClick={() =>
+                        updateAssessment(assessment, {
+                          participants_data: [],
+                        })
+                      }
+                    >
+                      Deletar todos os dados
+                    </DropdownMenuItem>
+                  )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
-
+      <div className="w-full h-full flex border rounded-lg overflow-hidden">
+        <Table>
+          <TableHeader className="sticky top-0 bg-white z-10 p-0!">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow
+                key={headerGroup.id}
+                className="shadow rounded-t-lg! overflow-hidden p-0!"
+              >
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id} className="p-0!">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="p-0! h-full! border-0!"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="p-0! h-full!  border-0!"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Nenhuma resposta encontrada.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
       {selectedAttempt && (
         <AttemptDialog
           attempt={selectedAttempt}
@@ -465,6 +469,6 @@ export function AttemptsDataTable({
           onClose={() => setIsAttemptDialogOpen(false)}
         />
       )}
-    </>
+    </div>
   );
 }
