@@ -9,7 +9,7 @@ import { LoaderCircle } from "lucide-react";
 
 import useAuth from "@/hooks/use-auth";
 
-import { signInWithPassword } from "@/app/actions/(auth)";
+import { signInWithPassword } from "@/app/actions";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

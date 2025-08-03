@@ -3,10 +3,10 @@ import Image from "next/image";
 
 import BinaryRainBackground from "@/components/shared/binary-rain-background";
 
-import womanArt from "@/assets/images/login/woman-login-art.png";
+import womanArt from "/public/assets/images/login/woman-login-art.png";
 import { ResetPasswordForm } from "@/features/auth/components/reset-password-form";
 import { RequestResetPasswordForm } from "@/features/auth/components/request-reset-password-form";
-import { useAuth } from "@/hooks/use-auth";
+import useAuth from "@/hooks/use-auth";
 
 export default function ResetPasswordPage() {
   const { user } = useAuth();

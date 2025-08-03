@@ -24,7 +24,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 
-import pdaSymbol from "@/assets/logos/simbolo_pda_fundo_branco.png";
+import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 const resendConfirmationSchema = z.object({
   email: z

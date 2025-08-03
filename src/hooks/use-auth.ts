@@ -2,15 +2,11 @@ import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/stores/shared/auth-store";
 
-import {
-  exchangeAuthCode,
-  signOut,
-  updateAuthUser,
-} from "@/app/actions/(auth)";
+import { exchangeAuthCode, signOut, updateAuthUser } from "@/app/actions";
 import {
   requestPasswordResetWithUserEmail,
   resendAnEmailSignupConfirmation,
-} from "@/app/actions/(auth)/emails";
+} from "@/app/actions/auth/emails";
 
 export default function useAuth() {
   const store = useAuthStore();
@@ -43,7 +39,7 @@ export default function useAuth() {
   const handleSignOut = async () => {
     await signOut();
     store.reset();
-    router.push("/");
+    router.push("/login");
   };
 
   return {

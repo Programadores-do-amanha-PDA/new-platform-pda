@@ -20,9 +20,9 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import pdaSymbol from "@/assets/logos/simbolo_pda_fundo_branco.png";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 const resetPasswordSchema = z
   .object({

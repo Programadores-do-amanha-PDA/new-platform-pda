@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setSession } from "@/app/actions/(auth)";
+import { setSession } from "@/app/actions";
 import useAuth from "@/hooks/use-auth";
 
 /**

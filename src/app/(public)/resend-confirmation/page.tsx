@@ -4,7 +4,7 @@ import Image from "next/image";
 import BinaryRainBackground from "@/components/shared/binary-rain-background";
 import { ResendConfirmationForm } from "@/features/auth/components/resend-confirmation-form";
 
-import womanArt from "@/assets/images/login/woman-login-art.png";
+import womanArt from "/public/assets/images/login/woman-login-art.png";
 
 export default function ResendConfirmationPage() {
   return (

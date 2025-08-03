@@ -20,7 +20,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import Image from "next/image";
-import pdaSymbol from "@/assets/logos/simbolo_pda_fundo_branco.png";
+import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const requestResetPasswordSchema = z.object({
