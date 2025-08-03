@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, Eye } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Table } from "@tanstack/react-table";
 
 interface ColumnGroup {
@@ -31,9 +31,8 @@ export function ColumnVisibilityDropdown<TData>({
 }: ColumnVisibilityDropdownProps<TData>) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger>
         <Button variant="outline" className="ml-auto">
-          <Eye className="mr-2 h-4 w-4" />
           Visualização
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>

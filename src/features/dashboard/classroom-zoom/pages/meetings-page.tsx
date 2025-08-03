@@ -4,46 +4,18 @@ import { useMemo, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import MeetingsSheetData from "../components/meetings/meetings-sheet-data";
 import ZoomMeetingsCard from "../components/meetings/meetings-card";
 
-type meetingStatusT = "all" | "upcoming" | "completed";
-
-const meetingsStatusLabels = {
-  all: "Todas",
-  upcoming: "Próximas",
-  completed: "Concluídas",
-  cancelled: "Canceladas",
-};
-
 const ZoomMeetingsPage = () => {
   const [searchFilter, setSearchFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<meetingStatusT>("all");
   const [allMeetingLoading, setAllMeetingLoading] = useState<boolean>(false);
-  
+
   const { meetings } = useZoomMeetingStore();
 
-  const { filteredMeetings, statusCount } = useMemo(() => {
-    const count = { all: meetings.length, upcoming: 0, completed: 0 };
-
-    const filtered = meetings.filter((meeting) => {
-
-      const startTime = new Date(meeting.start_time || 0).getTime();
-      const endTime = new Date(startTime + (meeting.duration || 0)).getTime();
-      const isUpcoming = endTime > Date.now();
-      const isCompleted = endTime < Date.now();
-      const status: meetingStatusT = isUpcoming ? "upcoming" : "completed";
-
-      // Update counts
-      if (isUpcoming) count.upcoming++;
-      if (isCompleted) count.completed++;
-
-      // Status filter
-      if (statusFilter !== "all" && status !== statusFilter) return false;
-
+  const filteredMeetings = useMemo(() => {
+    return meetings.filter((meeting) => {
       // Search filter
       if (searchFilter) {
         const searchLower = searchFilter.toLowerCase();
@@ -55,46 +27,12 @@ const ZoomMeetingsPage = () => {
 
       return true;
     });
-
-    return { filteredMeetings: filtered, statusCount: count };
-  }, [meetings, statusFilter, searchFilter]);
-
-  const statusFilters: meetingStatusT[] = ["all", "upcoming", "completed"];
+  }, [meetings, searchFilter]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-6 py-6 overflow-y-auto px-4">
+    <div className="w-full h-full flex flex-col gap-6 py-6 overflow-hidden px-4">
       <div className="w-full h-full flex flex-col gap-6">
         <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
-          <div className="w-max h-9 flex gap-4">
-            {statusFilters.map((filter, index) => (
-              <div key={filter} className="flex items-center gap-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setStatusFilter(filter)}
-                >
-                  <p
-                    className={`text-sm font-semibold ${
-                      statusFilter === filter ? "text-primary" : ""
-                    }`}
-                  >
-                    {meetingsStatusLabels[filter]}
-                  </p>
-                  <Badge
-                    variant={
-                      statusFilter === filter ? "default" : "outline"
-                    }
-                  >
-                    {statusCount[filter]}
-                  </Badge>
-                </Button>
-                {index < statusFilters.length - 1 && (
-                  <div className="h-full w-px border-l border-sidebar-accent" />
-                )}
-              </div>
-            ))}
-          </div>
-
           <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
             <Input
               id="search"
@@ -114,23 +52,6 @@ const ZoomMeetingsPage = () => {
         <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
           {filteredMeetings
             .sort((a, b) => {
-              if (statusFilter === "all") {
-                return (
-                  new Date(b.start_time ?? 0).getTime() -
-                  new Date(a.start_time ?? 0).getTime()
-                );
-              } else if (statusFilter === "upcoming") {
-                return (
-                  new Date(a.start_time ?? 0).getTime() -
-                  new Date(b.start_time ?? 0).getTime()
-                );
-              } else if (statusFilter === "completed") {
-                return (
-                  new Date(b.start_time ?? 0).getTime() -
-                  new Date(a.start_time ?? 0).getTime()
-                );
-              }
-
               return (
                 new Date(b.start_time ?? 0).getTime() -
                 new Date(a.start_time ?? 0).getTime()

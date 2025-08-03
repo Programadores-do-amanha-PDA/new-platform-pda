@@ -24,22 +24,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ColumnVisibilityDropdown } from "./column-visibility-dropdown";
-import { ColumnGroup, getColumnGroups } from "./column-groups";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
-} from "@radix-ui/react-dropdown-menu";
-import { Eye, ChevronDown } from "lucide-react";
-import { Button } from "react-day-picker";
+import { getColumnGroups } from "./column-groups";
+import { ClassroomOverviewData } from "@/types/classroom-overview";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  fullData?: any; // For accessing coodesh tests and projects names
+  fullData?: ClassroomOverviewData; // For accessing coodesh tests and projects names
 }
 
 export function DataTable<TData, TValue>({
@@ -78,14 +69,21 @@ export function DataTable<TData, TValue>({
 
   const allColumns = table.getAllColumns();
   const columnGroups = useMemo(() => {
+    // Provide a default structure if fullData is not available
+    const defaultData: ClassroomOverviewData = {
+      students: [],
+      coodeshTests: [],
+      projects: [],
+    };
+
     return getColumnGroups(
       allColumns as Array<{
         id: string;
         columnDef?: { accessorKey?: string; header?: unknown };
       }>,
-      fullData || data
+      fullData || defaultData
     );
-  }, [allColumns, data, fullData]);
+  }, [allColumns, fullData]);
 
   return (
     <div className="w-full h-full flex flex-col gap-2 overflow-hidden">

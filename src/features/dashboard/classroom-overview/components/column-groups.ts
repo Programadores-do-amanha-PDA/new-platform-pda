@@ -1,3 +1,5 @@
+import { ClassroomOverviewData } from "@/types/classroom-overview";
+
 export interface ColumnGroup {
   id: string;
   label: string | null; // null means it's an individual column that spans 2 rows
@@ -10,9 +12,8 @@ export interface ColumnGroup {
 export function getDescriptiveColumnName(
   columnId: string,
   accessorKey?: string,
-  data?: any
+  data?: ClassroomOverviewData
 ): string {
-  // Handle presence columns
   if (accessorKey?.startsWith("presence.")) {
     const presenceType = accessorKey.split(".")[1];
     switch (presenceType) {
@@ -37,14 +38,14 @@ export function getDescriptiveColumnName(
   // Handle coodesh columns
   if (columnId?.startsWith("coodesh-")) {
     const testId = columnId.replace("coodesh-", "");
-    const test = data?.coodeshTests?.find((t: any) => t.id === testId);
+    const test = data?.coodeshTests?.find((t) => t.id === testId);
     return test?.name || `Teste ${testId}`;
   }
 
   // Handle project columns
   if (columnId?.startsWith("project-")) {
     const projectId = columnId.replace("project-", "");
-    const project = data?.projects?.find((p: any) => p.id === projectId);
+    const project = data?.projects?.find((p) => p.id === projectId);
     return project?.name || `Projeto ${projectId}`;
   }
 
@@ -63,7 +64,7 @@ export function getColumnGroups(
     id: string;
     columnDef?: { accessorKey?: string; header?: unknown };
   }>,
-  data: any
+  data: ClassroomOverviewData
 ): ColumnGroup[] {
   const groups: ColumnGroup[] = [];
   let currentGroup: ColumnGroup | null = null;

@@ -9,10 +9,10 @@ import {
 } from "@/types/classroom-overview";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useCoodeshAssessmentStore } from "@/stores/modules/classrooms/coodesh/assessments";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useCoodeshAssessmentStore } from "../classroom-coodesh/stores/assessments";
 import {
   calculatePresenceByType,
   calculateCoodeshScores,
@@ -53,22 +53,25 @@ export default function ClassroomAttendancePage() {
         // Calcular presenças por tipo usando zoom past instances e meetings passados
         const presenceIndicators = calculatePresenceByType(
           user.id || "",
-          pastInstances,
-          meetings,
+          pastInstances.filter((p) => p.is_visible_on_schedule),
+          meetings.filter((m) => m.is_visible_on_schedule),
           studentEmail
         );
 
         // Calcular scores dos testes Coodesh
         const coodeshIndicators = calculateCoodeshScores(
           studentEmail,
-          assessments
+          assessments.filter((a) => a.is_visible_on_schedule === true)
         );
 
         // Calcular notas dos projetos
         const projectIndicators = calculateProjectNotes(studentEmail, projects);
 
         // Calcular presença geral das atividades
-        const activitiesPresence = calculateGeneralPresence(studentEmail, activities);
+        const activitiesPresence = calculateGeneralPresence(
+          studentEmail,
+          activities.filter(a => a.is_visible_on_schedule)
+        );
 
         return {
           id: user.id || "",
@@ -84,7 +87,7 @@ export default function ClassroomAttendancePage() {
     );
 
     // Preparar dados dos testes Coodesh
-    const coodeshTests = assessments.map((assessment) => ({
+    const coodeshTests = assessments.filter((a) => a.is_visible_on_schedule === true).map((assessment) => ({
       id: assessment.assessment_id,
       name: `Teste ${assessment.name}`,
     }));
@@ -100,7 +103,15 @@ export default function ClassroomAttendancePage() {
       coodeshTests,
       projects: projectsData,
     });
-  }, [classroomId, users, activities, assessments, projects, pastInstances, meetings]);
+  }, [
+    classroomId,
+    users,
+    activities,
+    assessments,
+    projects,
+    pastInstances,
+    meetings,
+  ]);
 
   return (
     <div className="flex flex-col w-full h-full gap-4 p-4 overflow-hidden">

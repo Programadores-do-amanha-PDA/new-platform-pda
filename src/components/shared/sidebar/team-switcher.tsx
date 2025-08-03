@@ -18,7 +18,7 @@ export default function TeamSwitcher({ team }: { team: TeamInfoT }) {
       <SidebarMenuItem>
         <SidebarMenuButton
           size="lg"
-          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+          className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
           onClick={() => router.push(`/dashboard/`)}
         >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar">

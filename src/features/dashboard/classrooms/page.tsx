@@ -1,11 +1,7 @@
 "use client";
-import { useState } from "react";
-
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-
-import { ClassroomStatusT } from "@/types/classrooms";
-import { useClassroomStore } from "@/stores/modules/classrooms";
+import { useState, useMemo } from "react";
+import { useClassroomStore } from "./stores/classrooms";
+import { Input } from "@/components/ui/input";
 import ClassroomFormDialog from "./components/classroom-form-dialog";
 import ClassroomCard from "./components/classroom-card";
 
@@ -16,84 +12,43 @@ const classroomStatusLabels = {
 };
 
 const TeamPage = () => {
-  const [statusFilter, setStatusFilter] = useState<ClassroomStatusT | "all">(
-    "all"
-  );
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { classrooms } = useClassroomStore();
 
-  const filteredClassrooms =
-    statusFilter === "all"
-      ? classrooms
-      : classrooms.filter((c) => c.status === statusFilter);
+  const displayedClassrooms = useMemo(() => {
+    let filtered = classrooms;
+
+    // Filtro por busca no título
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [classrooms, searchQuery]);
 
   return (
-    <div className="relative w-full h-full flex flex-col gap-10 p-4 overflow-hidden">
-      <header className="w-full flex justify-between gap-4">
-        <div className="w-full h-9 flex gap-4 border-b border-card">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setStatusFilter("all")}
-          >
-            <p
-              className={`text-sm font-semibold ${
-                statusFilter === "all" && "text-primary"
-              }`}
-            >
-              Todas
-            </p>
-            <Badge variant={statusFilter === "all" ? "default" : "outline"}>
-              {classrooms.length}
-            </Badge>
-          </Button>
-          <div className="h-full w-px border-l border-sidebar-accent" />
-
-          {classrooms.length > 0 &&
-            Array.from(new Set(classrooms.map((c) => c.status))).map(
-              (classroomStatus, i) => (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setStatusFilter(classroomStatus)}
-                  >
-                    <p
-                      className={`text-sm font-semibold ${
-                        statusFilter === classroomStatus && "text-primary"
-                      }`}
-                    >
-                      {classroomStatusLabels[classroomStatus]}
-                    </p>
-                    <Badge
-                      variant={
-                        statusFilter === classroomStatus ? "default" : "outline"
-                      }
-                    >
-                      {
-                        classrooms.filter((t) => t.status === classroomStatus)
-                          .length
-                      }
-                    </Badge>
-                  </Button>
-                  {i < classrooms.length - 1 && (
-                    <div className="h-full w-px border-l border-sidebar-accent" />
-                  )}
-                </>
-              )
-            )}
-        </div>
+    <div className="w-full h-max py-4 px-2 flex flex-col gap-6 overflow-hidden">
+      <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
+        <Input
+          placeholder="Buscar por título da turma..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-sm"
+        />
         <ClassroomFormDialog />
       </header>
 
-      <ul className="w-full max-h-full flex flex-row flex-wrap justify-start overflow-y-auto gap-4 p-4">
-        {filteredClassrooms.length === 0 && (
+      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
+        {displayedClassrooms.length === 0 && (
           <p className="w-full h-full text-center text-lg font-semibold">
             Nenhuma turma encontrada
           </p>
         )}
 
-        {filteredClassrooms.map((classroom, i) => (
+        {displayedClassrooms.map((classroom, i) => (
           <ClassroomCard
             key={i}
             classroom={classroom}

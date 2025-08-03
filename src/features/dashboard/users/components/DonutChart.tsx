@@ -9,14 +9,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { ChartData } from "@/types/charts";
+import { ChartDataT } from "@/types/charts";
 
 export function DonutChart({
   chartData,
   chartConfig,
   totalLabel,
 }: {
-  chartData: ChartData;
+  chartData: ChartDataT[];
   chartConfig: ChartConfig;
   totalLabel: string;
 }) {

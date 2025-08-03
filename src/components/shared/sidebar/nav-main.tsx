@@ -2,7 +2,6 @@
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
-import Link from "next/link";
 import {
   Collapsible,
   CollapsibleContent,
@@ -41,33 +40,35 @@ export default function NavMain({
             defaultOpen={
               path.split("/").includes(item?.ref || "") ? true : false
             }
-            className="group/collapsible"
+            className="group/collapsible "
           >
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
                   {item.icon && (
                     <item.icon
-                      className="size-5"
+                      className="size-5 cursor-pointer"
                       onClick={() => router.push(item.url)}
                     />
                   )}
-                  <span
+                  <p
                     onClick={() => router.push(item.url)}
-                    className="font-semibold"
+                    className="font-semibold cursor-pointer hover:underline"
                   >
                     {item.title}
-                  </span>
+                  </p>
                   <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                 </SidebarMenuButton>
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubButton key={subItem.title}>
-                      <Link href={subItem.url}>
-                        <span>{subItem.title}</span>
-                      </Link>
+                    <SidebarMenuSubButton
+                      key={subItem.title}
+                      onClick={() => router.push(subItem.url)}
+                      className="cursor-pointer hover:underline"
+                    >
+                      {subItem.title}
                     </SidebarMenuSubButton>
                   ))}
                 </SidebarMenuSub>

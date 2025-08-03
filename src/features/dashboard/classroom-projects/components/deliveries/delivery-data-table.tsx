@@ -233,8 +233,8 @@ export function DeliveryDataTable({
   });
 
   return (
-    <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
-      <div className="flex items-center justify-between py-4 sticky">
+    <div className="w-full h-full flex flex-col gap-4">
+      <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("members")?.getFilterValue() as string) ?? ""}
@@ -298,14 +298,15 @@ export function DeliveryDataTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length > 0 &&
-            `${
+      {table.getFilteredSelectedRowModel().rows.length > 0 && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="flex-1 text-sm text-muted-foreground">
+            {`${
               table.getFilteredSelectedRowModel().rows.length
             } linhas selecionadas.`}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

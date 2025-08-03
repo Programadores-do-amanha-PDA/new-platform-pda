@@ -11,8 +11,8 @@ export default async function DashboardLayout({
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
   return (
-    <main className="border-grid flex flex-1 flex-col w-full h-full">
-      <SidebarProvider defaultOpen={defaultOpen}>
+    <main className="flex w-full h-full bg-sidebar overflow-hidden">
+      <SidebarProvider defaultOpen={defaultOpen} className="w-full h-full flex pt-4 pr-4 pb-4 overflow-hidden">
         <AdminStackProvider>{children}</AdminStackProvider>
       </SidebarProvider>
     </main>

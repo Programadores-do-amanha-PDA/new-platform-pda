@@ -1,8 +1,6 @@
 "use client";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { Search } from "lucide-react";
 import { useState } from "react";
 import CreateProjectDialog from "../components/create-project-dialog";
 import ProjectCard from "../components/project-card";
@@ -24,7 +22,7 @@ const AllProjectsPage = () => {
     : projects;
 
   return (
-    <main className="relative w-full h-max p-4 flex flex-col gap-6 overflow-hidden">
+    <main className="w-full h-max py-4 px-2 flex flex-col gap-6 overflow-hidden">
       <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
         <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
           <Input

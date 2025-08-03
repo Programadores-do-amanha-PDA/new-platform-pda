@@ -2,7 +2,7 @@ import { LoaderCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
-import { updateAuthUser } from "@/app/actions/(auth)";
+import { updateAuthUser } from "@/app/actions/auth";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
 import { AuthUserWithProfileT } from "@/types/auth";
 import { Separator } from "@/components/ui/separator";

@@ -326,8 +326,8 @@ export default function ZoomPastMeetingPage({
             title="Atualizar"
             className="font-semibold"
           >
-            <RefreshCw className={cn("size-5", isUpdating && "animate-spin")} />
             Atualizar
+            <RefreshCw className={cn("size-5", isUpdating && "animate-spin")} />
           </Button>
         </div>
       </header>
@@ -342,14 +342,16 @@ export default function ZoomPastMeetingPage({
             {currentMeeting.participants &&
               currentMeeting.participants?.length > 0 && (
                 <TabsTrigger value="upcoming">
-                  Participantes ({currentMeeting.participants.length})
+                  Participantes (
+                  {currentMeeting.participants.length})
                 </TabsTrigger>
               )}
 
             {currentMeeting.poll_results &&
               currentMeeting.poll_results.length > 0 && (
                 <TabsTrigger value="completed">
-                  Respostas ({currentMeeting.poll_results.length})
+                  Respostas (
+                  {currentMeeting.poll_results.length})
                 </TabsTrigger>
               )}
           </TabsList>
@@ -366,7 +368,7 @@ export default function ZoomPastMeetingPage({
             </TabsContent>
           )}
 
-          {currentMeeting.poll_results && (
+          {currentMeeting.poll_results?.length && (
             <TabsContent
               value="completed"
               className="w-full h-full overflow-hidden"

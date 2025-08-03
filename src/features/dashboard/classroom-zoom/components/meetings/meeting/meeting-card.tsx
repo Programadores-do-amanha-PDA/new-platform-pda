@@ -1,31 +1,22 @@
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   CalendarMinus,
   CalendarPlus,
   LoaderCircle,
   RefreshCw,
 } from "lucide-react";
-
+import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { Button } from "@/components/ui/button";
-
-import { ZoomMeetingType } from "@/types/classroom-zoom/meetings";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { ZoomMeetingT } from "@/types";
 import { cn } from "@/lib/utils";
-import { useAdminStackContext } from "@/context/admin/stack-context";
 
-const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
+const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingT }) => {
   const path = usePathname();
   const [loading, setLoading] = useState(false);
 
-  const {
-    classroomsStack: {
-      zoom: {
-        accounts: { accounts },
-        meetings: {  },
-      },
-    },
-  } = useAdminStackContext();
+  const { accounts } = useZoomAccountStore();
 
   const handleRefresh = async () => {
     setLoading(true);
@@ -34,7 +25,6 @@ const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingType }) => {
       (account) => account.id === meeting.account_id
     );
     if (!account) return;
-
 
     setLoading(false);
   };

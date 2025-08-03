@@ -1,8 +1,14 @@
 "use client";
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ReferenceLine,
+} from "recharts";
 import { ArrowRight } from "lucide-react";
 import {
   Card,
@@ -25,24 +31,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 
 const chartConfig = {
-  views: {
-    label: "Page Views",
-  },
   participants: {
     label: "Participantes",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1))",
   },
   poll_results: {
     label: "Respostas",
-    color: "hsl(var(--chart-4))",
+    color: "var(--chart-2))",
   },
 } satisfies ChartConfig;
 
 export function MeetingsParticipantsChart({
   chartData,
+  classroomId,
 }: {
   chartData: {
     account_id: string;
@@ -51,8 +54,8 @@ export function MeetingsParticipantsChart({
     participants: number;
     poll_results: number;
   }[];
+  classroomId: string;
 }) {
-  const path = usePathname();
   const [timeRange, setTimeRange] = useState<"all" | "90d" | "30d" | "7d">(
     "30d"
   );
@@ -98,14 +101,26 @@ export function MeetingsParticipantsChart({
       return date >= startDate;
     });
 
+  // Calcular valores máximos para definir as linhas de meta
+  const maxParticipants = Math.max(
+    ...filteredData.map((item) => item.participants),
+    0
+  );
+  const maxPollResults = Math.max(
+    ...filteredData.map((item) => item.poll_results),
+    0
+  );
+  const participantsGoal = maxParticipants * 0.8; // Meta para participantes em 80% do valor máximo
+  const pollsGoal = maxPollResults * 0.8; // Meta para polls em 80% do valor máximo
+
   const handleTimeRangeChange = (value: string) => {
     setTimeRange(value as "all" | "90d" | "30d" | "7d");
   };
 
   return (
     <Card>
-      <CardHeader className="flex items-center gap-2 space-y-0 border-b py-5 sm:flex-row">
-        <div className="grid flex-1 gap-1 text-center sm:text-left">
+      <CardHeader className="w-full flex items-center justify-between gap-2 space-y-0 border-b sm:flex-row">
+        <div className="flex flex-col gap-1 text-center sm:text-left">
           <CardTitle>Participantes e Respostas por Reunião</CardTitle>
           <CardDescription>
             Dados quantitativos de participação e respostas por reunião.
@@ -155,13 +170,50 @@ export function MeetingsParticipantsChart({
             </SelectContent>
           </Select>
         </div>
+        <Link
+          href={`/dashboard/classrooms/${classroomId}/zoom/meetings`}
+          className="w-max flex items-center gap-2 px-4 text-sm font-bold text-primary-foreground hover:underline"
+        >
+          Ir para Reuniões
+          <ArrowRight className="-rotate-6 size-4" />
+        </Link>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
           config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
+          className="aspect-auto h-[350px] w-full"
         >
-          <AreaChart data={filteredData}>
+          <AreaChart
+            data={filteredData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              horizontal={true}
+              vertical={false}
+              stroke="#e2e8f0"
+            />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              minTickGap={32}
+              tickFormatter={(value) => {
+                const date = new Date(value);
+                return date.toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                });
+              }}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickMargin={8}
+              tickFormatter={(value) => value.toString()}
+              domain={[0, "dataMax + 5"]}
+            />
             <defs>
               <linearGradient
                 id="fill-participants"
@@ -172,12 +224,12 @@ export function MeetingsParticipantsChart({
               >
                 <stop
                   offset="5%"
-                  stopColor="var(--color-participants)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-participants)"
+                  stopColor="var(--chart-1)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -190,32 +242,18 @@ export function MeetingsParticipantsChart({
               >
                 <stop
                   offset="5%"
-                  stopColor="var(--color-poll_results)"
+                  stopColor="var(--chart-2)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-poll_results)"
+                  stopColor="var(--chart-2)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
             </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("pt-BR", {
-                  dateStyle: "short",
-                });
-              }}
-            />
             <ChartTooltip
-              cursor={true}
+              cursor={{ fill: "rgba(0, 0, 0, 0.1)" }}
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
@@ -223,38 +261,71 @@ export function MeetingsParticipantsChart({
                       dateStyle: "short",
                     });
                   }}
-                  indicator="dot"
+                  indicator="dashed"
                 />
               }
             />
-            <Area
-              dataKey="poll_results"
-              type="natural"
-              fill="url(#fill-poll_results)"
-              stroke="var(--color-poll_results)"
-              stackId="a"
-            />
+            {participantsGoal > 0 && (
+              <ReferenceLine
+                y={participantsGoal}
+                stroke="var(--chart-1)"
+                strokeWidth={2}
+                strokeDasharray="8 4"
+                label={{
+                  value: `Meta(P): ${Math.round(participantsGoal)}`,
+                  position: "left",
+                  offset: 10,
+                  style: {
+                    fill: "var(--chart-1)",
+                    fontWeight: "600",
+                    fontSize: "11px",
+                    textAnchor: "end",
+                    zIndex: 10,
+                  },
+                }}
+              />
+            )}
+            {pollsGoal > 0 && (
+              <ReferenceLine
+                y={pollsGoal}
+                stroke="var(--chart-2)"
+                strokeWidth={2}
+                strokeDasharray="8 4"
+                label={{
+                  value: `Meta(R): ${Math.round(pollsGoal)}`,
+                  position: "left",
+                  offset: 10,
+                  style: {
+                    fill: "var(--chart-2)",
+                    fontWeight: "600",
+                    fontSize: "11px",
+                    textAnchor: "end",
+                    zIndex: 10,
+                  },
+                }}
+              />
+            )}
+
             <Area
               dataKey="participants"
-              type="natural"
+              type="monotone"
               fill="url(#fill-participants)"
-              stroke="var(--color-participants)"
-              stackId="a"
+              stroke="var(--chart-1)"
+              strokeWidth={2}
+              fillOpacity={0.6}
+            />
+            <Area
+              dataKey="poll_results"
+              type="monotone"
+              fill="url(#fill-poll_results)"
+              stroke="var(--chart-2)"
+              strokeWidth={2}
+              fillOpacity={0.6}
             />
           </AreaChart>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex justify-center items-center">
-        <Link href={`${path}/meetings`}>
-          <Button
-            variant="link"
-            className="text-sm font-bold text-primary-foreground"
-          >
-            Ir para Reuniões
-            <ArrowRight className="-rotate-6" />
-          </Button>
-        </Link>
-      </CardFooter>
+      <CardFooter className="flex justify-center items-center"></CardFooter>
     </Card>
   );
 }

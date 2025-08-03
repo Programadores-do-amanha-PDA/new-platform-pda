@@ -1,9 +1,12 @@
 "use client";
-import { Calendar1, Type } from "lucide-react";
+import { ArrowLeft, Calendar1, Type } from "lucide-react";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
 import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types";
 import { useParams } from "next/navigation";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const projectTypesLabels = {
   mini_project: "Mini projeto",
@@ -12,11 +15,13 @@ const projectTypesLabels = {
 };
 
 export default function ProjectPage() {
-  const { project_id } = useParams();
-  const { projects } = useProjectStore();
+  const { project_id, classroom_id } = useParams();
+  const { projects, deleteProject } = useProjectStore();
+
   const currentProject:
     | ClassroomProjectWithDeliveriesAndCorrectionsT
     | undefined = projects.find((project) => project.id === project_id);
+
   const corrections = currentProject?.corrections || [];
   const deliveries =
     currentProject?.deliveries?.map((delivery) => ({
@@ -33,16 +38,25 @@ export default function ProjectPage() {
           Projeto não encontrado.
         </h2>
         <p className="text-muted-foreground">
-          Verifique se o ID do projeto está correto ou se o projeto existe no
-          sistema.
+          Verifique se o ID do projeto está correto ou se o projeto esta
+          cadastrado na turma.
         </p>
+        <Button variant="outline" asChild>
+          <Link
+            href={`/dashboard/classrooms/${classroom_id}/projects`}
+            className="hover:underline font-semibold"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4 rotate-2" />
+            Ver todos os Projetos
+          </Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
-      <header className="w-full flex flex-col gap-2">
+      <header className="w-full flex justify-between gap-2">
         <div className="flex items-center gap-4">
           {/* <p className="text-muted-foreground font-semibold">Testes:</p> */}
           <div className="flex items-center gap-1" title="Tipo do projeto">
@@ -80,9 +94,16 @@ export default function ProjectPage() {
               </div>
             )}
         </div>
+        <DeleteConfirmationButton
+          onConfirm={() => deleteProject(currentProject.id)}
+          buttonText="Deletar Projeto"
+          dialogTitle="Deletar Projeto"
+          description={`Tem certeza que deseja deletar o projeto "${currentProject.title}"? Esta ação não pode ser desfeita e todas as entregas e correções associadas serão permanentemente removidas.`}
+          confirmText="Deletar Projeto"
+        />
       </header>
 
-      <div className="w-full h-full overflow-y-auto">
+      <div className="w-full h-full flex overflow-hidden">
         <DeliveryDataTable
           deliveries={deliveries.sort(
             (a, b) =>

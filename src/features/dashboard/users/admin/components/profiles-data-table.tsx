@@ -17,11 +17,11 @@ import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import { UserMetadata } from "@supabase/supabase-js";
 import { DataTable } from "../../components/data-table";
-import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import InsertManyUsersDialog from "../../components/insert-many-users-dialog";
 import UserSheetData from "../../components/user-sheet-data";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
+import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 
 type ProfilesDataTableProps = {
   excludeRoles?: RolesT[];

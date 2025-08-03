@@ -1,33 +1,39 @@
 const pathLabels: { [key: string]: string } = {
-  users: "Usuários",
-  alumni: "Alumni",
-  companies: "Empresas",
-  jobs: "Vagas",
-  curated: "Vagas curadas",
-  curation: "Curadoria de Vagas",
   dashboard: "Dashboard",
-  all_users: "Todos os Usuários",
-  all_alumni: "Todos os Alumni",
-  all_companies: "Todos as Empresas",
-  all_jobs: "Todas as Vagas",
-  all_projects: "Todos os Projetos",
-  all_applications: "Todas as Aplicações",
   settings: "Configurações",
   profile: "Perfil",
-  match: "Match de Vagas",
-  resume: "Meu Currículo",
-  applications: "Minhas Candidaturas",
+  
+  // Users
+  users: "Usuários",
+  all_users: "Todos os Usuários",
+  alumni: "Alumni",
+  all_alumni: "Todos os Alumni",
+  
+  // Jobs
+  jobs: "Vagas",
+  all_jobs: "Todas as Vagas",
+  curated: "Vagas curadas",
+  curation: "Curadoria de Vagas",
   archives: "Vagas Arquivadas",
-  meetings: "Reuniões",
+  match: "Match de Vagas",
+  companies: "Empresas",
+  all_companies: "Todos as Empresas",
+  applications: "Minhas Candidaturas",
+  all_applications: "Todas as Aplicações",
+  
+  // Classrooms-modules
   classrooms: "Todas as Turmas",
-  coodesh: "⬆️ Coodesh",
-  zoom: "⬆️ Zoom",
-  assessments: "Avaliações",
-  accounts: "Contas",
-  projects: "Projetos",
+  overview: "Visão Geral",
   attendance: "Presenças",
   activities: "Atividades",
-  overview: "Visão Geral"
+  projects: "Projetos",
+  all_projects: "Todos os Projetos",
+  coodesh: "Coodesh",
+  assessments: "Avaliações",
+  zoom: "Zoom",
+  accounts: "Contas",
+  meetings: "Reuniões",
+  resume: "Meu Currículo",
 };
 
 export default pathLabels;

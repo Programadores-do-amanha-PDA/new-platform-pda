@@ -45,9 +45,9 @@ import {
   UserFormData,
   NewUserFormData,
 } from "../schemas/user-form-schema";
-import { useClassroomStore } from "@/stores/modules/classrooms";
 import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
 import { cn } from "@/lib/utils";
+import { useClassroomStore } from "../../classrooms/stores/classrooms";
 
 type UserSheetDataProps = {
   mode: "new" | "edit";

@@ -2,7 +2,6 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
@@ -10,7 +9,10 @@ import ZoomAccountCard from "../components/accounts/account-card";
 import { MeetingsParticipantsChart } from "../components/meetings-participants-chart";
 
 export default function ZoomHomePage() {
-  const { classroom_id } = useParams();
+  const params = useParams();
+  const classroom_id = Array.isArray(params.classroom_id)
+    ? params.classroom_id[0]
+    : params.classroom_id || "";
   const { accounts } = useZoomAccountStore();
   const { meetings } = useZoomMeetingStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
@@ -64,35 +66,34 @@ export default function ZoomHomePage() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 p-6">
+    <div className="w-full h-full flex flex-col gap-8 p-6 overflow-y-auto">
       <div className="w-full flex flex-col gap-4 p-6 rounded-lg bg-primary/10 pb-4">
-        <header className="w-full flex justify-between gap-4">
-          <p className="text-lg font-bold mb-4">Contas sincronizadas</p>
-          <Link href={`/dashboard/classrooms/${classroom_id}/zoom/accounts`}>
-            <Button
-              variant="link"
-              className="text-sm font-bold text-primary-foreground"
-            >
-              Gerenciar contas
-              <ArrowRight className="-rotate-6" />
-            </Button>
+        <header className="w-full flex justify-between items-center gap-4">
+          <p className="text-lg font-bold">Contas sincronizadas</p>
+          <Link
+            href={`/dashboard/classrooms/${classroom_id}/zoom/accounts`}
+            className="w-max h-6 flex gap-2 items-center text-sm font-bold text-primary-foreground hover:underline"
+          >
+            Gerenciar contas
+            <ArrowRight className="-rotate-6 size-4" />
           </Link>
         </header>
-        <ul className="w-full h-max flex items-start gap-4 overflow-x-auto">
-          {accounts
-            .filter((_, i) => i < 5)
-            .map((account) => (
-              <ZoomAccountCard
-                account={account}
-                key={account.id}
-                expansive={false}
-                handleSetCurrentAccount={() => {}}
-              />
-            ))}
+        <ul className="w-full h-max flex items-start gap-4 overflow-x-auto pb-5">
+          {accounts.map((account) => (
+            <ZoomAccountCard
+              account={account}
+              key={account.id}
+              expansive={false}
+              handleSetCurrentAccount={() => {}}
+            />
+          ))}
         </ul>
       </div>
 
-      <MeetingsParticipantsChart chartData={chartData()} />
+      <MeetingsParticipantsChart
+        chartData={chartData()}
+        classroomId={classroom_id}
+      />
     </div>
   );
 }

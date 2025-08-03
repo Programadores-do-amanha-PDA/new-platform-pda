@@ -34,7 +34,7 @@ export function MeetingDataTable<TData, TValue>({
   return (
     <div className="rounded-md border w-full h-full max-h-[70vh] flex flex-col overflow-y-auto mt-0">
       <Table>
-        <TableHeader className="sticky top-0 bg-white z-10 p-0!">
+        <TableHeader className="sticky top-0 bg-muted z-10 p-0!">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}

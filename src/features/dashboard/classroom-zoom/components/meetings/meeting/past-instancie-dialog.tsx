@@ -163,7 +163,7 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
 ];
 
 function PollResultsTable({ data }: { data: ZoomMeetingPollResultsT[] }) {
-  console.log(data)
+  console.log(data);
   const table = useReactTable({
     data: data,
     columns: meetingPollResultsColumns,
@@ -172,9 +172,9 @@ function PollResultsTable({ data }: { data: ZoomMeetingPollResultsT[] }) {
   });
 
   return (
-    <div className="w-full h-full flex border rounded-lg overflow-y-auto">
+    <div className="w-full max-h-full h-max flex border rounded-lg overflow-y-auto">
       <Table>
-        <TableHeader className="sticky top-0 bg-white z-10 p-0!">
+        <TableHeader className="sticky top-0 bg-muted z-10 p-0!">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
@@ -330,9 +330,9 @@ function ParticipantsTable({ data }: ParticipantsTableProps) {
   });
 
   return (
-    <div className="w-full h-full flex border rounded-lg overflow-hidden">
+    <div className="flex w-full h-full border rounded-lg !overflow-hidden">
       <Table>
-        <TableHeader className="sticky top-0 bg-white z-10 p-0!">
+        <TableHeader className="sticky top-0 bg-muted z-10 p-0!">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
@@ -432,7 +432,7 @@ const PastInstancieDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-max h-full !max-w-[90vw] !max-h-[90vh] overflow-hidden flex flex-col p-0">
+      <DialogContent className="w-max h-full !min-w-[50vw] !min-h-[50vh] !max-w-[90vw] !max-h-[90vh] overflow-hidden flex flex-col p-0">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>
             Instância ocorrida em{" "}
@@ -444,7 +444,7 @@ const PastInstancieDialog = ({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden px-6 pb-6">
+        <div className="flex w-full h-full overflow-hidden px-6 pb-6">
           <Tabs
             defaultValue="participants"
             className="w-full h-full flex flex-col overflow-hidden"
@@ -458,28 +458,18 @@ const PastInstancieDialog = ({
 
             <TabsContent
               value="participants"
-              className="flex-1 overflow-hidden mt-4"
+              className="flex w-full h-full overflow-hidden mt-4"
             >
-              {participantsData && participantsData.length > 0 ? (
-                <ParticipantsTable data={participantsData} />
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Nenhum dado de participante disponível.
-                </p>
-              )}
+              <ParticipantsTable data={participantsData} />
             </TabsContent>
 
             <TabsContent
               value="pollsResults"
-              className="flex-1 overflow-hidden mt-4"
+              className="flex w-full h-full overflow-hidden mt-4"
             >
-              {instancie.poll_results && instancie.poll_results.length > 0 ? (
-                <PollResultsTable data={instancie.poll_results} />
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Nenhum resultado de enquete disponível.
-                </p>
-              )}
+              <PollResultsTable
+                data={instancie.poll_results?.filter(Boolean)  || []}
+              />
             </TabsContent>
           </Tabs>
         </div>

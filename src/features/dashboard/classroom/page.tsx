@@ -1,6 +1,6 @@
 "use client";
 
-import { useClassroomStore } from "@/stores/modules/classrooms";
+import { useClassroomStore } from "../classrooms/stores/classrooms";
 import ClassroomFormDialog from "../classrooms/components/classroom-form-dialog";
 import { useParams } from "next/navigation";
 
@@ -19,15 +19,12 @@ const ClassroomHomePage = () => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 p-4 pb-0 overflow-hidden">
-      <header className="w-full flex flex-row flex-nowrap items-center justify-between gap-4">
-        <p className="w-full h-full flex items-center justify-start font-bold text-2xl">
-          Visão geral
-        </p>
+    <div className="w-full h-full flex flex-col gap-8 p-4 overflow-hidden">
+      <header className="w-full flex flex-row flex-nowrap items-center justify-end gap-4">
         <ClassroomFormDialog currentClassroom={currentClassroom} />
       </header>
 
-      <div className="w-full h-full bg-primary/55 rounded-md overflow-hidden flex relative">
+      <div className="w-full h-full bg-primary/55 rounded-md overflow-hidden flex">
       </div>
     </div>
   );

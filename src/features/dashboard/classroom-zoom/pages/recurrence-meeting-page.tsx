@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ZoomMeetingOccurrenceT, ZoomMeetingPastInstanceT } from "@/types/classroom-zoom";
+import {
+  ZoomMeetingOccurrenceT,
+  ZoomMeetingPastInstanceT,
+} from "@/types/classroom-zoom";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -236,7 +239,7 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     },
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">{row.original.poll_results?.length || 0}</p>
+        <p className="font-medium">{row.original.poll_results?.filter(Boolean)?.length || 0}</p>
       </div>
     ),
   },
@@ -477,13 +480,16 @@ export default function ZoomRecurrenceMeetingPage({
     setIsDialogOpen(true);
   };
 
-  const meetingOccurrences = currentMeeting?.occurrences?.map((occurrence) => ({
-    ...occurrence,
-    topic: currentMeeting.topic,
-    meeting_id: currentMeeting.id,
-  }));
+  const meetingOccurrences = currentMeeting?.occurrences
+    ?.filter(Boolean)
+    ?.map((occurrence) => ({
+      ...occurrence,
+      topic: currentMeeting.topic,
+      meeting_id: currentMeeting.id,
+    }));
 
   const meetingPastInstances = pastInstances
+    ?.filter(Boolean)
     .filter((p) => p.meeting_id === currentMeeting?.id)
     ?.map((pastInstance) => ({
       ...pastInstance,
@@ -519,10 +525,10 @@ export default function ZoomRecurrenceMeetingPage({
               title="Atualizar"
               className="font-semibold cursor-pointer"
             >
+              Atualizar
               <RefreshCw
                 className={cn("size-5", isUpdating && "animate-spin")}
               />
-              Atualizar
             </Button>
           </div>
 

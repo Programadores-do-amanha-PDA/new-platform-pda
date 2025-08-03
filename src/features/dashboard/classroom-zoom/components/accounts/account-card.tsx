@@ -19,7 +19,7 @@ const ZoomAccountCard = ({
   expansive: boolean;
 }) => {
   return (
-    <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4 bg-background">
+    <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4 bg-background shadow">
       <div className="flex flex-col gap-1">
         <p
           className="font-semibold truncate"

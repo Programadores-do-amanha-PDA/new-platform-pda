@@ -5,7 +5,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
-import { useClassroomStore } from "@/stores/modules/classrooms";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -28,6 +27,7 @@ import {
 import ClassroomPeriodSelector from "./classroom-period-selector";
 import ClassroomStatusSelector from "./classroom-status-selector";
 import { ClassroomT } from "@/types/classrooms";
+import { useClassroomStore } from "../stores/classrooms";
 
 const classroomFormSchema = z.object({
   name: z

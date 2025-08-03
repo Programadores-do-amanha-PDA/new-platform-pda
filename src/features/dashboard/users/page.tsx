@@ -1,7 +1,7 @@
 "use client"
 import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
 import ProfilesDataTable from "./admin/components/profiles-data-table";
-import { useClassroomStore } from "@/stores/modules/classrooms";
+import { useClassroomStore } from "../classrooms/stores/classrooms";
 
 export default function AllUsersPage() {
   const { isLoading } = useUsersCombinedStore();
