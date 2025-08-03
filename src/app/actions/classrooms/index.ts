@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomT } from "@/types/classrooms";
+import { ClassroomT } from "@/types";
 
 export const createClassroom = async (
   classroomData: Partial<ClassroomT>

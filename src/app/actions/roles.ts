@@ -1,8 +1,7 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { RolesT, JwtPayloadT } from "@/types/auth";
-import {} from "@/types/auth/user-role";
 import { jwtDecode } from "jwt-decode";
+import { RolesT, JwtPayloadT } from "@/types";
 
 export const getAllUserRoles = async () => {
   try {
@@ -93,7 +92,7 @@ export const getUserRole = async () => {
 
     return userRole;
   } catch (e) {
-    console.log("ROLE_ERROR", e);
+    console.error("ROLE_ERROR", e);
     return false;
   }
 };

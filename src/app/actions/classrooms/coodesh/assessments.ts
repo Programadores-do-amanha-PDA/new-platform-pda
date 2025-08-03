@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
+import { ClassroomCoodeshAssessmentT } from "@/types";
 
 export const createCoodeshAssessment = async (
   assessmentData: Partial<ClassroomCoodeshAssessmentT>
@@ -58,21 +58,23 @@ export const updateCoodeshAssessment = async (
   id: string,
   assessmentData: Partial<ClassroomCoodeshAssessmentT>
 ) => {
-  console.log({ ...assessmentData, updated_at: new Date().toISOString() })
   try {
     const supabase = await createClient();
+    
+    const updates = { ...assessmentData, updated_at: new Date().toISOString() };
+    console.log(id);
+    console.log(updates);
 
     const { data, error } = await supabase
       .from("classroom_coodesh_assessments")
-      .update({ ...assessmentData, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq("id", id)
-      .select()
-      .single();
+      .select();
 
     console.log(data, error);
 
     if (error) throw error;
-    return data as ClassroomCoodeshAssessmentT;
+    return data[0] as ClassroomCoodeshAssessmentT;
   } catch (error) {
     console.error("Error updating classroom coodesh assessment:", error);
     return false;

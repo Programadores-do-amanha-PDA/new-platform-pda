@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { UserClassroomT } from "@/types/auth";
+import { UserClassroomT } from "@/types";
 
 export const getAllUsersClassrooms = async () => {
   try {
@@ -54,7 +54,7 @@ export const getUserClassroomsByUserId = async (userId: string) => {
 
     return data as UserClassroomT[];
   } catch (e) {
-    console.log("Error on get user classrooms by user id", e);
+    console.error("Error on get user classrooms by user id", e);
     return null;
   }
 };

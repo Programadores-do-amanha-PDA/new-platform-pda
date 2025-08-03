@@ -66,7 +66,6 @@ export const uploadUserAvatar = async (userId: string, base64Image: string) => {
 
 export const updateUserAvatar = async (userId: string, base64Image: string) => {
   try {
-    console.log(userId);
     const byteCharacters = atob(base64Image.split(",")[1]);
     const byteNumbers = new Array(byteCharacters.length);
     for (let i = 0; i < byteCharacters.length; i++) {
@@ -96,15 +95,11 @@ export const updateUserAvatar = async (userId: string, base64Image: string) => {
 
 export const deleteUserAvatar = async (userId: string) => {
   try {
-    console.log(userId);
-
     const supabase = await createClient();
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("user_avatar")
       .remove([`${userId}/avatar.png`]);
-
-      console.log(data, error)
 
     if (error) throw error;
     return true;

@@ -5,7 +5,7 @@ import {
   getAllProfilesFilteredByRole,
 } from "@/app/actions/profiles";
 import { createClientAdmin } from "@/lib/supabase/server";
-import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types/auth";
+import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types";
 
 export const getAllUsers = async (role?: RolesT) => {
   try {
@@ -104,7 +104,6 @@ export const updateUser = async (
   updates: Partial<AuthUser>
 ) => {
   try {
-    console.log("updates ---", updates);
     const supabase = await createClientAdmin();
     const {
       data: { user },
@@ -115,7 +114,7 @@ export const updateUser = async (
 
     return user;
   } catch (error) {
-    console.log("Error on update auth user", error);
+    console.error("Error on update auth user", error);
     return false;
   }
 };
@@ -129,7 +128,7 @@ export const deleteUser = async (userId: string) => {
 
     return true;
   } catch (error) {
-    console.log("Error on delete auth user", error);
+    console.error("Error on delete auth user", error);
     return false;
   }
 };

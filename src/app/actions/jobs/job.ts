@@ -81,8 +81,6 @@ export const createJob = async (job: Partial<JobT>) => {
       .insert({ ...job, jobs_search_id: key })
       .select();
 
-    console.log(data, error);
-
     if (error) throw error;
 
     return data[0];

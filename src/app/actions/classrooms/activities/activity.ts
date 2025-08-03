@@ -1,6 +1,6 @@
 "use server";
-import { ClassroomActivityT } from "@/types/classroom-activities/activities";
 import { createClient } from "@/lib/supabase/server";
+import { ClassroomActivityT } from "@/types";
 
 const getAllActivitiesByClassroomId = async (classroomId: string) => {
   try {

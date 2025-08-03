@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   ClassroomProjectT,
   ClassroomProjectWithDeliveriesAndCorrectionsT,
-} from "@/types/classroom-projects/project";
+} from "@/types";
 
 export const createClassroomProject = async (
   projectData: Omit<ClassroomProjectT, "id" | "created_at">

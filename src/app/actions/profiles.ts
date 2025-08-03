@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ProfileT, RolesT } from "@/types/auth";
+import { ProfileT, RolesT } from "@/types";
 
 export const createProfile = async (profileData: {
   full_name: string;
@@ -44,7 +44,6 @@ export const getAllProfiles = async () => {
 };
 
 export const getAllProfilesFilteredByRole = async (role: RolesT) => {
-  console.log(role);
   try {
     const supabase = await createClient();
 
