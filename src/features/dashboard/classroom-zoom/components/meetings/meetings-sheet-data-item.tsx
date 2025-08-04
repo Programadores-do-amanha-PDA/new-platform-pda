@@ -20,7 +20,7 @@ export default function MeetingsSheetDataItem({
   isAddingMeeting: string | null;
 }) {
   return (
-    <li className="p-2 border rounded-lg">
+    <li key={meeting.id} className="p-2 border rounded-lg">
       <div className="flex items-center gap-4 justify-between">
         <div className="flex flex-col gap-1 truncate">
           <h2 className="font-semibold text-sm truncate" title={meeting.topic}>
@@ -40,7 +40,7 @@ export default function MeetingsSheetDataItem({
           size="icon"
           disabled={isAddingMeeting !== null}
         >
-          {isAddingMeeting === meeting.meeting_id ? (
+          {isAddingMeeting === meeting.id ? (
             <LoaderCircle className="size-4 animate-spin" />
           ) : (
             <Plus className="size-4" />

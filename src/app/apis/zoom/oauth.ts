@@ -9,7 +9,7 @@ type TokenData = {
 };
 
 function isTokenValid(tokenData: TokenData): boolean {
-  const BUFFER_TIME = 300000; // 5 minutes
+  const BUFFER_TIME = 300000; // 5 minutos antes da expiração
   return tokenData?.expires_at > Date.now() + BUFFER_TIME;
 }
 
