@@ -39,6 +39,7 @@ const getZoomMeetingById = async (meetingId: string) => {
 const createZoomMeetingByClassroomId = async (
   meetingData: Partial<ZoomMeetingT>
 ) => {
+  console.log(meetingData)
   try {
     const supabase = await createClient();
     if (!meetingData.classroom_id || !meetingData.topic) {
@@ -54,7 +55,7 @@ const createZoomMeetingByClassroomId = async (
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ZoomMeetingType;
   } catch (error) {
     console.error("Error creating zoom meeting:", error);
     return false;
@@ -70,7 +71,7 @@ const updateZoomMeetingById = async (
     const { data, error } = await supabase
       .from("classroom_zoom_meetings")
       .update(updates)
-      .eq("id", meetingId)
+      .eq("id", id)
       .select()
       .single();
 
@@ -88,7 +89,7 @@ const deleteZoomMeetingById = async (meetingId: string) => {
     const { error } = await supabase
       .from("classroom_zoom_meetings")
       .delete()
-      .eq("id", meetingId);
+      .eq("id", id);
 
     if (error) throw error;
     return true;

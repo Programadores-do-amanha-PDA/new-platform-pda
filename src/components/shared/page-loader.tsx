@@ -5,7 +5,7 @@ const PageLoader = () => {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <div className="flex items-center justify-center rounded-md text-primary-foreground">
+        <div className="flex flex-col items-center justify-center rounded-md text-primary-foreground gap-8">
           <Image
             src={logo_symbol}
             alt="Programadores do Amanhã. Logo"
@@ -13,6 +13,7 @@ const PageLoader = () => {
             height={200}
             className="animate-spin"
           />
+          {label && <h1 className="font-bold text-xl">{label}</h1>}
         </div>
       </div>
     </div>

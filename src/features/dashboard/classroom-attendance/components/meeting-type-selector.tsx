@@ -15,12 +15,39 @@ const meetingTypes = [
 ];
 
 const MeetingTypeSelector = ({
-  value,
-  handleValueChange,
+  pastMeeting,
+  type,
 }: {
   value: ZoomClassT | undefined;
   handleValueChange: (value: ZoomClassT) => void;
 }) => {
+  const [loading, setLoading] = useState(false);
+  const {
+    classroomsStack: {
+      zoom: {
+        meetings: {
+          handleUpdateZoomMeeting,
+          pastInstances: { handleUpdateZoomPastInstance },
+        },
+      },
+    },
+  } = useAdminStackContext();
+
+  const handleValueChange = async (value: ZoomClassType) => {
+    setLoading(true);
+    if (pastMeeting.id && type === "meeting") {
+      await handleUpdateZoomMeeting(pastMeeting.id, {
+        class_type: value,
+      });
+      setLoading(false);
+      return;
+    } else if (pastMeeting.id && type === "pastInstance") {
+      await handleUpdateZoomPastInstance(pastMeeting.id, { class_type: value });
+      setLoading(false);
+      return;
+    }
+  };
+
   return (
     <Select value={value} onValueChange={handleValueChange}>
       <SelectTrigger className="h-7! w-full">

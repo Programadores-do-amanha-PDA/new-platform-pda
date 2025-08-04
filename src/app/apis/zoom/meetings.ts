@@ -40,6 +40,7 @@ export const getAllMeetingsByAccount = async (ZOOM_ACCESS_TOKEN: string) => {
   } catch (error) {
     console.error("Error fetching meetings:", error);
     return null;
+    return null;
   }
 };
 
@@ -77,6 +78,7 @@ export const getMeetingById = async (
   } catch (error) {
     console.error("Error fetching meeting details:", error);
     return null;
+    return null;
   }
 };
 
@@ -104,6 +106,7 @@ export const getPastMeetingInstances = async (
     );
   } catch (error) {
     console.error("Error fetching past meeting instances:", error);
+    return null;
     return null;
   }
 };
@@ -152,6 +155,7 @@ export const getPastedMeetingParticipants = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
+    console.log(response.data)
     if (response.status !== 200)
       throw new Error("Failed to fetch participants");
 

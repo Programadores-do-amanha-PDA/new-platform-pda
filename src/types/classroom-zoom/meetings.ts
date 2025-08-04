@@ -84,6 +84,7 @@ export interface ZoomMeetingSettingsT {
   meeting_authentication?: boolean;
   registrants_email_notification?: boolean;
   polling?: boolean;
+  class_type?: ZoomClassType;
 }
 
 export interface ZoomMeetingJustificationT {
@@ -115,6 +116,11 @@ export interface ZoomMeetingParticipantT {
   failover: boolean;
   status: string;
   internal_user: boolean;
+}
+export interface ZoomMeetingJustificationType {
+  id?: string;
+  user_email: string;
+  message: string;
 }
 
 export interface ZoomMeetingPollResultsT {
