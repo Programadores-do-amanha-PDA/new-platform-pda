@@ -1,0 +1,1 @@
+export {default} from "@/features/dashboard/classroom-projects/pages/project-page"
