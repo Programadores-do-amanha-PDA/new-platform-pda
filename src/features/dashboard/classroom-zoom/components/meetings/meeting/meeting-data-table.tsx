@@ -38,7 +38,7 @@ export function MeetingDataTable<TData, TValue>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow
               key={headerGroup.id}
-              className="shadow rounded-t-lg! overflow-hidden p-0!"
+              className="shadow rounded-t-lg! overflow-hidden p-0! "
             >
               {headerGroup.headers.map((header) => {
                 return (

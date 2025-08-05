@@ -64,8 +64,7 @@ export default function AccountDialog({
         });
 
         if (!account) throw new Error("no account created");
-
-        toast.success("Conta adicionada com sucesso!");
+        return
       } else if (currentAccount && currentAccount.id) {
         toast.info("Atualizando informações de conta...");
         const account = await updateAccount(currentAccount.id, {
@@ -178,7 +177,7 @@ export default function AccountDialog({
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <Button type="submit" className="font-semibold" disabled={loading}>
+            <Button className="font-semibold" disabled={loading}>
               {loading && <LoaderCircle className="size-5 animate-spin" />}
               {!currentAccount?.id ? "Adicionar" : "Editar"}
             </Button>

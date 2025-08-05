@@ -163,7 +163,6 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
 ];
 
 function PollResultsTable({ data }: { data: ZoomMeetingPollResultsT[] }) {
-  console.log(data);
   const table = useReactTable({
     data: data,
     columns: meetingPollResultsColumns,
@@ -245,7 +244,7 @@ const meetingParticipantsColumns: ColumnDef<
     },
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium capitalize">{row.getValue("name")}</p>
+        <p className="font-medium capitalize">{row.original.name}</p>
       </div>
     ),
   },
@@ -322,6 +321,7 @@ interface ParticipantsTableProps {
 }
 
 function ParticipantsTable({ data }: ParticipantsTableProps) {
+  console.log(data)
   const table = useReactTable({
     data,
     columns: meetingParticipantsColumns,
@@ -399,11 +399,11 @@ const PastInstancieDialog = ({
   );
 
   instancie.participants?.forEach((participant) => {
-    const existing = participantGroups.get(participant.name);
+    const existing = participantGroups.get(participant.user_email);
     if (existing) {
       existing.duration += participant.duration;
     } else {
-      participantGroups.set(participant.name, {
+      participantGroups.set(participant.user_email, {
         ...participant,
         duration: participant.duration,
       });
@@ -468,7 +468,7 @@ const PastInstancieDialog = ({
               className="flex w-full h-full overflow-hidden mt-4"
             >
               <PollResultsTable
-                data={instancie.poll_results?.filter(Boolean)  || []}
+                data={instancie.poll_results?.filter(Boolean) || []}
               />
             </TabsContent>
           </Tabs>

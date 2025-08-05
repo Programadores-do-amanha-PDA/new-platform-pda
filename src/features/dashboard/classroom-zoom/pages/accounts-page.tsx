@@ -9,12 +9,9 @@ import { ZoomAccountT } from "@/types/classroom-zoom";
 
 export default function AccountsPage() {
   const params = useParams();
-  const classroom_id = Array.isArray(params.classroom_id)
-    ? params.classroom_id[0]
-    : params.classroom_id;
+  const [searchFilter, setSearchFilter] = useState<string>("");
 
   const { accounts, createAccount, updateAccount } = useZoomAccountStore();
-  const [searchFilter, setSearchFilter] = useState<string>("");
   const filteredAccounts = accounts.filter(
     (account) =>
       (account.me &&
@@ -27,6 +24,9 @@ export default function AccountsPage() {
     null
   );
 
+  const classroom_id = Array.isArray(params.classroom_id)
+    ? params.classroom_id[0]
+    : params.classroom_id;
   if (!classroom_id) return null;
 
   return (

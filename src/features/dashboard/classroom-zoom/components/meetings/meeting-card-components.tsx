@@ -76,7 +76,7 @@ export const MeetingInfo = ({ meeting }: MeetingInfoProps) => (
     {isFutureMeeting(meeting.start_time) && (
       <>
         <p className="text-sm h-4 text-muted-foreground flex gap-1">
-          ID da Reunião: <span className="font-bold">{meeting.id}</span>
+          ID da Reunião: <span className="font-bold">{meeting.meeting_id}</span>
         </p>
         <p className="text-sm h-4 text-muted-foreground flex gap-1">
           Senha: <span className="font-bold">{meeting.password}</span>

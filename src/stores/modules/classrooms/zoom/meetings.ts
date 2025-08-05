@@ -274,6 +274,7 @@ export const useZoomMeetingStore = create<
       },
 
       refreshAndUpdateMeeting: async (meeting, account) => {
+        let loadingToastId;
         try {
           if (
             !meeting.meeting_id ||
@@ -285,7 +286,7 @@ export const useZoomMeetingStore = create<
             throw new Error("id and updates fields are required");
           }
 
-          toast.info("Atualizando dados da reunião...", {
+          loadingToastId = toast.info("Atualizando dados da reunião...", {
             duration: 50000,
             closeButton: true,
           });
@@ -449,13 +450,17 @@ export const useZoomMeetingStore = create<
           console.error(error);
           toast.error("Erro ao atualizar dados da reunião!");
           return false;
+        } finally {
+          toast.dismiss(loadingToastId);
         }
       },
 
       deleteMeeting: async (meetingId) => {
+        let loadingToastId;
         try {
           if (!meetingId) throw new Error("meeting id is required to delete");
-          set({ loading: true });
+
+          loadingToastId = toast.loading("Excluindo os dados da conta...");
           const response = await deleteZoomMeetingById(meetingId);
           if (!response) throw new Error("no delete meeting response");
 
@@ -471,7 +476,7 @@ export const useZoomMeetingStore = create<
           toast.error("Erro ao deletar reunião. Tente novamente mais tarde!");
           return false;
         } finally {
-          set({ loading: false });
+          toast.dismiss(loadingToastId);
         }
       },
 

@@ -78,7 +78,6 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
           if (!client_id) throw new Error("Client ID is missing");
           if (!client_secret) throw new Error("Client Secret is missing");
 
-          set({ loading: true });
 
           const account = { account_id, client_id, client_secret };
           const ZOOM_ACCESS_TOKEN = await getAccessToken(account);
@@ -98,8 +97,6 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
             "Credenciais da conta inválidas ou não autorizadas. Verifique suas credenciais e tente novamente."
           );
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 

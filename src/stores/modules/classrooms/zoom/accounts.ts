@@ -89,7 +89,6 @@ export const useZoomAccountStore = create<
             toast.error("Dados obrigatórios da conta estão faltando!");
             throw new Error("Missing required account data");
           }
-          set({ loading: true });
 
           toast.info("Verificando as credenciais da conta...");
           const me = await useZoomAPIStore
@@ -100,24 +99,26 @@ export const useZoomAccountStore = create<
               accountData.client_secret
             );
           if (!me) throw new Error("no me data");
+          toast.success("Credenciais verificadas com sucesso!");
 
-          const newAccount = await createZoomAccountByClassroomId({
-            ...accountData,
-            me,
-          });
+          toast.info("Salvando as credencias da conta...");
+          const newAccount: ZoomAccountT = await createZoomAccountByClassroomId(
+            {
+              ...accountData,
+              me,
+            }
+          );
           if (!newAccount) throw new Error("No account create response");
 
           set({ accounts: [newAccount, ...get().accounts] });
           toast.success(
-            `Conta "${newAccount.account_name}" criada com sucesso!`
+            `Conta "${newAccount?.me?.first_name}" salva com sucesso!`
           );
           return newAccount.id;
         } catch (error) {
           console.error(error);
           toast.error("Erro ao criar nova conta!");
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 
@@ -126,7 +127,6 @@ export const useZoomAccountStore = create<
           if (!accountId || !updates) {
             throw new Error("ID and updates fields are required");
           }
-          set({ loading: true });
           const updatedAccount = await updateZoomAccountById(
             accountId,
             updates
@@ -144,15 +144,12 @@ export const useZoomAccountStore = create<
           console.error(error);
           toast.error("Erro ao atualizar a conta!");
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 
       deleteAccount: async (accountId) => {
         try {
           if (!accountId) throw new Error("Account ID is required to delete");
-          set({ loading: true });
           const response = await deleteZoomAccountById(accountId);
           if (!response) throw new Error("No delete account response");
 
@@ -167,8 +164,6 @@ export const useZoomAccountStore = create<
           console.error(error);
           toast.error("Erro ao deletar conta. Tente novamente mais tarde!");
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 

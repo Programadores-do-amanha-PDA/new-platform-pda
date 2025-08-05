@@ -56,7 +56,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     header: ({ column }) => {
       const sortState = column.getIsSorted();
       return (
-        <div className="w-full h-full flex justify-start items-center border-r border-border px-2">
+        <div className="w-full h-full flex justify-start items-center border-r border-b border-border px-2">
           <Button
             variant="ghost"
             className="text-left px-2 font-semibold"
@@ -83,7 +83,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full flex flex-row gap-2 justify-start items-center px-2 border-r border-border bg-background">
+      <div className="w-full h-full flex flex-row gap-2 justify-start items-center px-2 border-r bg-background">
         <Avatar>
           <AvatarFallback>
             {row
@@ -180,10 +180,10 @@ export default function AttendanceTable({
         />
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
-        <Table className="w-full h-full">
-          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden shadow-md">
+        <Table className="w-max h-full">
+          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="!p-0">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
@@ -204,10 +204,10 @@ export default function AttendanceTable({
                     return (
                       <TableHead
                         key={`TableHead-${pastMeeting.id}-${index}`}
-                        className="w-full h-max p-0 m-0"
+                        className="w-full h-max !p-0 !m-0 !border-0"
                       >
-                        <div className="w-full h-full  flex flex-col justify-center items-center border-r border-border">
-                          <div className="w-full h-11 max-w-[155px]! flex justify-center items-center border-b border-border px-2">
+                        <div className="w-full h-full flex flex-col justify-center items-center border-r border-b">
+                          <div className="w-full h-11 flex justify-center items-center border-b border-border px-2">
                             <p className="font-bold">
                               {new Date(
                                 pastMeeting.start_time || 0
@@ -346,7 +346,7 @@ export default function AttendanceTable({
                           key={`TableCell-${meeting.id}-${index}`}
                           className="border-r border-border"
                         >
-                          <div className="w-full max-w-[155px]! h-full flex items-center justify-between gap-1 px-2">
+                          <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
                             <p
                               className={cn(
                                 "font-semibold",
