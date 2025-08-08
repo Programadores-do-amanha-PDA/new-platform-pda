@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ZoomMeetingOccurrenceT,
+  ZoomMeetingParticipantT,
   ZoomMeetingPastInstanceT,
 } from "@/types/classroom-zoom";
 import { ColumnDef } from "@tanstack/react-table";
@@ -239,7 +240,9 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     },
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">{row.original.poll_results?.filter(Boolean)?.length || 0}</p>
+        <p className="font-medium">
+          {row.original.poll_results?.filter(Boolean)?.length || 0}
+        </p>
       </div>
     ),
   },
@@ -491,13 +494,25 @@ export default function ZoomRecurrenceMeetingPage({
   const meetingPastInstances = pastInstances
     ?.filter(Boolean)
     .filter((p) => p.meeting_id === currentMeeting?.id)
-    ?.map((pastInstance) => ({
-      ...pastInstance,
-      topic: currentMeeting?.topic,
-      duration: currentMeeting?.duration,
-      updatePastInstanceById,
-      handleOpenDialog,
-    }));
+    ?.map((pastInstance) => {
+      const participantGroups = new Map<string, ZoomMeetingParticipantT>();
+
+      pastInstance?.participants?.forEach((participant) => {
+        const existing = participantGroups.get(participant.user_email);
+        if (!existing) {
+          participantGroups.set(participant.user_email, participant);
+        }
+      });
+
+      return {
+        ...pastInstance,
+        topic: currentMeeting?.topic,
+        duration: currentMeeting?.duration,
+        participants: Array.from(participantGroups.values()),
+        updatePastInstanceById,
+        handleOpenDialog,
+      };
+    });
 
   return (
     <>

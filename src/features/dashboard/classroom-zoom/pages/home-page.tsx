@@ -7,6 +7,7 @@ import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import ZoomAccountCard from "../components/accounts/account-card";
 import { MeetingsParticipantsChart } from "../components/meetings-participants-chart";
+import { ZoomMeetingParticipantT } from "@/types";
 
 export default function ZoomHomePage() {
   const params = useParams();
@@ -19,34 +20,55 @@ export default function ZoomHomePage() {
 
   const chartData = () => {
     const pastInstanciesData =
-      pastInstances?.flatMap((instance) => {
-        const account = accounts.find((acc) => acc.id === instance.account_id);
-        const account_label = account?.me?.display_name || "Conta sem nome";
-        return {
-          account_id: instance.account_id,
-          account_label: account_label,
-          date: instance?.start_time || "",
-          participants: instance?.participants?.length || 0,
-          poll_results: instance?.poll_results?.length || 0,
-        };
-      }) || [];
+      pastInstances
+        ?.filter((p) => p.is_visible_on_schedule)
+        .flatMap((instance) => {
+          const account = accounts.find(
+            (acc) => acc.id === instance.account_id
+          );
+          const account_label = account?.me?.display_name || "Conta sem nome";
+          const participantGroups = new Map<string, ZoomMeetingParticipantT>();
+
+          instance?.participants?.forEach((participant) => {
+            const existing = participantGroups.get(participant.user_email);
+            if (!existing) {
+              participantGroups.set(participant.user_email, participant);
+            }
+          });
+
+          return {
+            account_id: instance.account_id,
+            account_label: account_label,
+            date: instance?.start_time || "",
+            participants: Array.from(participantGroups.values()).length || 0,
+            poll_results: instance?.poll_results?.length || 0,
+          };
+        }) || [];
 
     const pastMeetingsData =
       meetings
         ?.filter(
           (meeting) =>
             meeting.type !== 8 &&
-            new Date(meeting.start_time || 0).getTime() < Date.now()
+            new Date(meeting.start_time || 0).getTime() < Date.now() &&
+            meeting.is_visible_on_schedule
         )
         .flatMap((meeting) => {
           const account = accounts.find((acc) => acc.id === meeting.account_id);
           const account_label = account?.me?.display_name || "Conta sem nome";
+          const participantGroups = new Map<string, ZoomMeetingParticipantT>();
+          meeting?.participants?.forEach((participant) => {
+            const existing = participantGroups.get(participant.user_email);
+            if (!existing) {
+              participantGroups.set(participant.user_email, participant);
+            }
+          });
 
           return {
             account_id: meeting.account_id,
             account_label: account_label,
             date: meeting?.start_time || "",
-            participants: meeting?.participants?.length || 0,
+            participants: Array.from(participantGroups.values()).length || 0,
             poll_results: meeting?.poll_results?.length || 0,
           };
         }) || [];

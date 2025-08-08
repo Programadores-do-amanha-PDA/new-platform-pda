@@ -273,11 +273,11 @@ export default function ZoomPastMeetingPage({
     (typeof currentMeeting.participants)[number]
   >();
   currentMeeting?.participants?.forEach((participant) => {
-    const existing = participantGroups.get(participant.name);
+    const existing = participantGroups.get(participant.user_email);
     if (existing) {
       existing.duration += participant.duration;
     } else {
-      participantGroups.set(participant.name, {
+      participantGroups.set(participant.user_email, {
         ...participant,
         duration: participant.duration,
       });
