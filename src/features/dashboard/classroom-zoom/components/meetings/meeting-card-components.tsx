@@ -118,7 +118,7 @@ export const MeetingStats = ({
               <span className="font-bold">{pastInstancesCount}</span>
             </>
           ) : (
-            "Nenhum participante encontrado."
+            "Nenhuma reunião finalizada."
           )}
         </p>
         

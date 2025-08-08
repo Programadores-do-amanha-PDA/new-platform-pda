@@ -39,7 +39,7 @@ export function AttendanceJustificationDropdown({
     if (currentJustification) {
       setJustification(currentJustification.message || "");
     }
-  }, [currentMeeting]);
+  }, [currentMeeting, currentJustification]);
 
   const handleAddJustification = async () => {
     setLoading(true);
@@ -90,6 +90,7 @@ export function AttendanceJustificationDropdown({
       setDeleteLoading(false);
       return;
     }
+    setJustification("");
   };
 
   return (
@@ -114,7 +115,7 @@ export function AttendanceJustificationDropdown({
             placeholder="Qual a justificativa?"
             className="resize-none w-full h-full"
           />
-          <div className="w-full flex flex-row gap-2 items-center justify-center">
+          <div className="w-full flex flex-row gap-2 items-center justify-between">
             {currentJustification && (
               <Button
                 disabled={loading || deleteLoading}
@@ -139,7 +140,7 @@ export function AttendanceJustificationDropdown({
                   currentJustification.message === justification)
               }
               onClick={handleAddJustification}
-              className="w-full"
+              className="w-1/2 ml-auto"
             >
               {loading && <Loader className="size-5 animate-spin" />}
               {!loading

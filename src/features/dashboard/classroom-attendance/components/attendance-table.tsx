@@ -258,12 +258,46 @@ export default function AttendanceTable({
                       )}
                     </TableCell>
                   ))}
+
                   {displayedMeetings.length > 0 &&
                     displayedMeetings.map((meeting, index) => {
                       const meetingAttendanceHistory =
                         meeting?.participants?.filter(
                           (p) => p.user_email === row.original.email
                         );
+
+                      const meetingJustification =
+                        meeting?.justifications?.find(
+                          (j) => j.user_email === row.original.email
+                        );
+                      if (meetingJustification) {
+                        return (
+                          <TableCell
+                            key={`TableCell-${meeting.id}-${index}`}
+                            className="border-r border-border"
+                          >
+                            <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
+                              <p
+                                className={cn(
+                                  "font-semibold",
+                                  AttendanceStatusOptions["FJ"].color
+                                )}
+                                title={AttendanceStatusOptions["FJ"].label}
+                              >
+                                FJ
+                              </p>
+                              {row.original.email && (
+                                <AttendanceJustificationDropdown
+                                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+                                  currentMeeting={meeting}
+                                  currentUserEmail={row.original.email}
+                                  type={meeting.meeting_type}
+                                />
+                              )}
+                            </div>
+                          </TableCell>
+                        );
+                      }
 
                       if (
                         meetingAttendanceHistory &&
