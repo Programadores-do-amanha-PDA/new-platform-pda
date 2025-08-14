@@ -1,14 +1,10 @@
 "use client";
+
 import { useState } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ZoomMeetingOccurrenceT,
-  ZoomMeetingParticipantT,
-  ZoomMeetingPastInstanceT,
-} from "@/types/classroom-zoom";
-import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
 import {
   ArrowDown,
   ArrowUp,
@@ -18,16 +14,25 @@ import {
   RefreshCw,
   Siren,
 } from "lucide-react";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { toast } from "sonner";
 import RefreshButton from "@/components/shared/refresh-button";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
+import { cn } from "@/lib/utils";
+
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import PastInstancieDialog from "../components/meetings/meeting/past-instancie-dialog";
+import {
+  ZoomMeetingOccurrenceT,
+  ZoomMeetingParticipantT,
+  ZoomMeetingPastInstanceT,
+  ZoomMeetingT,
+} from "@/types/classroom-zoom";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceT & {
   topic: string | undefined;
@@ -258,7 +263,7 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     cell: ({ row }: { row: { original: MeetingPastInstance } }) => (
       <div
         key={row.original.uuid}
-        className="w-full h-full flex justify-center items-center border-b p-1"
+        className="w-full h-full flex justify-center items-center border-b"
       >
         <RefreshButton
           handleClick={async () =>
@@ -440,9 +445,9 @@ const meetingOccurrencesColumns: ColumnDef<MeetingOccurrence>[] = [
 ];
 
 export default function ZoomRecurrenceMeetingPage({
-  meeting_id,
+  currentMeeting,
 }: {
-  meeting_id: string;
+  currentMeeting: ZoomMeetingT;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -450,11 +455,9 @@ export default function ZoomRecurrenceMeetingPage({
     useState<ZoomMeetingPastInstanceT | null>(null);
 
   const { accounts } = useZoomAccountStore();
-  const { meetings, refreshAndUpdateMeeting } = useZoomMeetingStore();
+  const { refreshAndUpdateMeeting, deleteMeeting } = useZoomMeetingStore();
   const { pastInstances, updatePastInstanceById } =
     useZoomMeetingPastInstanceStore();
-
-  const currentMeeting = meetings?.find((m) => m.id === meeting_id);
 
   const handleRefreshMeeting = async () => {
     setIsUpdating(true);
@@ -514,6 +517,9 @@ export default function ZoomRecurrenceMeetingPage({
       };
     });
 
+  const currentMeetingOccurrences = meetingOccurrences || [];
+  const currentMeetingPastInstances = meetingPastInstances || [];
+
   return (
     <>
       <div className="w-full h-full p-4 overflow-hidden flex flex-col gap-8">
@@ -534,17 +540,26 @@ export default function ZoomRecurrenceMeetingPage({
                 <p className="font-normal">{currentMeeting?.host_email}</p>
               </p>
             </div>
-            <Button
-              disabled={isUpdating}
-              onClick={handleRefreshMeeting}
-              title="Atualizar"
-              className="font-semibold cursor-pointer"
-            >
-              Atualizar
-              <RefreshCw
-                className={cn("size-5", isUpdating && "animate-spin")}
+            <div className="flex gap-4">
+              <Button
+                disabled={isUpdating}
+                onClick={handleRefreshMeeting}
+                title="Atualizar"
+                className="font-semibold cursor-pointer"
+              >
+                <RefreshCw
+                  className={cn("size-5", isUpdating && "animate-spin")}
+                />
+                Atualizar
+              </Button>
+              <DeleteConfirmationButton
+                onConfirm={() => deleteMeeting(currentMeeting.id)}
+                buttonText="Deletar Reunião"
+                dialogTitle="Deletar Reunião"
+                description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as instancias futuras e passadas associadas serão permanentemente removidas juntamente com suas presenças e entregas (polls) a elas vinculadas.`}
+                confirmText="Deletar Reunião"
               />
-            </Button>
+            </div>
           </div>
 
           {meetingOccurrences &&
@@ -575,51 +590,57 @@ export default function ZoomRecurrenceMeetingPage({
             )}
         </header>
 
-        {(meetingOccurrences?.length || meetingPastInstances?.length) && (
+        {(currentMeetingOccurrences?.length ||
+          currentMeetingPastInstances?.length) && (
           <Tabs
-            defaultValue="upcoming"
+            defaultValue={
+              currentMeetingOccurrences.length
+                ? "occurrences"
+                : "pastInstancies"
+            }
             className="w-full h-full flex flex-col overflow-hidden"
           >
             <TabsList className="w-max flex gap-2 overflow-hidden">
-              {meetingOccurrences && meetingOccurrences?.length > 0 && (
-                <TabsTrigger value="upcoming">
-                  Reuniões Futuras ({meetingOccurrences.length})
+              {currentMeetingOccurrences.length > 0 && (
+                <TabsTrigger value="occurrences">
+                  Reuniões Futuras ({currentMeetingOccurrences.length})
                 </TabsTrigger>
               )}
 
-              {meetingPastInstances && meetingPastInstances.length > 0 && (
-                <TabsTrigger value="completed">
-                  Reuniões Terminadas ({meetingPastInstances.length})
+              {currentMeetingPastInstances.length > 0 && (
+                <TabsTrigger value="pastInstancies">
+                  Reuniões Terminadas ({currentMeetingPastInstances.length})
                 </TabsTrigger>
               )}
             </TabsList>
 
-            {meetingOccurrences?.length && (
+            {currentMeetingOccurrences.length > 0 && (
               <TabsContent
-                value="upcoming"
+                value="occurrences"
                 className="w-full h-full overflow-hidden"
               >
                 <MeetingDataTable
                   columns={meetingOccurrencesColumns}
-                  data={meetingOccurrences}
+                  data={currentMeetingOccurrences}
                 />
               </TabsContent>
             )}
 
-            {meetingPastInstances && (
+            {currentMeetingPastInstances && (
               <TabsContent
-                value="completed"
+                value="pastInstancies"
                 className="w-full h-full overflow-hidden"
               >
                 <MeetingDataTable
                   columns={meetingPastInstancesColumns}
-                  data={meetingPastInstances}
+                  data={currentMeetingPastInstances}
                 />
               </TabsContent>
             )}
           </Tabs>
         )}
       </div>
+
       {selectedInstancie && (
         <PastInstancieDialog
           instancie={selectedInstancie}

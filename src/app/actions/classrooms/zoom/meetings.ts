@@ -54,7 +54,7 @@ const createZoomMeetingByClassroomId = async (
       .single();
 
     if (error) throw error;
-    return data;
+    return data as ZoomMeetingT;
   } catch (error) {
     console.error("Error creating zoom meeting:", error);
     return false;

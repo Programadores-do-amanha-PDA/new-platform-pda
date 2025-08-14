@@ -10,23 +10,16 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
 
-export default function AccountDialog({
-  classroom_id,
-  createAccount,
+export default function EditAccountDialog({
   currentAccount,
   handleSetCurrentAccount,
   updateAccount,
 }: {
-  classroom_id: string;
-  createAccount: (
-    accountData: Partial<ZoomAccountT>
-  ) => Promise<string | boolean>;
   currentAccount: ZoomAccountT | null;
   handleSetCurrentAccount: (account: ZoomAccountT | null) => void;
   updateAccount: (
@@ -34,7 +27,6 @@ export default function AccountDialog({
     updates: Partial<ZoomAccountT>
   ) => Promise<boolean>;
 }) {
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [accountData, setAccountData] = useState<Partial<ZoomAccountT>>({
     account_id: "",
@@ -49,78 +41,53 @@ export default function AccountDialog({
     try {
       const { account_id, client_id, client_secret } = accountData;
 
-      if (!account_id || !client_id || !client_secret || !classroom_id) {
+      if (!account_id || !client_id || !client_secret || !currentAccount?.id) {
         toast.error("Por favor, preencha todos os campos.");
         return;
       }
 
-      if (!currentAccount || !currentAccount.id) {
-        toast.info("Salvando informações de conta...");
-        const account = await createAccount({
-          classroom_id,
-          account_id,
-          client_id,
-          client_secret,
-        });
+      toast.info("Atualizando informações de conta...");
+      const success = await updateAccount(currentAccount.id, {
+        account_id,
+        client_id,
+        client_secret,
+      });
+      
+      if (!success) throw new Error("no account updated");
 
-        if (!account) throw new Error("no account created");
-        return
-      } else if (currentAccount && currentAccount.id) {
-        toast.info("Atualizando informações de conta...");
-        const account = await updateAccount(currentAccount.id, {
-          account_id,
-          client_id,
-          client_secret,
-        });
-        if (!account) throw new Error("no account updated");
-
-        toast.success("Conta atualizada com sucesso!");
-      }
+      toast.success("Conta atualizada com sucesso!");
+      handleSetCurrentAccount(null);
     } catch (error) {
       console.log(error);
+      toast.error("Erro ao atualizar conta.");
     } finally {
-      setOpen(false);
       setLoading(false);
     }
   };
 
   useEffect(() => {
     if (currentAccount) {
-      setAccountData(currentAccount);
+      setAccountData({
+        account_id: currentAccount.account_id || "",
+        client_id: currentAccount.client_id || "",
+        client_secret: currentAccount.client_secret || "",
+      });
     }
   }, [currentAccount]);
 
   const handleSetOpen = (v: boolean) => {
     if (v === false) {
-      setAccountData({
-        account_id: "",
-        client_id: "",
-        client_secret: "",
-      });
       handleSetCurrentAccount(null);
     }
-    setOpen(v);
   };
 
   return (
-    <Dialog
-      open={currentAccount !== null || open === true}
-      onOpenChange={handleSetOpen}
-    >
-      <DialogTrigger>
-        <Button variant="default" className="font-semibold">
-          Adicionar Conta
-        </Button>
-      </DialogTrigger>
+    <Dialog open={currentAccount !== null} onOpenChange={handleSetOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>
-            {currentAccount ? "Atualizar Conta" : "Adicionar Nova Conta"}
-          </DialogTitle>
+          <DialogTitle>Atualizar Conta</DialogTitle>
           <DialogDescription>
-            {currentAccount
-              ? "Atualize as informações de conexão do App server to server da conta do Zoom."
-              : "Adicione as informações de conexão do App server to server da conta do Zoom."}
+            Atualize as informações de conexão do App server to server da conta do Zoom.
           </DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-6 py-4" onSubmit={handleSubmit}>
@@ -177,9 +144,9 @@ export default function AccountDialog({
             <DialogClose asChild>
               <Button variant="outline">Cancelar</Button>
             </DialogClose>
-            <Button className="font-semibold" disabled={loading}>
+            <Button type="submit" className="font-semibold" disabled={loading}>
               {loading && <LoaderCircle className="size-5 animate-spin" />}
-              {!currentAccount?.id ? "Adicionar" : "Editar"}
+              Atualizar
             </Button>
           </div>
         </form>

@@ -106,7 +106,6 @@ export default function ZoomHomePage() {
               account={account}
               key={account.id}
               expansive={false}
-              handleSetCurrentAccount={() => {}}
             />
           ))}
         </ul>

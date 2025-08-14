@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
@@ -27,49 +27,66 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import MeetingsSheetDataItem from "./meetings-sheet-data-item";
-import { ZoomMeetingT } from "@/types/classroom-zoom";
+import { ZoomAccountT, ZoomMeetingT } from "@/types/classroom-zoom";
 
-export default function MeetingsSheetData() {
+export default function MeetingsSheetData({
+  classroom_id,
+}: {
+  classroom_id: string;
+}) {
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [meetingsSearch, setMeetingsSearch] = useState<string>("");
   const [selectedAccount, setSelectedAccount] = useState<string | "all">("all");
   const [isAddingMeeting, setIsAddingMeeting] = useState<string | null>(null);
+  const [classroomZoomAccounts, setClassroomZoomAccounts] = useState<
+    ZoomAccountT[]
+  >([]);
 
   const { accounts } = useZoomAccountStore();
   const { meetings, createMeeting } = useZoomMeetingStore();
   const { meetingsByAPI, getAllMeetingsByAPI } = useZoomAPIStore();
 
-  const handleOpen = async (open: boolean) => {
-    if (open === true && meetingsByAPI.length === 0) {
-      setLoading(true);
-      for (const account of accounts) {
-        await getAllMeetingsByAPI(account);
-      }
-      setLoading(false);
-    } else if (open === false) {
-      setLoading(false);
-      setMeetingsSearch("");
-      setSelectedAccount("all");
-      setIsAddingMeeting(null);
-    }
+  useEffect(() => {
+    const loadMeetings = async () => {
+      if (openModal) {
+        setLoading(true);
 
-    setOpenModal(open);
-  };
+        const filteredAccounts = accounts.filter(
+          (account) => account.classroom_id === classroom_id
+        );
+        setClassroomZoomAccounts(filteredAccounts);
+
+        for (const account of filteredAccounts) {
+          await getAllMeetingsByAPI(account);
+        }
+
+        setLoading(false);
+      } else {
+        setLoading(false);
+        setMeetingsSearch("");
+        setSelectedAccount("all");
+        setIsAddingMeeting(null);
+        setClassroomZoomAccounts([]);
+      }
+    };
+
+    loadMeetings();
+  }, [openModal, classroom_id]);
 
   // Memoize IDs para evitar recalcular a cada iteração
   const existingMeetingIds = new Set(meetings.map((m) => m.meeting_id));
   const existingIds = new Set(meetings.map((m) => m.id));
 
-  const filteredMeetings = meetingsByAPI.filter((meeting) => {
+  // Calculate classroom meetings from API data
+  const accountIds = classroomZoomAccounts.map((a) => a.id);
+  const classroomMeetingsByAPI = meetingsByAPI.filter((meeting) =>
+    accountIds.includes(meeting.account_id)
+  );
+
+  const filteredMeetings = classroomMeetingsByAPI.filter((meeting) => {
     // Remove reuniões já adicionadas
     if (existingMeetingIds.has(meeting.meeting_id)) return false;
-
-    // Filtro por conta específica
-    if (selectedAccount !== "all" && meeting.account_id !== selectedAccount) {
-      return false;
-    }
-
     // Filtro por busca de texto
     if (meetingsSearch) {
       const searchMatch = meeting.topic
@@ -89,18 +106,17 @@ export default function MeetingsSheetData() {
 
   const handleAddMeeting = async (meeting: ZoomMeetingT) => {
     setIsAddingMeeting(meeting.id);
-    const account = accounts.find(
+    const account = classroomZoomAccounts.find(
       (account) => account.id === meeting.account_id
     );
     if (!account) return;
     toast.info("Pegando informações da reunião...");
-    console.log(meeting);
     await createMeeting(account, meeting);
     setIsAddingMeeting(null);
   };
 
   return (
-    <Sheet onOpenChange={handleOpen} open={openModal}>
+    <Sheet onOpenChange={setOpenModal} open={openModal}>
       <SheetTrigger>
         <Button className="px-4! w-max items-start justify-start font-semibold cursor-pointer">
           Adicionar Reunião
@@ -130,8 +146,11 @@ export default function MeetingsSheetData() {
                 </SelectItem>
                 <SelectGroup>
                   <SelectLabel>Contas Zoom</SelectLabel>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
+                  {classroomZoomAccounts.map((account, i) => (
+                    <SelectItem
+                      key={`zoom-account-key-${i}`}
+                      value={account.id}
+                    >
                       {account.me?.display_name || account.me?.email}
                     </SelectItem>
                   ))}

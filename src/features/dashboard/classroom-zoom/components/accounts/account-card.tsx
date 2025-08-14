@@ -11,19 +11,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
+import EditAccountDialog from "./edit-account-dialog";
 import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
 
 const ZoomAccountCard = ({
   account,
-  handleSetCurrentAccount,
   expansive,
 }: {
   account: ZoomAccountT;
-  handleSetCurrentAccount: (account: ZoomAccountT) => void;
   expansive: boolean;
 }) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-  const { deleteAccount } = useZoomAccountStore();
+  const [currentAccount, setCurrentAccount] = useState<ZoomAccountT | null>(
+    null
+  );
+  const { deleteAccount, updateAccount } = useZoomAccountStore();
 
   return (
     <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4 bg-background shadow">
@@ -60,7 +62,7 @@ const ZoomAccountCard = ({
             <DropdownMenuItem className="px-0">
               <Button
                 variant="ghost"
-                onClick={() => handleSetCurrentAccount(account)}
+                onClick={() => setCurrentAccount(account)}
                 className="!w-full cursor-pointed font-semibold text-muted-foreground justify-start"
               >
                 <Edit className="size-4" />
@@ -87,6 +89,12 @@ const ZoomAccountCard = ({
         onOpenChange={setDialogOpen}
         onConfirm={() => deleteAccount(account.id)}
         description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE os dados da CONTA e removerá todos os dados de REUNIÕES, PRESENÇAS e RESPOSTAS (KPI) atreladas a conta."
+      />
+
+      <EditAccountDialog
+        currentAccount={currentAccount}
+        handleSetCurrentAccount={setCurrentAccount}
+        updateAccount={updateAccount}
       />
     </li>
   );

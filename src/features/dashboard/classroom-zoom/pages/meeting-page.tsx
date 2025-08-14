@@ -3,9 +3,13 @@ import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import ZoomRecurrenceMeetingPage from "./recurrence-meeting-page";
 import ZoomPastMeetingPage from "./past-meeting-page";
 import { useParams } from "next/navigation";
+import { NotFoundState } from "@/components/shared/not-found-state";
 
 export default function ZoomMeetingPage() {
-  const { meeting_id } = useParams<{ meeting_id: string }>();
+  const { meeting_id, classroom_id } = useParams<{
+    meeting_id: string;
+    classroom_id: string;
+  }>();
   const { meetings } = useZoomMeetingStore();
 
   console.log("meeting_id", meeting_id);
@@ -13,12 +17,19 @@ export default function ZoomMeetingPage() {
   const currentMeeting = meetings?.find((m) => m.id === meeting_id);
 
   if (!currentMeeting) {
-    return <div>Meeting not found</div>;
+    return (
+      <NotFoundState
+        title="Reunião não encontrada."
+        subtitle="Verifique se o ID da reunião está correto ou se a reunião esta cadastrada na turma."
+        href={`/dashboard/classrooms/${classroom_id}/zoom/meetings`}
+        buttonText="Ver todas as reuniões"
+      />
+    );
   }
 
-  if (currentMeeting.type === 8) {
-    return <ZoomRecurrenceMeetingPage meeting_id={meeting_id} />;
+  if (currentMeeting.type === 8 || currentMeeting.type === 3) {
+    return <ZoomRecurrenceMeetingPage currentMeeting={currentMeeting} />;
   } else {
-    return <ZoomPastMeetingPage meeting_id={meeting_id} />;
+    return <ZoomPastMeetingPage currentMeeting={currentMeeting} />;
   }
 }

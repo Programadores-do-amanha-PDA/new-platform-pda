@@ -1,16 +1,21 @@
 "use client";
-import { useMemo, useState } from "react";
 
-import { Label } from "@/components/ui/label";
+import { useMemo, useState } from "react";
+import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import MeetingsSheetData from "../components/meetings/meetings-sheet-data";
 import ZoomMeetingsCard from "../components/meetings/meetings-card";
 
 const ZoomMeetingsPage = () => {
+  const { classroom_id } = useParams();
   const [searchFilter, setSearchFilter] = useState<string>("");
   const [allMeetingLoading, setAllMeetingLoading] = useState<boolean>(false);
+
+  const classroomId = Array.isArray(classroom_id)
+    ? classroom_id[0]
+    : classroom_id;
 
   const { meetings } = useZoomMeetingStore();
 
@@ -32,22 +37,18 @@ const ZoomMeetingsPage = () => {
   return (
     <div className="w-full h-full flex flex-col gap-6 py-6 overflow-hidden px-4">
       <div className="w-full h-full flex flex-col gap-6">
-        <div className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
-          <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
-            <Input
-              id="search"
-              type="text"
-              placeholder="Buscando algo?"
-              className="max-w-xs border-none! ring-0! shadow-none rounded-none!"
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-            />
-            <Label htmlFor="search">
-              <Search className="size-5 text-primary-foreground" />
-            </Label>
-          </div>
-          <MeetingsSheetData />
-        </div>
+        <header className="w-full flex items-center justify-between flex-wrap p-4 gap-4">
+          <Input
+            id="search"
+            type="text"
+            placeholder="Buscando algo?"
+            className="max-w-xs"
+            value={searchFilter}
+            onChange={(e) => setSearchFilter(e.target.value)}
+          />
+
+          <MeetingsSheetData classroom_id={classroomId} />
+        </header>
 
         <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
           {filteredMeetings

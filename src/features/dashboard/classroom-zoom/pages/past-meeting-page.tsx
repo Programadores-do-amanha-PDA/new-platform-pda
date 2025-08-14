@@ -2,17 +2,21 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown, RefreshCw } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
+
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowUpDown, RefreshCw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import {
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
+  ZoomMeetingT,
 } from "@/types/classroom-zoom/meetings";
-import { cn } from "@/lib/utils";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
 const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
   {
@@ -169,7 +173,7 @@ const meetingParticipantsColumns: ColumnDef<
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b min-h-[37px]">
         <p className="font-medium">{row.original.user_email}</p>
       </div>
     ),
@@ -229,16 +233,14 @@ const meetingParticipantsColumns: ColumnDef<
 ];
 
 export default function ZoomPastMeetingPage({
-  meeting_id,
+  currentMeeting,
 }: {
-  meeting_id: string;
+  currentMeeting: ZoomMeetingT;
 }) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const { accounts } = useZoomAccountStore();
-  const { meetings, refreshAndUpdateMeeting } = useZoomMeetingStore();
-
-  const currentMeeting = meetings?.find((m) => m.id === meeting_id);
+  const { refreshAndUpdateMeeting, deleteMeeting } = useZoomMeetingStore();
 
   const handleRefreshMeeting = async () => {
     setIsUpdating(true);
@@ -260,19 +262,14 @@ export default function ZoomPastMeetingPage({
     }
   };
 
-  if (!currentMeeting || !currentMeeting.participants) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        Carregando...
-      </div>
-    );
-  }
+  const currentPollResults = currentMeeting.poll_results || [];
+  const currentParticipants = currentMeeting.participants || [];
 
   const participantGroups = new Map<
     string,
-    (typeof currentMeeting.participants)[number]
+    (typeof currentParticipants)[number]
   >();
-  currentMeeting?.participants?.forEach((participant) => {
+  currentParticipants.forEach((participant) => {
     const existing = participantGroups.get(participant.user_email);
     if (existing) {
       existing.duration += participant.duration;
@@ -295,68 +292,73 @@ export default function ZoomPastMeetingPage({
 
   return (
     <div className="w-full h-full p-4 overflow-hidden flex flex-col gap-8">
-      <header className="w-full flex flex-col gap-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-muted-foreground font-semibold flex gap-1">
-              Ultima sincronização em:
-              <p className="font-normal">
-                {currentMeeting?.synchronized_at &&
-                  new Date(
-                    currentMeeting.synchronized_at || 0
-                  ).toLocaleDateString("pt-BR")}
-              </p>
+      <header className="w-full flex gap-4 justify-between items-center">
+        <div className="flex flex-col items-start">
+          <p className="text-muted-foreground font-semibold flex gap-1">
+            Ultima sincronização em:
+            <p className="font-normal">
+              {currentMeeting?.synchronized_at &&
+                new Date(
+                  currentMeeting.synchronized_at || 0
+                ).toLocaleDateString("pt-BR")}
             </p>
+          </p>
+          {currentMeeting?.host_email && (
             <p className="text-muted-foreground flex gap-1 font-semibold">
               Host:
-              <p className="font-normal">{currentMeeting?.host_email}</p>
+              <p className="font-normal">{currentMeeting.host_email}</p>
             </p>
-            <p className="text-muted-foreground flex gap-1 font-semibold">
-              Duração:
-              <p className="font-normal">
-                {currentMeeting?.duration > 60
-                  ? `${Math.floor(currentMeeting.duration / 60)} Horas`
-                  : `${currentMeeting.duration} Minutos`}
-              </p>
+          )}
+
+          <p className="text-muted-foreground flex gap-1 font-semibold">
+            Duração:
+            <p className="font-normal">
+              {currentMeeting?.duration > 60
+                ? `${Math.floor(currentMeeting.duration / 60)} Horas`
+                : `${currentMeeting.duration} Minutos`}
             </p>
-          </div>
+          </p>
+        </div>
+        <div className="flex gap-4">
           <Button
             disabled={isUpdating}
             onClick={handleRefreshMeeting}
             title="Atualizar"
             className="font-semibold"
           >
-            Atualizar
             <RefreshCw className={cn("size-5", isUpdating && "animate-spin")} />
+            Atualizar
           </Button>
+          <DeleteConfirmationButton
+            onConfirm={() => deleteMeeting(currentMeeting.id)}
+            buttonText="Deletar Reunião"
+            dialogTitle="Deletar Reunião"
+            description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as presenças e entregas (polls) associadas serão permanentemente removidas.`}
+            confirmText="Deletar Reunião"
+          />
         </div>
       </header>
 
-      {(currentMeeting?.participants?.length ||
-        currentMeeting?.poll_results?.length) && (
+      {(participantsData.length || currentPollResults.length) && (
         <Tabs
-          defaultValue="upcoming"
+          defaultValue={participantsData.length ? "upcoming" : "completed"}
           className="w-full h-full flex flex-col overflow-hidden"
         >
           <TabsList className="w-max flex gap-2 overflow-hidden">
-            {currentMeeting.participants &&
-              currentMeeting.participants?.length > 0 && (
-                <TabsTrigger value="upcoming">
-                  Participantes (
-                  {currentMeeting.participants.length})
-                </TabsTrigger>
-              )}
+            {participantsData.length > 0 && (
+              <TabsTrigger value="upcoming">
+                Participantes ({participantsData.length})
+              </TabsTrigger>
+            )}
 
-            {currentMeeting.poll_results &&
-              currentMeeting.poll_results.length > 0 && (
-                <TabsTrigger value="completed">
-                  Respostas (
-                  {currentMeeting.poll_results.length})
-                </TabsTrigger>
-              )}
+            {currentPollResults && currentPollResults.length > 0 && (
+              <TabsTrigger value="completed">
+                Respostas ({currentPollResults.length})
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          {currentMeeting.participants?.length && (
+          {participantsData.length && (
             <TabsContent
               value="upcoming"
               className="w-full h-full overflow-hidden"
@@ -368,14 +370,14 @@ export default function ZoomPastMeetingPage({
             </TabsContent>
           )}
 
-          {currentMeeting.poll_results?.length && (
+          {currentPollResults.length && (
             <TabsContent
               value="completed"
               className="w-full h-full overflow-hidden"
             >
               <MeetingDataTable
                 columns={meetingPollResultsColumns}
-                data={currentMeeting.poll_results}
+                data={currentPollResults}
               />
             </TabsContent>
           )}

@@ -3,15 +3,14 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import AccountDialog from "../components/accounts/account-dialog";
+import CreateAccountDialog from "../components/accounts/create-account-dialog";
 import ZoomAccountCard from "../components/accounts/account-card";
-import { ZoomAccountT } from "@/types/classroom-zoom";
 
 export default function AccountsPage() {
   const params = useParams();
   const [searchFilter, setSearchFilter] = useState<string>("");
 
-  const { accounts, createAccount, updateAccount } = useZoomAccountStore();
+  const { accounts } = useZoomAccountStore();
   const filteredAccounts = accounts.filter(
     (account) =>
       (account.me &&
@@ -19,9 +18,6 @@ export default function AccountsPage() {
           ?.toLowerCase()
           .includes(searchFilter.toLowerCase())) ||
       account.me?.last_name?.toLowerCase().includes(searchFilter.toLowerCase())
-  );
-  const [currentAccount, setCurrentAccount] = useState<ZoomAccountT | null>(
-    null
   );
 
   const classroom_id = Array.isArray(params.classroom_id)
@@ -41,12 +37,8 @@ export default function AccountsPage() {
           className="max-w-xs min-w-72 "
         />
 
-        <AccountDialog
+        <CreateAccountDialog
           classroom_id={classroom_id}
-          createAccount={createAccount}
-          currentAccount={currentAccount}
-          handleSetCurrentAccount={setCurrentAccount}
-          updateAccount={updateAccount}
         />
       </header>
 
@@ -56,7 +48,6 @@ export default function AccountsPage() {
             expansive={true}
             account={account}
             key={account.id}
-            handleSetCurrentAccount={setCurrentAccount}
           />
         ))}
       </ul>
