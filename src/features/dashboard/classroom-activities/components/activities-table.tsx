@@ -48,10 +48,16 @@ import { useParams } from "next/navigation";
 import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
 import { ParticipationStatusOptions } from "../utils/participation-status-options";
 import ActivitiesPaginationControl from "./activities-pagination-control";
+import { isWithinInterval } from "date-fns";
 
 interface ActivitiesTableProps {
   users: Partial<AuthUserWithProfileT>[];
   activities: ClassroomActivityT[];
+}
+
+interface DateRange {
+  from: Date;
+  to: Date;
 }
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
@@ -135,20 +141,26 @@ export default function ActivitiesTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [displayedActivitiesCount, setDisplayedActivitiesCount] =
-    React.useState(Math.min(activities.length, 10));
+  const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
 
   const { updateActivityById, deleteActivity } = useClassroomActivityStore();
 
-  // Update displayed count when activities change
-  React.useEffect(() => {
-    setDisplayedActivitiesCount(Math.min(activities.length, 10));
-  }, [activities.length]);
-
-  // Get the activities to display based on pagination
+  // Get the activities to display based on date range filter
   const displayedActivities = React.useMemo(() => {
-    return activities.slice(0, displayedActivitiesCount);
-  }, [activities, displayedActivitiesCount]);
+    if (!dateRange) return activities;
+
+    return activities.filter((activity) => {
+      const activityDate = new Date(activity.created_at);
+      return isWithinInterval(activityDate, {
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+    });
+  }, [activities, dateRange]);
+
+  const handleDateRangeChange = React.useCallback((newDateRange: DateRange) => {
+    setDateRange(newDateRange);
+  }, []);
 
   const table = useReactTable({
     data: users,
@@ -184,12 +196,12 @@ export default function ActivitiesTable({
           }
           className="max-w-sm"
         />
-        <InsertManyActivitiesDialog classroomId={classroom_id} />
-        <ActivitiesPaginationControl
-          totalActivities={activities.length}
-          displayedCount={displayedActivitiesCount}
-          onCountChange={setDisplayedActivitiesCount}
-        />
+        <div className="flex gap-4 justify-between">
+          <InsertManyActivitiesDialog classroomId={classroom_id} />
+          <ActivitiesPaginationControl
+            onDateRangeChange={handleDateRangeChange}
+          />
+        </div>
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
         <Table className="w-full h-full">

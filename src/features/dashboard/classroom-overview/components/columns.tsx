@@ -20,8 +20,8 @@ export const createColumns = (
       accessorKey: "name",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p className="font-semibold">Usuário</p>
+          <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
+            <p className="font-semibold h-9 flex items-center">Usuário</p>
             <Button
               variant="ghost"
               size="icon"
@@ -76,7 +76,7 @@ export const createColumns = (
       header: ({ column }) => {
         return (
           <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Presença Geral</p>
+            <p>Geral</p>
             <Button
               variant="ghost"
               size="icon"
@@ -176,11 +176,37 @@ export const createColumns = (
       ),
     },
     {
-      accessorKey: "activities",
+      accessorKey: "presence.community",
       header: ({ column }) => {
         return (
           <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Atividades</p>
+            <p>Comunidade</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
+          <span className="font-medium">
+            {formatPercentage(row.original.presence.community)}
+          </span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "activities",
+      header: ({ column }) => {
+        return (
+          <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
+            <p className="font-semibold h-9 flex items-center">Atividades</p>
             <Button
               variant="ghost"
               size="icon"

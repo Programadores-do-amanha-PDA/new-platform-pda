@@ -18,13 +18,15 @@ export function getDescriptiveColumnName(
     const presenceType = accessorKey.split(".")[1];
     switch (presenceType) {
       case "general":
-        return "Presença Geral";
+        return "Geral";
       case "programming":
         return "Programação";
       case "english":
         return "Inglês";
       case "softSkills":
         return "Soft Skills";
+        case "community":
+          return "Comunidade";
       default:
         return presenceType;
     }

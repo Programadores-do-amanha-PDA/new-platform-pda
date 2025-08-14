@@ -11,6 +11,7 @@ export function calculatePresenceByType(
     programming: 0,
     english: 0,
     softSkills: 0,
+    community: 0,
   };
 
   // Filtrar meetings que já passaram e não são recorrentes
@@ -76,7 +77,6 @@ export function calculatePresenceByType(
 
     const presencePercentage = Math.round((attendedEvents / totalEvents) * 100);
 
-    //TODO: melhorar caso haja outros tipos
     switch (classType) {
       case "programming":
         presenceData.programming = presencePercentage;
@@ -88,36 +88,28 @@ export function calculatePresenceByType(
         presenceData.softSkills = presencePercentage;
         break;
       case "community":
-      case "general":
-        presenceData.general = presencePercentage;
+        presenceData.community = presencePercentage;
         break;
-      default:
-        presenceData.general = presencePercentage;
+      // "general" não é um tipo de aula, é calculado como média dos outros tipos
     }
   });
 
-  // fazendo o cálculo com base em TODOS os eventos (independente do tipo)
-  if (allPastEvents.length > 0) {
-    const totalAttendedAcrossAllTypes = allPastEvents.filter((event) => {
-      return event.participants?.some((participant) => {
-        const emailMatch = participant.user_email === studentEmail;
-        const userIdMatch = participant.user_id === studentId;
-        return emailMatch || userIdMatch;
-      });
-    }).length;
+  // Calcular "general" como média dos outros tipos de aula
+  const typeValues = [
+    presenceData.programming,
+    presenceData.english,
+    presenceData.softSkills,
+    presenceData.community,
+  ].filter((value) => value > 0); // Apenas tipos que têm dados
 
-    const generalPresenceFromAll = Math.round(
-      (totalAttendedAcrossAllTypes / allPastEvents.length) * 100
+  if (typeValues.length > 0) {
+    presenceData.general = Math.round(
+      typeValues.reduce((sum, value) => sum + value, 0) / typeValues.length
     );
-
-    // se não houver presença geral específica, usar o cálculo baseado em todos os eventos
-    if (presenceData.general === 0) {
-      presenceData.general = generalPresenceFromAll;
-    }
-
-    console.log(`presença-final calculada:`, presenceData);
-    return presenceData;
   }
+
+  console.log(`presença-final calculada:`, presenceData);
+  return presenceData;
 
   return presenceData;
 }

@@ -1,12 +1,11 @@
 "use client";
-import { ArrowLeft, Calendar1, Type } from "lucide-react";
+import { Calendar1, Type } from "lucide-react";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
 import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types";
 import { useParams } from "next/navigation";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { NotFoundState } from "@/components/shared/not-found-state";
 
 const projectTypesLabels = {
   mini_project: "Mini projeto",
@@ -33,24 +32,12 @@ export default function ProjectPage() {
 
   if (!currentProject) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-4 p-4 py-6 overflow-hidden">
-        <h2 className="font-bold text-2xl text-foreground">
-          Projeto não encontrado.
-        </h2>
-        <p className="text-muted-foreground">
-          Verifique se o ID do projeto está correto ou se o projeto esta
-          cadastrado na turma.
-        </p>
-        <Button variant="outline" asChild>
-          <Link
-            href={`/dashboard/classrooms/${classroom_id}/projects`}
-            className="hover:underline font-semibold"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4 rotate-2" />
-            Ver todos os Projetos
-          </Link>
-        </Button>
-      </div>
+      <NotFoundState
+        title="Projeto não encontrado."
+        subtitle="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
+        href={`/dashboard/classrooms/${classroom_id}/projects`}
+        buttonText="Ver todos os Projetos"
+      />
     );
   }
 

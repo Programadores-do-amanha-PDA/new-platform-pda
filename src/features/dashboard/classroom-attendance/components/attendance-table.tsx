@@ -34,6 +34,7 @@ import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoo
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
 import { ZoomMeetingT } from "@/types/classroom-zoom";
 import AttendancePaginationControl from "./attendance-pagination-control";
+import { isWithinInterval } from "date-fns";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -122,6 +123,13 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
   },
 ];
 
+interface DateRange {
+  from: Date;
+  to: Date;
+}
+
+
+
 export default function AttendanceTable({
   users,
   meetings,
@@ -130,14 +138,25 @@ export default function AttendanceTable({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [displayedMeetingsCount, setDisplayedMeetingsCount] =
-    React.useState(31);
+  const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
 
   const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
 
   const displayedMeetings = React.useMemo(() => {
-    return meetings.slice(0, displayedMeetingsCount);
-  }, [meetings, displayedMeetingsCount]);
+    if (!dateRange) return meetings;
+    
+    return meetings.filter((meeting) => {
+      const meetingDate = new Date(meeting.start_time || 0);
+      return isWithinInterval(meetingDate, {
+        start: dateRange.from,
+        end: dateRange.to,
+      });
+    });
+  }, [meetings, dateRange]);
+
+  const handleDateRangeChange = React.useCallback((newDateRange: DateRange) => {
+    setDateRange(newDateRange);
+  }, []);
 
   const table = useReactTable({
     data: users,
@@ -174,9 +193,7 @@ export default function AttendanceTable({
           className="max-w-sm"
         />
         <AttendancePaginationControl
-          totalMeetings={meetings.length}
-          displayedCount={displayedMeetingsCount}
-          onCountChange={setDisplayedMeetingsCount}
+          onDateRangeChange={handleDateRangeChange}
         />
       </div>
       <div className="rounded-md border flex w-full h-full overflow-y-auto">

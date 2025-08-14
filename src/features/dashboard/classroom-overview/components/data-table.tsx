@@ -127,8 +127,8 @@ export function DataTable<TData, TValue>({
                     <TableHead
                       key={group.id}
                       colSpan={visibleColspan}
-                      rowSpan={group.label === null ? 2 : 1} // Individual columns span 2 rows
-                      className={`w-full h-max p-0 ${
+                      rowSpan={group.label === null ? 2 : 1}
+                      className={`w-full h-max p-0! m-0 ${
                         isFirstColumn ? "sticky left-0 bg-sidebar z-10" : ""
                       }`}
                     >
