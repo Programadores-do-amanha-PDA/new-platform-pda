@@ -8,6 +8,7 @@ import { ClassroomT } from "@/types/classrooms";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
+import { safeIconName } from "@/utils/lucide-safe";
 
 interface ClassroomState {
   classrooms: ClassroomT[];
@@ -45,7 +46,14 @@ export const useClassroomStore = create<ClassroomState & ClassroomActions>()(
           set({ loading: true });
           const classroomsResponse = await getAllClassrooms();
           if (!classroomsResponse) throw "no classrooms response";
-          set({ classrooms: classroomsResponse});
+          
+          // Garantir que todos os classrooms tenham um ícone válido
+          const classroomsWithValidIcons = classroomsResponse.map(classroom => ({
+            ...classroom,
+            icon: safeIconName(classroom.icon)
+          }));
+          
+          set({ classrooms: classroomsWithValidIcons});
           return true;
         } catch (error) {
           console.error(error);
@@ -76,7 +84,13 @@ export const useClassroomStore = create<ClassroomState & ClassroomActions>()(
           const newClassroom = await createClassroom(classroomData);
           if (!newClassroom) throw new Error("no classroom create response");
 
-          set({ classrooms: [...classrooms, { ...newClassroom }] });
+          // Garantir que o novo classroom tenha um ícone válido
+          const classroomWithValidIcon = {
+            ...newClassroom,
+            icon: safeIconName(newClassroom.icon)
+          };
+
+          set({ classrooms: [...classrooms, classroomWithValidIcon] });
           toast.success(`Turma ${newClassroom.name} criada com sucesso!`);
           return newClassroom.id;
         } catch (error) {
@@ -98,9 +112,15 @@ export const useClassroomStore = create<ClassroomState & ClassroomActions>()(
           if (!classroomUpdated)
             throw new Error("no update classroom response");
 
+          // Garantir que o classroom atualizado tenha um ícone válido
+          const classroomWithValidIcon = {
+            ...classroomUpdated,
+            icon: safeIconName(classroomUpdated.icon)
+          };
+
           set({
             classrooms: classrooms.map((classroom) =>
-              classroom.id === classroomId ? classroomUpdated : classroom
+              classroom.id === classroomId ? classroomWithValidIcon : classroom
             ),
           });
           toast.success("Turma atualizada com sucesso!");

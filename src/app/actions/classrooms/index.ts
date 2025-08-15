@@ -28,7 +28,7 @@ export const getAllClassrooms = async () => {
 
     const { data, error } = await supabase
       .from("classrooms")
-      .select("*, classroom_coodesh_assessments(*)")
+      .select("*")
       .order("created_at", { ascending: true });
 
     if (error) throw error;

@@ -96,7 +96,8 @@ export type ZoomClassT =
   | "programming"
   | "english"
   | "soft-skills"
-  | "community";
+  | "community"
+  | "employability";
 
 export interface ZoomMeetingTrackingFieldT {
   field: string;

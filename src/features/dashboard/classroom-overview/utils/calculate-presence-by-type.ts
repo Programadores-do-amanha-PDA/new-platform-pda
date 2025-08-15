@@ -12,6 +12,7 @@ export function calculatePresenceByType(
     english: 0,
     softSkills: 0,
     community: 0,
+    employability: 0,
   };
 
   // Filtrar meetings que já passaram e não são recorrentes
@@ -90,6 +91,9 @@ export function calculatePresenceByType(
       case "community":
         presenceData.community = presencePercentage;
         break;
+      case "employability":
+        presenceData.employability = presencePercentage;
+        break;
       // "general" não é um tipo de aula, é calculado como média dos outros tipos
     }
   });
@@ -100,6 +104,7 @@ export function calculatePresenceByType(
     presenceData.english,
     presenceData.softSkills,
     presenceData.community,
+    presenceData.employability,
   ].filter((value) => value > 0); // Apenas tipos que têm dados
 
   if (typeValues.length > 0) {

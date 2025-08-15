@@ -27,6 +27,8 @@ export function getDescriptiveColumnName(
         return "Soft Skills";
         case "community":
           return "Comunidade";
+          case "employability":
+            return "Empregabilidade";
       default:
         return presenceType;
     }

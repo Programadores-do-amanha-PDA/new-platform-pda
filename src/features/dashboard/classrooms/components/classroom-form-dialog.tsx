@@ -28,6 +28,7 @@ import ClassroomPeriodSelector from "./classroom-period-selector";
 import ClassroomStatusSelector from "./classroom-status-selector";
 import { ClassroomT } from "@/types/classrooms";
 import { useClassroomStore } from "../stores/classrooms";
+import { IconPicker, IconName } from "@/components/ui/icon-picker";
 
 const classroomFormSchema = z.object({
   name: z
@@ -39,6 +40,7 @@ const classroomFormSchema = z.object({
   status: z.enum(["created", "active", "finished"], {
     required_error: "Status é obrigatório",
   }),
+  icon: z.string().min(1, "Ícone é obrigatório"),
 });
 
 type ClassroomFormData = z.infer<typeof classroomFormSchema>;
@@ -59,6 +61,7 @@ const ClassroomFormDialog = ({
       name: "",
       period: "afternoon",
       status: "active",
+      icon: "book-open",
     },
   });
 
@@ -70,19 +73,12 @@ const ClassroomFormDialog = ({
   };
 
   useEffect(() => {
-    if (currentClassroom) {
-      form.reset({
-        name: currentClassroom.name,
-        period: currentClassroom.period,
-        status: currentClassroom.status,
-      });
-    } else {
-      form.reset({
-        name: "",
-        period: "afternoon",
-        status: "active",
-      });
-    }
+    form.reset({
+      name: currentClassroom?.name ?? "",
+      period: currentClassroom?.period ?? "afternoon",
+      status: currentClassroom?.status ?? "active",
+      icon: currentClassroom?.icon ?? "book-open",
+    });
   }, [currentClassroom, form]);
 
   const handleSubmit = async (data: ClassroomFormData) => {
@@ -96,6 +92,7 @@ const ClassroomFormDialog = ({
           updates.period = data.period;
         if (data.status !== currentClassroom.status)
           updates.status = data.status;
+        if (data.icon !== currentClassroom.icon) updates.icon = data.icon;
 
         await updateClassroom(currentClassroom.id, updates);
         toast.success("Turma editada com sucesso!");
@@ -140,19 +137,41 @@ const ClassroomFormDialog = ({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-6"
           >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-semibold">Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Digite o nome da turma" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="w-full flex justify-between items-start gap-4">
+              <FormField
+                control={form.control}
+                name="icon"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-semibold">Ícone</FormLabel>
+                    <FormControl>
+                      <IconPicker
+                        value={(field.value as IconName) ?? "BookOpen"}
+                        onValueChange={(iconName) => {
+                          field.onChange(iconName);
+                        }}
+                        className="w-max"
+                        searchPlaceholder="Procurando por qual ícone?"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel className="font-semibold">Nome</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Digite o nome da turma" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <div className="w-full flex justify-between items-start gap-4">
               <FormField

@@ -52,6 +52,7 @@ export function ColumnVisibilityDropdown<TData>({
                 className="capitalize"
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                onSelect={(e) => e.preventDefault()}
               >
                 {group.columnHeaders?.[group.columns[0]] || group.id}
               </DropdownMenuCheckboxItem>
@@ -77,9 +78,9 @@ export function ColumnVisibilityDropdown<TData>({
                       col?.toggleVisibility(!!value)
                     );
                   }}
+                  onSelect={(e) => e.preventDefault()}
                 >
-                  {group.label}{" "}
-                  {someVisible && !allVisible ? "(Parcial)" : ""}
+                  {group.label} {someVisible && !allVisible ? "(Parcial)" : ""}
                 </DropdownMenuCheckboxItem>
                 {groupColumns.map((column) => (
                   <DropdownMenuCheckboxItem
@@ -89,6 +90,7 @@ export function ColumnVisibilityDropdown<TData>({
                     onCheckedChange={(value) =>
                       column?.toggleVisibility(!!value)
                     }
+                    onSelect={(e) => e.preventDefault()}
                   >
                     {group.columnHeaders?.[column?.id || ""] || column?.id}
                   </DropdownMenuCheckboxItem>

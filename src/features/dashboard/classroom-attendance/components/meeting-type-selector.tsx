@@ -12,6 +12,7 @@ const meetingTypes = [
   { id: "english", name: "Inglês" },
   { id: "soft-skills", name: "Soft Skills" },
   { id: "community", name: "Comunidade" },
+  { id: "employability", name: "Empregabilidade" },
 ];
 
 const MeetingTypeSelector = ({

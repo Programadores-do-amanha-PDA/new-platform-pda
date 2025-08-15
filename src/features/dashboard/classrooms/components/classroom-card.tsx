@@ -1,13 +1,9 @@
-import { Moon, Sun, Sunrise } from "lucide-react";
-import { ClassroomT, ClassroomStatusT } from "@/types/classrooms";
+"use client";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
-
-const classroomPeriodLabels = {
-  morning: <Sunrise className="size-5 " />,
-  afternoon: <Sun className="size-5 text-muted-foreground" />,
-  evening: <Moon className="size-5 text-muted-foreground" />,
-};
+import { DynamicLucideIcon } from "@/components/shared/icons/dynamic-lucide-icon";
+import { ClassroomT, ClassroomStatusT } from "@/types";
+import { safeIconName } from "@/utils/lucide-safe";
 
 const cardBadgeVariantByStatus: Record<
   ClassroomStatusT,
@@ -45,7 +41,7 @@ const ClassroomCard = ({
           </Badge>
         </div>
       </div>
-      {classroom.period && classroomPeriodLabels[classroom.period]}
+      <DynamicLucideIcon name={safeIconName(classroom.icon)} className="w-6 h-6" />
     </li>
   );
 };

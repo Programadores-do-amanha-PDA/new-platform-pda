@@ -34,7 +34,8 @@ export default function AttendancePage() {
       user.profile?.classrooms
         ?.map((c) => c.classroom_id)
         ?.includes(classroom_id) &&
-      user.profile?.user_roles?.map((r) => r.role).includes("student")
+      (user.profile?.user_roles?.map((r) => r.role).includes("student") ||
+        user.profile?.user_roles?.map((r) => r.role).includes("alumni"))
   );
 
   const allPastsMeetings = [

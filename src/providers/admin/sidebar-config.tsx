@@ -1,20 +1,15 @@
 "use client";
-import { Moon, Sun, Sunrise, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ClassroomT } from "@/types/classrooms";
-import { AuthUserWithProfileT } from "@/types/auth";
-import { ZoomMeetingT } from "@/types/classroom-zoom/meetings";
-import { SidebarDataT } from "@/types/sidebar";
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
-import { ClassroomProjectT } from "@/types/classroom-projects";
+import {
+  AuthUserWithProfileT,
+  SidebarDataT,
+  ClassroomT,
+  ZoomMeetingT,
+  ClassroomCoodeshAssessmentT,
+  ClassroomProjectT,
+} from "@/types";
 import pathLabels from "@/utils/path-labels";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
-
-export const classroomPeriodsIcons = {
-  morning: Sunrise,
-  afternoon: Sun,
-  evening: Moon,
-};
 
 export const generateSidebarConfig = (
   user: AuthUserWithProfileT,
@@ -36,7 +31,7 @@ export const generateSidebarConfig = (
         title: pathLabels["users"],
         url: "/dashboard/users",
         ref: "users",
-        icon: Users,
+        icon: "users",
         items: [
           {
             title: pathLabels["all_users"],
@@ -72,9 +67,7 @@ export const generateSidebarConfig = (
         title: classroom.name,
         ref: classroom.id,
         url: `/dashboard/classrooms/${classroom.id}`,
-        icon: classroomPeriodsIcons[
-          classroom.period as keyof typeof classroomPeriodsIcons
-        ],
+        icon: classroom.icon,
         isActive: false,
         items: [
           {

@@ -201,12 +201,19 @@ export const createColumns = (
         </div>
       ),
     },
-    {
-      accessorKey: "activities",
+  ];
+
+  // Verificar se há dados de empregabilidade para mostrar a coluna
+  const hasEmployabilityData = data.students.some(student => student.presence.employability > 0);
+
+  // Adicionar coluna de empregabilidade condicionalmente
+  if (hasEmployabilityData) {
+    baseColumns.push({
+      accessorKey: "presence.employability",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
-            <p className="font-semibold h-9 flex items-center">Atividades</p>
+          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p>Empregabilidade</p>
             <Button
               variant="ghost"
               size="icon"
@@ -222,12 +229,40 @@ export const createColumns = (
       cell: ({ row }) => (
         <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
           <span className="font-medium">
-            {formatPercentage(row.original.activities)}
+            {formatPercentage(row.original.presence.employability)}
           </span>
         </div>
       ),
+    });
+  }
+
+  // Adicionar coluna de atividades
+  baseColumns.push({
+    accessorKey: "activities",
+    header: ({ column }) => {
+      return (
+        <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
+          <p className="font-semibold h-9 flex items-center">Atividades</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() =>
+              column.toggleSorting(column.getIsSorted() === "asc")
+            }
+          >
+            <ArrowUpDown />
+          </Button>
+        </div>
+      );
     },
-  ];
+    cell: ({ row }) => (
+      <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
+        <span className="font-medium">
+          {formatPercentage(row.original.activities)}
+        </span>
+      </div>
+    ),
+  });
 
   // Adicionar colunas dinâmicas dos testes Coodesh
   const coodeshColumns: ColumnDef<StudentOverview>[] = data.coodeshTests.map(

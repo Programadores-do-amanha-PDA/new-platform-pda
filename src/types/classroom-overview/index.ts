@@ -4,6 +4,7 @@ export type StudentPresenceIndicators = {
   english: number;
   softSkills: number;
   community: number;
+  employability: number;
 };
 
 export type StudentCoodeshIndicators = {

@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import { SidebarNavItemT } from "@/types/sidebar";
+import { DynamicLucideIcon } from "../icons/dynamic-lucide-icon";
 
 export default function NavMain({
   items,
@@ -46,10 +47,12 @@ export default function NavMain({
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
                   {item.icon && (
-                    <item.icon
-                      className="size-5 cursor-pointer"
-                      onClick={() => router.push(item.url)}
-                    />
+                    <div onClick={() => router.push(item.url)}>
+                      <DynamicLucideIcon
+                        name={item.icon}
+                        className="size-4 cursor-pointer"
+                      />
+                    </div>
                   )}
                   <p
                     onClick={() => router.push(item.url)}

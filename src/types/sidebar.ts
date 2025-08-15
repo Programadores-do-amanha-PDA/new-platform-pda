@@ -13,7 +13,7 @@ export interface NavItemT {
 
 export interface SidebarNavItemT extends NavItemT {
   ref?: string;
-  icon?: LucideIcon;
+  icon?: string;
   isActive?: boolean;
   items?: NavItemT[];
 }
