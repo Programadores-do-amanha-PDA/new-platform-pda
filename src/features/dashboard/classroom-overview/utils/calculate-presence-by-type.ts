@@ -108,8 +108,5 @@ export function calculatePresenceByType(
     );
   }
 
-  console.log(`presença-final calculada:`, presenceData);
-  return presenceData;
-
   return presenceData;
 }
