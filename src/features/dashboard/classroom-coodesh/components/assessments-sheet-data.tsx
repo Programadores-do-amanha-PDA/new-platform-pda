@@ -76,7 +76,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
             Anexe abaixo as avaliações da Coodesh que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
-        <main className="h-full flex flex-col gap-4 xl:gap-6 p-2">
+        <main className="h-full flex flex-col gap-4 xl:gap-6 p-2 overflow-hidden">
           <div>
             <Input
               placeholder="Procurando por algo?"
@@ -90,20 +90,21 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                 (assessmentPayload: AssessmentPayloadT) => (
                   <li
                     key={assessmentPayload.assessment_id}
-                    className="p-2 border rounded-lg"
+                    className="w-full  h-max p-2 border rounded-lg"
                   >
                     <div className="flex items-center gap-4 justify-between">
-                      <div className="flex flex-col gap-1 truncate">
+                      <div className="flex flex-col gap-1">
                         <h2
-                          className="font-semibold text-sm truncate"
+                          className="w-full font-semibold text-sm"
                           title={assessmentPayload.name}
                         >
                           {assessmentPayload.name}
                         </h2>
-                        <p className="text-xs text-gray-500 truncate">
-                          {assessmentPayload.description}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate"></p>
+                        {assessmentPayload.description.length > 0 && (
+                          <p className="text-xs text-gray-500">
+                            {assessmentPayload.description}
+                          </p>
+                        )}
                       </div>
                       <Button
                         onClick={() =>
