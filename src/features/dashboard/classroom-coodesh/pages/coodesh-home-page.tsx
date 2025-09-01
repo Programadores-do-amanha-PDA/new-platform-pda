@@ -14,13 +14,14 @@ const CoodeshHomePage = () => {
   const path = usePathname();
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 p-6 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-8 p-6 overflow-y-scroll">
       <AttemptsChallengeScoreChart
         participants={assessments
           .map((assessment) => assessment.participants_data || [])
           .flat()}
       />
-      <div className="w-full h-full flex flex-col justify-start items-start gap-4 px-6 overflow-hidden">
+
+      <div className="w-full min-h-[200px] flex flex-col justify-start items-start gap-4 px-6">
         <header className="w-full h-12 flex justify-between gap-4">
           <p className="text-lg font-bold mb-4">Avaliações da turma</p>
           <Link href={`${path}/assessments`}>
@@ -35,7 +36,7 @@ const CoodeshHomePage = () => {
         </header>
 
         {assessments.length > 0 && (
-          <ul className="w-full h-max max-h-full flex flex-wrap items-start gap-4 overflow-y-auto">
+          <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto">
             {assessments
               ?.sort(
                 (a, b) =>
