@@ -1,4 +1,5 @@
 "use server";
+
 import { AssessmentT } from "@/types";
 import axios from "axios";
 
@@ -20,7 +21,7 @@ const getCoodeshAPIAssessments = async () => {
     return response.data as AssessmentT;
   } catch (error) {
     console.error(error);
-    throw false;
+    return null
   }
 };
 

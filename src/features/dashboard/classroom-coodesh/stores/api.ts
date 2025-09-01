@@ -32,8 +32,8 @@ export const useCoodeshAPIAssessmentStore = create<
       getApiAssessments: async () => {
         try {
           set({ loading: true });
-          const assessments: AssessmentT = await getCoodeshAPIAssessments();
-          console.log(assessments);
+          const assessments: AssessmentT | null =
+            await getCoodeshAPIAssessments();
 
           if (!assessments) throw "no assessments fetched successfully";
 
