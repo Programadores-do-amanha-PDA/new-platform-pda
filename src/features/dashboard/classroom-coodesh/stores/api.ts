@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 import { AssessmentPayloadT, AssessmentT } from "@/types";
-import { getCoodeshAPIAssessments } from "@/app/apis/coodesh/assessments";
+import { getCoodeshAPIAssessments } from "@/features/dashboard/classroom-coodesh/api/assessments";
 
 interface CoodeshAPIAssessmentState {
   apiAssessments: AssessmentPayloadT[];
@@ -35,7 +35,9 @@ export const useCoodeshAPIAssessmentStore = create<
           const assessments: AssessmentT | null =
             await getCoodeshAPIAssessments();
 
-          if (!assessments) throw "no assessments fetched successfully";
+          if (!assessments) {
+            throw new Error("no assessments fetched successfully");
+          }
 
           set({
             apiAssessments: [...get().apiAssessments, ...assessments.payload],
@@ -44,7 +46,7 @@ export const useCoodeshAPIAssessmentStore = create<
 
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao buscar avaliações! Tente novamente mais tarde!");
           set({ loading: false });
           return false;

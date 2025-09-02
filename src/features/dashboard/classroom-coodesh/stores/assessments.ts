@@ -20,6 +20,10 @@ interface CoodeshAssessmentActions {
   createAssessment: (
     assessmentData: Partial<ClassroomCoodeshAssessmentT>
   ) => Promise<boolean>;
+  createManualAssessment: (
+    classroomId: string,
+    assessmentData: Partial<ClassroomCoodeshAssessmentT>
+  ) => Promise<boolean>;
   updateAssessment: (
     assessment: ClassroomCoodeshAssessmentT,
     updatedData: Partial<ClassroomCoodeshAssessmentT>
@@ -86,6 +90,45 @@ export const useCoodeshAssessmentStore = create<
           toast.error(
             "Erro ao anexar a avaliação! Tente novamente mais tarde!"
           );
+          return false;
+        }
+      },
+
+      createManualAssessment: async (classroomId, assessmentData) => {
+        try {
+          if (!classroomId) throw new Error("classroom_id is required");
+
+          // Generate a unique assessment_id for manual assessments
+          const assessment_id = assessmentData.assessment_id || "";
+
+          const manualAssessmentData: Partial<ClassroomCoodeshAssessmentT> = {
+            assessment_id,
+            classroom_id: classroomId,
+            name: assessmentData.name,
+            description: assessmentData.description || "",
+            default_locale: assessmentData.default_locale || "pt",
+            duration: assessmentData.duration,
+            duration_unit: assessmentData.duration_unit,
+            questions: [],
+            created_at: new Date().toISOString(),
+          };
+
+          const assessmentCreated = await createCoodeshAssessment(
+            manualAssessmentData
+          );
+
+          if (!assessmentCreated)
+            throw new Error("no manual assessment created successfully");
+
+          set({
+            assessments: [...get().assessments, assessmentCreated],
+          });
+
+          toast.success("Avaliação criada com sucesso!");
+          return true;
+        } catch (error) {
+          console.log(error);
+          toast.error("Erro ao criar a avaliação! Tente novamente mais tarde!");
           return false;
         }
       },
