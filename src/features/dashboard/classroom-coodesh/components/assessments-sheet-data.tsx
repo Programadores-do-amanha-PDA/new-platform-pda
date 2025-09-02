@@ -101,7 +101,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                           {assessmentPayload.name}
                         </h2>
                         {assessmentPayload.description.length > 0 && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs">
                             {assessmentPayload.description}
                           </p>
                         )}

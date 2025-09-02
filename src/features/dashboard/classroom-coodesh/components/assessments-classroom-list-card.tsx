@@ -139,7 +139,7 @@ const AssessmentsClassroomListCard = ({
               {assessment.name}
             </Link>
           </div>
-          {assessment.description && (
+          {assessment.description.length > 0 && (
             <p
               className="text-sm h-5 text-gray-500"
               title={assessment.description}
@@ -157,7 +157,7 @@ const AssessmentsClassroomListCard = ({
             </p>
           )}
 
-          {assessment.questions.length && (
+          {assessment.questions.length > 0 && (
             <p className="text-sm h-5 text-gray-500 flex gap-1">
               Questões:
               <p className="font-bold">{assessment.questions.length}</p>
