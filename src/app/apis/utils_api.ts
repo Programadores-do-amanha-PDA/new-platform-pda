@@ -1,3 +1,4 @@
+"use server"
 import axios from "axios";
 
 const useAxios = axios.create({
