@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 
 import AssessmentsClassroomListCard from "../components/assessments-classroom-list-card";
 import AssessmentsSheetData from "../components/assessments-sheet-data";
+import AssessmentFormDialog from "../components/assessment-form-dialog";
 import { useCoodeshAssessmentStore } from "../stores/assessments";
 
 export default function AssessmentsPage() {
@@ -30,7 +31,10 @@ export default function AssessmentsPage() {
           onChange={(e) => setSearchFilter(e.target.value)}
         />
 
-        <AssessmentsSheetData classroom_id={classroom_id} />
+        <div className="flex gap-2">
+          <AssessmentFormDialog classroomId={classroom_id} />
+          <AssessmentsSheetData classroom_id={classroom_id} />
+        </div>
       </header>
 
       {assessments && assessments.length > 0 ? (
