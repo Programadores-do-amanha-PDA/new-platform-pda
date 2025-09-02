@@ -32,12 +32,6 @@ export const generateSidebarConfig = (
         url: "/dashboard/users",
         ref: "users",
         icon: "users",
-        items: [
-          {
-            title: pathLabels["all_users"],
-            url: "/dashboard/users/all",
-          },
-        ],
       },
       // {
       //   title: pathLabels["jobs"],
