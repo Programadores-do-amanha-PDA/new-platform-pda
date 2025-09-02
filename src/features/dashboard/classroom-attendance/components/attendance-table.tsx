@@ -35,6 +35,7 @@ import { AttendanceJustificationDropdown } from "./attendance-justification-drop
 import { ZoomMeetingT } from "@/types/classroom-zoom";
 import AttendancePaginationControl from "./attendance-pagination-control";
 import { isWithinInterval } from "date-fns";
+import { calculateClassPresence } from "../utils/class-presence";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -57,7 +58,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     header: ({ column }) => {
       const sortState = column.getIsSorted();
       return (
-        <div className="w-full h-full flex justify-start items-center border-r border-b border-border px-2">
+        <div className="w-full h-full flex justify-start items-center border-r border-b px-2">
           <Button
             variant="ghost"
             className="text-left px-2 font-semibold"
@@ -128,8 +129,6 @@ interface DateRange {
   to: Date;
 }
 
-
-
 export default function AttendanceTable({
   users,
   meetings,
@@ -144,7 +143,7 @@ export default function AttendanceTable({
 
   const displayedMeetings = React.useMemo(() => {
     if (!dateRange) return meetings;
-    
+
     return meetings.filter((meeting) => {
       const meetingDate = new Date(meeting.start_time || 0);
       return isWithinInterval(meetingDate, {
@@ -224,7 +223,7 @@ export default function AttendanceTable({
                         className="w-full h-max !p-0 !m-0 !border-0"
                       >
                         <div className="w-full h-full flex flex-col justify-center items-center border-r border-b">
-                          <div className="w-full h-11 flex justify-center items-center border-b border-border px-2">
+                          <div className="w-full h-11 flex justify-center items-center border-b px-2">
                             <p className="font-bold">
                               {new Date(
                                 pastMeeting.start_time || 0
@@ -249,6 +248,9 @@ export default function AttendanceTable({
                                 })
                               }
                             />
+                          </div>
+                          <div className="w-full h-11 flex justify-center items-center gap-1 border-t px-2">
+                            <p>{calculateClassPresence(pastMeeting, users)}%</p>
                           </div>
                         </div>
                       </TableHead>
@@ -291,7 +293,7 @@ export default function AttendanceTable({
                         return (
                           <TableCell
                             key={`TableCell-${meeting.id}-${index}`}
-                            className="border-r border-border"
+                            className="border-r"
                           >
                             <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
                               <p
@@ -332,7 +334,7 @@ export default function AttendanceTable({
                           <TableCell
                             key={`TableCell-${meeting.id}-${index}`}
                             className={cn(
-                              "border-r border-border",
+                              "border-r",
                               new Date(meeting.start_time || 0).getTime() ===
                                 new Date().getTime()
                                 ? "bg-amber-50"
@@ -395,7 +397,7 @@ export default function AttendanceTable({
                       return (
                         <TableCell
                           key={`TableCell-${meeting.id}-${index}`}
-                          className="border-r border-border"
+                          className="border-r"
                         >
                           <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
                             <p
