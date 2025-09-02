@@ -271,8 +271,8 @@ export const createColumns = (
       accessorFn: (row) => row.coodesh[test.id],
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>{test.name}</p>
+          <div className="w-full max-w-[200px]  h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p className="truncate" title={test.name}>{test.name}</p>
             <Button
               variant="ghost"
               size="icon"
@@ -305,8 +305,8 @@ export const createColumns = (
       accessorFn: (row) => row.projects[project.id],
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>{project.name}</p>
+          <div className="w-full max-w-[200px] h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p className="truncate">{project.name}</p>
             <Button
               variant="ghost"
               size="icon"
