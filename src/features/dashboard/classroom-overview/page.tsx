@@ -52,7 +52,6 @@ export default function ClassroomAttendancePage() {
 
         // Calcular presenças por tipo usando zoom past instances e meetings passados
         const presenceIndicators = calculatePresenceByType(
-          user.id || "",
           pastInstances.filter((p) => p.is_visible_on_schedule === true),
           meetings.filter((m) => m.is_visible_on_schedule === true),
           studentEmail

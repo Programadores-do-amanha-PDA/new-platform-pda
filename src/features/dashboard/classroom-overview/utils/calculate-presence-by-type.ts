@@ -1,7 +1,7 @@
 import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types";
+import { calculateUserAttendance } from "@/utils/attendance-calculator";
 
 export function calculatePresenceByType(
-  studentId: string,
   zoomPastInstances: ZoomMeetingPastInstanceT[],
   zoomMeetings: ZoomMeetingT[],
   studentEmail: string
@@ -30,29 +30,20 @@ export function calculatePresenceByType(
   });
 
   // Combinar past instances com meetings que já passaram
-  const allPastEvents: Array<{
-    class_type: string;
-    participants?: Array<{ user_email: string; user_id: string }>;
-  }> = [
+  const allPastEvents: Array<ZoomMeetingPastInstanceT | ZoomMeetingT> = [
     ...zoomPastInstances,
-    ...pastMeetings.map((meeting) => ({
-      class_type: meeting.class_type || "general",
-      participants: meeting.participants?.map((p) => ({
-        user_email: p.user_email,
-        user_id: p.user_id,
-      })),
-    })),
+    ...pastMeetings,
   ];
 
   // agrupando eventos por tipo de aula
   const eventsByType = allPastEvents.reduce((acc, event) => {
-    const classType = event.class_type || "general";
+    const classType = event.class_type || "";
     if (!acc[classType]) {
       acc[classType] = [];
     }
     acc[classType].push(event);
     return acc;
-  }, {} as Record<string, Array<{ class_type: string; participants?: Array<{ user_email: string; user_id: string }> }>>);
+  }, {} as Record<string, Array<ZoomMeetingPastInstanceT | ZoomMeetingT>>);
 
   // calculando presença para cada tipo
   Object.keys(eventsByType).forEach((classType) => {
@@ -66,14 +57,8 @@ export function calculatePresenceByType(
         return false; //nenhum participante encontrado
       }
 
-      const hasParticipant = event.participants.some((participant) => {
-        const emailMatch = participant.user_email === studentEmail;
-        const userIdMatch = participant.user_id === studentId;
-
-        return emailMatch || userIdMatch;
-      });
-
-      return hasParticipant;
+      const attendance = calculateUserAttendance(event, studentEmail || "");
+      return attendance.status === "P" || attendance.status === "FJ";
     }).length;
 
     const presencePercentage = Math.round((attendedEvents / totalEvents) * 100);
@@ -94,7 +79,6 @@ export function calculatePresenceByType(
       case "employability":
         presenceData.employability = presencePercentage;
         break;
-      // "general" não é um tipo de aula, é calculado como média dos outros tipos
     }
   });
 

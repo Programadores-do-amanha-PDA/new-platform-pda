@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
   }, [allColumns, fullData]);
 
   return (
-    <div className="w-full h-full flex flex-col gap-2 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-4 overflow-hidden">
       <div className="flex items-center justify-between py-4">
         <div className="flex flex-1 items-center space-x-2">
           <Input
@@ -100,8 +100,9 @@ export function DataTable<TData, TValue>({
         </div>
         <ColumnVisibilityDropdown table={table} columnGroups={columnGroups} />
       </div>
+
       <div className="rounded-md border flex w-full h-full overflow-auto">
-        <Table className="w-full h-full">
+        <Table className="w-full">
           <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden shadow-md">
             {/* Group headers row */}
             <TableRow className="w-full p-0">
@@ -193,14 +194,14 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="!border-0"
+                  className="!border-0 !h-max"
                 >
                   {row.getVisibleCells().map((cell, index) => {
                     const isFirstColumn = index === 0;
                     return (
                       <TableCell
                         key={cell.id}
-                        className={`p-0 h-full border-0 ${
+                        className={`p-0 border-0 h-full ${
                           isFirstColumn ? "sticky left-0 z-10" : ""
                         }`}
                       >
