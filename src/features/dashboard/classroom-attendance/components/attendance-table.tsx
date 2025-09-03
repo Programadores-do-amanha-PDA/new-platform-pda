@@ -1,6 +1,7 @@
 "use client";
 
-import * as React from "react";
+import { useState, useMemo, useCallback } from "react";
+import { isWithinInterval } from "date-fns";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -15,7 +16,6 @@ import {
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -25,16 +25,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
 import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
 import MeetingTypeSelector from "./meeting-type-selector";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { ZoomMeetingT } from "@/types/classroom-zoom";
 import AttendancePaginationControl from "./attendance-pagination-control";
-import { isWithinInterval } from "date-fns";
+import { AuthUserWithProfileT, ProfileT, ZoomMeetingT } from "@/types";
+import { cn } from "@/lib/utils";
+import { calculateUserAttendance } from "@/utils/attendance-calculator";
 import { calculateClassPresence } from "../utils/class-presence";
 
 interface AttendanceTableProps {
@@ -58,10 +57,10 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     header: ({ column }) => {
       const sortState = column.getIsSorted();
       return (
-        <div className="w-full h-full flex justify-start items-center border-r border-b px-2">
+        <div className="w-full h-[133.5px] flex justify-between items-center border-r border-b px-2">
+          <p className="text-left font-semibold">Usuário</p>
           <Button
             variant="ghost"
-            className="text-left px-2 font-semibold"
             onClick={() => {
               if (!sortState) {
                 column.toggleSorting(false);
@@ -72,11 +71,10 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
               }
             }}
           >
-            Usuário
             {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary" />
+              <ArrowUp className="stroke-primary-foreground" />
             ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary" />
+              <ArrowDown className="stroke-primary-foreground" />
             ) : (
               <ArrowUpDown />
             )}
@@ -85,7 +83,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-full flex flex-row gap-2 justify-start items-center px-2 border-r bg-background">
+      <div className="w-full h-[57px] flex flex-row gap-2 justify-start items-center px-2 border-r border-b bg-background group-hover/row:bg-muted/50!">
         <Avatar>
           <AvatarFallback>
             {row
@@ -133,15 +131,13 @@ export default function AttendanceTable({
   users,
   meetings,
 }: AttendanceTableProps) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
 
-  const displayedMeetings = React.useMemo(() => {
+  const displayedMeetings = useMemo(() => {
     if (!dateRange) return meetings;
 
     return meetings.filter((meeting) => {
@@ -153,13 +149,94 @@ export default function AttendanceTable({
     });
   }, [meetings, dateRange]);
 
-  const handleDateRangeChange = React.useCallback((newDateRange: DateRange) => {
+  const handleDateRangeChange = useCallback((newDateRange: DateRange) => {
     setDateRange(newDateRange);
   }, []);
 
+  // Create dynamic columns for meetings
+  const meetingColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] =
+    useMemo(() => {
+      return displayedMeetings.map((meeting, index) => ({
+        id: `meeting-${meeting.id}-${index}`,
+        header: () => (
+          <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
+            <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
+              <p className="font-bold">
+                {new Date(meeting.start_time || 0).getTime() ===
+                new Date().getTime()
+                  ? "Hoje"
+                  : new Date(meeting.start_time || 0).toLocaleDateString(
+                      "pt-BR",
+                      {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                      }
+                    )}
+              </p>
+            </div>
+            <div className="w-[155px]! h-11 flex justify-center items-center p-2">
+              <MeetingTypeSelector
+                key={`MeetingTypeSelector-${meeting.id}-${index}`}
+                value={meeting.class_type}
+                handleValueChange={(value) =>
+                  updatePastInstanceByUuid(meeting.uuid, {
+                    class_type: value,
+                  })
+                }
+              />
+            </div>
+            <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
+              <p>{calculateClassPresence(meeting, users)}%</p>
+            </div>
+          </div>
+        ),
+        cell: ({ row }) => {
+          const userAttendance = calculateUserAttendance(
+            meeting,
+            row.original.email || ""
+          );
+
+          return (
+            <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
+              <div className="flex flex-col">
+                <p
+                  className={cn(
+                    "font-semibold",
+                    AttendanceStatusOptions[userAttendance.status].color
+                  )}
+                  title={AttendanceStatusOptions[userAttendance.status].label}
+                >
+                  {userAttendance.status}
+                </p>
+                {userAttendance.minutesAttended < 60 && userAttendance.minutesAttended > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {userAttendance.minutesAttended}M
+                  </p>
+                )}
+              </div>
+              {row.original.email && userAttendance.status !== "P" && (
+                <AttendanceJustificationDropdown
+                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+                  currentMeeting={meeting}
+                  currentUserEmail={row.original.email}
+                  type={meeting.meeting_type}
+                />
+              )}
+            </div>
+          );
+        },
+      }));
+    }, [displayedMeetings, users]);
+
+  // Combine user columns with meeting columns
+  const allColumns = useMemo(() => {
+    return [...usersColumns, ...meetingColumns];
+  }, [meetingColumns]);
+
   const table = useReactTable({
     data: users,
-    columns: usersColumns,
+    columns: allColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -181,13 +258,13 @@ export default function AttendanceTable({
   });
 
   return (
-    <div className="w-full h-full flex flex-col gap-2">
+    <div className="w-full h-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("profile")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
@@ -195,16 +272,24 @@ export default function AttendanceTable({
           onDateRangeChange={handleDateRangeChange}
         />
       </div>
+
       <div className="rounded-md border flex w-full h-full overflow-y-auto">
-        <Table className="w-max h-full">
-          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden">
+        <Table className="w-max">
+          <TableHeader className="bg-sidebar border-0! sticky top-0 left-0 right-0 z-20 overflow-hidden">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="!p-0">
+              <TableRow
+                key={headerGroup.id}
+                className="max-w-[155px]! border-0! !p-0 h-max"
+              >
                 {headerGroup.headers.map((header) => {
+                  const isUserColumn = header.id === "profile";
                   return (
                     <TableHead
                       key={header.id}
-                      className="w-full h-max sticky left-0 bg-sidebar z-10 p-0"
+                      className={cn(
+                        "w-full h-max !p-0 !m-0 !border-0",
+                        isUserColumn && "sticky left-0 bg-sidebar z-10"
+                      )}
                     >
                       {header.isPlaceholder
                         ? null
@@ -215,47 +300,6 @@ export default function AttendanceTable({
                     </TableHead>
                   );
                 })}
-                {displayedMeetings.length > 0 &&
-                  displayedMeetings.map((pastMeeting, index) => {
-                    return (
-                      <TableHead
-                        key={`TableHead-${pastMeeting.id}-${index}`}
-                        className="w-full h-max !p-0 !m-0 !border-0"
-                      >
-                        <div className="w-full h-full flex flex-col justify-center items-center border-r border-b">
-                          <div className="w-full h-11 flex justify-center items-center border-b px-2">
-                            <p className="font-bold">
-                              {new Date(
-                                pastMeeting.start_time || 0
-                              ).getTime() === new Date().getTime()
-                                ? "Hoje"
-                                : new Date(
-                                    pastMeeting.start_time || 0
-                                  ).toLocaleDateString("pt-BR", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "2-digit",
-                                  })}
-                            </p>
-                          </div>
-                          <div className="w-[155px]! h-11 flex justify-center items-center p-2">
-                            <MeetingTypeSelector
-                              key={`MeetingTypeSelector-${pastMeeting.id}-${index}`}
-                              value={pastMeeting.class_type}
-                              handleValueChange={(value) =>
-                                updatePastInstanceByUuid(pastMeeting.uuid, {
-                                  class_type: value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="w-full h-11 flex justify-center items-center gap-1 border-t px-2">
-                            <p>{calculateClassPresence(pastMeeting, users)}%</p>
-                          </div>
-                        </div>
-                      </TableHead>
-                    );
-                  })}
               </TableRow>
             ))}
           </TableHeader>
@@ -265,168 +309,32 @@ export default function AttendanceTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="group/row max-w-[155px]! w-full border-0!"
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="p-0 h-full sticky left-0"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const isUserColumn = cell.column.id === "profile";
 
-                  {displayedMeetings.length > 0 &&
-                    displayedMeetings.map((meeting, index) => {
-                      const meetingAttendanceHistory =
-                        meeting?.participants?.filter(
-                          (p) => p.user_email === row.original.email
-                        );
-
-                      const meetingJustification =
-                        meeting?.justifications?.find(
-                          (j) => j.user_email === row.original.email
-                        );
-                      if (meetingJustification) {
-                        return (
-                          <TableCell
-                            key={`TableCell-${meeting.id}-${index}`}
-                            className="border-r"
-                          >
-                            <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
-                              <p
-                                className={cn(
-                                  "font-semibold",
-                                  AttendanceStatusOptions["FJ"].color
-                                )}
-                                title={AttendanceStatusOptions["FJ"].label}
-                              >
-                                FJ
-                              </p>
-                              {row.original.email && (
-                                <AttendanceJustificationDropdown
-                                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                                  currentMeeting={meeting}
-                                  currentUserEmail={row.original.email}
-                                  type={meeting.meeting_type}
-                                />
-                              )}
-                            </div>
-                          </TableCell>
-                        );
-                      }
-
-                      if (
-                        meetingAttendanceHistory &&
-                        meetingAttendanceHistory.length > 0
-                      ) {
-                        const attendanceMinutes = Math.round(
-                          meetingAttendanceHistory.reduce(
-                            (accumulator, currentValue) =>
-                              accumulator + currentValue.duration,
-                            0
-                          ) / 60
-                        );
-
-                        return (
-                          <TableCell
-                            key={`TableCell-${meeting.id}-${index}`}
-                            className={cn(
-                              "border-r",
-                              new Date(meeting.start_time || 0).getTime() ===
-                                new Date().getTime()
-                                ? "bg-amber-50"
-                                : ""
-                            )}
-                          >
-                            <div className="w-full h-full flex items-start justify-between px-2 gap-1">
-                              <div className="w-full h-full flex flex-col justify-center items-start">
-                                {attendanceMinutes >= 60 ? (
-                                  <p
-                                    className={cn(
-                                      "font-semibold",
-                                      AttendanceStatusOptions["P"].color
-                                    )}
-                                    title={AttendanceStatusOptions["P"].label}
-                                  >
-                                    P
-                                  </p>
-                                ) : attendanceMinutes >= 30 ? (
-                                  <p
-                                    className={cn(
-                                      "font-semibold",
-                                      AttendanceStatusOptions["PP"].color
-                                    )}
-                                    title={AttendanceStatusOptions["PP"].label}
-                                  >
-                                    PP
-                                  </p>
-                                ) : (
-                                  <p
-                                    className={cn(
-                                      "font-semibold",
-                                      AttendanceStatusOptions["F"].color
-                                    )}
-                                    title={AttendanceStatusOptions["F"].label}
-                                  >
-                                    F
-                                  </p>
-                                )}
-
-                                {attendanceMinutes < 60 && (
-                                  <p className="text-sm text-muted-foreground">
-                                    {attendanceMinutes}M
-                                  </p>
-                                )}
-                              </div>
-                              {row.original.email && (
-                                <AttendanceJustificationDropdown
-                                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                                  currentMeeting={meeting}
-                                  currentUserEmail={row.original.email}
-                                  type={meeting.meeting_type}
-                                />
-                              )}
-                            </div>
-                          </TableCell>
-                        );
-                      }
-
-                      return (
-                        <TableCell
-                          key={`TableCell-${meeting.id}-${index}`}
-                          className="border-r"
-                        >
-                          <div className="w-[155px]! h-full flex items-center justify-between gap-1 px-2">
-                            <p
-                              className={cn(
-                                "font-semibold",
-                                AttendanceStatusOptions["F"].color
-                              )}
-                              title={AttendanceStatusOptions["F"].label}
-                            >
-                              F
-                            </p>
-                            {row.original.email && (
-                              <AttendanceJustificationDropdown
-                                key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                                currentMeeting={meeting}
-                                currentUserEmail={row.original.email}
-                                type={meeting.meeting_type}
-                              />
-                            )}
-                          </div>
-                        </TableCell>
-                      );
-                    })}
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          "w-max p-0 h-full border-0!",
+                          isUserColumn && "sticky left-0"
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={usersColumns.length}
+                  colSpan={allColumns.length}
                   className="h-24 text-center"
                 >
                   Sem resultados.
