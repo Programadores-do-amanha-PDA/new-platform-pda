@@ -3,6 +3,7 @@ import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "@/types";
+import { calculateUserAttendance } from "@/utils/attendance-calculator";
 
 export function calculateClassPresence(
   meeting: ZoomMeetingT | ZoomMeetingPastInstanceT,
@@ -12,14 +13,11 @@ export function calculateClassPresence(
     return 0;
   }
 
-  const presentUsers = users.filter((user) => {
-    return meeting.participants?.some((participant) => {
-      const emailMatch = participant.user_email === user.email;
-      const userIdMatch = participant.user_id === user.id;
-      return emailMatch || userIdMatch;
-    });
+  const attendances = users.filter((user) => {
+    const attendance = calculateUserAttendance(meeting, user.email || "");
+    return attendance.status === "P" || attendance.status === "FJ";
   });
 
-  const presencePercentage = (presentUsers.length / users.length) * 100;
+  const presencePercentage = (attendances.length / users.length) * 100;
   return Math.round((presencePercentage * 100) / 100);
 }
