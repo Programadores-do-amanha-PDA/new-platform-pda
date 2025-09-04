@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -19,6 +19,10 @@ import {
   MoreHorizontal,
   Trash2,
 } from "lucide-react";
+import { isWithinInterval } from "date-fns";
+import { useParams } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,28 +40,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
-import { ClassroomActivityT } from "@/types/classroom-activities";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
-import ActivityTypeSelector from "./activity-type-selector";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { ActivityJustificationDropdown } from "./activity-justification-dropdown";
 import { Badge } from "@/components/ui/badge";
-import { useParams } from "next/navigation";
+import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
+
+import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
+import ActivityTypeSelector from "./activity-type-selector";
+import { ActivityJustificationDropdown } from "./activity-justification-dropdown";
 import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
+import { AuthUserWithProfileT, ProfileT, ClassroomActivityT } from "@/types";
 import { ParticipationStatusOptions } from "../utils/participation-status-options";
-import ActivitiesPaginationControl from "./activities-pagination-control";
-import { isWithinInterval } from "date-fns";
 
 interface ActivitiesTableProps {
   users: Partial<AuthUserWithProfileT>[];
   activities: ClassroomActivityT[];
-}
-
-interface DateRange {
-  from: Date;
-  to: Date;
 }
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
@@ -137,28 +133,26 @@ export default function ActivitiesTable({
   activities,
 }: ActivitiesTableProps) {
   const { classroom_id } = useParams<{ classroom_id: string }>();
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [dateRange, setDateRange] = React.useState<DateRange | null>(null);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   const { updateActivityById, deleteActivity } = useClassroomActivityStore();
 
   // Get the activities to display based on date range filter
-  const displayedActivities = React.useMemo(() => {
-    if (!dateRange) return activities;
+  const displayedActivities = useMemo(() => {
+    if (!dateRange || !dateRange.from || !dateRange.to) return activities;
 
     return activities.filter((activity) => {
       const activityDate = new Date(activity.created_at);
       return isWithinInterval(activityDate, {
-        start: dateRange.from,
-        end: dateRange.to,
+        start: dateRange.from!,
+        end: dateRange.to!,
       });
     });
   }, [activities, dateRange]);
 
-  const handleDateRangeChange = React.useCallback((newDateRange: DateRange) => {
+  const handleDateRangeChange = useCallback((newDateRange: DateRange) => {
     setDateRange(newDateRange);
   }, []);
 
@@ -198,7 +192,7 @@ export default function ActivitiesTable({
         />
         <div className="flex gap-4 justify-between">
           <InsertManyActivitiesDialog classroomId={classroom_id} />
-          <ActivitiesPaginationControl
+          <DateIntervalPaginationControl
             onDateRangeChange={handleDateRangeChange}
           />
         </div>

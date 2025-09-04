@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
@@ -21,28 +21,25 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
-interface ActivitiesPaginationControlProps {
+interface AttendancePaginationControlProps {
   onDateRangeChange: (dateRange: { from: Date; to: Date }) => void;
 }
 
-export default function ActivitiesPaginationControl({
+export default function DateIntervalPaginationControl({
   onDateRangeChange,
-}: ActivitiesPaginationControlProps) {
-  // Inicializa com a semana atual (domingo a sábado)
-  const [dateRange, setDateRange] = React.useState<DateRange | undefined>(
-    () => {
-      const today = new Date();
-      const weekStart = startOfDay(startOfWeek(today, { weekStartsOn: 0 })); // Domingo
-      const weekEnd = endOfDay(endOfWeek(today, { weekStartsOn: 0 })); // Sábado
-      return {
-        from: weekStart,
-        to: weekEnd,
-      };
-    }
-  );
+}: AttendancePaginationControlProps) {
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+    const today = new Date();
+    const weekStart = startOfDay(startOfWeek(today, { weekStartsOn: 0 }));
+    const weekEnd = endOfDay(endOfWeek(today, { weekStartsOn: 0 }));
+    return {
+      from: weekStart,
+      to: weekEnd,
+    };
+  });
 
   // Notifica mudanças no intervalo de datas
-  React.useEffect(() => {
+  useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
       onDateRangeChange({
         from: dateRange.from,
@@ -151,7 +148,7 @@ export default function ActivitiesPaginationControl({
         </Button>
 
         <Popover>
-          <PopoverTrigger asChild>
+          <PopoverTrigger>
             <Button
               variant="ghost"
               className="h-8 px-3 text-sm font-medium rounded-none border-0 hover:bg-muted/50"

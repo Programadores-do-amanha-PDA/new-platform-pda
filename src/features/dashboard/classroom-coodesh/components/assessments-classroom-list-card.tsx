@@ -12,7 +12,7 @@ import { calculateOverallAccuracy } from "../utils/calculate-metric";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import DateIntervalPicker from "@/components/shared/date-interval-picker";
+import { DateIntervalPicker } from "@/components/shared/date-interval";
 
 import { ClassroomCoodeshAssessmentT } from "@/types";
 import { Badge } from "@/components/ui/badge";

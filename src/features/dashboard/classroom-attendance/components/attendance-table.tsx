@@ -14,7 +14,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,14 +24,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
+import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import MeetingTypeSelector from "./meeting-type-selector";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import AttendancePaginationControl from "./attendance-pagination-control";
-import { AuthUserWithProfileT, ProfileT, ZoomMeetingT } from "@/types";
 import { cn } from "@/lib/utils";
+
+import MeetingTypeSelector from "./meeting-type-selector";
+import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
+import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
+import { AuthUserWithProfileT, ProfileT, ZoomMeetingT } from "@/types";
+import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { calculateUserAttendance } from "@/utils/attendance-calculator";
 import { calculateClassPresence } from "../utils/class-presence";
 
@@ -209,11 +209,12 @@ export default function AttendanceTable({
                 >
                   {userAttendance.status}
                 </p>
-                {userAttendance.minutesAttended < 60 && userAttendance.minutesAttended > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    {userAttendance.minutesAttended}M
-                  </p>
-                )}
+                {userAttendance.minutesAttended < 60 &&
+                  userAttendance.minutesAttended > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      {userAttendance.minutesAttended}M
+                    </p>
+                  )}
               </div>
               {row.original.email && userAttendance.status !== "P" && (
                 <AttendanceJustificationDropdown
@@ -268,7 +269,7 @@ export default function AttendanceTable({
           }
           className="max-w-sm"
         />
-        <AttendancePaginationControl
+        <DateIntervalPaginationControl
           onDateRangeChange={handleDateRangeChange}
         />
       </div>
