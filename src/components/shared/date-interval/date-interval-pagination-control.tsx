@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { ChevronLeft, ChevronRight, Cog, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
 import {
@@ -11,32 +11,134 @@ import {
   subWeeks,
   startOfDay,
   endOfDay,
-  format,
+  isWithinInterval,
 } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import DateIntervalPicker from "./date-interval-picker";
+import { ClassroomConfigModulesT } from "@/types/classroom-configs";
+import { Separator } from "@/components/ui/separator";
 
-interface AttendancePaginationControlProps {
+type DefaultIntervalType = "manual" | "modules";
+
+interface DateIntervalPaginationControlProps {
   onDateRangeChange: (dateRange: { from: Date; to: Date }) => void;
+  modules?: ClassroomConfigModulesT[];
+  defaultInterval?: DefaultIntervalType;
 }
 
 export default function DateIntervalPaginationControl({
   onDateRangeChange,
-}: AttendancePaginationControlProps) {
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(() => {
+  modules = [],
+  defaultInterval = "manual",
+}: DateIntervalPaginationControlProps) {
+  const getCurrentModule = useCallback((): string => {
+    if (!modules.length) return "manual";
+
+    const today = new Date();
+    const currentModules = modules.filter((module) => {
+      if (!module.interval?.from || !module.interval?.to) return false;
+      return isWithinInterval(today, {
+        start: module.interval.from,
+        end: module.interval.to,
+      });
+    });
+
+    if (!currentModules.length) return "manual";
+
+    // Se houver múltiplos módulos, seleciona o último criado (created_at)
+    const latestModule = currentModules.reduce((latest, current) => {
+      if (!latest.created_at) return current;
+      if (!current.created_at) return latest;
+      return new Date(current.created_at) > new Date(latest.created_at)
+        ? current
+        : latest;
+    });
+
+    return latestModule?.id || "manual";
+  }, [modules]);
+
+  const [selectedModule, setSelectedModule] = useState<string>(
+    defaultInterval === "manual" ? "manual" : ""
+  );
+  const [intervalType, setIntervalType] = useState<"manual" | "modules">(
+    defaultInterval === "manual" ? "manual" : "modules"
+  );
+
+  // Inicializar com o módulo atual se defaultInterval for "modules"
+  useEffect(() => {
+    if (defaultInterval === "modules" && modules.length > 0) {
+      const currentModuleId = getCurrentModule();
+      if (currentModuleId !== "manual") {
+        setSelectedModule(currentModuleId);
+        setIntervalType("modules");
+      } else {
+        // Se não há módulo atual, usar modo manual com semana atual
+        setSelectedModule("manual");
+        setIntervalType("manual");
+        setDateRange(getCurrentWeekRange());
+      }
+    }
+  }, [defaultInterval]);
+
+  const getCurrentWeekRange = (): DateRange => {
     const today = new Date();
     const weekStart = startOfDay(startOfWeek(today, { weekStartsOn: 0 }));
     const weekEnd = endOfDay(endOfWeek(today, { weekStartsOn: 0 }));
-    return {
-      from: weekStart,
-      to: weekEnd,
-    };
-  });
+    return { from: weekStart, to: weekEnd };
+  };
+
+  const getCurrentModuleRange = (): DateRange => {
+    if (!modules.length) return getCurrentWeekRange();
+
+    const today = new Date();
+    const currentModules = modules.filter((module) => {
+      if (!module.interval?.from || !module.interval?.to) return false;
+      return isWithinInterval(today, {
+        start: module.interval.from,
+        end: module.interval.to,
+      });
+    });
+
+    if (!currentModules.length) return getCurrentWeekRange();
+
+    // Se houver múltiplos módulos, seleciona o último criado (created_at)
+    const latestModule = currentModules.reduce((latest, current) => {
+      if (!latest.created_at) return current;
+      if (!current.created_at) return latest;
+      return new Date(current.created_at) > new Date(latest.created_at)
+        ? current
+        : latest;
+    });
+
+    if (latestModule?.interval?.from && latestModule?.interval?.to) {
+      return {
+        from: startOfDay(latestModule.interval.from),
+        to: endOfDay(latestModule.interval.to),
+      };
+    }
+
+    return getCurrentWeekRange();
+  };
+
+  const getInitialDateRange = (): DateRange => {
+    return defaultInterval === "modules"
+      ? getCurrentModuleRange()
+      : getCurrentWeekRange();
+  };
+
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(
+    getInitialDateRange
+  );
 
   // Notifica mudanças no intervalo de datas
   useEffect(() => {
@@ -46,7 +148,7 @@ export default function DateIntervalPaginationControl({
         to: dateRange.to,
       });
     }
-  }, [dateRange, onDateRangeChange]);
+  }, [dateRange]);
 
   const handlePreviousInterval = () => {
     if (dateRange?.from && dateRange?.to) {
@@ -118,13 +220,11 @@ export default function DateIntervalPaginationControl({
 
   const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
     if (newDateRange?.from && newDateRange?.to) {
-      // Permite seleção livre de intervalos, ajustando apenas para início e fim do dia
       setDateRange({
         from: startOfDay(newDateRange.from),
         to: endOfDay(newDateRange.to),
       });
     } else if (newDateRange?.from) {
-      // Se apenas uma data for selecionada, mantém apenas a data inicial
       setDateRange({
         from: startOfDay(newDateRange.from),
         to: undefined,
@@ -132,61 +232,160 @@ export default function DateIntervalPaginationControl({
     } else {
       setDateRange(newDateRange);
     }
+    setSelectedModule(""); // Reset module selection when manually changing dates
   };
 
+  // Wrapper function that matches the expected Dispatch type for DateIntervalPicker
+  const handleDatePickerChange: React.Dispatch<
+    React.SetStateAction<DateRange | undefined>
+  > = (value) => {
+    const newDateRange = typeof value === "function" ? value(dateRange) : value;
+    handleDateRangeChangeWrapper(newDateRange);
+  };
+
+  const handleIntervalTypeChange = (
+    type: "manual" | "modules",
+    moduleId?: string
+  ) => {
+    if (type === "manual") {
+      setSelectedModule("manual");
+      setDateRange(getCurrentWeekRange());
+      setIntervalType("manual");
+      return;
+    }
+
+    if (type === "modules" && moduleId) {
+      setSelectedModule(moduleId);
+      const selectedModuleData = modules.find((m) => m.id === moduleId);
+      if (
+        selectedModuleData?.interval?.from &&
+        selectedModuleData?.interval?.to
+      ) {
+        setDateRange({
+          from: startOfDay(selectedModuleData.interval.from),
+          to: endOfDay(selectedModuleData.interval.to),
+        });
+        setIntervalType("modules");
+      }
+    }
+  };
+
+  const handleDateRangeChangeWrapper = (
+    newDateRange: DateRange | undefined
+  ) => {
+    handleDateRangeChange(newDateRange);
+    setIntervalType("manual");
+    setSelectedModule("manual");
+  };
+
+  const getDisplayTitle = () => {
+    if (
+      intervalType === "modules" &&
+      selectedModule &&
+      selectedModule !== "manual"
+    ) {
+      const moduleData = modules.find((m) => m.id === selectedModule);
+      return moduleData?.title || "Módulo";
+    }
+
+    if ((dateRange?.from && dateRange?.to) || dateRange?.from) {
+      return (
+        <DateIntervalPicker
+          date={dateRange}
+          setDate={handleDatePickerChange}
+          buttonClassName="h-8 w-max border-0! shadow-none! rounded-none! border-x!"
+        />
+      );
+    }
+
+    return "Selecione período";
+  };
+
+  const showNavigationControls = intervalType === "manual";
+
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center border rounded-md">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handlePreviousInterval}
-          className="h-8 w-8 p-0 rounded-r-none border-r"
-          disabled={!dateRange?.from}
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
+    <div className="flex h-8 items-center border rounded-lg overflow-hidden">
+      <div className="flex items-center">
+        {showNavigationControls && (
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={() => {
+              handlePreviousInterval();
+            }}
+            className="size-8 p-0"
+            disabled={!dateRange?.from}
+          >
+            <ChevronLeft className="h-3 w-3" />
+          </Button>
+        )}
 
-        <Popover>
-          <PopoverTrigger>
-            <Button
-              variant="ghost"
-              className="h-8 px-3 text-sm font-medium rounded-none border-0 hover:bg-muted/50"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              {dateRange?.from && dateRange?.to ? (
-                <>
-                  {format(dateRange.from, "dd/MM", { locale: ptBR })} -{" "}
-                  {format(dateRange.to, "dd/MM/yyyy", { locale: ptBR })}
-                </>
-              ) : dateRange?.from ? (
-                format(dateRange.from, "dd/MM/yyyy", { locale: ptBR })
-              ) : (
-                "Selecione período"
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="center">
-            <CalendarComponent
-              mode="range"
-              selected={dateRange}
-              onSelect={handleDateRangeChange}
-              numberOfMonths={2}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
+        <span className="text-sm font-semibold w-max min-w-10 text-center">
+          {getDisplayTitle()}
+        </span>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNextInterval}
-          className="h-8 w-8 p-0 rounded-l-none border-l"
-          disabled={!dateRange?.from}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
+        {showNavigationControls && (
+          <Button
+            variant="ghost"
+            size="sm"
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleNextInterval();
+            }}
+            className="size-8 p-0 rounded-none"
+            disabled={!dateRange?.from}
+          >
+            <ChevronRight className="h-3 w-3" />
+          </Button>
+        )}
       </div>
+      <Separator orientation="vertical" />
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Button size="sm" variant="ghost" className="size-8 p-0 rounded-none">
+            <Cog className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align="end" className="w-[200px]">
+          <DropdownMenuLabel className="font-semibold">
+            Tipos de Intervalos
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => handleIntervalTypeChange("manual")}>
+            <div className="flex items-center justify-between w-full">
+              <span>Manual</span>
+              {intervalType === "manual" && <Check className="h-4 w-4" />}
+            </div>
+          </DropdownMenuItem>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <div className="flex items-center justify-between w-full">
+                <span>Módulos</span>
+                {intervalType === "modules" && <Check className="h-4 w-4" />}
+              </div>
+            </DropdownMenuSubTrigger>
+
+            <DropdownMenuSubContent className="w-[230px]">
+              {modules.map((module) => (
+                <DropdownMenuItem
+                  key={module.id}
+                  onClick={() => handleIntervalTypeChange("modules", module.id)}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span>{module.title}</span>
+                    {intervalType === "modules" &&
+                      selectedModule === module.id && (
+                        <Check className="h-4 w-4" />
+                      )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
