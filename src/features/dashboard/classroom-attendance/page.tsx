@@ -67,6 +67,7 @@ export default function AttendancePage() {
             | (ZoomMeetingT & { meeting_type: "meeting" | "pastInstance" })
           )[]
         }
+        classroomId={classroom_id}
       />
     </div>
   );

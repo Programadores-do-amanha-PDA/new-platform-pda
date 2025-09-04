@@ -35,6 +35,8 @@ import { AuthUserWithProfileT, ProfileT, ZoomMeetingT } from "@/types";
 import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import { calculateUserAttendance } from "@/utils/attendance-calculator";
 import { calculateClassPresence } from "../utils/class-presence";
+import { DateRange } from "react-day-picker";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -42,6 +44,7 @@ interface AttendanceTableProps {
     | (ZoomMeetingPastInstanceT & { meeting_type: "meeting" | "pastInstance" })
     | (ZoomMeetingT & { meeting_type: "meeting" | "pastInstance" })
   )[];
+  classroomId: string;
 }
 
 const AttendanceStatusOptions = {
@@ -122,29 +125,29 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
   },
 ];
 
-interface DateRange {
-  from: Date;
-  to: Date;
-}
-
 export default function AttendanceTable({
   users,
   meetings,
+  classroomId,
 }: AttendanceTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
   const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
+  const { configsByClassroom } = useClassroomConfigStore();
+
+  const currentConfig = configsByClassroom[classroomId];
+  const classroomModules = currentConfig?.modules || [];
 
   const displayedMeetings = useMemo(() => {
-    if (!dateRange) return meetings;
+    if (!dateRange || !dateRange.from || !dateRange.to) return meetings;
 
     return meetings.filter((meeting) => {
       const meetingDate = new Date(meeting.start_time || 0);
       return isWithinInterval(meetingDate, {
-        start: dateRange.from,
-        end: dateRange.to,
+        start: dateRange.from!,
+        end: dateRange.to!,
       });
     });
   }, [meetings, dateRange]);
@@ -271,6 +274,7 @@ export default function AttendanceTable({
         />
         <DateIntervalPaginationControl
           onDateRangeChange={handleDateRangeChange}
+          modules={classroomModules}
         />
       </div>
 
