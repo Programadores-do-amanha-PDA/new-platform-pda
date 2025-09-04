@@ -30,7 +30,11 @@ export default function ClassroomActivitiesPage() {
 
   return (
     <div className="w-full h-full p-6">
-      <ActivitiesTable users={classroomUsers} activities={sortedActivities} />
+      <ActivitiesTable
+        users={classroomUsers}
+        activities={sortedActivities}
+        classroomId={classroom_id}
+      />
     </div>
   );
 }

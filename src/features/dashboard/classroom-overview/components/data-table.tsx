@@ -26,17 +26,23 @@ import {
 import { ColumnVisibilityDropdown } from "./column-visibility-dropdown";
 import { getColumnGroups } from "./column-groups";
 import { ClassroomOverviewData } from "@/types/classroom-overview";
+import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
+import { ClassroomConfigModulesT } from "@/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   fullData?: ClassroomOverviewData; // For accessing coodesh tests and projects names
+  onDateRangeChange?: (dateRange: { from: Date; to: Date }) => void;
+  modules?: ClassroomConfigModulesT[];
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   fullData,
+  onDateRangeChange,
+  modules,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -85,19 +91,28 @@ export function DataTable<TData, TValue>({
     );
   }, [allColumns, fullData]);
 
+  const handleDateRangeChange = (newDateRange: { from: Date; to: Date }) => {
+    onDateRangeChange?.(newDateRange);
+  };
+
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-hidden">
-      <div className="flex items-center justify-between py-4">
-        <div className="flex flex-1 items-center space-x-2">
-          <Input
-            placeholder="Procurando por alguém?"
-            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("name")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
+      <div className="flex items-center justify-between">
+        <Input
+          placeholder="Procurando por alguém?"
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+
+        <DateIntervalPaginationControl
+          onDateRangeChange={handleDateRangeChange}
+          modules={modules}
+          defaultInterval="modules"
+        />
+
         <ColumnVisibilityDropdown table={table} columnGroups={columnGroups} />
       </div>
 

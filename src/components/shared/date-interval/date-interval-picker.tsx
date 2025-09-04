@@ -19,8 +19,10 @@ const DateIntervalPicker = ({
   date,
   setDate,
   className,
+  buttonClassName,
 }: {
   date: DateRange | undefined;
+  buttonClassName?: string;
   setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
 } & React.HTMLAttributes<HTMLDivElement>) => {
   return (
@@ -33,7 +35,8 @@ const DateIntervalPicker = ({
             variant={"outline"}
             className={cn(
               "w-[250px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              !date && "text-muted-foreground",
+              buttonClassName
             )}
           >
             <CalendarIcon />

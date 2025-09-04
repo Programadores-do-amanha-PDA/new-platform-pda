@@ -2,9 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { ClassroomT } from "@/types";
 
-export const createClassroom = async (
-  classroomData: Partial<ClassroomT>
-) => {
+export const createClassroom = async (classroomData: Partial<ClassroomT>) => {
   try {
     const supabase = await createClient();
 
