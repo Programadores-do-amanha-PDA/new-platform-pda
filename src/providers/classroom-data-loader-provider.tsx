@@ -14,6 +14,7 @@ import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
@@ -39,9 +40,11 @@ export function ClassroomDataLoaderProvider({
   const zoomMeetingStore = useZoomMeetingStore();
   const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
   const classroomActivityStore = useClassroomActivityStore();
+  const classroomConfigStore = useClassroomConfigStore();
 
   const isLoading =
     classroomStore.loading ||
+    classroomConfigStore.loading ||
     coodeshAssessmentStore.loading ||
     projectStore.loading ||
     deliveryStore.loading ||
@@ -54,11 +57,13 @@ export function ClassroomDataLoaderProvider({
     if (!classroomId) return;
 
     try {
-      await classroomStore.getAllClassrooms();
+      await classroomConfigStore.getConfigByClassroom(classroomId);
 
       await coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId);
 
-      await projectStore.getAllProjectsWithDeliveriesAndCorrections(classroomId);
+      await projectStore.getAllProjectsWithDeliveriesAndCorrections(
+        classroomId
+      );
 
       await zoomAccountStore.getAllAccounts(classroomId);
       await zoomMeetingStore.getAllMeetings(classroomId);
@@ -70,16 +75,7 @@ export function ClassroomDataLoaderProvider({
     } catch (error) {
       console.error("Error loading classroom data:", error);
     }
-  }, [
-    classroomId,
-    classroomStore,
-    coodeshAssessmentStore,
-    projectStore,
-    zoomAccountStore,
-    zoomMeetingStore,
-    zoomMeetingPastInstanceStore,
-    classroomActivityStore,
-  ]);
+  }, [classroomId]);
 
   useEffect(() => {
     loadAllData();
