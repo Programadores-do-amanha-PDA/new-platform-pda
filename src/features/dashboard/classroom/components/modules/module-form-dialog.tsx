@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,12 +14,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DateIntervalPicker } from "@/components/shared/date-interval";
 
-import { DateRange } from "react-day-picker";
 import { ClassroomConfigModulesT } from "@/types/classroom-configs";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import { toast } from "sonner";
-import DateIntervalPicker from "@/components/shared/date-interval-picker";
 
 interface ModuleFormDialogProps {
   configId: string;

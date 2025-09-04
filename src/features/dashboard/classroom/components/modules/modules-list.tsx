@@ -51,7 +51,7 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
       <header className="w-full flex items-center justify-between border-b p-3">
         <h2 className="font-bold">Módulos da Turma</h2>
 
-        {currentConfig && (
+        {modules.length > 0 && currentConfig && (
           <ModuleFormDialog
             configId={currentConfig.id}
             trigger={
@@ -65,15 +65,12 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
 
       {modules.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-              <Plus className="size-8 text-muted-foreground" />
-            </div>
+          <div className="text-center py-4 space-y-6">
             <div>
-              <h3 className="text-lg font-semibold">
+              <h3 className="font-semibold">
                 Nenhum módulo encontrado
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Comece criando o primeiro módulo da turma
               </p>
             </div>
