@@ -2,6 +2,7 @@
 
 import { useClassroomStore } from "../classrooms/stores/classrooms";
 import ClassroomFormDialog from "../classrooms/components/classroom-form-dialog";
+import { ModulesList } from "./components/modules";
 import { useParams } from "next/navigation";
 
 const ClassroomHomePage = () => {
@@ -24,7 +25,8 @@ const ClassroomHomePage = () => {
         <ClassroomFormDialog currentClassroom={currentClassroom} />
       </header>
 
-      <div className="w-full h-full bg-primary/55 rounded-md overflow-hidden flex">
+      <div className="w-full h-full rounded-md overflow-hidden flex p-6">
+        <ModulesList classroomId={classroomId} />
       </div>
     </div>
   );
