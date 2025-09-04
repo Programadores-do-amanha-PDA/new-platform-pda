@@ -23,7 +23,7 @@ import {
 } from "@/types/classroom-projects/project";
 import ProjectTypeSelect from "./project-type-select";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import DateIntervalPicker from "@/components/shared/date-interval-picker";
+import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
 
 const CreateProjectDialog = ({
   classroom_id,

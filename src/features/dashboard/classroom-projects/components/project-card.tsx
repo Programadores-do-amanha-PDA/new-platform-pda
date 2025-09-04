@@ -12,7 +12,7 @@ import { DateRange } from "react-day-picker";
 import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/classroom-projects/project";
 import { Separator } from "@/components/ui/separator";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import DateIntervalPicker from "@/components/shared/date-interval-picker";
+import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
 
 type ProjectCardProps = {
   project: ClassroomProjectWithDeliveriesAndCorrectionsT;
