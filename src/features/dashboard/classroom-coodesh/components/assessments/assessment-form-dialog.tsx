@@ -33,7 +33,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { AssessmentPayloadT, ClassroomCoodeshAssessmentT } from "@/types";
-import { useCoodeshAssessmentStore } from "../stores/assessments";
+import { useCoodeshAssessmentStore } from "../../stores/assessments";
 
 const assessmentFormSchema = z.object({
   name: z

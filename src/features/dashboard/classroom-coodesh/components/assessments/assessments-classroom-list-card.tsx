@@ -6,8 +6,8 @@ import Link from "next/link";
 import { DateRange } from "react-day-picker";
 import { LoaderCircle } from "lucide-react";
 
-import { useCoodeshAssessmentStore } from "../stores/assessments";
-import { calculateOverallAccuracy } from "../utils/calculate-metric";
+import { useCoodeshAssessmentStore } from "../../stores/assessments";
+import { calculateOverallAccuracy } from "../../utils/calculate-metric";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";

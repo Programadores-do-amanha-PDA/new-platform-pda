@@ -16,7 +16,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
-
 import {
   Table,
   TableBody,
@@ -32,7 +31,7 @@ import { ClassroomCoodeshAssessmentT } from "@/types";
 import {
   calculateAccuracyByChallenge,
   calculateAverageDurationByChallenge,
-} from "../utils/calculate-metric";
+} from "../../utils/calculate-metric";
 
 type Question = ClassroomCoodeshAssessmentT["questions"][number];
 

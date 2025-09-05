@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { LoaderCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCoodeshAssessmentStore } from "../stores/assessments";
-import { useCoodeshAPIAssessmentStore } from "../stores/api";
+import { useCoodeshAssessmentStore } from "../../stores/assessments";
+import { useCoodeshAPIAssessmentStore } from "../../stores/api";
 import {
   Sheet,
   SheetClose,
