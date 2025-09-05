@@ -19,6 +19,7 @@ export function formatParticipantsData(
 
   // Processar results.csv agrupando múltiplas entradas
   results.forEach((result) => {
+    if (!result.email) return;
     const email = result.email.toLowerCase();
     const existing = participantsMap.get(email);
 
@@ -37,6 +38,8 @@ export function formatParticipantsData(
 
   // Processar integrity.csv
   integrity.forEach((event) => {
+    if (!event.email) return;
+
     const email = event.email.toLowerCase();
     const participant = participantsMap.get(email);
     if (participant) {
@@ -46,6 +49,7 @@ export function formatParticipantsData(
 
   // Processar action_plans.csv
   actionPlans.forEach((plan) => {
+    if (!plan.email) return;
     const email = plan.email.toLowerCase();
     const participant = participantsMap.get(email);
     if (participant) {

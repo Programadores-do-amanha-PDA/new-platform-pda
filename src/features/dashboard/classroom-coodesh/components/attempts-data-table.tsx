@@ -34,7 +34,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import InsertAssessmentAttempts from "./insert-assessment-attemts";
+import InsertAssessmentAttempts from "./insert-assessment-attempts";
 import AttemptDialog from "./attempt-dialog";
 
 import {
