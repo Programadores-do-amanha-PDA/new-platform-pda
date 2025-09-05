@@ -31,8 +31,8 @@ const DataReviewStage = ({
     <>
       <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
         <Table className="w-full h-full">
-          <TableHeader className="sticky top-0 bg-background z-10">
-            <TableRow>
+          <TableHeader className="sticky top-0 bg-sidebar z-10 border-0!">
+            <TableRow className="border-0!">
               <TableHead className="max-w-56 w-56 truncate font-semibold p-0! border-0!">
                 <div className="w-full h-full p-2 flex justify-start items-center border-r border-b">
                   Nome

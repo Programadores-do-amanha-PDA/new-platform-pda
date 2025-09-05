@@ -1,15 +1,15 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, FileSearch, Languages, Timer} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { AttemptsDataTable } from "../components/attempts-data-table";
-import { AssessmentQuestionsTable } from "../components/assessment-questions-table";
-import { useCoodeshAssessmentStore } from "../stores/assessments";
 import { Button } from "@/components/ui/button";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import Link from "next/link";
+
+import { AttemptsDataTable } from "../components/assessment/attempts-data-table";
+import { AssessmentQuestionsTable } from "../components/assessment/assessment-questions-table";
+import { useCoodeshAssessmentStore } from "../stores/assessments";
 
 type DefaultLocationsT = {
   pt: string;

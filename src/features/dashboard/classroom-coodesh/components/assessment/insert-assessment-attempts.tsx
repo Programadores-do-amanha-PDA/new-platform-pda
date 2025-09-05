@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { ClassroomCoodeshAssessmentT, ParticipantDataT } from "@/types";
-import { formatParticipantsData } from "../utils/format-participant-data";
+import { formatParticipantsData } from "../../utils/format-participant-data";
 import FileUploadStage from "./file-upload-stage";
 import DataReviewStage from "./data-review-stage";
 
@@ -42,7 +42,7 @@ const InsertAssessmentAttempts = ({
   );
 
   const handleExtractParticipantData = () => {
-    if (!resultsCsv || !integrityCsv || !actionPlansCsv) {
+    if (!resultsCsv || integrityCsv === null || actionPlansCsv === null) {
       toast.error("Selecione todos os arquivos necessários.");
       setStage(0);
 
@@ -124,6 +124,9 @@ const InsertAssessmentAttempts = ({
 
   const handleBackToFileSelection = () => {
     setParticipantData([]);
+    setResultsCsv(null);
+    setIntegrityCsv(null);
+    setActionPlansCsv(null);
     setStage(0);
   };
 
@@ -156,8 +159,8 @@ const InsertAssessmentAttempts = ({
               <>
                 Selecione os arquivos CSV para carregar os dados das tentativas
                 <p>
-                  São necessários os arquivos: <b>Respostas</b>,{" "}
-                  <b>Integridade</b> e <b>Plano de ação</b>
+                  O arquivo de <b>Respostas</b> é obrigatório, ja os arquivos{" "}
+                  <b>Integridade</b> e <b>Plano de ação</b> são opcionais.
                 </p>
               </>
             )}

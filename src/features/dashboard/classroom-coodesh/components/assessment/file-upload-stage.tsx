@@ -32,11 +32,10 @@ const FileInput = ({ id, label, onChange }: FileInputProps) => {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
-        if (event.target?.result) {
-          onChange(event.target.result as string);
-          setSelectedFileName(file.name);
-          toast.success(`${label} carregado com sucesso.`);
-        }
+        console.log(event.target?.result);
+        onChange((event.target?.result as string) || "");
+        setSelectedFileName(file.name);
+        toast.success(`${label} carregado com sucesso.`);
       };
       reader.readAsText(file);
     } else {
@@ -77,10 +76,10 @@ const FileInput = ({ id, label, onChange }: FileInputProps) => {
           </span>
         </Label>
       ) : (
-        <div className="flex items-center justify-between p-3 bg-primary/10 rounded-lg">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4 justify-between p-3 bg-primary/10 rounded-lg overflow-hidden">
             <FileCheck className="size-5 text-primary-foreground" />
-            <span className="text-sm font-medium max-w-48">
+          <div className="w-full flex items-center overflow-hidden">
+            <span className="text-sm text-wrap w-full">
               {selectedFileName}
             </span>
           </div>
@@ -100,31 +99,27 @@ const FileInput = ({ id, label, onChange }: FileInputProps) => {
 
 const FileUploadStage = ({
   resultsCsv,
-  integrityCsv,
-  actionPlansCsv,
   setResultsCsv,
   setIntegrityCsv,
   setActionPlansCsv,
   onExtractData,
 }: FileUploadStageProps) => {
-  const allFilesSelected = resultsCsv && integrityCsv && actionPlansCsv;
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-4">
         <FileInput
           id="resultsFile"
-          label="Respostas"
+          label="*Respostas"
           onChange={setResultsCsv}
         />
         <FileInput
           id="integrityFile"
-          label="Integridade"
+          label="Integridade (Opcional)"
           onChange={setIntegrityCsv}
         />
         <FileInput
           id="actionPlanFile"
-          label="Plano de ação"
+          label="Plano de ação (Opcional)"
           onChange={setActionPlansCsv}
         />
       </div>
@@ -140,7 +135,7 @@ const FileUploadStage = ({
         </DialogClose>
         <Button
           onClick={onExtractData}
-          disabled={!allFilesSelected}
+          disabled={!resultsCsv}
           className="font-semibold"
         >
           Extrair dados

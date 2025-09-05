@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 
-import AssessmentsClassroomListCard from "../components/assessments-classroom-list-card";
-import AssessmentsSheetData from "../components/assessments-sheet-data";
-import AssessmentFormDialog from "../components/assessment-form-dialog";
+import AssessmentsClassroomListCard from "../components/assessments/assessments-classroom-list-card";
+import AssessmentsSheetData from "../components/assessments/assessments-sheet-data";
+import AssessmentFormDialog from "../components/assessments/assessment-form-dialog";
 import { useCoodeshAssessmentStore } from "../stores/assessments";
 
 export default function AssessmentsPage() {

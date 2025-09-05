@@ -19,11 +19,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { MarkdownRenderer } from "@/components/shared/shiki-markdown";
+
 import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
 import { ActionPlanRowT, ParticipantDataT } from "@/types";
-import { EVENT_TYPE_LABELS } from "../utils/event-type";
+import { EVENT_TYPE_LABELS } from "../../utils/event-type";
 
 const AttemptDialog = ({
   open,

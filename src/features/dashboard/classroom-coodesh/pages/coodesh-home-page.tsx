@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import { AttemptsChallengeScoreChart } from "../components/attempts-challenge-score-chart";
-import AssessmentsClassroomListCard from "../components/assessments-classroom-list-card";
+import { AttemptsChallengeScoreChart } from "../components/homepage/attempts-challenge-score-chart";
+import AssessmentsClassroomListCard from "../components/assessments/assessments-classroom-list-card";
 import { useCoodeshAssessmentStore } from "../stores/assessments";
 
 const CoodeshHomePage = () => {
