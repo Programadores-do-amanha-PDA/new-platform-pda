@@ -13,6 +13,7 @@ import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/classroom
 import { Separator } from "@/components/ui/separator";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
+import PermissionGuard from "@/components/shared/permission-guard";
 
 type ProjectCardProps = {
   project: ClassroomProjectWithDeliveriesAndCorrectionsT;
@@ -102,46 +103,55 @@ const ProjectCard = ({ project, expansive }: ProjectCardProps) => {
           </p>
         </div>
       </div>
-      {expansive &&
-        (project.schedule_date &&
-        project.schedule_date.to &&
-        new Date(project.schedule_date.to).getTime() > Date.now() ? (
-          <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
-            <div className="w-full flex flex-col gap-6">
-              <div className="w-full flex flex-col gap-2">
-                <Label htmlFor="startDate" className="font-semibold">
-                  Período de entrega:
-                </Label>
-                <DateIntervalPicker
-                  date={scheduleDate}
-                  setDate={setScheduleDate}
-                />
+      <PermissionGuard
+        permissions={[
+          "classroom_projects.update_all",
+          "classroom_projects.update_self",
+        ]}
+      >
+        {expansive &&
+          (project.schedule_date &&
+          project.schedule_date.to &&
+          new Date(project.schedule_date.to).getTime() > Date.now() ? (
+            <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
+              <div className="w-full flex flex-col gap-6">
+                <div className="w-full flex flex-col gap-2">
+                  <Label htmlFor="startDate" className="font-semibold">
+                    Período de entrega:
+                  </Label>
+                  <DateIntervalPicker
+                    date={scheduleDate}
+                    setDate={setScheduleDate}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button disabled={!isEdit} onClick={handleUpdateProject}>
+                  {loading && <LoaderCircle className="size-5 animate-spin" />}
+                  Salvar alterações
+                </Button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button disabled={!isEdit} onClick={handleUpdateProject}>
-                {loading && <LoaderCircle className="size-5 animate-spin" />}
-                Salvar alterações
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <Separator />
-            <div className="flex flex-col items-start gap-2">
-              <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
-                Entregas:
-                <p className="font-normal">{project.deliveries?.length ?? 0}</p>
-              </p>
-              <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
-                Correções:
-                <p className="font-normal">
-                  {project.corrections?.length ?? 0}
+          ) : (
+            <>
+              <Separator />
+              <div className="flex flex-col items-start gap-2">
+                <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
+                  Entregas:
+                  <p className="font-normal">
+                    {project.deliveries?.length ?? 0}
+                  </p>
                 </p>
-              </p>
-            </div>
-          </>
-        ))}
+                <p className="text-sm h-5 text-gray-500 flex gap-1 font-semibold">
+                  Correções:
+                  <p className="font-normal">
+                    {project.corrections?.length ?? 0}
+                  </p>
+                </p>
+              </div>
+            </>
+          ))}
+      </PermissionGuard>
     </li>
   );
 };
