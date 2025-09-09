@@ -16,17 +16,17 @@ import { SidebarDataT } from "@/types/sidebar";
 import useAuth from "@/hooks/use-auth";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 
-interface AdminStackProviderProps {
+interface StudentStackProviderProps {
   children: React.ReactNode;
   loadInitialData?: boolean;
 }
 
-const AdminStackContext = createContext({});
+const StudentStackContext = createContext({});
 
-export const AdminStackProvider = ({
+export const StudentStackProvider = ({
   children,
   loadInitialData = true,
-}: AdminStackProviderProps) => {
+}: StudentStackProviderProps) => {
   const [loading, setLoading] = useState(false);
   const { user, userRole } = useAuth();
 
@@ -38,7 +38,7 @@ export const AdminStackProvider = ({
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      if (!loadInitialData || !user || !userRole || userRole !== "admin")
+      if (!loadInitialData || !user || !userRole || userRole !== "student")
         return;
 
       setLoading(true);
@@ -92,4 +92,4 @@ export const AdminStackProvider = ({
   );
 };
 
-export const useAdminStackContext = () => useContext(AdminStackContext);
+export const useStudentStackContext = () => useContext(StudentStackContext);

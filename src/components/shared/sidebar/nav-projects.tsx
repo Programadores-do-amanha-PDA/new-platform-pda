@@ -30,10 +30,10 @@ export default function NavProjects({ projects }: { projects: ProjectItemT[] }) 
       <SidebarGroupLabel>Recursos</SidebarGroupLabel>
       <SidebarMenu>
         {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+          <SidebarMenuItem key={item.ref}>
             <SidebarMenuButton onClick={() => router.push(item.url)}>
               <item.icon />
-              <span>{item.name}</span>
+              <span>{item.title}</span>
             </SidebarMenuButton>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -50,12 +50,12 @@ export default function NavProjects({ projects }: { projects: ProjectItemT[] }) 
               >
                 <DropdownMenuItem>
                   <item.icon className="text-muted-foreground" />
-                  <span>Ver {item.name}</span>
+                  <span>Ver {item.title}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Forward className="text-muted-foreground" />
-                  <span>Compartilhar {item.name}</span>
+                  <span>Compartilhar {item.title}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
