@@ -2,8 +2,8 @@ export type RolesT =
   | "admin"
   | "employer"
   | "class_manager"
-  | "student"
   | "teacher"
+  | "student"
   | "alumni";
 
 export interface UserRoleT {

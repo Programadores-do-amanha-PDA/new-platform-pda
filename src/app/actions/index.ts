@@ -7,6 +7,7 @@ export * from './profile-avatar';
 export * from './profiles';
 export * from './resume';
 export * from './roles';
+export * from './role-permissions';
 export * from './user-classroom';
 
 // Subdirectory actions
