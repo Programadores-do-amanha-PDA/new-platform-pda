@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { setSession } from "@/app/actions";
 import useAuth from "@/hooks/use-auth";
@@ -43,7 +43,6 @@ import useAuth from "@/hooks/use-auth";
 export default function useAuthConfirmation() {
   const router = useRouter();
   const { updateAuthState, handleExchangeAuthCode } = useAuth();
-  const pathname = usePathname();
 
   /**
    * Handle password reset flow
@@ -58,6 +57,7 @@ export default function useAuthConfirmation() {
           toast.error("Código de recuperação inválido ou expirado.");
           return;
         }
+
         updateAuthState(session);
         router.push("/reset-password");
       } catch (error) {
@@ -67,7 +67,7 @@ export default function useAuthConfirmation() {
         );
       }
     },
-    [pathname, router]
+    [handleExchangeAuthCode, updateAuthState, router]
   );
 
   useEffect(() => {
@@ -112,6 +112,7 @@ export default function useAuthConfirmation() {
       // Handle password reset flow (with or without type=recovery)
       if (verificationCode && (authType === "recovery" || !authType)) {
         handleResetPassword(verificationCode);
+        return; // Exit early to prevent other authentication flows
       }
 
       /**

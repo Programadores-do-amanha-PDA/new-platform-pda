@@ -30,7 +30,7 @@ type DataTableProps = {
   data: Partial<AuthUserWithProfileT>[];
   columns: ColumnDef<Partial<AuthUserWithProfileT>>[];
   loading: boolean;
-  headerRightOptions?: React.ReactNode;
+  headerRightOptions?: (selectedUsers: AuthUserWithProfileT[], clearSelection?: () => void) => React.ReactNode;
 };
 
 export function DataTable({
@@ -74,6 +74,14 @@ export function DataTable({
     },
   });
 
+  // Get selected users
+  const selectedUsers = table.getFilteredSelectedRowModel().rows.map(row => row.original) as AuthUserWithProfileT[];
+  
+  // Function to clear selection
+  const clearSelection = () => {
+    setRowSelection({});
+  };
+
   return (
     <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
       <div className="flex items-center justify-between py-4 sticky">
@@ -85,7 +93,7 @@ export function DataTable({
           }
           className="max-w-sm"
         />
-        {headerRightOptions}
+        {headerRightOptions?.(selectedUsers, clearSelection)}
       </div>
 
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
