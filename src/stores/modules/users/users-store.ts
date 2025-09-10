@@ -97,7 +97,6 @@ export const useUsersStore = create<UsersState & UsersActions>()(
             ...userResponse,
             profile: {
               ...userProfileResponse,
-              user_id: userResponse.id,
               classrooms: userProfileResponse.classrooms || [],
             },
           };
