@@ -57,8 +57,6 @@ export function formatParticipantsData(
     }
   });
 
-  console.log(Array.from(participantsMap.values()));
-
   return Array.from(participantsMap.values());
 }
 

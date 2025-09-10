@@ -89,9 +89,7 @@ export const useZoomAccountStore = create<
             toast.error("Dados obrigatórios da conta estão faltando!");
             throw new Error("Missing required account data");
           }
-
-          console.log(accountData)
-
+          
           toast.info("Verificando as credenciais da conta...");
                     
           const me = await useZoomAPIStore

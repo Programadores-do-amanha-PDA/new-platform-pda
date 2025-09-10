@@ -27,7 +27,7 @@ export async function signInWithPassword(userCredentials: UserAuthLogin) {
     ) {
       return { error: true, confirmation: true };
     } else {
-      console.log("Error on signInWithPassword", error);
+      console.error("Error on signInWithPassword", error);
       return { error: true, confirmation: false };
     }
   }
@@ -50,7 +50,7 @@ export const updateAuthUser = async (
 
     return data;
   } catch (error) {
-    console.log("Error on update auth user", error);
+    console.error("Error on update auth user", error);
     return false;
   }
 };

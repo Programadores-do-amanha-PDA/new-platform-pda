@@ -22,7 +22,6 @@ const RefreshButton = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnClick = useCallback(async () => {
-    console.log("Button clicked, setting isLoading to true");
     setIsLoading(true);
     try {
       await handleClick();

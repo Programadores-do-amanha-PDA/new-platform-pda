@@ -76,12 +76,6 @@ const ProfileDataTabs = ({
         newPassword.length > 0 &&
         confirmNewPassword.length > 0
       ) {
-        console.log(
-          "password",
-          newPassword === confirmNewPassword &&
-            newPassword.length > 0 &&
-            confirmNewPassword.length > 0
-        );
         userData.password = newPassword;
       }
 
@@ -115,7 +109,7 @@ const ProfileDataTabs = ({
 
       setLoading(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       switch (error) {
         case "fill the fields":
           toast.error("Por favor preencha todos os campos!");

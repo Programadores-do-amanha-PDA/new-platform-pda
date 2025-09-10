@@ -214,7 +214,7 @@ const InsertManyUsersDialog = ({
           )
         );
       } catch (error) {
-        console.log("Error", error);
+        console.error("Error", error);
         switch (error) {
           case "role assign error":
             toast.error("Erro ao atribuir o cargo!");

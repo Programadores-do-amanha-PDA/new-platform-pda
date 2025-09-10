@@ -50,7 +50,6 @@ export function MemberSelectionCombobox({
   );
 
   const handleSelect = (userId: string) => {
-    console.log(userId);
     const newSelectedIds = selectedUserIds.includes(userId)
       ? selectedUserIds.filter((id) => id !== userId)
       : [...selectedUserIds, userId];

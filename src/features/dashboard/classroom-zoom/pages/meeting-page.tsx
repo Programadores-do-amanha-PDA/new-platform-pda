@@ -12,8 +12,6 @@ export default function ZoomMeetingPage() {
   }>();
   const { meetings } = useZoomMeetingStore();
 
-  console.log("meeting_id", meeting_id);
-
   const currentMeeting = meetings?.find((m) => m.id === meeting_id);
 
   if (!currentMeeting) {

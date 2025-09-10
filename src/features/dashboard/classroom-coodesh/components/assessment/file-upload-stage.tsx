@@ -32,7 +32,6 @@ const FileInput = ({ id, label, onChange }: FileInputProps) => {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
-        console.log(event.target?.result);
         onChange((event.target?.result as string) || "");
         setSelectedFileName(file.name);
         toast.success(`${label} carregado com sucesso.`);

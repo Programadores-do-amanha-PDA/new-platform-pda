@@ -30,7 +30,6 @@ export const onAuthStateChange = (
   updateAuthState: (session: { access_token: string } | null) => Promise<void>
 ) => {
   return supabase.auth.onAuthStateChange(async (e, session) => {
-    console.log(e);
     await updateAuthState(session);
   });
 };

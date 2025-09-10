@@ -90,7 +90,6 @@ export const calculateMatchPercentage = (
   student: ResumeT,
   job: JobT
 ) => {
-  console.log(student)
   const area = areaMatch(student, job);
   const language = languageMatchPercentage(student, job);
   const studies = studiesMatch(student, job);
