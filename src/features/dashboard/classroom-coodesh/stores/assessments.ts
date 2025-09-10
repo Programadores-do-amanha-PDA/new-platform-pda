@@ -59,7 +59,7 @@ export const useCoodeshAssessmentStore = create<
           set({ assessments: allAssessments });
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error(
             "Erro ao buscar avaliações da sala de aula! Tente novamente mais tarde!"
           );
@@ -86,7 +86,7 @@ export const useCoodeshAssessmentStore = create<
           toast.success("Avaliação anexada com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error(
             "Erro ao anexar a avaliação! Tente novamente mais tarde!"
           );
@@ -127,14 +127,13 @@ export const useCoodeshAssessmentStore = create<
           toast.success("Avaliação criada com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao criar a avaliação! Tente novamente mais tarde!");
           return false;
         }
       },
 
       updateAssessment: async (assessment, updatedData) => {
-        console.log("Updating assessment with data:", updatedData);
 
         try {
           if (!assessment.id || !updatedData) {
