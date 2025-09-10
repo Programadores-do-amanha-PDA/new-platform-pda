@@ -50,6 +50,7 @@ const AllProjectsPage = () => {
               key={`project-${i}`}
               project={project}
               expansive={true}
+              classroomId={classroom_id}
             />
           ))}
       </ul>

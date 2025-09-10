@@ -1,8 +1,10 @@
 "use client";
 import { Calendar1, Type } from "lucide-react";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
+import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
+import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
-import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types";
+import { ClassroomProjectT } from "@/types/classroom-projects/project";
 import { useParams } from "next/navigation";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import { NotFoundState } from "@/components/shared/not-found-state";
@@ -16,19 +18,24 @@ const projectTypesLabels = {
 export default function ProjectPage() {
   const { project_id, classroom_id } = useParams();
   const { projects, deleteProject } = useProjectStore();
+  const { deliveries } = useDeliveryStore();
+  const { corrections } = useCorrectionStore();
 
-  const currentProject:
-    | ClassroomProjectWithDeliveriesAndCorrectionsT
-    | undefined = projects.find((project) => project.id === project_id);
+  const currentProject: ClassroomProjectT | undefined = projects.find(
+    (project) => project.id === project_id
+  );
 
-  const corrections = currentProject?.corrections || [];
-  const deliveries =
-    currentProject?.deliveries?.map((delivery) => ({
+  const projectCorrections = corrections.filter(
+    (correction) => correction.project_id === project_id
+  );
+  const projectDeliveries = deliveries
+    .filter((delivery) => delivery.project_id === project_id)
+    .map((delivery) => ({
       ...delivery,
       lastCorrection:
-        corrections.find((corr) => corr.delivery_id === delivery.id)
+        projectCorrections.find((corr) => corr.delivery_id === delivery.id)
           ?.created_at || null,
-    })) || [];
+    }));
 
   if (!currentProject) {
     return (
@@ -92,11 +99,12 @@ export default function ProjectPage() {
 
       <div className="w-full h-full flex overflow-hidden">
         <DeliveryDataTable
-          deliveries={deliveries.sort(
+          deliveries={projectDeliveries.sort(
             (a, b) =>
               new Date(a.created_at || 0).getTime() -
               new Date(b.created_at || 0).getTime()
           )}
+          projectType={currentProject.project_type}
         />
       </div>
     </div>
