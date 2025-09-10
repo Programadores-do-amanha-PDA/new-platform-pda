@@ -3,6 +3,8 @@ import { useState } from "react";
 
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
+import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
+import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +28,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
-import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/types/classroom-projects/project";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -40,6 +42,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
+
 
 const projectsShortLabels = {
   mini_project: "MP",
@@ -59,10 +62,12 @@ const ClassroomGeneralViewDataTable = ({
 
   const { users } = useUsersStore();
   const { projects } = useProjectStore();
+  const { deliveries } = useDeliveryStore();
+  const { corrections } = useCorrectionStore();
 
   const classroomProjects = projects.filter(
     (project) => project.classroom_id === classroom_id
-  ) as ClassroomProjectWithDeliveriesAndCorrectionsT[];
+  );
 
   const columns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
@@ -228,11 +233,14 @@ const ClassroomGeneralViewDataTable = ({
       cell: ({ row }) => {
         const user = row.original;
         const userProjects = classroomProjects
-          .filter((project: ClassroomProjectWithDeliveriesAndCorrectionsT) =>
-            project?.deliveries?.some((delivery) =>
+          .filter((project: ClassroomProjectT) => {
+            const projectDeliveries = deliveries.filter(
+              (delivery) => delivery.project_id === project.id
+            );
+            return projectDeliveries.some((delivery) =>
               delivery.members.some((member) => member === user.email)
-            )
-          )
+            );
+          })
           .sort((a, b) => {
             const aType = a.project_type;
             const bType = b.project_type;
@@ -248,25 +256,25 @@ const ClassroomGeneralViewDataTable = ({
         return (
           <div className="flex items-center justify-start w-full">
             {userProjects.length > 0 ? (
-              userProjects.map(
-                (project: ClassroomProjectWithDeliveriesAndCorrectionsT) => {
-                  const notes =
-                    project.corrections
-                      ?.map((correction) => Number(correction.final_note))
-                      .filter((note): note is number => !isNaN(note)) || [];
+              userProjects.map((project: ClassroomProjectT) => {
+                const projectCorrections = corrections.filter(
+                  (correction) => correction.project_id === project.id
+                );
+                const notes = projectCorrections
+                  .map((correction) => Number(correction.final_note))
+                  .filter((note): note is number => !isNaN(note));
 
-                  const maxNote = notes.length > 0 ? Math.max(...notes) : 0;
+                const maxNote = notes.length > 0 ? Math.max(...notes) : 0;
 
-                  return (
-                    <Badge variant="outline" key={project.id}>
-                      {projectsShortLabels[project.project_type].concat(
-                        project.module
-                      )}
-                      : {maxNote}
-                    </Badge>
-                  );
-                }
-              )
+                return (
+                  <Badge variant="outline" key={project.id}>
+                    {projectsShortLabels[project.project_type].concat(
+                      project.module
+                    )}
+                    : {maxNote}
+                  </Badge>
+                );
+              })
             ) : (
               <p className="text-sm text-muted-foreground">Nenhum projeto</p>
             )}
