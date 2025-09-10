@@ -1,6 +1,4 @@
 import { DateRange } from "react-day-picker";
-import { ClassroomProjectDeliveryT } from "./delivery";
-import { ClassroomProjectCorrectionT } from "./corrections";
 
 export type ClassroomProjectModuleT = "0" | "1" | "2" | "3" | "4" | "5";
 
@@ -19,9 +17,3 @@ export interface ClassroomProjectT {
   description?: string;
   created_at: string;
 }
-
-export type ClassroomProjectWithDeliveriesAndCorrectionsT =
-  ClassroomProjectT & {
-    deliveries?: ClassroomProjectDeliveryT[];
-    corrections?: ClassroomProjectCorrectionT[];
-  };

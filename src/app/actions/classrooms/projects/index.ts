@@ -1,9 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import {
-  ClassroomProjectT,
-  ClassroomProjectWithDeliveriesAndCorrectionsT,
-} from "@/types";
+import { ClassroomProjectT } from "@/types";
 
 export const createClassroomProject = async (
   projectData: Omit<ClassroomProjectT, "id" | "created_at">
@@ -43,26 +40,7 @@ export const getAllProjectsByClassroomId = async (
   }
 };
 
-export const getAllProjectsWithDeliveriesAndCorrectionsByClassroomId = async (
-  classRoomId: string
-): Promise<ClassroomProjectT[] | null> => {
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("classroom_projects")
-      .select(
-        "*, deliveries:classroom_project_deliveries(*), corrections:classroom_project_corrections(*)"
-      )
-      .eq("classroom_id", classRoomId)
-      .order("created_at", { ascending: false });
 
-    if (error) throw error;
-    return data as ClassroomProjectWithDeliveriesAndCorrectionsT[];
-  } catch (error) {
-    console.error("Error fetching all classroom projects:", error);
-    return null;
-  }
-};
 
 export const getClassroomProjectById = async (
   id: string

@@ -9,6 +9,7 @@ import React, {
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
+import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
@@ -36,6 +37,7 @@ export function ClassroomDataLoaderProvider({
   const coodeshAssessmentStore = useCoodeshAssessmentStore();
   const projectStore = useProjectStore();
   const deliveryStore = useDeliveryStore();
+  const correctionStore = useCorrectionStore();
   const zoomAccountStore = useZoomAccountStore();
   const zoomMeetingStore = useZoomMeetingStore();
   const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
@@ -48,6 +50,7 @@ export function ClassroomDataLoaderProvider({
     coodeshAssessmentStore.loading ||
     projectStore.loading ||
     deliveryStore.loading ||
+    correctionStore.loading ||
     zoomAccountStore.loading ||
     zoomMeetingStore.loading ||
     zoomMeetingPastInstanceStore.loading ||
@@ -57,21 +60,17 @@ export function ClassroomDataLoaderProvider({
     if (!classroomId) return;
 
     try {
-      await classroomConfigStore.getConfigByClassroom(classroomId);
-
-      await coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId);
-
-      await projectStore.getAllProjectsWithDeliveriesAndCorrections(
-        classroomId
-      );
-
-      await zoomAccountStore.getAllAccounts(classroomId);
-      await zoomMeetingStore.getAllMeetings(classroomId);
-      await zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
-        classroomId
-      );
-
-      await classroomActivityStore.getAllActivitiesByClassroom(classroomId);
+      await Promise.all([
+        classroomConfigStore.getConfigByClassroom(classroomId),
+        coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
+        projectStore.getAllProjectsByClassroomId(classroomId),
+        deliveryStore.getAllDeliveriesByClassroomId(classroomId),
+        correctionStore.getAllCorrectionsByClassroomId(classroomId),
+        zoomAccountStore.getAllAccounts(classroomId),
+        zoomMeetingStore.getAllMeetings(classroomId),
+        zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(classroomId),
+        classroomActivityStore.getAllActivitiesByClassroom(classroomId),
+      ]);
     } catch (error) {
       console.error("Error loading classroom data:", error);
     }

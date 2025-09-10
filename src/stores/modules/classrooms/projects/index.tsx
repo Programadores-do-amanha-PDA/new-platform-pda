@@ -6,30 +6,17 @@ import {
   getAllProjectsByClassroomId,
   updateClassroomProjectById,
   deleteProjectById,
-  getAllProjectsWithDeliveriesAndCorrectionsByClassroomId,
 } from "@/app/actions/classrooms/projects";
-import {
-  ClassroomProjectT,
-  ClassroomProjectWithDeliveriesAndCorrectionsT,
-} from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/types/classroom-projects/project";
 
 interface ProjectState {
-  projects:
-    | ClassroomProjectT[]
-    | ClassroomProjectWithDeliveriesAndCorrectionsT[];
+  projects: ClassroomProjectT[];
   loading: boolean;
 }
 
 interface ProjectActions {
-  setProjects: (
-    projects:
-      | ClassroomProjectT[]
-      | ClassroomProjectWithDeliveriesAndCorrectionsT[]
-  ) => void;
+  setProjects: (projects: ClassroomProjectT[]) => void;
   getAllProjectsByClassroomId: (classroomId: string) => Promise<boolean>;
-  getAllProjectsWithDeliveriesAndCorrections: (
-    classroomId: string
-  ) => Promise<boolean>;
   createProject: (
     projectData: Omit<ClassroomProjectT, "id" | "created_at">
   ) => Promise<boolean>;
@@ -70,25 +57,7 @@ export const useProjectStore = create<ProjectState & ProjectActions>()(
         }
       },
 
-      getAllProjectsWithDeliveriesAndCorrections: async (classroomId) => {
-        set({ loading: true });
-        try {
-          if (!classroomId) throw new Error("Classroom ID is required");
-          const allProjects =
-            await getAllProjectsWithDeliveriesAndCorrectionsByClassroomId(
-              classroomId
-            );
-          if (!allProjects) throw new Error("No projects found");
-          set({ projects: allProjects });
-          return true;
-        } catch (error) {
-          console.error(error);
-          toast.error("Erro ao carregar projetos. Tente novamente mais tarde.");
-          return false;
-        } finally {
-          set({ loading: false });
-        }
-      },
+
 
       createProject: async (projectData) => {
         try {

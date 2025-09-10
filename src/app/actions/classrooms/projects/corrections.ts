@@ -1,9 +1,9 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomProjectCorrectionT } from "@/types";
+import { ClassroomProjectCorrectionT } from "@/types/classroom-projects/corrections";
 
 export const createClassroomProjectCorrection = async (
-  correctionData: Omit<ClassroomProjectCorrectionT, "id" | "created_at">
+  correctionData: Omit<Partial<ClassroomProjectCorrectionT>, "id" | "created_at">
 ): Promise<ClassroomProjectCorrectionT | null> => {
   try {
     const supabase = await createClient();
@@ -35,7 +35,7 @@ export const getAllCorrectionsByProjectId = async (
     if (error) throw error;
     return data as ClassroomProjectCorrectionT[];
   } catch (error) {
-    console.error("Error fetching all classroom project corrections:", error);
+    console.error("Error fetching corrections by project ID:", error);
     return null;
   }
 };
@@ -54,7 +54,29 @@ export const getAllCorrectionsByDeliveryId = async (
     if (error) throw error;
     return data as ClassroomProjectCorrectionT[];
   } catch (error) {
-    console.error("Error fetching all classroom project corrections:", error);
+    console.error("Error fetching corrections by delivery ID:", error);
+    return null;
+  }
+};
+
+export const getAllCorrectionsByClassroomId = async (
+  classroomId: string
+): Promise<ClassroomProjectCorrectionT[] | null> => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("classroom_project_corrections")
+      .select(`
+        *,
+        classroom_projects!inner(classroom_id)
+      `)
+      .eq("classroom_projects.classroom_id", classroomId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data as ClassroomProjectCorrectionT[];
+  } catch (error) {
+    console.error("Error fetching all classroom corrections:", error);
     return null;
   }
 };

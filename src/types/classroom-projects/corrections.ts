@@ -15,5 +15,7 @@ export interface ClassroomProjectCorrectionT {
   final_considerations: string;
   final_note: string;
   teacher_email: string;
+  classroom_id: string;
+  teacher_id: string;
   created_at: string;
 }

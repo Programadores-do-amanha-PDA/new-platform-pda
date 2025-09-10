@@ -9,7 +9,6 @@ import {
   ClassroomProjectModuleT,
   ClassroomProjectTypeT,
   ClassroomProjectT,
-  ClassroomProjectWithDeliveriesAndCorrectionsT,
 } from "./project";
 
 export type {
@@ -19,5 +18,4 @@ export type {
   ClassroomProjectModuleT,
   ClassroomProjectTypeT,
   ClassroomProjectT,
-  ClassroomProjectWithDeliveriesAndCorrectionsT,
 };

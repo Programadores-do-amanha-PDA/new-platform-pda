@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ClassroomProjectDeliveryT } from "@/types";
 
 export const createClassroomProjectDelivery = async (
-  deliveryData: Omit<ClassroomProjectDeliveryT, "id" | "created_at">
+  deliveryData: Omit<Partial<ClassroomProjectDeliveryT>, "id" | "created_at">
 ): Promise<ClassroomProjectDeliveryT | null> => {
   try {
     const supabase = await createClient();
@@ -36,6 +36,28 @@ export const getAllDeliveriesByProjectId = async (
     return data as ClassroomProjectDeliveryT[];
   } catch (error) {
     console.error("Error fetching all classroom project deliveries:", error);
+    return null;
+  }
+};
+
+export const getAllDeliveriesByClassroomId = async (
+  classroomId: string
+): Promise<ClassroomProjectDeliveryT[] | null> => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("classroom_project_deliveries")
+      .select(`
+        *,
+        classroom_projects!inner(classroom_id)
+      `)
+      .eq("classroom_projects.classroom_id", classroomId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data as ClassroomProjectDeliveryT[];
+  } catch (error) {
+    console.error("Error fetching all classroom deliveries:", error);
     return null;
   }
 };
