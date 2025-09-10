@@ -133,8 +133,6 @@ export const useZoomMeetingStore = create<
             const { past_instances, ...restOfMeeting } =
               meetingWithPastInstances;
 
-            console.log(past_instances, restOfMeeting);
-
             loadingToastId = toast.loading(
               "Criando a reunião, por favor aguarde..."
             );

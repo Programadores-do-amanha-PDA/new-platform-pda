@@ -78,7 +78,7 @@ export const ResetPasswordForm = () => {
         type: "manual",
         message: "Erro ao redefinir a senha. Tente novamente.",
       });
-      console.log(error);
+      console.error(error);
     }
   };
 

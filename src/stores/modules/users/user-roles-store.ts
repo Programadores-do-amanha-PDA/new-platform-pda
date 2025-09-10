@@ -46,7 +46,7 @@ export const useRolesStore = create<UserRolesActions>()(
           toast.success("Cargo adicionado com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao adicionar cargo ao usuário!");
           return false;
         }
@@ -81,7 +81,7 @@ export const useRolesStore = create<UserRolesActions>()(
           toast.success("Cargo atualizado com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao atualizar cargo do usuário!");
           return false;
         }
@@ -113,7 +113,7 @@ export const useRolesStore = create<UserRolesActions>()(
           toast.success("Cargo removido com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao remover cargo do usuário!");
           return false;
         }

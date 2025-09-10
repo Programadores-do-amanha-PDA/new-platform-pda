@@ -50,7 +50,6 @@ export const RequestResetPasswordForm = () => {
       setIsSubmitting(true);
 
       const success = await handleRequestResetPassword(values.email);
-      console.log("success", success);
       if (success) {
         toast.success("Solicitação enviada com sucesso!");
         setIsSuccess(true);

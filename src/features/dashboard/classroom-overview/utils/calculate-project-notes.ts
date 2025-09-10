@@ -1,8 +1,12 @@
-import { ClassroomProjectWithDeliveriesAndCorrectionsT } from "@/types/classroom-projects";
+import { ClassroomProjectT } from "@/types/classroom-projects/project";
+import { ClassroomProjectDeliveryT } from "@/types/classroom-projects/delivery";
+import { ClassroomProjectCorrectionT } from "@/types/classroom-projects/corrections";
 
 export function calculateProjectNotes(
-  studentEmail: string,
-  projects: ClassroomProjectWithDeliveriesAndCorrectionsT[]
+  student: string,
+  projects: ClassroomProjectT[],
+  deliveries: ClassroomProjectDeliveryT[],
+  corrections: ClassroomProjectCorrectionT[]
 ): { [projectId: string]: number } {
   const notes: { [projectId: string]: number } = {};
 
@@ -10,23 +14,25 @@ export function calculateProjectNotes(
     // Inicializar com 0 por padrão
     notes[project.id] = 0;
 
-    // Procurar por entregas do estudante
-    const studentDeliveries = project.deliveries?.filter((delivery) =>
-      delivery.members.includes(studentEmail)
+    // Procurar por entregas do estudante neste projeto
+    const studentDeliveries = deliveries.filter(
+      (delivery) =>
+        delivery.project_id === project.id &&
+        delivery.members_id.includes(student)
     );
 
-    if (studentDeliveries && studentDeliveries.length > 0) {
+    if (studentDeliveries.length > 0) {
       // Para cada entrega, procurar pela correção mais recente
       let latestNote = 0;
       
       studentDeliveries.forEach((delivery) => {
-        const corrections = project.corrections?.filter(
+        const deliveryCorrections = corrections.filter(
           (correction) => correction.delivery_id === delivery.id
         );
 
-        if (corrections && corrections.length > 0) {
+        if (deliveryCorrections.length > 0) {
           // Pegar a correção mais recente
-          const latestCorrection = corrections.sort(
+          const latestCorrection = deliveryCorrections.sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           )[0];
 

@@ -35,167 +35,247 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ClassroomProjectDeliveryT } from "@/types/classroom-projects/delivery";
+import { ClassroomProjectTypeT } from "@/types/classroom-projects/project";
+import { AuthUserWithProfileT } from "@/types";
+import { useUsersStore } from "@/stores/modules/users/users-store";
 
-const columns: ColumnDef<ClassroomProjectDeliveryT>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="w-full h-full flex justify-center items-center px-2 border-r">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "members",
-    header: ({ column }) => {
-      return (
-        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-          <p>Membros</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <ArrowUpDown />
-          </Button>
+const createColumns = (
+  projectType: ClassroomProjectTypeT,
+  users: Partial<AuthUserWithProfileT>[]
+): ColumnDef<ClassroomProjectDeliveryT>[] => {
+  const columns: ColumnDef<ClassroomProjectDeliveryT>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="w-full h-full flex justify-center items-center px-2 border-r">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
         </div>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <span className="font-medium">
-          {(row.getValue("members") as string[]).join(", ")}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "created_at",
-    header: ({ column }) => {
-      return (
-        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-          <p>Entregue em</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      const date = new Date(row.getValue("created_at"));
-      const formatted = new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-      }).format(date);
-
-      return (
+      ),
+      cell: ({ row }) => (
         <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
-          <span>{formatted}</span>
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
         </div>
-      );
+      ),
+      enableSorting: false,
+      enableHiding: false,
     },
-  },
-  {
-    accessorKey: "lastCorrection",
-    header: ({ column }) => {
-      return (
-        <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-          <p>Corrigido em</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => {
-      if (!row.getValue("lastCorrection")) {
+  ];
+
+  // Adicionar colunas específicas para mini projects
+  if (projectType === "mini_project") {
+    columns.push(
+      {
+        accessorKey: "user_id",
+        header: ({ column }) => {
+          return (
+            <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+              <p>Entregue por</p>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
+              >
+                <ArrowUpDown />
+              </Button>
+            </div>
+          );
+        },
+        cell: ({ row }) => {
+          const user = users.find(
+            (user) => user.id === row.getValue("user_id")
+          );
+          return (
+            <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+              <span className="font-medium">
+                {user?.email || "Usuário não encontrado"}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "members",
+        header: ({ column }) => {
+          return (
+            <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+              <p>Membros</p>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() =>
+                  column.toggleSorting(column.getIsSorted() === "asc")
+                }
+              >
+                <ArrowUpDown />
+              </Button>
+            </div>
+          );
+        },
+        cell: ({ row }) => {
+          const delivery = row.original;
+          let memberNames: string[] = [];
+
+          // Verificar se tem members_id (novos projetos)
+          if (delivery.members_id && Array.isArray(delivery.members_id)) {
+            memberNames = delivery.members_id
+              .map((memberId) => {
+                const user = users.find((user) => user.id === memberId);
+                return user?.email || memberId;
+              })
+              .filter(Boolean);
+          }
+          // Fallback para members (projetos antigos)
+          else if (delivery.members && Array.isArray(delivery.members)) {
+            memberNames = delivery.members;
+          }
+
+          return (
+            <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+              <span className="font-medium">
+                {memberNames.length > 0
+                  ? memberNames.join(", ")
+                  : "Sem membros"}
+              </span>
+            </div>
+          );
+        },
+      }
+    );
+  }
+
+  // Adicionar colunas comuns
+  columns.push(
+    {
+      accessorKey: "created_at",
+      header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
-            <span className="text-muted-foreground">Correção pendente</span>
+          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p>Entregue em</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
           </div>
         );
-      }
-      const date = new Date(row.getValue("lastCorrection"));
-      const formatted = new Intl.DateTimeFormat("pt-BR", {
-        dateStyle: "short",
-      }).format(date);
+      },
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("created_at"));
+        const formatted = new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+        }).format(date);
 
-      return (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
-          <span>{formatted}</span>
-        </div>
-      );
+        return (
+          <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
+            <span>{formatted}</span>
+          </div>
+        );
+      },
     },
-  },
-  {
-    id: "actions",
-    header: () => (
-      <div className="w-full h-full flex justify-center items-center px-2">
-        <p>Ações</p>
-      </div>
-    ),
-    enableHiding: false,
-    cell: ({ row }) => {
-      const delivery = row.original;
+    {
+      accessorKey: "lastCorrection",
+      header: ({ column }) => {
+        return (
+          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p>Corrigido em</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        if (!row.getValue("lastCorrection")) {
+          return (
+            <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
+              <span className="text-muted-foreground">Correção pendente</span>
+            </div>
+          );
+        }
+        const date = new Date(row.getValue("lastCorrection"));
+        const formatted = new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+        }).format(date);
 
-      return (
-        <div className="w-full h-full flex justify-center items-center p-2 border-b">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Abrir menu</span>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel className="font-semibold">
-                Ações
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(delivery.id)}
-              >
-                Copiar Id da Entrega
-              </DropdownMenuItem>
-              <DropdownMenuItem>Deletar entrega</DropdownMenuItem>
-              <DropdownMenuItem>Download attachments</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      );
+        return (
+          <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
+            <span>{formatted}</span>
+          </div>
+        );
+      },
     },
-  },
-];
+    {
+      id: "actions",
+      header: () => (
+        <div className="w-full h-full flex justify-center items-center px-2">
+          <p>Ações</p>
+        </div>
+      ),
+      enableHiding: false,
+      cell: ({ row }) => {
+        const delivery = row.original;
+
+        return (
+          <div className="w-full h-full flex justify-center items-center p-2 border-b">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Abrir menu</span>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="font-semibold">
+                  Ações
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => navigator.clipboard.writeText(delivery.id)}
+                >
+                  Copiar Id da Entrega
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    }
+  );
+
+  return columns;
+};
 
 export function DeliveryDataTable({
   deliveries,
+  projectType,
 }: {
   deliveries: ClassroomProjectDeliveryT[];
+  projectType: ClassroomProjectTypeT;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -204,6 +284,12 @@ export function DeliveryDataTable({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  const { users } = useUsersStore();
+  const columns = React.useMemo(
+    () => createColumns(projectType, users),
+    [projectType, users]
+  );
 
   const table = useReactTable({
     data: deliveries,
@@ -234,16 +320,20 @@ export function DeliveryDataTable({
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Procurando por alguém?"
-          value={(table.getColumn("members")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("members")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
+      {projectType === "mini_project" && (
+        <div className="flex items-center justify-between">
+          <Input
+            placeholder="Procurando por alguém?"
+            value={
+              (table.getColumn("members")?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn("members")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        </div>
+      )}
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="sticky top-0 bg-white z-10 p-0!">

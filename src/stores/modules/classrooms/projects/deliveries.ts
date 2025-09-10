@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   createClassroomProjectDelivery,
   getAllDeliveriesByProjectId,
+  getAllDeliveriesByClassroomId,
   updateClassroomProjectDeliveryById,
   deleteDeliveryById,
 } from "@/app/actions/classrooms/projects/deliveries";
@@ -17,8 +18,9 @@ interface DeliveryState {
 interface DeliveryActions {
   setDeliveries: (deliveries: ClassroomProjectDeliveryT[]) => void;
   getAllDeliveriesByProjectId: (projectId: string) => Promise<boolean>;
+  getAllDeliveriesByClassroomId: (classroomId: string) => Promise<boolean>;
   createDelivery: (
-    deliveryData: Omit<ClassroomProjectDeliveryT, "id" | "created_at">
+    deliveryData: Omit<Partial<ClassroomProjectDeliveryT>, "id" | "created_at">
   ) => Promise<boolean>;
   updateDelivery: (
     id: string,
@@ -57,17 +59,36 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
         }
       },
 
+      getAllDeliveriesByClassroomId: async (classroomId) => {
+        set({ loading: true });
+        try {
+          if (!classroomId) throw new Error("Classroom ID is required");
+          const allDeliveries = await getAllDeliveriesByClassroomId(
+            classroomId
+          );
+          if (!allDeliveries) throw new Error("No deliveries found");
+          set({ deliveries: allDeliveries });
+          return true;
+        } catch (error) {
+          console.error(error);
+          toast.error("Erro ao carregar entregas. Tente novamente mais tarde.");
+          return false;
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       createDelivery: async (deliveryData) => {
         try {
-          if (!deliveryData.project_id || !deliveryData.members.length) {
-            throw new Error("Project ID and delivery content are required");
+          if (!deliveryData.project_id || !deliveryData.user_id) {
+            throw new Error("Project ID and user ID are required");
           }
           const deliveryCreated = await createClassroomProjectDelivery(
             deliveryData
           );
           if (!deliveryCreated) throw new Error("Delivery creation failed");
-          set({ 
-            deliveries: [...get().deliveries, deliveryCreated] 
+          set({
+            deliveries: [...get().deliveries, deliveryCreated],
           });
           toast.success("Entrega criada com sucesso!");
           return true;
@@ -91,7 +112,7 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
           set({
             deliveries: get().deliveries.map((delivery) =>
               delivery.id === updatedDelivery.id ? updatedDelivery : delivery
-            )
+            ),
           });
           toast.success("Entrega atualizada com sucesso!");
           return true;
@@ -110,7 +131,7 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
           set({
             deliveries: get().deliveries.filter(
               (delivery) => delivery.id !== id
-            )
+            ),
           });
           toast.success("Entrega deletada com sucesso!");
           return true;

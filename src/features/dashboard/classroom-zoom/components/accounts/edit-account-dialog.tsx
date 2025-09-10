@@ -58,7 +58,7 @@ export default function EditAccountDialog({
       toast.success("Conta atualizada com sucesso!");
       handleSetCurrentAccount(null);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Erro ao atualizar conta.");
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { useClassroomStore } from "./stores/classrooms";
 import { Input } from "@/components/ui/input";
 import ClassroomFormDialog from "./components/classroom-form-dialog";
 import ClassroomCard from "./components/classroom-card";
+import PermissionGuard from "@/components/shared/permission-guard";
 
 const classroomStatusLabels = {
   created: "Criado",
@@ -33,12 +34,14 @@ const TeamPage = () => {
     <div className="w-full h-max py-4 px-2 flex flex-col gap-6 overflow-hidden">
       <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
         <Input
-          placeholder="Buscar por título da turma..."
+          placeholder="Procurando por algo?"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-sm"
         />
-        <ClassroomFormDialog />
+        <PermissionGuard permission="classrooms.insert">
+          <ClassroomFormDialog />
+        </PermissionGuard>
       </header>
 
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">

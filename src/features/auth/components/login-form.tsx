@@ -73,8 +73,6 @@ export const LoginForm = () => {
     try {
       const response: LoginResponse = await signInWithPassword(data);
 
-      console.log("Response:", response);
-
       if (response.error && response.confirmation) {
         toast.error("Confirme seu email para continuar.");
         router.push(

@@ -62,16 +62,12 @@ export const updateCoodeshAssessment = async (
     const supabase = await createClient();
     
     const updates = { ...assessmentData, updated_at: new Date().toISOString() };
-    console.log(id);
-    console.log(updates);
 
     const { data, error } = await supabase
       .from("classroom_coodesh_assessments")
       .update(updates)
       .eq("id", id)
       .select();
-
-    console.log(data, error);
 
     if (error) throw error;
     return data[0] as ClassroomCoodeshAssessmentT;

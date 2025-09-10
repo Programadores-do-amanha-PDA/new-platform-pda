@@ -19,9 +19,10 @@ export interface SidebarNavItemT extends NavItemT {
 }
 
 export interface ProjectItemT {
-  name: string;
+  title: string;
   url: string;
   icon: LucideIcon;
+  ref?: string;
 }
 
 export interface SidebarDataT {

@@ -5,12 +5,10 @@ import { useState } from "react";
 import CreateProjectDialog from "../components/create-project-dialog";
 import ProjectCard from "../components/project-card";
 import { useParams } from "next/navigation";
+import PermissionGuard from "@/components/shared/permission-guard";
 
 const AllProjectsPage = () => {
-  const params = useParams();
-  const classroom_id = Array.isArray(params.classroom_id)
-    ? params.classroom_id[0]
-    : params.classroom_id;
+  const { classroom_id } = useParams<{ classroom_id: string }>();
   const [searchFilter, setSearchFilter] = useState<string>("");
 
   const { projects } = useProjectStore();
@@ -34,7 +32,9 @@ const AllProjectsPage = () => {
             onChange={(e) => setSearchFilter(e.target.value)}
           />
         </div>
-        <CreateProjectDialog classroom_id={classroom_id} />
+        <PermissionGuard permission="classroom_projects.insert">
+          <CreateProjectDialog classroom_id={classroom_id} />
+        </PermissionGuard>
       </header>
 
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
@@ -50,10 +50,12 @@ const AllProjectsPage = () => {
               key={`project-${i}`}
               project={project}
               expansive={true}
+              classroomId={classroom_id}
             />
           ))}
       </ul>
     </main>
   );
 };
+
 export default AllProjectsPage;

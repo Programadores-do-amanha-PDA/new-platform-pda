@@ -39,7 +39,6 @@ export default function CreateAccountDialog({
 
     try {
       const { account_id, client_id, client_secret } = accountData;
-      console.log({ account_id, client_id, client_secret });
 
       if (!account_id || !client_id || !client_secret || !classroom_id) {
         toast.error("Por favor, preencha todos os campos.");
@@ -64,7 +63,7 @@ export default function CreateAccountDialog({
         client_secret: "",
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("Erro ao criar conta.");
     } finally {
       setLoading(false);

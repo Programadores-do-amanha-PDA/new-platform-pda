@@ -84,7 +84,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Sucesso ao criar a vaga!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao criar a vaga. Tente novamente mais tarde!");
           return false;
         }
@@ -104,7 +104,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Sucesso ao editar vaga!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao editar vaga. Tente novamente mais tarde!");
           return false;
         }
@@ -128,7 +128,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Vaga aprovada com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao aprovar vaga. Tente novamente mais tarde!");
           return false;
         }
@@ -152,7 +152,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Vaga reenviada a curadoria com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error(
             "Erro ao reenviada vaga a curadoria. Tente novamente mais tarde!"
           );
@@ -177,7 +177,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Vaga marcada como enviada ao Discord com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error(
             "Erro ao marcar vaga como enviada ao Discord. Tente novamente mais tarde!"
           );
@@ -224,7 +224,7 @@ export const useJobStore = create<JobState & JobActions>()(
           toast.success("Vaga deletada com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao deletar vaga. tente novamente mais tarde!");
           return false;
         }

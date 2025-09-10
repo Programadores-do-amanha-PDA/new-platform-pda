@@ -10,6 +10,8 @@ import {
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
+import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
+import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
@@ -40,6 +42,8 @@ export default function ClassroomAttendancePage() {
   const { activities } = useClassroomActivityStore();
   const { assessments } = useCoodeshAssessmentStore();
   const { projects } = useProjectStore();
+  const { deliveries } = useDeliveryStore();
+  const { corrections } = useCorrectionStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
   const { meetings } = useZoomMeetingStore();
 
@@ -129,7 +133,9 @@ export default function ClassroomAttendancePage() {
         // Calcular notas dos projetos com dados filtrados
         const projectIndicators = calculateProjectNotes(
           studentEmail,
-          filteredProjects
+          filteredProjects,
+          deliveries,
+          corrections
         );
 
         // Calcular presença geral das atividades com dados filtrados

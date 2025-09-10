@@ -16,7 +16,6 @@ export interface ProfileT {
   user_roles?: UserRoleT[];
   created_at?: Date;
   updated_at?: Date;
-  user_id: string;
   classrooms?: UserClassroomT[];
 }
 

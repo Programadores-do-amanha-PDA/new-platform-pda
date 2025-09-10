@@ -32,7 +32,6 @@ const ClassroomCard = ({
           <p className="font-bold group-hover:underline">{classroom.name}</p>
         </div>
         <div className="flex flex-row gap-1">
-          <p className="text-sm text-muted-foreground">Status:</p>
           <Badge
             variant={cardBadgeVariantByStatus[classroom.status]}
             className="w-max font-semibold"
@@ -41,7 +40,10 @@ const ClassroomCard = ({
           </Badge>
         </div>
       </div>
-      <DynamicLucideIcon name={safeIconName(classroom.icon)} className="w-6 h-6" />
+      <DynamicLucideIcon
+        name={safeIconName(classroom.icon)}
+        className="w-6 h-6"
+      />
     </li>
   );
 };

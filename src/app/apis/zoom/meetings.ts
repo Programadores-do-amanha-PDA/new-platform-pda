@@ -98,7 +98,6 @@ export const getPastMeetingInstances = async (
         params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
-    console.log(response.data);
     return (
       (response.data.meetings?.filter(Boolean) as ZoomMeetingPastInstanceT[]) ||
       []
@@ -155,7 +154,6 @@ export const getPastedMeetingParticipants = async (
     );
     if (response.status !== 200)
       throw new Error("Failed to fetch participants")
-    console.log(response.data.participants?.filter(Boolean))
 
     return response.data.participants?.filter(Boolean);
   } catch (error) {

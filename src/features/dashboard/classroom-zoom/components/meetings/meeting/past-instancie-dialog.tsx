@@ -321,7 +321,6 @@ interface ParticipantsTableProps {
 }
 
 function ParticipantsTable({ data }: ParticipantsTableProps) {
-  console.log(data)
   const table = useReactTable({
     data,
     columns: meetingParticipantsColumns,

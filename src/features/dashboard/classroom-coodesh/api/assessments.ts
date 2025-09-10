@@ -14,7 +14,6 @@ const axiosInstance = axios.create({
 const getCoodeshAPIAssessments = async () => {
   try {
     const response = await axiosInstance.get("/assessments/ats?limit=150");
-    console.log(response.data)
     if (response.status !== 200) {
       throw new Error("Failed to fetch assessments");
     }

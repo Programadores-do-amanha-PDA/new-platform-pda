@@ -21,10 +21,10 @@ export default function AppSidebar({ ...props }: AppSidebarPropsT) {
         {props.data.team && <TeamSwitcher team={props.data.team} />}
       </SidebarHeader>
       <SidebarContent>
-        {props.data.navMain && (
+        {props.data.navMain && props.data.navMain.length > 0 && (
           <NavMain items={props.data.navMain} title="Geral" />
         )}
-        {props.data.classRooms && (
+        {props.data.classRooms && props.data.classRooms.length > 0 && (
           <NavMain items={props.data.classRooms} title="Turmas" />
         )}
         {props.data.projects && props.data.projects.length > 0 && (

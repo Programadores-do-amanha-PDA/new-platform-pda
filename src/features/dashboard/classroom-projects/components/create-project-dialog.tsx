@@ -103,7 +103,7 @@ const CreateProjectDialog = ({
         return;
       }
     } catch (error) {
-      console.log(error)
+      console.error(error)
       toast.error(
         currentProject?.id
           ? "Erro ao editar projeto. Tente novamente mais tarde!"

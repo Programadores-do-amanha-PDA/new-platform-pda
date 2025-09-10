@@ -55,7 +55,6 @@ export const ProfileAvatarPicker = ({
 
   const createImage = (url: string): Promise<HTMLImageElement> =>
     new Promise((resolve, reject) => {
-      console.log(url);
       const image = new Image();
       image.addEventListener("load", () => resolve(image));
       image.addEventListener("error", (error) => reject(error));
@@ -114,7 +113,6 @@ export const ProfileAvatarPicker = ({
         throw new Error("cropped profile image and user id is required");
       }
       if (user.profile?.avatarUrl) {
-        console.log("update");
         const base64Image = await fileToBase64(croppedProfileImage);
         await updateUserAvatar(user.id, base64Image);
 

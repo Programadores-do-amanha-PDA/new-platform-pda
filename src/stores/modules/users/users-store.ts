@@ -97,7 +97,6 @@ export const useUsersStore = create<UsersState & UsersActions>()(
             ...userResponse,
             profile: {
               ...userProfileResponse,
-              user_id: userResponse.id,
               classrooms: userProfileResponse.classrooms || [],
             },
           };
@@ -109,7 +108,7 @@ export const useUsersStore = create<UsersState & UsersActions>()(
           return userResponse.id;
         } catch (error) {
           toast.error("Erro ao criar novo usuário!");
-          console.log(error);
+          console.error(error);
           return false;
         }
       },
@@ -153,7 +152,7 @@ export const useUsersStore = create<UsersState & UsersActions>()(
           toast.success("Usuário atualizado com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao atualizar o usuário!");
           return false;
         }
@@ -172,7 +171,7 @@ export const useUsersStore = create<UsersState & UsersActions>()(
           toast.success("Usuário deletado com sucesso!");
           return true;
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error("Erro ao deletar usuário. tente novamente mais tarde!");
           return false;
         }

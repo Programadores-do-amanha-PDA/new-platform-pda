@@ -1,6 +1,7 @@
 import { UserAuthLogin, User, ProfileT, AuthUserWithProfileT } from "./user";
 import { UserClassroomT } from "./user-classroom";
 import { RolesT, UserRoleT, JwtPayloadT } from "./user-role";
+import { RolePermissionT, UserPermissionsT, PermissionT } from "./role-permissions";
 
 export type {
   UserAuthLogin,
@@ -11,4 +12,7 @@ export type {
   RolesT,
   UserRoleT,
   JwtPayloadT,
+  RolePermissionT,
+  UserPermissionsT,
+  PermissionT,
 };
