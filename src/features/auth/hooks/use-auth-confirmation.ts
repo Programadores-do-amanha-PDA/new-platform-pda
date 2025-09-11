@@ -162,5 +162,5 @@ export default function useAuthConfirmation() {
     };
 
     processAuthParams();
-  }, [router, updateAuthState, handleResetPassword]);
+  }, []);
 }

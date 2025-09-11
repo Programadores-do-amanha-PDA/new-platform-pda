@@ -1,3 +1,4 @@
+"use client"
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "@/stores/shared/auth-store";
