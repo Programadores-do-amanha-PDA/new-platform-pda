@@ -95,24 +95,14 @@ export const signOut = async () => {
 
 export const exchangeAuthCode = async (code: string) => {
   try {
-    console.log("Exchanging auth code:", code);
     const supabase = await createClient();
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.exchangeCodeForSession(code);
-    
-    if (error) {
-      console.error("Exchange error:", error);
-      throw error;
-    }
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    console.log("Exchange successful, session:", !!session);
-    return session;
+    if (error) throw error;
+
+    return data;
   } catch (error) {
     console.error("Exchange auth code error:", error);
     return null;
   }
 };
-
-

@@ -42,7 +42,8 @@ import useAuth from "@/hooks/use-auth";
  */
 export default function useAuthConfirmation() {
   const router = useRouter();
-  const { updateAuthState, handleExchangeAuthCode } = useAuth();
+  const { updateAuthState, handleExchangeAuthCode, fetchSession, user } =
+    useAuth();
 
   /**
    * Handle password reset flow
@@ -51,14 +52,23 @@ export default function useAuthConfirmation() {
   const handleResetPassword = useCallback(
     async (code: string) => {
       try {
-        const session = await handleExchangeAuthCode(code);
+        const data = await handleExchangeAuthCode(code);
 
-        if (!session) {
+        if (!data || (data?.session && !data?.user && !user)) {
           toast.error("Código de recuperação inválido ou expirado.");
           return;
         }
 
-        updateAuthState(session);
+        if (!data.session && data.user) {
+          await fetchSession();
+          if (!user) {
+            toast.error("Código de recuperação inválido ou expirado.");
+            return;
+          }
+          router.push("/reset-password");
+        }
+
+        updateAuthState(data?.session);
         router.push("/reset-password");
       } catch (error) {
         console.error("Erro ao trocar código de autenticação:", error);
