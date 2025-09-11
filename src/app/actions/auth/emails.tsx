@@ -1,5 +1,5 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createClientAdmin } from "@/lib/supabase/server";
 
 export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
   try {
@@ -42,38 +42,47 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
 
 export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
   try {
-    const supabase = await createClient();
+    const supabase = await createClientAdmin();
     const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_PATH;
 
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
-    const results = await Promise.allSettled(
-      emails.map(async (email) => {
+    let successful = 0;
+    let failed = 0;
+
+    // Execute sequentially to avoid potential Supabase rate limiting or context issues
+    for (const email of emails) {
+      try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: PLATFORM_BASE_URL.concat("/reset-password"),
         });
-        
-        if (error) throw error;
-        return { email, success: true };
-      })
-    );
 
-    const successful = results.filter(result => result.status === 'fulfilled').length;
-    const failed = results.filter(result => result.status === 'rejected').length;
+        if (error) throw error;
+        successful++;
+
+        // Add small delay between requests to prevent rate limiting
+        if (emails.length > 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        console.error(`Error sending password reset to ${email}:`, error);
+        failed++;
+      }
+    }
 
     return {
       success: true,
       results: {
         successful,
         failed,
-        total: emails.length
-      }
+        total: emails.length,
+      },
     };
   } catch (error) {
     console.error("Error sending password reset emails:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error"
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 };

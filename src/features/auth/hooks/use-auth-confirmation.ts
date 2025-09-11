@@ -93,7 +93,7 @@ export default function useAuthConfirmation() {
       const errorCode = params.get("error_code");
 
       // Clean authentication parameters from URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // window.history.replaceState({}, document.title, window.location.pathname);
 
       // Handle expired tokens
       if (expiresAt && new Date(parseInt(expiresAt) * 1000) < new Date()) {
