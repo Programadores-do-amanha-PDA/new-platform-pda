@@ -86,3 +86,51 @@ export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
     };
   }
 };
+
+export const sendEmailVerificationToMultipleUsers = async (emails: string[]) => {
+  try {
+    const supabase = await createClientAdmin();
+
+    let successful = 0;
+    let failed = 0;
+
+    // Execute sequentially to avoid potential Supabase rate limiting or context issues
+    for (const email of emails) {
+      try {
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email: email,
+          options: {
+            emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_PATH,
+          },
+        });
+
+        if (error) throw error;
+        successful++;
+
+        // Add small delay between requests to prevent rate limiting
+        if (emails.length > 1) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        console.error(`Error sending email verification to ${email}:`, error);
+        failed++;
+      }
+    }
+
+    return {
+      success: true,
+      results: {
+        successful,
+        failed,
+        total: emails.length,
+      },
+    };
+  } catch (error) {
+    console.error("Error sending email verification emails:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+};

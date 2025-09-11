@@ -23,6 +23,7 @@ import UserSheetData from "../../components/user-sheet-data";
 import BulkPasswordResetButton from "../../components/bulk-password-reset-button";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
+import BulkEmailVerificationButton from "../../components/bulk-email-verification-button";
 
 type ProfilesDataTableProps = {
   excludeRoles?: RolesT[];
@@ -468,13 +469,20 @@ const ProfilesDataTable = ({
         ]
       : [];
 
-  const headerOptions = (selectedUsers: AuthUserWithProfileT[], clearSelection?: () => void) => (
+  const headerOptions = (
+    selectedUsers: AuthUserWithProfileT[],
+    clearSelection?: () => void
+  ) => (
     <div className="flex gap-4">
-      <BulkPasswordResetButton 
-        selectedUsers={selectedUsers} 
+      <BulkEmailVerificationButton
+        selectedUsers={selectedUsers}
         onComplete={clearSelection}
       />
-      
+      <BulkPasswordResetButton
+        selectedUsers={selectedUsers}
+        onComplete={clearSelection}
+      />
+
       <InsertManyUsersDialog
         excludeRoles={excludeRoles}
         classrooms={classrooms}
