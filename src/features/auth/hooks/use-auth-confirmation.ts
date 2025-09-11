@@ -42,43 +42,28 @@ import useAuth from "@/hooks/use-auth";
  */
 export default function useAuthConfirmation() {
   const router = useRouter();
-  const { updateAuthState, handleExchangeAuthCode, fetchSession, user } =
-    useAuth();
+  const { updateAuthState, handleExchangeAuthCode } = useAuth();
 
   /**
    * Handle password reset flow
    * @param {string} code - The password reset code from URL
    */
-  const handleResetPassword = useCallback(
-    async (code: string) => {
-      try {
-        const data = await handleExchangeAuthCode(code);
+  const handleResetPassword = useCallback(async (code: string) => {
+    try {
+      const data = await handleExchangeAuthCode(code);
 
-        if (!data || (data?.session && !data?.user && !user)) {
-          toast.error("Código de recuperação inválido ou expirado.");
-          return;
-        }
-
-        if (!data.session && data.user) {
-          await fetchSession();
-          if (!user) {
-            toast.error("Código de recuperação inválido ou expirado.");
-            return;
-          }
-          router.push("/reset-password");
-        }
-
-        updateAuthState(data?.session);
-        router.push("/reset-password");
-      } catch (error) {
-        console.error("Erro ao trocar código de autenticação:", error);
-        toast.error(
-          "Erro ao processar código de recuperação. Tente novamente."
-        );
+      if (!data || data?.session) {
+        toast.error("Código de recuperação inválido ou expirado.");
+        return;
       }
-    },
-    []
-  );
+
+      updateAuthState(data?.session);
+      router.push("/reset-password");
+    } catch (error) {
+      console.error("Erro ao trocar código de autenticação:", error);
+      toast.error("Erro ao processar código de recuperação. Tente novamente.");
+    }
+  }, []);
 
   useEffect(() => {
     // Skip execution in SSR
@@ -103,7 +88,7 @@ export default function useAuthConfirmation() {
       const errorCode = params.get("error_code");
 
       // Clean authentication parameters from URL
-      // window.history.replaceState({}, document.title, window.location.pathname);
+      window.history.replaceState({}, document.title, window.location.pathname);
 
       // Handle expired tokens
       if (expiresAt && new Date(parseInt(expiresAt) * 1000) < new Date()) {
