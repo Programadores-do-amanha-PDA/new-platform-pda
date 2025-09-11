@@ -170,17 +170,23 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
       <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-6">
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
-            <Link
-              href={
-                expansive
-                  ? `${path}/${project.id}`
-                  : `${path}/projects/${project.id}`
+            <RoleGuard
+              fallback={
+                <p className="font-semibold truncate">{project.title}</p>
               }
-              className="font-semibold truncate hover:underline cursor-pointer"
-              title={project.title}
             >
-              {project.title}
-            </Link>
+              <Link
+                href={
+                  expansive
+                    ? `${path}/${project.id}`
+                    : `${path}/projects/${project.id}`
+                }
+                className="font-semibold truncate hover:underline cursor-pointer"
+                title={project.title}
+              >
+                {project.title}
+              </Link>
+            </RoleGuard>
             <p className="text-sm h-5 text-muted-foreground font-semibold">
               Módulo {project.module}
             </p>
