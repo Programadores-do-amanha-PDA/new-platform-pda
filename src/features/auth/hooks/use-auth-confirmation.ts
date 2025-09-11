@@ -77,7 +77,7 @@ export default function useAuthConfirmation() {
         );
       }
     },
-    [handleExchangeAuthCode, updateAuthState, router]
+    []
   );
 
   useEffect(() => {
