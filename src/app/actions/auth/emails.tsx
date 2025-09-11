@@ -9,7 +9,7 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
     const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-      redirectTo: PLATFORM_BASE_URL.concat("/reset-password"),
+      redirectTo: PLATFORM_BASE_URL,
     });
 
     if (error) throw error;
@@ -54,7 +54,7 @@ export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
     for (const email of emails) {
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: PLATFORM_BASE_URL.concat("/reset-password"),
+          redirectTo: PLATFORM_BASE_URL,
         });
 
         if (error) throw error;
