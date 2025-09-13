@@ -1,65 +1,75 @@
 "use client";
-import { useState } from "react";
-import { Edit, Ellipsis, Trash2, Calendar } from "lucide-react";
+import React, { useState } from "react";
+import { Edit, Ellipsis, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ClassroomConfigClassTypesT } from "@/types/classroom-configs";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import Color from "color";
 
-interface ModuleCardProps {
-  module: ClassroomConfigModulesT;
+interface ClassTypeCardProps {
+  classType: ClassroomConfigClassTypesT;
   configId: string;
-  onEdit: (module: ClassroomConfigModulesT) => void;
+  onEdit: (classType: ClassroomConfigClassTypesT) => void;
 }
 
-const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
+const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
-  const handleDeleteModule = async () => {
+  const handleDeleteClassType = async () => {
     const currentConfig = Object.values(configsByClassroom).find(
       (config) => config.id === configId
     );
     if (!currentConfig) return;
 
-    const updatedModules = currentConfig.modules.filter(
-      (m: ClassroomConfigModulesT) => m.id !== module.id
+    const updatedClassTypes = currentConfig.class_types.filter(
+      (m: ClassroomConfigClassTypesT) => m.id !== module.id
     );
-    await updateConfigById(configId, { modules: updatedModules });
+    await updateConfigById(configId, { class_types: updatedClassTypes });
   };
 
-  const formatDateRange = () => {
-    if (!module.interval?.from) return "Data não definida";
-
-    const fromDate = format(new Date(module.interval.from), "dd/MM/yyyy", {
-      locale: ptBR,
-    });
-    const toDate = module.interval.to
-      ? format(new Date(module.interval.to), "dd/MM/yyyy", { locale: ptBR })
-      : "Em andamento";
-
-    return `${fromDate} - ${toDate}`;
+  const backgroundColor = (color: string) => {
+    try {
+      return Color(color).hex();
+    } catch {
+      return "#f3f4f6";
+    }
   };
 
   return (
     <li className="w-full h-max flex justify-between gap-4 overflow-hidden">
       <div className="flex flex-col gap-1 flex-1">
-        <p className="truncate text-sm font-semibold" title={module.title}>
-          {module.title}
+        <p className="truncate text-sm font-semibold" title={classType.title}>
+          {classType.title} 
         </p>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Calendar className="size-3" />
-          <span className="text-xs">{formatDateRange()}</span>
-        </div>
+        {classType.limits && classType.limits.length > 0 && (
+          <div className="flex gap-1 flex-wrap">
+            {classType.limits.map((limit) => (
+              <Badge
+                key={`class-type-limit-${limit.id}`}
+                variant="secondary"
+                className="text-xs!"
+                style={{
+                  backgroundColor: backgroundColor(limit.color),
+                  color: Color(limit.color).isDark() ? "#fff" : "#000",
+                }}
+              >
+                <p className="font-semibold">({limit.key}) {limit.title}:</p>
+                {limit.min} - {limit.max ?? "∞"}
+              </Badge>
+            ))}
+          </div>
+        )}
       </div>
 
       <DropdownMenu>
@@ -73,7 +83,7 @@ const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="!w-full cursor-pointer text-muted-foreground justify-start"
-            onClick={() => onEdit(module)}
+            onClick={() => onEdit(classType)}
           >
             <Edit className="size-4" />
             Editar
@@ -87,15 +97,14 @@ const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <DeleteConfirmationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onConfirm={handleDeleteModule}
+        onConfirm={handleDeleteClassType}
         description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE o módulo e todos os dados relacionados a ele."
       />
     </li>
   );
 };
 
-export default ModuleCard;
+export default ClassTypeCard;

@@ -3,6 +3,7 @@
 import { useClassroomStore } from "../classrooms/stores/classrooms";
 import ClassroomFormDialog from "../classrooms/components/classroom-form-dialog";
 import { ModulesList } from "./components/modules";
+import { ClassTypesList } from "./components/class-types";
 import { useParams } from "next/navigation";
 import PermissionGuard from "@/components/shared/permission-guard";
 
@@ -36,8 +37,9 @@ const ClassroomHomePage = () => {
           </div>
         }
       >
-        <div className="w-full h-full rounded-md overflow-hidden flex p-6">
+        <div className="w-full h-full rounded-md overflow-hidden flex gap-6 p-6">
           <ModulesList classroomId={classroomId} />
+          <ClassTypesList classroomId={classroomId} />
         </div>
       </PermissionGuard>
     </div>
