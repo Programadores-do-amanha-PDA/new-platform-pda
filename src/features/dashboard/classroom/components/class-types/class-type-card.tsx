@@ -33,7 +33,7 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
     if (!currentConfig) return;
 
     const updatedClassTypes = currentConfig.class_types.filter(
-      (m: ClassroomConfigClassTypesT) => m.id !== module.id
+      (m: ClassroomConfigClassTypesT) => m.id !== classType.id
     );
     await updateConfigById(configId, { class_types: updatedClassTypes });
   };

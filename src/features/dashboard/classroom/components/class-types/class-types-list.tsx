@@ -33,7 +33,7 @@ const ClassTypesList = ({ classroomId }: ClassTypesListProps) => {
       <header className="w-full flex items-center justify-between border-b p-3">
         <h2 className="font-bold">Tipos de Aula</h2>
 
-        {currentConfig && (
+        {currentConfig && classTypes.length > 0 && (
           <ClassTypeFormDialog
             configId={currentConfig!.id}
             trigger={
