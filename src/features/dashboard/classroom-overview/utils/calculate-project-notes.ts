@@ -17,7 +17,7 @@ export function calculateProjectNotes(
     // Procurar por entregas do estudante neste projeto
     const studentDeliveries = deliveries.filter(
       (delivery) =>
-        delivery.project_id === project.id &&
+        delivery.project_id === project.id && delivery.members_id &&
         delivery.members_id.includes(student)
     );
 
