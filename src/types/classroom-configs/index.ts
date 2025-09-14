@@ -16,6 +16,14 @@ export interface ClassroomConfigClassTypesLimitT {
   color: string;
   min: number;
   max?: number;
+  allowJustification: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ClassroomConfigClassTypesJustificationT {
+  key: string;
+  color: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -33,6 +41,7 @@ export interface ClassroomConfigT {
   classroom_id: string;
   modules: ClassroomConfigModulesT[];
   class_types: ClassroomConfigClassTypesT[];
+  justification: ClassroomConfigClassTypesJustificationT;
 }
 
 // Zod schemas
