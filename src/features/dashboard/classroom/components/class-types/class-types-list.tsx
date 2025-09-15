@@ -29,7 +29,7 @@ const ClassTypesList = ({ classroomId }: ClassTypesListProps) => {
   };
 
   return (
-    <div className="w-full max-w-[400px] h-full max-h-96 flex flex-col border rounded-lg overflow-hidden">
+    <div className="w-full max-w-[600px] h-full max-h-96 flex flex-col border rounded-lg overflow-hidden">
       <header className="w-full flex items-center justify-between border-b p-3">
         <h2 className="font-bold">Tipos de Aula</h2>
 
