@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
@@ -69,7 +70,7 @@ const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Ações</DropdownMenuItem>
+          <DropdownMenuLabel>Ações</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="!w-full cursor-pointer text-muted-foreground justify-start"

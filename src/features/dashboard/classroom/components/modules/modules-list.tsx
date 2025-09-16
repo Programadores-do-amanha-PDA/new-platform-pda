@@ -30,7 +30,7 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
 
   return (
     <div className="w-full max-w-[400px] h-max max-h-96 flex flex-col border rounded-lg overflow-hidden">
-      <header className="w-full flex items-center justify-between border-b p-3">
+      <header className="w-full flex items-center justify-between border-b-2 p-3 bg-muted">
         <h2 className="font-bold">Módulos da Turma</h2>
 
         {modules.length > 0 && currentConfig && (
