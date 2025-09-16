@@ -21,7 +21,9 @@ export interface ClassroomConfigClassTypesLimitT {
   updated_at?: string;
 }
 
-export interface ClassroomConfigClassTypesJustificationT {
+export interface ClassroomConfigJustificationT {
+  id: string;
+  title: string;
   key: string;
   color: string;
   created_at?: string;
@@ -39,9 +41,9 @@ export interface ClassroomConfigClassTypesT {
 export interface ClassroomConfigT {
   id: string;
   classroom_id: string;
-  modules: ClassroomConfigModulesT[];
-  class_types: ClassroomConfigClassTypesT[];
-  justification: ClassroomConfigClassTypesJustificationT;
+  modules: Array<ClassroomConfigModulesT>;
+  class_types: Array<ClassroomConfigClassTypesT>;
+  justifications: Array<ClassroomConfigJustificationT>;
 }
 
 // Zod schemas
@@ -52,6 +54,7 @@ export const ClassroomConfigClassTypesLimitSchema = z.object({
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hex válido"),
   min: z.number().min(0, "Mínimo deve ser maior ou igual a 0"),
   max: z.number().min(0, "Máximo deve ser maior ou igual a 0").optional(),
+  allowJustification: z.boolean(),
 });
 
 export const ClassroomConfigClassTypesSchema = z.object({
