@@ -41,6 +41,10 @@ export default function DateIntervalPaginationControl({
   modules = [],
   defaultInterval = "manual",
 }: DateIntervalPaginationControlProps) {
+  const [selectedModule, setSelectedModule] = useState<string>();
+  const [intervalType, setIntervalType] = useState<"manual" | "modules">();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
+
   const getCurrentModule = useCallback((): string => {
     if (!modules.length) return "manual";
 
@@ -67,13 +71,6 @@ export default function DateIntervalPaginationControl({
     return latestModule?.id || "manual";
   }, [modules]);
 
-  const [selectedModule, setSelectedModule] = useState<string>(
-    defaultInterval === "manual" ? "manual" : ""
-  );
-  const [intervalType, setIntervalType] = useState<"manual" | "modules">(
-    defaultInterval === "manual" ? "manual" : "modules"
-  );
-
   // Inicializar com o módulo atual se defaultInterval for "modules"
   useEffect(() => {
     if (defaultInterval === "modules" && modules.length > 0) {
@@ -87,8 +84,15 @@ export default function DateIntervalPaginationControl({
         setIntervalType("manual");
         setDateRange(getCurrentWeekRange());
       }
+    } else {
+      setSelectedModule("manual");
+      setIntervalType("manual");
+      setDateRange(getCurrentWeekRange());
     }
-  }, [defaultInterval]);
+
+    setDateRange(getInitialDateRange());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getCurrentWeekRange = (): DateRange => {
     const today = new Date();
@@ -136,10 +140,6 @@ export default function DateIntervalPaginationControl({
       : getCurrentWeekRange();
   };
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(
-    getInitialDateRange
-  );
-
   // Notifica mudanças no intervalo de datas
   useEffect(() => {
     if (dateRange?.from && dateRange?.to) {
@@ -148,6 +148,7 @@ export default function DateIntervalPaginationControl({
         to: dateRange.to,
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange]);
 
   const handlePreviousInterval = () => {
