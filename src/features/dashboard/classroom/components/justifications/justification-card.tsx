@@ -1,65 +1,73 @@
 "use client";
-import { useState } from "react";
-import { Edit, Ellipsis, Trash2, Calendar } from "lucide-react";
+import Color from "color";
+import { Edit, Ellipsis, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
+import { useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
-interface ModuleCardProps {
-  module: ClassroomConfigModulesT;
+interface JustificationCardProps {
   configId: string;
-  onEdit: (module: ClassroomConfigModulesT) => void;
+  justification: ClassroomConfigJustificationT;
+  onEdit: (justification: ClassroomConfigJustificationT) => void;
 }
 
-const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
+const JustificationCard = ({
+  configId,
+  justification,
+  onEdit,
+}: JustificationCardProps) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
-  const handleDeleteModule = async () => {
+  const handleDeleteJustification = async () => {
     const currentConfig = Object.values(configsByClassroom).find(
       (config) => config.id === configId
     );
     if (!currentConfig) return;
 
-    const updatedModules = currentConfig.modules.filter(
-      (m: ClassroomConfigModulesT) => m.id !== module.id
+    const updatedClassTypes = currentConfig.justifications.filter(
+      (j: ClassroomConfigJustificationT) => j.id !== justification.id
     );
-    await updateConfigById(configId, { modules: updatedModules });
+    await updateConfigById(configId, { justifications: updatedClassTypes });
   };
 
-  const formatDateRange = () => {
-    if (!module.interval?.from) return "Data não definida";
-
-    const fromDate = format(new Date(module.interval.from), "dd/MM/yyyy", {
-      locale: ptBR,
-    });
-    const toDate = module.interval.to
-      ? format(new Date(module.interval.to), "dd/MM/yyyy", { locale: ptBR })
-      : "Em andamento";
-
-    return `${fromDate} - ${toDate}`;
+  const backgroundColor = (color: string) => {
+    try {
+      return Color(color).hex();
+    } catch {
+      return "#f3f4f6";
+    }
   };
 
   return (
-    <li className="w-full h-max flex justify-between gap-4 overflow-hidden">
+    <li className="w-full h-max flex items-center justify-between gap-4 overflow-hidden p-3 hover:bg-zinc-50">
       <div className="flex flex-col gap-1 flex-1">
-        <p className="truncate text-sm font-semibold" title={module.title}>
-          {module.title}
-        </p>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <Calendar className="size-3" />
-          <span className="text-xs">{formatDateRange()}</span>
+        <div className="flex gap-1">
+          <Badge
+            key={`class-type-limit-${justification.id}`}
+            variant="secondary"
+            style={{
+              backgroundColor: backgroundColor(justification.color),
+              color: Color(justification.color).isDark() ? "#fff" : "#000",
+            }}
+          >
+            <p className="font-semibold text-xs!">({justification.key})</p>
+          </Badge>
+          <h3 className="truncate text-sm font-semibold">
+            {justification.title}
+          </h3>
         </div>
       </div>
 
@@ -74,7 +82,7 @@ const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="!w-full cursor-pointer text-muted-foreground justify-start"
-            onClick={() => onEdit(module)}
+            onClick={() => onEdit(justification)}
           >
             <Edit className="size-4" />
             Editar
@@ -88,15 +96,14 @@ const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
       <DeleteConfirmationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onConfirm={handleDeleteModule}
+        onConfirm={handleDeleteJustification}
         description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE o módulo e todos os dados relacionados a ele."
       />
     </li>
   );
 };
 
-export default ModuleCard;
+export default JustificationCard;

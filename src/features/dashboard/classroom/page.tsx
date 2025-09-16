@@ -3,8 +3,10 @@
 import { useClassroomStore } from "../classrooms/stores/classrooms";
 import ClassroomFormDialog from "../classrooms/components/classroom-form-dialog";
 import { ModulesList } from "./components/modules";
+import { ClassTypesList } from "./components/class-types";
 import { useParams } from "next/navigation";
 import PermissionGuard from "@/components/shared/permission-guard";
+import { JustificationsList } from "./components/justifications";
 
 const ClassroomHomePage = () => {
   const { classroom_id } = useParams();
@@ -21,7 +23,7 @@ const ClassroomHomePage = () => {
   );
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 p-4 overflow-hidden">
+    <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y-auto">
       <PermissionGuard permission="classrooms.update_all">
         <header className="w-full flex flex-row flex-nowrap items-center justify-end gap-4">
           <ClassroomFormDialog currentClassroom={currentClassroom} />
@@ -36,8 +38,10 @@ const ClassroomHomePage = () => {
           </div>
         }
       >
-        <div className="w-full h-full rounded-md overflow-hidden flex p-6">
+        <div className="w-full h-full rounded-md overflow-hidden flex flex-wrap gap-6 p-6">
           <ModulesList classroomId={classroomId} />
+          <ClassTypesList classroomId={classroomId} />
+          <JustificationsList classroomId={classroomId} />
         </div>
       </PermissionGuard>
     </div>

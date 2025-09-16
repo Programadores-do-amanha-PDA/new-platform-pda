@@ -37,6 +37,7 @@ import { calculateUserAttendance } from "@/utils/attendance-calculator";
 import { calculateClassPresence } from "../utils/class-presence";
 import { DateRange } from "react-day-picker";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import Color from "color";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -46,13 +47,6 @@ interface AttendanceTableProps {
   )[];
   classroomId: string;
 }
-
-const AttendanceStatusOptions = {
-  P: { label: "Presente", color: "text-green-500" },
-  F: { label: "Falta", color: "text-red-500" },
-  PP: { label: "Presença Parcial", color: "text-yellow-500" },
-  FJ: { label: "Falta Justificada", color: "text-orange-500" },
-};
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
   {
@@ -139,6 +133,7 @@ export default function AttendanceTable({
 
   const currentConfig = configsByClassroom[classroomId];
   const classroomModules = currentConfig?.modules || [];
+  const classroomClassTypes = currentConfig?.class_types || [];
 
   const displayedMeetings = useMemo(() => {
     if (!dateRange || !dateRange.from || !dateRange.to) return meetings;
@@ -155,6 +150,15 @@ export default function AttendanceTable({
   const handleDateRangeChange = useCallback((newDateRange: DateRange) => {
     setDateRange(newDateRange);
   }, []);
+
+  const backgroundColor = (color: string | null | undefined) => {
+    try {
+      if (!color) throw "color null";
+      return Color(color).hex();
+    } catch {
+      return "#f3f4f6";
+    }
+  };
 
   // Create dynamic columns for meetings
   const meetingColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] =
@@ -182,6 +186,7 @@ export default function AttendanceTable({
               <MeetingTypeSelector
                 key={`MeetingTypeSelector-${meeting.id}-${index}`}
                 value={meeting.class_type}
+                options={classroomClassTypes}
                 handleValueChange={(value) =>
                   updatePastInstanceByUuid(meeting.uuid, {
                     class_type: value,
@@ -195,43 +200,63 @@ export default function AttendanceTable({
           </div>
         ),
         cell: ({ row }) => {
+          const currentClassType = classroomClassTypes.find(
+            (classType) => classType.id === meeting.class_type
+          );
           const userAttendance = calculateUserAttendance(
             meeting,
-            row.original.email || ""
+            row.original.email || "",
+            currentClassType!,
+            currentConfig.justifications
           );
 
           return (
             <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
               <div className="flex flex-col">
                 <p
-                  className={cn(
-                    "font-semibold",
-                    AttendanceStatusOptions[userAttendance.status].color
-                  )}
-                  title={AttendanceStatusOptions[userAttendance.status].label}
+                  className="font-semibold"
+                  style={{
+                    color: backgroundColor(
+                      userAttendance?.justification?.color ||
+                        userAttendance?.limit?.color
+                    ),
+                  }}
+                  title={
+                    userAttendance?.justification?.title ||
+                    userAttendance?.limit?.title
+                  }
                 >
-                  {userAttendance.status}
+                  {userAttendance?.justification?.key ||
+                    userAttendance?.limit?.key}
                 </p>
-                {userAttendance.minutesAttended < 60 &&
-                  userAttendance.minutesAttended > 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      {userAttendance.minutesAttended}M
-                    </p>
-                  )}
+
+                {userAttendance.minutesAttended > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {userAttendance.minutesAttended}M
+                  </p>
+                )}
               </div>
-              {row.original.email && userAttendance.status !== "P" && (
-                <AttendanceJustificationDropdown
-                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                  currentMeeting={meeting}
-                  currentUserEmail={row.original.email}
-                  type={meeting.meeting_type}
-                />
-              )}
+              {row.original.email &&
+                (userAttendance?.justification ||
+                  userAttendance?.limit?.allowJustification) && (
+                  <AttendanceJustificationDropdown
+                    key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+                    currentMeeting={meeting}
+                    currentUserEmail={row.original.email}
+                    type={meeting.meeting_type}
+                  />
+                )}
             </div>
           );
         },
       }));
-    }, [displayedMeetings, users]);
+    }, [
+      classroomClassTypes,
+      currentConfig.justifications,
+      displayedMeetings,
+      updatePastInstanceByUuid,
+      users,
+    ]);
 
   // Combine user columns with meeting columns
   const allColumns = useMemo(() => {

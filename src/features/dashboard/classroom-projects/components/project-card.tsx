@@ -171,6 +171,7 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
             <RoleGuard
+            roles={["admin", "class_manager", "employer"]}
               fallback={
                 <p className="font-semibold truncate">{project.title}</p>
               }

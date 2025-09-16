@@ -1,40 +1,41 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
-import ModuleCard from "./module-card";
-import ModuleFormDialog from "./module-form-dialog";
+import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
+import { JustificationCard, JustificationFormDialog } from ".";
 
-interface ModulesListProps {
+interface JustificationsListProps {
   classroomId: string;
 }
 
-const ModulesList = ({ classroomId }: ModulesListProps) => {
-  const [currentModule, setCurrentModule] =
-    useState<ClassroomConfigModulesT | null>(null);
+const JustificationsList = ({ classroomId }: JustificationsListProps) => {
+  const [currentJustification, setCurrentJustification] =
+    useState<ClassroomConfigJustificationT | null>(null);
 
   const { configsByClassroom } = useClassroomConfigStore();
 
   const currentConfig = configsByClassroom[classroomId];
-  const modules = currentConfig?.modules || [];
+  const justifications = currentConfig?.justifications || [];
 
-  const handleEditModule = (module: ClassroomConfigModulesT) => {
-    setCurrentModule(module);
+  const handleEditJustification = (
+    justification: ClassroomConfigJustificationT
+  ) => {
+    setCurrentJustification(justification);
   };
 
   const handleCloseDialog = () => {
-    setCurrentModule(null);
+    setCurrentJustification(null);
   };
 
   return (
     <div className="w-full max-w-[400px] h-max max-h-96 flex flex-col border rounded-lg overflow-hidden">
       <header className="w-full flex items-center justify-between border-b-2 p-3 bg-muted">
-        <h2 className="font-bold">Módulos da Turma</h2>
+        <h2 className="font-bold">Justificativas</h2>
 
-        {modules.length > 0 && currentConfig && (
-          <ModuleFormDialog
+        {currentConfig && justifications.length > 0 && (
+          <JustificationFormDialog
             configId={currentConfig.id}
             trigger={
               <Button size="icon">
@@ -45,22 +46,24 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
         )}
       </header>
 
-      {modules.length === 0 ? (
+      {justifications.length === 0 ? (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center py-4 space-y-6">
             <div>
-              <h3 className="font-semibold">Nenhum módulo encontrado</h3>
+              <h3 className="font-semibold">
+                Nenhuma justificativa encontrada
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Comece criando o primeiro módulo da turma
+                Comece criando a primeira justificativa
               </p>
             </div>
             {currentConfig && (
-              <ModuleFormDialog
+              <JustificationFormDialog
                 configId={currentConfig.id}
                 trigger={
                   <Button>
                     <Plus className="size-4 mr-2" />
-                    Criar Primeiro Módulo
+                    Criar Primeira Justificativa
                   </Button>
                 }
               />
@@ -69,23 +72,23 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
         </div>
       ) : (
         <div className="flex-1 overflow-auto">
-          <ul className="w-full grid grid-flow-row *:hover:bg-zinc-50 *:p-3 *:not-first:border-t">
-            {modules.map((module) => (
-              <ModuleCard
-                key={module.id}
-                module={module}
-                configId={currentConfig!.id}
-                onEdit={handleEditModule}
+          <div className="w-full *:not-first:border-t">
+            {justifications.map((justification) => (
+              <JustificationCard
+                configId={currentConfig.id}
+                key={justification.id}
+                justification={justification}
+                onEdit={handleEditJustification}
               />
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
       {currentConfig && (
-        <ModuleFormDialog
+        <JustificationFormDialog
           configId={currentConfig.id}
-          currentModule={currentModule}
+          currentJustification={currentJustification}
           onClose={handleCloseDialog}
         />
       )}
@@ -93,4 +96,4 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
   );
 };
 
-export default ModulesList;
+export default JustificationsList;
