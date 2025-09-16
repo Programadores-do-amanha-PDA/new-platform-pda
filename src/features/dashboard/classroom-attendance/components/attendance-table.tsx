@@ -151,8 +151,9 @@ export default function AttendanceTable({
     setDateRange(newDateRange);
   }, []);
 
-  const backgroundColor = (color: string) => {
+  const backgroundColor = (color: string | null | undefined) => {
     try {
+      if (!color) throw "color null";
       return Color(color).hex();
     } catch {
       return "#f3f4f6";
@@ -205,7 +206,8 @@ export default function AttendanceTable({
           const userAttendance = calculateUserAttendance(
             meeting,
             row.original.email || "",
-            currentClassType!
+            currentClassType!,
+            currentConfig.justifications
           );
 
           return (
@@ -214,40 +216,47 @@ export default function AttendanceTable({
                 <p
                   className="font-semibold"
                   style={{
-                    backgroundColor:
-                      userAttendance.isJustification || !userAttendance?.limit
-                        ? "#f3f4f6"
-                        : backgroundColor(userAttendance?.limit?.color),
-                    color: Color(userAttendance?.limit?.color).isDark()
-                      ? "#000"
-                      : "#fff",
+                    color: backgroundColor(
+                      userAttendance?.justification?.color ||
+                        userAttendance?.limit?.color
+                    ),
                   }}
                   title={
-                    userAttendance.isJustification || !userAttendance?.limit
-                      ? "Falta Justificada"
-                      : userAttendance?.limit?.title
+                    userAttendance?.justification?.title ||
+                    userAttendance?.limit?.title
                   }
                 >
-                  {userAttendance?.limit?.key}
+                  {userAttendance?.justification?.key ||
+                    userAttendance?.limit?.key}
                 </p>
 
-                <p className="text-sm text-muted-foreground">
-                  {userAttendance.minutesAttended}M
-                </p>
+                {userAttendance.minutesAttended > 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    {userAttendance.minutesAttended}M
+                  </p>
+                )}
               </div>
-              {row.original.email && userAttendance?.limit?.allowJustification && (
-                <AttendanceJustificationDropdown
-                  key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                  currentMeeting={meeting}
-                  currentUserEmail={row.original.email}
-                  type={meeting.meeting_type}
-                />
-              )}
+              {row.original.email &&
+                (userAttendance?.justification ||
+                  userAttendance?.limit?.allowJustification) && (
+                  <AttendanceJustificationDropdown
+                    key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+                    currentMeeting={meeting}
+                    currentUserEmail={row.original.email}
+                    type={meeting.meeting_type}
+                  />
+                )}
             </div>
           );
         },
       }));
-    }, [displayedMeetings, users]);
+    }, [
+      classroomClassTypes,
+      currentConfig.justifications,
+      displayedMeetings,
+      updatePastInstanceByUuid,
+      users,
+    ]);
 
   // Combine user columns with meeting columns
   const allColumns = useMemo(() => {
