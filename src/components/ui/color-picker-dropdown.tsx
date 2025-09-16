@@ -11,7 +11,6 @@ import {
   ColorPicker,
   ColorPickerSelection,
   ColorPickerHue,
-  ColorPickerFormat,
 } from "@/components/ui/shadcn-io/color-picker";
 import Color, { ColorLike } from "color";
 
@@ -71,9 +70,6 @@ const ColorPickerDropdown = ({
           <ColorPickerSelection  />
           <div className="flex items-center">
               <ColorPickerHue />
-          </div>
-          <div className="flex items-center">
-            <ColorPickerFormat className="[&_input]:bg-muted!" />
           </div>
         </ColorPicker>
       </PopoverContent>
