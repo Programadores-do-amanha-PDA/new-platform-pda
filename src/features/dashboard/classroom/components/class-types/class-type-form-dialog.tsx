@@ -1,6 +1,8 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Info, Plus, Trash2 } from "lucide-react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +14,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  ClassroomConfigClassTypesLimitT,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
   ClassroomConfigClassTypesT,
   ClassroomConfigClassTypesSchema,
   ClassroomConfigClassTypesFormData,
@@ -20,8 +29,8 @@ import {
 import Color, { ColorLike } from "color";
 import ColorPickerDropdown from "@/components/ui/color-picker-dropdown";
 import { toast } from "sonner";
-import { ZodError, ZodIssue } from "zod";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface ClassTypeFormDialogProps {
   currentClassType?: ClassroomConfigClassTypesT | null;
@@ -39,43 +48,16 @@ const ClassTypeFormDialog = ({
   trigger,
 }: ClassTypeFormDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [limits, setLimits] = useState<ClassroomConfigClassTypesLimitT[]>([]);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
   const isEditing = !!currentClassType;
 
-  useEffect(() => {
-    if (currentClassType) {
-      setTitle(currentClassType.title);
-      setLimits(
-        currentClassType.limits?.map((limit) => ({
-          id: limit.id,
-          title: limit.title,
-          key: limit.key,
-          color: limit.color,
-          min: limit.min,
-          max: limit.max,
-        })) || []
-      );
-      setOpen(true);
-    }
-  }, [currentClassType]);
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setTitle("");
-      setLimits([]);
-      setErrors({});
-      setIsSubmitting(false);
-      setOpen(false);
-      onClose?.();
-    }
-    if (open && !currentClassType) {
-      setTitle("");
-      setLimits([
+  const form = useForm<ClassroomConfigClassTypesFormData>({
+    resolver: zodResolver(ClassroomConfigClassTypesSchema),
+    defaultValues: {
+      title: "",
+      limits: [
         {
           id: crypto.randomUUID(),
           title: "Presença",
@@ -83,6 +65,7 @@ const ClassTypeFormDialog = ({
           color: "#21a041",
           min: 60,
           max: undefined,
+          allowJustification: false,
         },
         {
           id: crypto.randomUUID(),
@@ -91,6 +74,7 @@ const ClassTypeFormDialog = ({
           color: "#e0de62",
           min: 30,
           max: 60,
+          allowJustification: true,
         },
         {
           id: crypto.randomUUID(),
@@ -99,11 +83,78 @@ const ClassTypeFormDialog = ({
           color: "#e94040",
           min: 0,
           max: 30,
+          allowJustification: true,
         },
-      ]);
-      setErrors({});
-      setIsSubmitting(false);
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "limits",
+  });
+
+  useEffect(() => {
+    if (currentClassType) {
       setOpen(true);
+      form.reset({
+        title: currentClassType.title,
+        limits:
+          currentClassType.limits?.map((limit) => ({
+            id: limit.id,
+            title: limit.title,
+            key: limit.key,
+            color: limit.color,
+            min: limit.min,
+            max: limit.max,
+            allowJustification: limit.allowJustification,
+          })) || [],
+      });
+    }
+  }, [currentClassType, form]);
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      form.reset();
+      setIsSubmitting(false);
+      setOpen(false);
+      onClose?.();
+    } else {
+      setOpen(true);
+      if (!currentClassType) {
+        form.reset({
+          title: "",
+          limits: [
+            {
+              id: crypto.randomUUID(),
+              title: "Presença",
+              key: "P",
+              color: "#21a041",
+              min: 60,
+              max: undefined,
+              allowJustification: false,
+            },
+            {
+              id: crypto.randomUUID(),
+              title: "Presença Parcial",
+              key: "PP",
+              color: "#e0de62",
+              min: 30,
+              max: 60,
+              allowJustification: true,
+            },
+            {
+              id: crypto.randomUUID(),
+              title: "Falta",
+              key: "F",
+              color: "#e94040",
+              min: 0,
+              max: 30,
+              allowJustification: true,
+            },
+          ],
+        });
+      }
     }
   };
 
@@ -114,33 +165,15 @@ const ClassTypeFormDialog = ({
       50
     ).hex();
 
-    setLimits([
-      ...limits,
-      {
-        id: crypto.randomUUID(),
-        title: "",
-        key: "",
-        color: randomColor,
-        min: 0,
-        max: undefined,
-      },
-    ]);
-  };
-
-  const removeLimit = (index: number) => {
-    setLimits(limits.filter((_, i) => i !== index));
-  };
-
-  const updateLimit = (
-    index: number,
-    field: keyof ClassroomConfigClassTypesLimitT,
-    value: string | number | undefined
-  ) => {
-    setLimits(
-      limits.map((limit, i) =>
-        i === index ? { ...limit, [field]: value } : limit
-      )
-    );
+    append({
+      id: crypto.randomUUID(),
+      title: "",
+      key: "",
+      color: randomColor,
+      min: 0,
+      max: undefined,
+      allowJustification: false,
+    });
   };
 
   const handleColorChange = useCallback(
@@ -164,41 +197,19 @@ const ClassTypeFormDialog = ({
           return; // Invalid color format
         }
 
-        // Only update if the color actually changed to prevent infinite loops
-        setLimits((prevLimits) => {
-          const currentColor = prevLimits[index]?.color;
-          if (currentColor === hex) {
-            return prevLimits; // No change, return same reference
-          }
-
-          return prevLimits.map((limit, i) =>
-            i === index ? { ...limit, color: hex } : limit
-          );
-        });
+        // Update the form field
+        form.setValue(`limits.${index}.color`, hex);
       } catch (error) {
         console.error("Error processing color:", error);
       }
     },
-    []
+    [form]
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ClassroomConfigClassTypesFormData) => {
     setIsSubmitting(true);
-    setErrors({});
 
     try {
-      // Validate form data with Zod
-      const formData: ClassroomConfigClassTypesFormData = {
-        title,
-        limits: limits.map((limit) => ({
-          ...limit,
-          max: limit.max === 0 ? undefined : limit.max,
-        })),
-      };
-
-      const validatedData = ClassroomConfigClassTypesSchema.parse(formData);
-
       // Get current classroom config
       const currentConfig = Object.values(configsByClassroom).find(
         (config) => config.id === configId
@@ -219,16 +230,22 @@ const ClassTypeFormDialog = ({
         if (index !== -1) {
           updatedClassTypes[index] = {
             ...currentClassType,
-            title: validatedData.title,
-            limits: validatedData.limits,
+            title: data.title,
+            limits: data.limits.map((limit) => ({
+              ...limit,
+              max: limit.max === 0 ? undefined : limit.max,
+            })),
             updated_at: new Date().toISOString(),
           };
         }
       } else {
         const newClassType: ClassroomConfigClassTypesT = {
           id: crypto.randomUUID(),
-          title: validatedData.title,
-          limits: validatedData.limits,
+          title: data.title,
+          limits: data.limits.map((limit) => ({
+            ...limit,
+            max: limit.max === 0 ? undefined : limit.max,
+          })),
           created_at: new Date().toISOString(),
         };
         updatedClassTypes.push(newClassType);
@@ -251,23 +268,8 @@ const ClassTypeFormDialog = ({
         toast.error("Erro ao salvar tipo de aula");
       }
     } catch (error) {
-      if (error instanceof Error) {
-        // Handle Zod validation errors
-        if (error.name === "ZodError") {
-          const zodError = error as ZodError;
-          const fieldErrors: Record<string, string> = {};
-
-          zodError.errors?.forEach((err: ZodIssue) => {
-            const path = err.path.join(".");
-            fieldErrors[path] = err.message;
-          });
-
-          setErrors(fieldErrors);
-          toast.error("Por favor, corrija os erros no formulário");
-        } else {
-          toast.error("Erro ao salvar tipo de aula");
-        }
-      }
+      console.error("Error saving class type:", error);
+      toast.error("Erro ao salvar tipo de aula");
     } finally {
       setIsSubmitting(false);
     }
@@ -277,184 +279,227 @@ const ClassTypeFormDialog = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl w-full max-h-[90vh] h-full flex flex-col overflow-hidden">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? "Editar Tipo de Aula" : "Novo Tipo de Aula"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Título</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Digite o título do tipo de aula"
-              className={errors.title ? "border-destructive" : ""}
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="h-full w-full flex flex-col gap-6 overflow-hidden"
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">Título</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Digite o título do tipo de aula"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title}</p>
-            )}
-          </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Limites por intervalo</Label>
-              <Button type="button" onClick={addLimit} size="sm">
-                <Plus className="size-4 mr-2" />
-                Adicionar Limite
-              </Button>
+            <div className="w-full h-full flex flex-col overflow-hidden bg-muted rounded-lg">
+              <div className="flex items-center justify-between p-4">
+                <Label className="font-semibold">Limites por intervalo</Label>
+                <Button type="button" onClick={addLimit} size="sm">
+                  <Plus className="size-4 mr-2" />
+                  Adicionar Limite
+                </Button>
+              </div>
+
+              <ul className="w-full h-max p-4 flex overflow-y-auto flex-col gap-4">
+                {fields.map((field, index) => (
+                  <li
+                    key={field.id}
+                    className="border rounded-lg space-y-4 bg-background"
+                  >
+                    <div className="flex items-center justify-between border-b p-2">
+                      <div className="space-y-2 flex-1 mr-2">
+                        <FormField
+                          control={form.control}
+                          name={`limits.${index}.id`}
+                          render={({ field }) => (
+                            <input type="hidden" {...field} />
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`limits.${index}.title`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="sr-only font-semibold">
+                                Título do Limite
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="Ex: Presença Parcial"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-4">
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.key`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold">
+                              Identificador
+                            </FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: PP" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.color`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold">Cor</FormLabel>
+                            <FormControl>
+                              <ColorPickerDropdown
+                                color={field.value}
+                                onColorChange={(colorValue) =>
+                                  handleColorChange(index, colorValue)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 mx-4 mb-4">
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.min`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold">
+                              Mínimo de minutos
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                {...field}
+                                onChange={(e) =>
+                                  field.onChange(parseInt(e.target.value) || 0)
+                                }
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.max`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold">
+                              Máximo de minutos
+                              <p title="Deixe vazio para ilimitado">
+                                <Info className="size-4 fill-primary cursor-help" />
+                                <span className="sr-only">
+                                  Deixe vazio para ilimitado
+                                </span>
+                              </p>
+                            </FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                placeholder="∞"
+                                value={field.value || ""}
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(
+                                    value === ""
+                                      ? undefined
+                                      : parseInt(value) || 0
+                                  );
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="mx-4 mb-4">
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.allowJustification`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Permitir justificativa?</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {limits.map((limit, index) => (
-              <article key={index} className="border rounded-lg space-y-4">
-                <div className="flex items-center justify-between border-b p-2">
-                  <div className="space-y-2 flex-1 mr-2">
-                    <Label htmlFor={`limit-title-${index}`} className="sr-only">
-                      Título do Limite
-                    </Label>
-                    <Input
-                      id={`limit-title-${index}`}
-                      value={limit.title}
-                      onChange={(e) =>
-                        updateLimit(index, "title", e.target.value)
-                      }
-                      placeholder="Ex: Presença Parcial"
-                      className={
-                        errors[`limits.${index}.title`]
-                          ? "border-destructive"
-                          : ""
-                      }
-                    />
-                    {errors[`limits.${index}.title`] && (
-                      <p className="text-sm text-destructive">
-                        {errors[`limits.${index}.title`]}
-                      </p>
-                    )}
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeLimit(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mx-4">
-                  <div className="space-y-2">
-                    <Label>Identificador</Label>
-                    <Input
-                      value={limit.key}
-                      onChange={(e) =>
-                        updateLimit(index, "key", e.target.value)
-                      }
-                      placeholder="Ex: PP"
-                      className={
-                        errors[`limits.${index}.key`]
-                          ? "border-destructive"
-                          : ""
-                      }
-                    />
-                    {errors[`limits.${index}.key`] && (
-                      <p className="text-sm text-destructive">
-                        {errors[`limits.${index}.key`]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Cor</Label>
-                    <ColorPickerDropdown
-                      color={limit.color}
-                      onColorChange={(colorValue) =>
-                        handleColorChange(index, colorValue)
-                      }
-                    />
-                    {errors[`limits.${index}.color`] && (
-                      <p className="text-sm text-destructive">
-                        {errors[`limits.${index}.color`]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mx-4 mb-4">
-                  <div className="space-y-2">
-                    <Label>Mínimo de minutos</Label>
-                    <Input
-                      type="number"
-                      value={limit.min}
-                      onChange={(e) =>
-                        updateLimit(index, "min", parseInt(e.target.value) || 0)
-                      }
-                      min="0"
-                      className={
-                        errors[`limits.${index}.min`]
-                          ? "border-destructive"
-                          : ""
-                      }
-                    />
-                    {errors[`limits.${index}.min`] && (
-                      <p className="text-sm text-destructive">
-                        {errors[`limits.${index}.min`]}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Máximo de minutos (opcional)</Label>
-                    <Input
-                      type="number"
-                      value={limit.max || ""}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        updateLimit(
-                          index,
-                          "max",
-                          value === "" ? undefined : parseInt(value) || 0
-                        );
-                      }}
-                      min="0"
-                      placeholder="Deixe vazio para ilimitado"
-                      className={
-                        errors[`limits.${index}.max`]
-                          ? "border-destructive"
-                          : ""
-                      }
-                    />
-                    {errors[`limits.${index}.max`] && (
-                      <p className="text-sm text-destructive">
-                        {errors[`limits.${index}.max`]}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting
-                ? "Salvando..."
-                : isEditing
-                ? "Salvar Alterações"
-                : "Criar Tipo de Aula"}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Salvando..."
+                  : isEditing
+                  ? "Salvar Alterações"
+                  : "Criar Tipo de Aula"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

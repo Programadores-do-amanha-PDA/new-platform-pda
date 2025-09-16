@@ -8,6 +8,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -33,7 +34,7 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
     if (!currentConfig) return;
 
     const updatedClassTypes = currentConfig.class_types.filter(
-      (m: ClassroomConfigClassTypesT) => m.id !== classType.id
+      (c: ClassroomConfigClassTypesT) => c.id !== classType.id
     );
     await updateConfigById(configId, { class_types: updatedClassTypes });
   };
@@ -49,9 +50,9 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
   return (
     <li className="w-full h-max flex justify-between gap-4 overflow-hidden">
       <div className="flex flex-col gap-1 flex-1">
-        <p className="truncate text-sm font-semibold" title={classType.title}>
+        <h3 className="truncate text-sm font-semibold" title={classType.title}>
           {classType.title} 
-        </p>
+        </h3>
         {classType.limits && classType.limits.length > 0 && (
           <div className="flex gap-1 flex-wrap">
             {classType.limits.map((limit) => (
@@ -79,7 +80,7 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Ações</DropdownMenuItem>
+          <DropdownMenuLabel>Ações</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="!w-full cursor-pointer text-muted-foreground justify-start"

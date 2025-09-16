@@ -30,7 +30,7 @@ const ClassTypesList = ({ classroomId }: ClassTypesListProps) => {
 
   return (
     <div className="w-full max-w-[600px] h-full max-h-96 flex flex-col border rounded-lg overflow-hidden">
-      <header className="w-full flex items-center justify-between border-b p-3">
+      <header className="w-full flex items-center justify-between border-b-2 p-3 bg-muted">
         <h2 className="font-bold">Tipos de Aula</h2>
 
         {currentConfig && classTypes.length > 0 && (
