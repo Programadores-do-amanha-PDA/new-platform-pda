@@ -131,9 +131,24 @@ export default function AttendanceTable({
   const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
   const { configsByClassroom } = useClassroomConfigStore();
 
-  const currentConfig = configsByClassroom[classroomId];
-  const classroomModules = currentConfig?.modules || [];
-  const classroomClassTypes = currentConfig?.class_types || [];
+  const currentConfig = useMemo(() => {
+    if (configsByClassroom[classroomId]) return configsByClassroom[classroomId];
+    else return null;
+  }, [configsByClassroom, classroomId]);
+  const classroomModules = useMemo(() => {
+    if (currentConfig && currentConfig.modules) return currentConfig.modules;
+    else return [];
+  }, [currentConfig]);
+  const classroomClassTypes = useMemo(() => {
+    if (currentConfig && currentConfig.class_types.length > 0)
+      return currentConfig.class_types;
+    else return [];
+  }, [currentConfig]);
+  const classroomJustifications = useMemo(() => {
+    if (currentConfig && currentConfig.justifications.length > 0)
+      return currentConfig.justifications;
+    else return [];
+  }, [currentConfig]);
 
   const displayedMeetings = useMemo(() => {
     if (!dateRange || !dateRange.from || !dateRange.to) return meetings;
@@ -207,7 +222,7 @@ export default function AttendanceTable({
             meeting,
             row.original.email || "",
             currentClassType!,
-            currentConfig.justifications
+            classroomJustifications
           );
 
           return (
@@ -252,9 +267,8 @@ export default function AttendanceTable({
       }));
     }, [
       classroomClassTypes,
-      currentConfig.justifications,
+      classroomJustifications,
       displayedMeetings,
-      updatePastInstanceByUuid,
       users,
     ]);
 
