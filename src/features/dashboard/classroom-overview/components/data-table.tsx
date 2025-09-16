@@ -78,6 +78,7 @@ export function DataTable<TData, TValue>({
     // Provide a default structure if fullData is not available
     const defaultData: ClassroomOverviewData = {
       students: [],
+      classTypes: [],
       coodeshTests: [],
       projects: [],
     };

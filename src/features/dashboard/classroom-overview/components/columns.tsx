@@ -71,149 +71,55 @@ export const createColumns = (
         );
       },
     },
-    {
-      accessorKey: "presence.general",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Geral</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.presence.general)}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "presence.programming",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Programação</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.presence.programming)}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "presence.english",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Inglês</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.presence.english)}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "presence.softSkills",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Soft Skills</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.presence.softSkills)}
-          </span>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "presence.community",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Comunidade</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.presence.community)}
-          </span>
-        </div>
-      ),
-    },
   ];
 
-  // Verificar se há dados de empregabilidade para mostrar a coluna
-  const hasEmployabilityData = data.students.some(student => student.presence.employability > 0);
-
-  // Adicionar coluna de empregabilidade condicionalmente
-  if (hasEmployabilityData) {
-    baseColumns.push({
-      accessorKey: "presence.employability",
+  const attendanceColumns: ColumnDef<StudentOverview>[] = data.classTypes.map(
+    (classType) => ({
+      id: `attendance-${classType.id}`,
+      accessorFn: (row) => row.attendances[classType.id],
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p>Empregabilidade</p>
+          <div className="w-full max-w-[200px]  h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p className="truncate" title={classType.name}>
+              {classType.name}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const value = row.original.attendances[classType.id];
+        console.log(row.original.attendances);
+        return (
+          <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
+            <span className="font-medium">
+              {value ? formatPercentage(value) : "0%"}
+            </span>
+          </div>
+        );
+      },
+    })
+  );
+
+  const studentActivities = data.students.reduce((acc, student) => {
+    acc += student.activities;
+    return acc;
+  }, 0);
+  if (studentActivities > 0) {
+    attendanceColumns.push({
+      accessorKey: "activities",
+      header: ({ column }) => {
+        return (
+          <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
+            <p className="font-semibold h-9 flex items-center">Atividades</p>
             <Button
               variant="ghost"
               size="icon"
@@ -229,40 +135,12 @@ export const createColumns = (
       cell: ({ row }) => (
         <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
           <span className="font-medium">
-            {formatPercentage(row.original.presence.employability)}
+            {formatPercentage(row.original.activities)}
           </span>
         </div>
       ),
     });
   }
-
-  // Adicionar coluna de atividades
-  baseColumns.push({
-    accessorKey: "activities",
-    header: ({ column }) => {
-      return (
-        <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
-          <p className="font-semibold h-9 flex items-center">Atividades</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() =>
-              column.toggleSorting(column.getIsSorted() === "asc")
-            }
-          >
-            <ArrowUpDown />
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-        <span className="font-medium">
-          {formatPercentage(row.original.activities)}
-        </span>
-      </div>
-    ),
-  });
 
   // Adicionar colunas dinâmicas dos testes Coodesh
   const coodeshColumns: ColumnDef<StudentOverview>[] = data.coodeshTests.map(
@@ -272,7 +150,9 @@ export const createColumns = (
       header: ({ column }) => {
         return (
           <div className="w-full max-w-[200px]  h-full flex justify-between items-center px-2 gap-4 border-r">
-            <p className="truncate" title={test.name}>{test.name}</p>
+            <p className="truncate" title={test.name}>
+              {test.name}
+            </p>
             <Button
               variant="ghost"
               size="icon"
@@ -332,5 +212,12 @@ export const createColumns = (
     })
   );
 
-  return [...baseColumns, ...coodeshColumns, ...projectColumns];
+  return Array.from(
+    new Set([
+      ...baseColumns,
+      ...attendanceColumns,
+      ...coodeshColumns,
+      ...projectColumns,
+    ])
+  );
 };

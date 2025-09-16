@@ -1,10 +1,5 @@
-export type StudentPresenceIndicators = {
-  general: number;
-  programming: number;
-  english: number;
-  softSkills: number;
-  community: number;
-  employability: number;
+export type StudentAttendanceIndicators = {
+  [presenceId: string]: number;
 };
 
 export type StudentCoodeshIndicators = {
@@ -20,7 +15,7 @@ export type StudentOverview = {
   name: string;
   email: string;
   number: number;
-  presence: StudentPresenceIndicators;
+  attendances: StudentAttendanceIndicators;
   activities: number;
   coodesh: StudentCoodeshIndicators;
   projects: StudentProjectIndicators;
@@ -28,6 +23,10 @@ export type StudentOverview = {
 
 export type ClassroomOverviewData = {
   students: StudentOverview[];
+    classTypes: Array<{
+    id: string;
+    name: string;
+  }>;
   coodeshTests: Array<{
     id: string;
     name: string;

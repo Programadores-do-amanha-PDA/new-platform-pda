@@ -6,14 +6,7 @@ export function calculatePresenceByType(
   zoomMeetings: ZoomMeetingT[],
   studentEmail: string
 ) {
-  const presenceData = {
-    general: 0,
-    programming: 0,
-    english: 0,
-    softSkills: 0,
-    community: 0,
-    employability: 0,
-  };
+  const presenceData = {} as Record<string, number>;
 
   // Filtrar meetings que já passaram e não são recorrentes
   const pastMeetings = zoomMeetings.filter((meeting) => {
@@ -58,43 +51,29 @@ export function calculatePresenceByType(
       }
 
       const attendance = calculateUserAttendance(event, studentEmail || "");
-      return attendance.status === "P" || attendance.status === "FJ";
+      return (
+        attendance.justification?.isPresence || attendance.limit?.isPresence
+      );
     }).length;
 
     const presencePercentage = Math.round((attendedEvents / totalEvents) * 100);
 
-    switch (classType) {
-      case "programming":
-        presenceData.programming = presencePercentage;
-        break;
-      case "english":
-        presenceData.english = presencePercentage;
-        break;
-      case "soft-skills":
-        presenceData.softSkills = presencePercentage;
-        break;
-      case "community":
-        presenceData.community = presencePercentage;
-        break;
-      case "employability":
-        presenceData.employability = presencePercentage;
-        break;
+    if (classType) {
+      presenceData[classType] = presencePercentage;
     }
   });
 
   // Calcular "general" como média dos outros tipos de aula
-  const typeValues = [
-    presenceData.programming,
-    presenceData.english,
-    presenceData.softSkills,
-    presenceData.community,
-    presenceData.employability,
-  ].filter((value) => value > 0); // Apenas tipos que têm dados
+  const typeValues = Object.values(presenceData).filter(
+    (value) => typeof value === "number"
+  ) as number[];
 
   if (typeValues.length > 0) {
-    presenceData.general = Math.round(
+    presenceData["general"] = Math.round(
       typeValues.reduce((sum, value) => sum + value, 0) / typeValues.length
     );
+  } else {
+    presenceData["general"] = 0;
   }
 
   return presenceData;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { ClassroomOverviewTable } from "./components/classroom-overview-table";
 import {
@@ -29,6 +29,7 @@ export default function ClassroomAttendancePage() {
 
   const [data, setData] = useState<ClassroomOverviewData>({
     students: [],
+    classTypes: [],
     coodeshTests: [],
     projects: [],
   });
@@ -46,6 +47,12 @@ export default function ClassroomAttendancePage() {
   const { corrections } = useCorrectionStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
   const { meetings } = useZoomMeetingStore();
+
+  const currentConfig = configsByClassroom[classroomId];
+  const modules = useMemo(
+    () => currentConfig?.modules || [],
+    [currentConfig?.modules]
+  );
 
   // Função para filtrar dados por intervalo de datas
   const filterDataByDateRange = <T,>(
@@ -118,7 +125,7 @@ export default function ClassroomAttendancePage() {
         const studentEmail = user.email || "";
 
         // Calcular presenças por tipo usando dados filtrados
-        const presenceIndicators = calculatePresenceByType(
+        const attendancesIndicators = calculatePresenceByType(
           filteredPastInstances,
           filteredMeetings,
           studentEmail
@@ -139,7 +146,7 @@ export default function ClassroomAttendancePage() {
         );
 
         // Calcular presença geral das atividades com dados filtrados
-        const activitiesPresence = calculateGeneralPresence(
+        const activitiesIndicators = calculateGeneralPresence(
           studentEmail,
           filteredActivities
         );
@@ -149,13 +156,40 @@ export default function ClassroomAttendancePage() {
           name: user.profile?.full_name || "",
           email: studentEmail,
           number: index + 1,
-          presence: presenceIndicators,
-          activities: activitiesPresence,
+          attendances: attendancesIndicators,
+          activities: activitiesIndicators,
           coodesh: coodeshIndicators,
           projects: projectIndicators,
         };
       }
     );
+
+    // Preparar dados dos tipos de atividade
+    const classTypes = Array.from(
+      new Set([
+        ...filteredMeetings.map((m) => m.class_type),
+        ...filteredPastInstances.map((p) => p.class_type),
+      ])
+    )
+      .map((classType) => {
+        const currentClassType = currentConfig?.class_types?.find(
+          (ct) => ct.id === classType
+        );
+        if (currentClassType) {
+          return {
+            id: currentClassType.id,
+            name: currentClassType.title,
+          };
+        } else return null;
+      })
+      .filter(Boolean) as { id: string; name: string }[];
+
+    if (classTypes.length > 0) {
+      classTypes.unshift({
+        id: "general",
+        name: "Geral",
+      });
+    }
 
     // Preparar dados dos testes Coodesh filtrados
     const coodeshTests = filteredAssessments.map((assessment) => ({
@@ -171,22 +205,23 @@ export default function ClassroomAttendancePage() {
 
     setData({
       students: studentsData,
+      classTypes,
       coodeshTests,
       projects: projectsData,
     });
   }, [
     classroomId,
+    currentConfig,
     users,
+    dateRange,
+    meetings,
+    pastInstances,
     activities,
     assessments,
     projects,
-    pastInstances,
-    meetings,
-    dateRange,
+    deliveries,
+    corrections,
   ]);
-
-  const currentConfig = configsByClassroom[classroomId];
-  const modules = currentConfig?.modules || [];
 
   const handleDateRangeChange = (newDateRange: { from: Date; to: Date }) => {
     setDateRange(newDateRange);

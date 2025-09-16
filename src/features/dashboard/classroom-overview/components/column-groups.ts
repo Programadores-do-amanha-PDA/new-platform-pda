@@ -25,10 +25,10 @@ export function getDescriptiveColumnName(
         return "Inglês";
       case "softSkills":
         return "Soft Skills";
-        case "community":
-          return "Comunidade";
-          case "employability":
-            return "Empregabilidade";
+      case "community":
+        return "Comunidade";
+      case "employability":
+        return "Empregabilidade";
       default:
         return presenceType;
     }
@@ -37,6 +37,13 @@ export function getDescriptiveColumnName(
   // Handle activities column
   if (accessorKey === "activities") {
     return "Atividades";
+  }
+
+  // Handle attendance columns
+  if (columnId?.startsWith("attendance-")) {
+    const classTypeId = columnId.replace("attendance-", "");
+    const classType = data?.classTypes?.find((ct) => ct.id === classTypeId);
+    return classType?.name || `Presença ${classTypeId}`;
   }
 
   // Handle coodesh columns
@@ -79,11 +86,11 @@ export function getColumnGroups(
     const accessorKey = column.columnDef?.accessorKey;
     const headerName = getDescriptiveColumnName(columnId, accessorKey, data);
 
-    // Check if this column belongs to a group based on accessorKey
-    if (accessorKey?.startsWith("presence.")) {
-      if (!currentGroup || currentGroup.id !== "presence") {
+    // Check if this column belongs to a group based on accessorKey or columnId
+    if (columnId?.startsWith("attendance-")) {
+      if (!currentGroup || currentGroup.id !== "attendance") {
         currentGroup = {
-          id: "presence",
+          id: "attendance",
           label: "Presença",
           colspan: 0,
           columns: [],
