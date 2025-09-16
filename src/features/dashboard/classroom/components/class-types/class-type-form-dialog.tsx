@@ -108,6 +108,7 @@ const ClassTypeFormDialog = ({
             min: limit.min,
             max: limit.max,
             allowJustification: limit.allowJustification,
+            isPresence: limit.isPresence,
           })) || [],
       });
     }
@@ -173,6 +174,7 @@ const ClassTypeFormDialog = ({
       min: 0,
       max: undefined,
       allowJustification: false,
+      isPresence: true,
     });
   };
 
@@ -458,7 +460,24 @@ const ClassTypeFormDialog = ({
                       />
                     </div>
 
-                    <div className="mx-4 mb-4">
+                    <div className="grid grid-cols-2 gap-4 mx-4 mb-4">
+                      <FormField
+                        control={form.control}
+                        name={`limits.${index}.isPresence`}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>Contar como presença?</FormLabel>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
                       <FormField
                         control={form.control}
                         name={`limits.${index}.allowJustification`}

@@ -25,11 +25,13 @@ import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import ColorPickerDropdown from "@/components/ui/color-picker-dropdown";
 import Color, { ColorLike } from "color";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const JustificationFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   key: z.string().min(1, "Identificador é obrigatório"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hex válido"),
+  isPresence: z.boolean(),
 });
 
 type JustificationFormData = z.infer<typeof JustificationFormSchema>;
@@ -69,6 +71,7 @@ const JustificationFormDialog = ({
         title: currentJustification.title,
         key: currentJustification.key,
         color: currentJustification.color,
+        isPresence: currentJustification.isPresence,
       });
     }
   }, [currentJustification, form]);
@@ -130,6 +133,7 @@ const JustificationFormDialog = ({
         created_at:
           currentJustification?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        isPresence: true,
       };
 
       // Get current justifications array
@@ -181,7 +185,7 @@ const JustificationFormDialog = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-4">
             <FormField
               control={form.control}
               name="title"
@@ -234,11 +238,35 @@ const JustificationFormDialog = ({
               />
             </div>
 
+            <div className="">
+              <FormField
+                control={form.control}
+                name="isPresence"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Contar como presença?</FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button
+                type="submit"
+                onClick={form.handleSubmit(onSubmit)}
+                disabled={loading}
+              >
                 {loading
                   ? "Salvando..."
                   : isEditing
@@ -246,7 +274,7 @@ const JustificationFormDialog = ({
                   : "Criar Justificativa"}
               </Button>
             </div>
-          </form>
+          </div>
         </Form>
       </DialogContent>
     </Dialog>

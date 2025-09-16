@@ -17,6 +17,7 @@ export interface ClassroomConfigClassTypesLimitT {
   min: number;
   max?: number;
   allowJustification: boolean;
+  isPresence: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -26,6 +27,7 @@ export interface ClassroomConfigJustificationT {
   title: string;
   key: string;
   color: string;
+  isPresence: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -55,6 +57,7 @@ export const ClassroomConfigClassTypesLimitSchema = z.object({
   min: z.number().min(0, "Mínimo deve ser maior ou igual a 0"),
   max: z.number().min(0, "Máximo deve ser maior ou igual a 0").optional(),
   allowJustification: z.boolean(),
+  isPresence: z.boolean(),
 });
 
 export const ClassroomConfigClassTypesSchema = z.object({

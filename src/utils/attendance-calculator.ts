@@ -35,7 +35,6 @@ export function calculateUserAttendance(
     // Se não há justificativas disponíveis, usa justificativa padrão
     if (!availableJustifications || availableJustifications.length === 0) {
       const defaultJustification = getDefaultJustification();
-      console.log(defaultJustification)
       return {
         minutesAttended: 0,
         justification: defaultJustification,
@@ -97,6 +96,7 @@ function getDefaultJustification(): ClassroomConfigJustificationT {
     key: "FJ",
     title: "Falta Justificada",
     color: "#0066cc",
+    isPresence: true,
   };
 }
 
@@ -137,6 +137,7 @@ function getDefaultLimit(
       title: "Presente",
       color: "#00ff00",
       allowJustification: false,
+      isPresence: true,
     };
   } else if (minutesAttended >= 30) {
     return {
@@ -147,6 +148,7 @@ function getDefaultLimit(
       title: "Presença Parcial",
       color: "#ffff00",
       allowJustification: true,
+      isPresence: false,
     };
   } else {
     return {
@@ -157,6 +159,7 @@ function getDefaultLimit(
       title: "Falta",
       color: "#ff0000",
       allowJustification: true,
+      isPresence: false,
     };
   }
 }
