@@ -11,6 +11,8 @@ import {
   ClassroomProjectT,
 } from "./project";
 
+import { ProjectModuleSelectProps } from "./project-module-select-type";
+
 export type {
   ClassroomProjectCorrectionRulesSelectedT,
   ClassroomProjectCorrectionT,
@@ -18,4 +20,5 @@ export type {
   ClassroomProjectModuleT,
   ClassroomProjectTypeT,
   ClassroomProjectT,
+  ProjectModuleSelectProps,
 };

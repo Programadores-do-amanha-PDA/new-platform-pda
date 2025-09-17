@@ -1,6 +1,13 @@
 import { DateRange } from "react-day-picker";
 
-export type ClassroomProjectModuleT = "0" | "1" | "2" | "3" | "4" | "5";
+export type ClassroomProjectModuleT =
+  | "0"
+  | "1"
+  | "2"
+  | "3"
+  | "4"
+  | "5"
+  | string;
 
 export type ClassroomProjectTypeT =
   | "mini_project"
@@ -14,6 +21,7 @@ export interface ClassroomProjectT {
   module: ClassroomProjectModuleT;
   project_type: ClassroomProjectTypeT;
   schedule_date: DateRange | undefined;
+  closing_time?: string;
   description?: string;
   created_at: string;
 }

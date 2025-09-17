@@ -1,4 +1,4 @@
-import * as React from "react";
+"use client";
 
 import {
   Select,
@@ -9,22 +9,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomProjectModuleT } from "@/types/classroom-projects/project";
 
-interface ProjectModuleSelectProps
-  extends React.HTMLAttributes<HTMLSelectElement> {
-  value: ClassroomProjectModuleT | "";
-  onValueChange: (newValue: ClassroomProjectModuleT) => void;
-  name?: string;
-}
-
-const modules: ClassroomProjectModuleT[] = ["0", "1", "2", "3", "4", "5"];
+import { ProjectModuleSelectProps } from "../types";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { getDefaultModules } from "../utils/default-modules";
 
 const ProjectModuleSelect = ({
+  classroomId,
   value,
   onValueChange,
   name,
 }: ProjectModuleSelectProps) => {
+  const { configsByClassroom } = useClassroomConfigStore();
+  const currentConfig = configsByClassroom[classroomId];
+  const modules = currentConfig?.modules || getDefaultModules();
+
   return (
     <Select value={value} onValueChange={onValueChange} name={name}>
       <SelectTrigger className="w-[180px]">
@@ -34,8 +33,8 @@ const ProjectModuleSelect = ({
         <SelectGroup accessKey="m">
           <SelectLabel>Módulos</SelectLabel>
           {modules.map((module) => (
-            <SelectItem key={"module-" + module} value={module}>
-              Módulo {module}
+            <SelectItem key={"module-" + module.id} value={module.id}>
+              Módulo {module.title}
             </SelectItem>
           ))}
         </SelectGroup>

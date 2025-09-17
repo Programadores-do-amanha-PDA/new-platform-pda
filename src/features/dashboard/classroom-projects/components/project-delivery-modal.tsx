@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dialog";
 
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 import { ProfileT } from "@/types/auth/user";
 import useAuth from "@/hooks/use-auth";
 import { MemberSelectionCombobox } from "./deliveries/delivery/member-selection-combobox";

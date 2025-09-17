@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomProjectTypeT } from "@/types/classroom-projects/project";
+import { ClassroomProjectTypeT } from "@/features/dashboard/classroom-projects/types/project";
 
 interface ProjectTypeSelectProps
   extends React.HTMLAttributes<HTMLSelectElement> {

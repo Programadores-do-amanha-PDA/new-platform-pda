@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomProjectCorrectionT } from "@/types/classroom-projects/corrections";
+import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
 
 export const createClassroomProjectCorrection = async (
   correctionData: Omit<Partial<ClassroomProjectCorrectionT>, "id" | "created_at">
