@@ -293,9 +293,8 @@ const UserSheetData = ({
           classroom_id: uc,
         }));
         await createUserClassrooms(uClassroom);
-      } else if (
-        !currentClassrooms.every((c) => data.userClassrooms.includes(c))
-      ) {
+      } else {
+        // Check if there are any changes (additions or deletions)
         const deleteClassrooms = currentClassrooms.filter(
           (c) => !data.userClassrooms.includes(c)
         );
