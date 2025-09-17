@@ -9,7 +9,7 @@ import {
   updateClassroomProjectCorrectionById,
   deleteCorrectionById,
 } from "@/app/actions/classrooms/projects/corrections";
-import { ClassroomProjectCorrectionT } from "@/types/classroom-projects/corrections";
+import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
 
 interface CorrectionState {
   corrections: ClassroomProjectCorrectionT[];

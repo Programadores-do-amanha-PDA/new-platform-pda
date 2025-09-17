@@ -34,8 +34,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClassroomProjectDeliveryT } from "@/types/classroom-projects/delivery";
-import { ClassroomProjectTypeT } from "@/types/classroom-projects/project";
+import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
+import { ClassroomProjectTypeT } from "@/features/dashboard/classroom-projects/types/project";
 import { AuthUserWithProfileT } from "@/types";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 

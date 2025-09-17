@@ -8,7 +8,7 @@ import {
   updateClassroomProjectDeliveryById,
   deleteDeliveryById,
 } from "@/app/actions/classrooms/projects/deliveries";
-import { ClassroomProjectDeliveryT } from "@/types/classroom-projects/delivery";
+import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
 
 interface DeliveryState {
   deliveries: ClassroomProjectDeliveryT[];

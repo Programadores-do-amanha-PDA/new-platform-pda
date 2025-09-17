@@ -1,6 +1,6 @@
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
-import { ClassroomProjectDeliveryT } from "@/types/classroom-projects/delivery";
-import { ClassroomProjectCorrectionT } from "@/types/classroom-projects/corrections";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
+import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
+import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
 
 export function calculateProjectNotes(
   student: string,

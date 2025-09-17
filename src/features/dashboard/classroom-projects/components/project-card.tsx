@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 
 import { DateRange } from "react-day-picker";
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 import { Separator } from "@/components/ui/separator";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
@@ -105,11 +105,18 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
     const projectFromDate = new Date(
       project.schedule_date?.from || 0
     ).getTime();
-    const projectToDate = new Date(project.schedule_date?.to || 0).getTime();
+
+    // Criar data de fechamento com hora específica ou 23:59 como padrão
+    const closingTime = project.closing_time || "23:59";
+    const [hours, minutes] = closingTime.split(":").map(Number);
+    const projectToDate = new Date(project.schedule_date?.to || 0);
+    projectToDate.setHours(hours, minutes, 59, 999); // Definir hora, minuto, segundo e milissegundo
+    const projectToDateTime = projectToDate.getTime();
+
     const now = Date.now();
 
     if (!userProjectDelivery) {
-      if (projectFromDate <= now && projectToDate >= now) {
+      if (projectFromDate <= now && projectToDateTime >= now) {
         return (
           <div className="flex flex-col items-end gap-4 rounded-xl">
             <Button onClick={() => setIsDeliveryModalOpen(true)}>
@@ -125,7 +132,7 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
             </p>
           </div>
         );
-      } else if (projectToDate < now) {
+      } else if (projectToDateTime < now) {
         return (
           <div className="flex flex-col items-center gap-4">
             <p className="text-sm font-semibold text-destructive">
@@ -171,7 +178,7 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
             <RoleGuard
-            roles={["admin", "class_manager", "employer"]}
+              roles={["admin", "class_manager", "employer"]}
               fallback={
                 <p className="font-semibold truncate">{project.title}</p>
               }
@@ -204,6 +211,9 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
                     {format(project.schedule_date.to, "dd/LL/yy", {
                       locale: ptBR,
                     })}
+                    <span className="text-xs opacity-75">
+                      até {project.closing_time || "23:59"}
+                    </span>
                   </>
                 ) : (
                   format(project.schedule_date?.from || 0, "dd/LL/yy", {
@@ -236,7 +246,13 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
             {expansive &&
               (project.schedule_date &&
               project.schedule_date.to &&
-              new Date(project.schedule_date.to).getTime() > Date.now() ? (
+              (() => {
+                const closingTime = project.closing_time || "23:59";
+                const [hours, minutes] = closingTime.split(":").map(Number);
+                const endDate = new Date(project.schedule_date.to);
+                endDate.setHours(hours, minutes, 59, 999);
+                return endDate.getTime() > Date.now();
+              })() ? (
                 <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
                   <div className="w-full flex flex-col gap-6">
                     <div className="w-full flex flex-col gap-2">

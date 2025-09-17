@@ -7,7 +7,7 @@ import {
   updateClassroomProjectById,
   deleteProjectById,
 } from "@/app/actions/classrooms/projects";
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 
 interface ProjectState {
   projects: ClassroomProjectT[];

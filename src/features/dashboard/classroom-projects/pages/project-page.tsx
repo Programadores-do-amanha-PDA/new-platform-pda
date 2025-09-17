@@ -1,22 +1,21 @@
 "use client";
+import { useParams } from "next/navigation";
 import { Calendar1, Type } from "lucide-react";
+import { NotFoundState } from "@/components/shared/not-found-state";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
 import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
-import { useParams } from "next/navigation";
-import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import { NotFoundState } from "@/components/shared/not-found-state";
-
-const projectTypesLabels = {
-  mini_project: "Mini projeto",
-  end_module_project: "Projeto final",
-  end_module_english_project: "English final project",
-};
+import { ClassroomProjectT } from "../types";
+import { projectTypesLabels } from "../utils/project-type-labels";
+import ProjectDialog from "../components/project-dialog";
 
 export default function ProjectPage() {
-  const { project_id, classroom_id } = useParams();
+  const { project_id, classroom_id } = useParams<{
+    project_id: string;
+    classroom_id: string;
+  }>();
   const { projects, deleteProject } = useProjectStore();
   const { deliveries } = useDeliveryStore();
   const { corrections } = useCorrectionStore();
@@ -84,17 +83,29 @@ export default function ProjectPage() {
                   )?.toLocaleDateString("pt-BR", {
                     dateStyle: "short",
                   }) ?? "Não definido"}
+                  {currentProject.closing_time && (
+                    <span className="text-xs opacity-75">
+                      {" "}
+                      às {currentProject.closing_time}
+                    </span>
+                  )}
                 </span>
               </div>
             )}
         </div>
-        <DeleteConfirmationButton
-          onConfirm={() => deleteProject(currentProject.id)}
-          buttonText="Deletar Projeto"
-          dialogTitle="Deletar Projeto"
-          description={`Tem certeza que deseja deletar o projeto "${currentProject.title}"? Esta ação não pode ser desfeita e todas as entregas e correções associadas serão permanentemente removidas.`}
-          confirmText="Deletar Projeto"
-        />
+        <div className="flex gap-4">
+          <ProjectDialog
+            classroom_id={classroom_id}
+            currentProject={currentProject}
+          />
+          <DeleteConfirmationButton
+            onConfirm={() => deleteProject(currentProject.id)}
+            buttonText="Deletar Projeto"
+            dialogTitle="Deletar Projeto"
+            description={`Tem certeza que deseja deletar o projeto "${currentProject.title}"? Esta ação não pode ser desfeita e todas as entregas e correções associadas serão permanentemente removidas.`}
+            confirmText="Deletar Projeto"
+          />
+        </div>
       </header>
 
       <div className="w-full h-full flex overflow-hidden">

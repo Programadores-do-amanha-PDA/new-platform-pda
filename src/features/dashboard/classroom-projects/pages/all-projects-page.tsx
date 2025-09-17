@@ -1,11 +1,11 @@
 "use client";
-import { Input } from "@/components/ui/input";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import { useState } from "react";
-import CreateProjectDialog from "../components/create-project-dialog";
-import ProjectCard from "../components/project-card";
 import { useParams } from "next/navigation";
+import { Input } from "@/components/ui/input";
 import PermissionGuard from "@/components/shared/permission-guard";
+import { useProjectStore } from "@/stores/modules/classrooms/projects";
+import ProjectCard from "../components/project-card";
+import ProjectDialog from "../components/project-dialog";
 
 const AllProjectsPage = () => {
   const { classroom_id } = useParams<{ classroom_id: string }>();
@@ -33,17 +33,25 @@ const AllProjectsPage = () => {
           />
         </div>
         <PermissionGuard permission="classroom_projects.insert">
-          <CreateProjectDialog classroom_id={classroom_id} />
+          <ProjectDialog classroom_id={classroom_id} />
         </PermissionGuard>
       </header>
 
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
         {filteredProjects
-          .sort(
-            (a, b) =>
-              new Date(a.schedule_date?.to ?? 0).getTime() -
-              new Date(b.schedule_date?.to ?? 0).getTime()
-          )
+          .sort((a, b) => {
+            // Criar datas com hora de fechamento
+            const getClosingDateTime = (project: typeof a) => {
+              if (!project.schedule_date?.to) return 0;
+              const closingTime = project.closing_time || "23:59";
+              const [hours, minutes] = closingTime.split(":").map(Number);
+              const date = new Date(project.schedule_date.to);
+              date.setHours(hours, minutes, 59, 999);
+              return date.getTime();
+            };
+
+            return getClosingDateTime(a) - getClosingDateTime(b);
+          })
           .sort((a, b) => Number(a.module) - Number(b.module))
           .map((project, i) => (
             <ProjectCard
