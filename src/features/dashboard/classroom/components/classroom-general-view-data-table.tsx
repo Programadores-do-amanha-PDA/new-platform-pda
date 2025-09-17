@@ -28,7 +28,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
-import { ClassroomProjectT } from "@/types/classroom-projects/project";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 import {
   ColumnDef,
   ColumnFiltersState,
