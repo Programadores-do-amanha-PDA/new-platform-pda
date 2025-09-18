@@ -1,20 +1,19 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
-import pathLabels from "@/utils/path-labels";
-import { generateSidebarConfig, generatePathLabels } from "./sidebar-config";
+import useAuth from "@/hooks/use-auth";
 import PageLoader from "@/components/shared/page-loader";
-
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
-
 import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
+import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useUsersCombinedStore } from "@/stores/modules/users/users-combined-store";
+import { generateSidebarConfig, generatePathLabels } from "./sidebar-config";
+import pathLabels from "@/utils/path-labels";
+import { SidebarDataT } from "@/types";
 
-import { SidebarDataT } from "@/types/sidebar";
-import useAuth from "@/hooks/use-auth";
+
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
+import { useProjectStore } from "@/features/dashboard/classroom-projects/stores";
 
 interface AdminStackProviderProps {
   children: React.ReactNode;

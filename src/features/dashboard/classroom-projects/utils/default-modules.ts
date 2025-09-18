@@ -1,10 +1,10 @@
 export const getDefaultModules = () => {
-  const modules = Array(5)
+  const modules = Array(6)
     .fill(0)
     .map((_, index) => {
       return {
-        id: index + 1,
-        title: `Modulo ${index + 1}`,
+        id: `${index}`,
+        title: `Modulo ${index}`,
       };
     });
 

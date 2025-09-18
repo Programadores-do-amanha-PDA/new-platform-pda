@@ -3,9 +3,9 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import PermissionGuard from "@/components/shared/permission-guard";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
 import ProjectCard from "../components/project-card";
 import ProjectDialog from "../components/project-dialog";
+import { useProjectStore } from "../stores";
 
 const AllProjectsPage = () => {
   const { classroom_id } = useParams<{ classroom_id: string }>();

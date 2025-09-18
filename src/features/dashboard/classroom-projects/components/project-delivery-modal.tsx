@@ -24,7 +24,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
 import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 import { ProfileT } from "@/types/auth/user";
 import useAuth from "@/hooks/use-auth";
@@ -32,6 +31,7 @@ import { MemberSelectionCombobox } from "./deliveries/delivery/member-selection-
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDeliveryStore } from "../stores/deliveries";
 
 type LinkType = {
   url: string;

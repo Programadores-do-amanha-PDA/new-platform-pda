@@ -9,9 +9,6 @@ import {
 } from "@/types/classroom-overview";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
@@ -22,6 +19,9 @@ import {
   calculateProjectNotes,
   calculateGeneralPresence,
 } from "./utils";
+import { useProjectStore } from "../classroom-projects/stores";
+import { useDeliveryStore } from "../classroom-projects/stores/deliveries";
+import { useCorrectionStore } from "../classroom-projects/stores/corrections";
 
 export default function ClassroomAttendancePage() {
   const params = useParams();

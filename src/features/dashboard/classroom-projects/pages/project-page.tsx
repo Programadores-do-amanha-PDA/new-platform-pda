@@ -1,15 +1,18 @@
 "use client";
+// global imports
 import { useParams } from "next/navigation";
 import { Calendar1, Type } from "lucide-react";
 import { NotFoundState } from "@/components/shared/not-found-state";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
+
+// local imports
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
+import ProjectDialog from "../components/project-dialog";
 import { ClassroomProjectT } from "../types";
 import { projectTypesLabels } from "../utils/project-type-labels";
-import ProjectDialog from "../components/project-dialog";
+import { useDeliveryStore } from "../stores/deliveries";
+import { useProjectStore } from "../stores";
+import { useCorrectionStore } from "../stores/corrections";
 
 export default function ProjectPage() {
   const { project_id, classroom_id } = useParams<{
@@ -55,7 +58,7 @@ export default function ProjectPage() {
           <div className="flex items-center gap-1" title="Tipo do projeto">
             <Type className="size-5 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {projectTypesLabels[currentProject?.project_type]}
+              {projectTypesLabels[currentProject?.project_type].label}
             </span>
           </div>
           <div className="flex items-center gap-1" title="Modulo do projeto">

@@ -1,8 +1,13 @@
 "use client";
+
+// Global imports
 import { useState } from "react";
-import { toast } from "sonner";
 import { Info, LoaderCircle, Pen, Plus } from "lucide-react";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { DateRange } from "react-day-picker";
+
+// Local imports
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,15 +19,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import ProjectModuleSelect from "./project-module-select";
-import ProjectTypeSelect from "./project-type-select";
-import {
-  ClassroomProjectModuleT,
-  ClassroomProjectT,
-  ClassroomProjectTypeT,
-} from "@/features/dashboard/classroom-projects/types/project";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
 import {
   Form,
   FormControl,
@@ -31,149 +27,88 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { getCurrentWeekRange } from "@/components/shared/date-interval/utils";
+import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
+import ProjectModuleSelect from "./project-module-select";
+import ProjectTypeSelect from "./project-type-select";
+import { useProjectStore } from "../stores";
+import {
+  ProjectDialogPropsT,
+  ClassroomProjectModuleT,
+  ClassroomProjectTypeT,
+} from "../types";
+import {
+  createProjectSchema,
+  ProjectFormSchemaT,
+  getDefaultFormValues,
+  getResetFormValues,
+  handleProjectSubmission,
+} from "../utils";
 
-const createProjectSchema = z.object({
-  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
-  module: z.string().min(1, "Módulo é obrigatório"),
-  project_type: z.string().min(1, "Tipo do projeto é obrigatório"),
-  schedule_date: z
-    .object({
-      from: z.date({ required_error: "Data de início é obrigatória" }),
-      to: z.date({ required_error: "Data de fim é obrigatória" }),
-    })
-    .optional(),
-  closing_time: z.string().optional(),
-});
-
-type CreateProjectFormData = z.infer<typeof createProjectSchema>;
-
+/**
+ * ProjectDialog component for creating and editing classroom projects
+ * Handles both create and edit modes with proper form validation and error handling
+ */
 const ProjectDialog = ({
   classroom_id,
   currentProject,
-}: {
-  classroom_id: string;
-  currentProject?: ClassroomProjectT;
-}) => {
+}: ProjectDialogPropsT): JSX.Element => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const form = useForm<CreateProjectFormData>({
+  const form = useForm<ProjectFormSchemaT>({
     resolver: zodResolver(createProjectSchema),
-    defaultValues: {
-      title: currentProject?.title || "",
-      module: currentProject?.module || "",
-      project_type: currentProject?.project_type || "",
-      schedule_date: currentProject?.schedule_date || getCurrentWeekRange(),
-      closing_time: currentProject?.closing_time || "",
-    },
+    defaultValues: getDefaultFormValues(currentProject),
   });
 
   const { createProject, updateProject } = useProjectStore();
 
-  const onOpenChange = (e: boolean) => {
-    if (e && currentProject) {
-      form.reset({
-        title: currentProject.title,
-        module: currentProject.module,
-        project_type: currentProject.project_type,
-        schedule_date: currentProject.schedule_date,
-        closing_time: currentProject.closing_time || "",
-      });
-    } else if (!e || (e && !currentProject)) {
-      form.reset({
-        title: "",
-        module: "",
-        project_type: "",
-        schedule_date: getCurrentWeekRange(),
-        closing_time: "",
-      });
-    }
-    setIsDialogOpen(e);
+  /**
+   * Handles dialog open/close state changes and form reset
+   * @param isOpen - Whether the dialog should be open
+   */
+  const handleOpenChange = (isOpen: boolean): void => {
+    const resetValues = getResetFormValues(currentProject, isOpen);
+    form.reset(resetValues);
+    setIsDialogOpen(isOpen);
   };
 
-  const onSubmit = async (data: CreateProjectFormData) => {
+  /**
+   * Handles form submission for both create and edit modes
+   * @param formData - The validated form data
+   */
+  const handleSubmit = async (formData: ProjectFormSchemaT): Promise<void> => {
     setLoading(true);
 
     try {
-      if (!classroom_id) {
-        throw new Error("ID da sala de aula é obrigatório");
-      }
-
-      const projectData = {
-        title: data.title,
-        module: data.module as ClassroomProjectModuleT,
+      await handleProjectSubmission(
+        formData,
         classroom_id,
-        project_type: data.project_type as ClassroomProjectTypeT,
-        schedule_date: data.schedule_date,
-        closing_time: data.closing_time || "23:59",
-      };
-
-      if (!currentProject?.id) {
-        await createProject(projectData);
-        toast.success("Projeto criado com sucesso!");
-      } else {
-        // Verificar se houve mudanças
-        const hasChanges =
-          data.title !== currentProject.title ||
-          data.module !== currentProject.module ||
-          data.project_type !== currentProject.project_type ||
-          data.schedule_date?.from !== currentProject?.schedule_date?.from ||
-          data.schedule_date?.to !== currentProject?.schedule_date?.to ||
-          (data.closing_time || "23:59") !==
-            (currentProject.closing_time || "23:59");
-
-        if (hasChanges) {
-          const updates = {} as Partial<ClassroomProjectT>;
-          if (data.title !== currentProject.title) updates.title = data.title;
-          if (data.module !== currentProject.module)
-            updates.module = data.module as ClassroomProjectModuleT;
-          if (data.project_type !== currentProject.project_type)
-            updates.project_type = data.project_type as ClassroomProjectTypeT;
-          if (
-            data.schedule_date?.from !== currentProject?.schedule_date?.from ||
-            data.schedule_date?.to !== currentProject?.schedule_date?.to
-          ) {
-            updates.schedule_date = data.schedule_date;
-          }
-          if (
-            (data.closing_time || "23:59") !==
-            (currentProject.closing_time || "23:59")
-          ) {
-            updates.closing_time = data.closing_time || "23:59";
-          }
-
-          await updateProject(currentProject.id, updates);
-          toast.success("Projeto atualizado com sucesso!");
-        }
-      }
-
-      onOpenChange(false);
-    } catch (error) {
-      console.error(error);
-      toast.error(
-        currentProject?.id
-          ? "Erro ao editar projeto. Tente novamente mais tarde!"
-          : "Erro ao criar projeto. Tente novamente mais tarde!"
+        currentProject,
+        createProject,
+        updateProject
       );
+      handleOpenChange(false);
+    } catch {
+      // Error is already handled in handleProjectSubmission
+      // Just need to ensure loading state is reset
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Dialog modal={true} open={isDialogOpen} onOpenChange={onOpenChange}>
+    <Dialog modal={true} open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="default" className="font-semibold">
           {currentProject?.id ? (
             <>
-              <Pen /> Editar projeto
+              <Pen className="mr-2 h-4 w-4" />
+              Editar projeto
             </>
           ) : (
-               <>
-              <Plus /> Criar projeto
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Criar projeto
             </>
           )}
         </Button>
@@ -186,7 +121,7 @@ const ProjectDialog = ({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit)}
             className="w-full h-full flex flex-col gap-6 pt-4"
           >
             <FormField
@@ -214,7 +149,7 @@ const ProjectDialog = ({
                       <ProjectModuleSelect
                         classroomId={classroom_id}
                         value={field.value as ClassroomProjectModuleT | ""}
-                        onValueChange={(value) => field.onChange(value)}
+                        onValueChange={(value: string) => field.onChange(value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -233,7 +168,7 @@ const ProjectDialog = ({
                     <FormControl>
                       <ProjectTypeSelect
                         value={field.value as ClassroomProjectTypeT | ""}
-                        onValueChange={(value) => field.onChange(value)}
+                        onValueChange={(value: string) => field.onChange(value)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -253,7 +188,7 @@ const ProjectDialog = ({
                     </FormLabel>
                     <FormControl>
                       <DateIntervalPicker
-                        date={field.value}
+                        date={field.value as DateRange | undefined}
                         setDate={field.onChange}
                         buttonClassName="max-w-max"
                       />
@@ -268,11 +203,11 @@ const ProjectDialog = ({
                 name="closing_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">
+                    <FormLabel className="font-semibold flex items-center gap-2">
                       Hora de fechamento
                       <div
-                        title="Se não especificado, será definido automaticamente para
-                      23:59"
+                        title="Se não especificado, será definido automaticamente para 23:59"
+                        className="cursor-help"
                       >
                         <Info className="size-4 fill-primary" />
                       </div>
@@ -301,7 +236,9 @@ const ProjectDialog = ({
                 className="font-semibold"
                 disabled={loading}
               >
-                {loading && <LoaderCircle className="size-5 animate-spin" />}
+                {loading && (
+                  <LoaderCircle className="size-5 animate-spin mr-2" />
+                )}
                 {currentProject?.id ? "Editar projeto" : "Criar projeto"}
               </Button>
             </DialogFooter>

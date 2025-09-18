@@ -22,7 +22,8 @@ const ProjectModuleSelect = ({
 }: ProjectModuleSelectProps) => {
   const { configsByClassroom } = useClassroomConfigStore();
   const currentConfig = configsByClassroom[classroomId];
-  const modules = currentConfig?.modules || getDefaultModules();
+  const modules = currentConfig?.modules;
+  const defaultModules = getDefaultModules();
 
   return (
     <Select value={value} onValueChange={onValueChange} name={name}>
@@ -35,6 +36,14 @@ const ProjectModuleSelect = ({
           {modules.map((module) => (
             <SelectItem key={"module-" + module.id} value={module.id}>
               Módulo {module.title}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+        <SelectGroup accessKey="d">
+          <SelectLabel>Módulos padrão</SelectLabel>
+          {defaultModules.map((module) => (
+            <SelectItem key={"default-module-" + module.id} value={module.id}>
+            {module.title}
             </SelectItem>
           ))}
         </SelectGroup>

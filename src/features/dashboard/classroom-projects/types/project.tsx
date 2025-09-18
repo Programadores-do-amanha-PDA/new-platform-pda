@@ -20,7 +20,10 @@ export interface ClassroomProjectT {
   title: string;
   module: ClassroomProjectModuleT;
   project_type: ClassroomProjectTypeT;
-  schedule_date: DateRange | undefined;
+  schedule_date:
+    | DateRange
+    | { from: Date; to?: Date | undefined }
+    | undefined;
   closing_time?: string;
   description?: string;
   created_at: string;
