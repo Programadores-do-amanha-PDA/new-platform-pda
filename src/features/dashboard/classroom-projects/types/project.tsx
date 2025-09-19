@@ -22,9 +22,8 @@ export interface ClassroomProjectT {
   project_type: ClassroomProjectTypeT;
   schedule_date:
     | DateRange
-    | { from: Date; to?: Date | undefined }
+    | { from: Date | string; to?: Date | string | undefined }
     | undefined;
-  closing_time?: string;
   description?: string;
   created_at: string;
 }

@@ -13,31 +13,85 @@ import { handleProjectError } from "./error-handling";
  */
 export const createProjectSchema = z
   .object({
-    title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
-    module: z.string().min(1, "Módulo é obrigatório"),
-    project_type: z.string().min(1, "Tipo do projeto é obrigatório"),
+    title: z
+      .string()
+      .min(1, "Título é obrigatório")
+      .min(3, "Título deve ter pelo menos 3 caracteres")
+      .max(100, "Título deve ter no máximo 100 caracteres")
+      .trim(),
+    module: z
+      .string()
+      .min(1, "Módulo é obrigatório")
+      .refine((val) => val !== "", "Selecione um módulo válido"),
+    project_type: z
+      .string()
+      .min(1, "Tipo do projeto é obrigatório")
+      .refine((val) => val !== "", "Selecione um tipo de projeto válido"),
     schedule_date: z
       .object({
         from: z.date().optional(),
         to: z.date().optional(),
       })
-      .optional(),
-    closing_time: z.string().optional(),
+      .refine(
+        (data) => {
+          // Both from and to must be present
+          if (!data.from || !data.to) return false;
+          return data.from <= data.to;
+        },
+        {
+          message: "Período de entregas é obrigatório com datas válidas",
+        }
+      ),
   })
   .refine(
     (data) => {
-      if (!data.schedule_date) return true;
-      if (!data.schedule_date.from) return true;
-      if (!data.schedule_date.to) return true;
-      return data.schedule_date.from <= data.schedule_date.to;
+      // Additional validation for schedule_date
+      if (!data.schedule_date?.from || !data.schedule_date?.to) {
+        return false;
+      }
+
+      // Check if the date range is reasonable (not more than 1 year)
+      const oneYearFromNow = new Date();
+      oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+
+      return data.schedule_date.to <= oneYearFromNow;
     },
     {
-      message: "A data de início deve ser anterior à data de término",
+      message: "O período de entregas não pode ser superior a 1 ano",
       path: ["schedule_date"],
     }
   );
 
 export type ProjectFormSchemaT = z.infer<typeof createProjectSchema>;
+
+/**
+ * Converts string dates to Date objects for schedule_date
+ * @param scheduleDate - The schedule date that might have string dates
+ * @returns Schedule date with proper Date objects
+ */
+const convertScheduleDateToDateObjects = (
+  scheduleDate?: ClassroomProjectT["schedule_date"]
+): { from?: Date; to?: Date } | undefined => {
+  if (!scheduleDate) return undefined;
+
+  const result: { from?: Date; to?: Date } = {};
+
+  if (scheduleDate.from) {
+    result.from =
+      scheduleDate.from instanceof Date
+        ? scheduleDate.from
+        : new Date(scheduleDate.from);
+  }
+
+  if (scheduleDate.to) {
+    result.to =
+      scheduleDate.to instanceof Date
+        ? scheduleDate.to
+        : new Date(scheduleDate.to);
+  }
+
+  return result;
+};
 
 /**
  * Gets default form values for project creation/editing
@@ -47,12 +101,18 @@ export type ProjectFormSchemaT = z.infer<typeof createProjectSchema>;
 export const getDefaultFormValues = (
   currentProject?: ClassroomProjectT
 ): ProjectFormSchemaT => {
+  // Ensure schedule_date has the correct type structure
+  const defaultScheduleDate = getCurrentWeekRange();
+  const scheduleDate = currentProject?.schedule_date
+    ? convertScheduleDateToDateObjects(currentProject.schedule_date) ||
+      defaultScheduleDate
+    : defaultScheduleDate;
+
   return {
     title: currentProject?.title || "",
     module: currentProject?.module || "",
     project_type: currentProject?.project_type || "",
-    schedule_date: currentProject?.schedule_date || getCurrentWeekRange(),
-    closing_time: currentProject?.closing_time || "",
+    schedule_date: scheduleDate,
   };
 };
 
@@ -67,12 +127,16 @@ export const getResetFormValues = (
   isOpen?: boolean
 ): ProjectFormSchemaT => {
   if (isOpen && currentProject) {
+    const scheduleDate = currentProject.schedule_date
+      ? convertScheduleDateToDateObjects(currentProject.schedule_date) ||
+        getCurrentWeekRange()
+      : getCurrentWeekRange();
+
     return {
       title: currentProject.title,
       module: currentProject.module,
       project_type: currentProject.project_type,
-      schedule_date: currentProject.schedule_date,
-      closing_time: currentProject.closing_time || "",
+      schedule_date: scheduleDate,
     };
   }
 
@@ -81,7 +145,6 @@ export const getResetFormValues = (
     module: "",
     project_type: "",
     schedule_date: getCurrentWeekRange(),
-    closing_time: "",
   };
 };
 
@@ -111,7 +174,6 @@ export const transformFormDataToProject = (
     classroom_id: classroomId,
     project_type: formData.project_type as ClassroomProjectTypeT,
     schedule_date,
-    closing_time: formData.closing_time || "23:59",
   };
 };
 
@@ -125,20 +187,22 @@ export const hasProjectChanges = (
   formData: ProjectFormSchemaT,
   currentProject: ClassroomProjectT
 ): boolean => {
-  // Compare dates safely
+  // Compare dates safely - convert current project dates to Date objects first
   const formFromTime = formData.schedule_date?.from?.getTime();
   const formToTime = formData.schedule_date?.to?.getTime();
-  const currentFromTime = currentProject?.schedule_date?.from?.getTime();
-  const currentToTime = currentProject?.schedule_date?.to?.getTime();
+
+  const currentScheduleDate = convertScheduleDateToDateObjects(
+    currentProject.schedule_date
+  );
+  const currentFromTime = currentScheduleDate?.from?.getTime();
+  const currentToTime = currentScheduleDate?.to?.getTime();
 
   return (
     formData.title !== currentProject.title ||
     formData.module !== currentProject.module ||
     formData.project_type !== currentProject.project_type ||
     formFromTime !== currentFromTime ||
-    formToTime !== currentToTime ||
-    (formData.closing_time || "23:59") !==
-      (currentProject.closing_time || "23:59")
+    formToTime !== currentToTime
   );
 };
 
@@ -166,11 +230,15 @@ export const createProjectUpdates = (
     updates.project_type = formData.project_type as ClassroomProjectTypeT;
   }
 
-  // Compare dates safely using timestamps
+  // Compare dates safely using timestamps - convert current project dates first
   const formFromTime = formData.schedule_date?.from?.getTime();
   const formToTime = formData.schedule_date?.to?.getTime();
-  const currentFromTime = currentProject?.schedule_date?.from?.getTime();
-  const currentToTime = currentProject?.schedule_date?.to?.getTime();
+
+  const currentScheduleDate = convertScheduleDateToDateObjects(
+    currentProject.schedule_date
+  );
+  const currentFromTime = currentScheduleDate?.from?.getTime();
+  const currentToTime = currentScheduleDate?.to?.getTime();
 
   if (formFromTime !== currentFromTime || formToTime !== currentToTime) {
     // Transform schedule_date to match expected type
@@ -184,13 +252,6 @@ export const createProjectUpdates = (
     }
   }
 
-  if (
-    (formData.closing_time || "23:59") !==
-    (currentProject.closing_time || "23:59")
-  ) {
-    updates.closing_time = formData.closing_time || "23:59";
-  }
-
   return updates;
 };
 
@@ -199,7 +260,7 @@ export const createProjectUpdates = (
  * @param scheduleDate - The date range to validate
  * @returns True if valid, false otherwise
  */
-const validateScheduleDate = (scheduleDate?: {
+export const validateScheduleDate = (scheduleDate?: {
   from?: Date;
   to?: Date;
 }): boolean => {
@@ -232,8 +293,8 @@ export const handleProjectSubmission = async (
       throw new Error("ID da sala de aula é obrigatório");
     }
 
-    // Validate schedule date
-    if (!validateScheduleDate(formData.schedule_date)) {
+    // Additional validation that's not covered by Zod
+    if (!formData.schedule_date?.from || !formData.schedule_date?.to) {
       throw new Error("Período de entregas é obrigatório");
     }
 
@@ -244,7 +305,9 @@ export const handleProjectSubmission = async (
       if (success) {
         toast.success("Projeto criado com sucesso!");
       } else {
-        throw new Error("Failed to create project");
+        throw new Error(
+          "Falha ao criar projeto. Verifique os dados e tente novamente."
+        );
       }
     } else {
       // Update existing project
@@ -254,17 +317,33 @@ export const handleProjectSubmission = async (
         if (success) {
           toast.success("Projeto atualizado com sucesso!");
         } else {
-          throw new Error("Failed to update project");
+          throw new Error(
+            "Falha ao atualizar projeto. Verifique os dados e tente novamente."
+          );
         }
+      } else {
+        toast.info("Nenhuma alteração foi detectada.");
       }
     }
   } catch (error) {
     handleProjectError(error, "project-dialog-submission");
-    const contextualMessage = currentProject?.id
-      ? "Erro ao editar projeto. Tente novamente mais tarde!"
-      : "Erro ao criar projeto. Tente novamente mais tarde!";
 
-    toast.error(contextualMessage);
+    // More specific error messages
+    let errorMessage = "Erro inesperado. Tente novamente mais tarde!";
+
+    if (error instanceof Error) {
+      if (error.message.includes("Falha ao")) {
+        errorMessage = error.message;
+      } else if (error.message.includes("obrigatório")) {
+        errorMessage = error.message;
+      } else {
+        errorMessage = currentProject?.id
+          ? "Erro ao editar projeto. Verifique os dados e tente novamente!"
+          : "Erro ao criar projeto. Verifique os dados e tente novamente!";
+      }
+    }
+
+    toast.error(errorMessage);
     throw error; // Re-throw to allow component to handle loading state
   }
 };

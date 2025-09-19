@@ -13,12 +13,14 @@ import {
 import { ProjectModuleSelectProps } from "../types";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { getDefaultModules } from "../utils/default-modules";
+import { cn } from "@/lib/utils";
 
 const ProjectModuleSelect = ({
   classroomId,
   value,
   onValueChange,
   name,
+  error = false,
 }: ProjectModuleSelectProps) => {
   const { configsByClassroom } = useClassroomConfigStore();
   const currentConfig = configsByClassroom[classroomId];
@@ -27,7 +29,12 @@ const ProjectModuleSelect = ({
 
   return (
     <Select value={value} onValueChange={onValueChange} name={name}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger
+        className={cn(
+          "w-[180px]",
+          error && "border-destructive focus:ring-destructive"
+        )}
+      >
         <SelectValue placeholder="Selecione um módulo" />
       </SelectTrigger>
       <SelectContent align="start">
@@ -43,7 +50,7 @@ const ProjectModuleSelect = ({
           <SelectLabel>Módulos padrão</SelectLabel>
           {defaultModules.map((module) => (
             <SelectItem key={"default-module-" + module.id} value={module.id}>
-            {module.title}
+              {module.title}
             </SelectItem>
           ))}
         </SelectGroup>

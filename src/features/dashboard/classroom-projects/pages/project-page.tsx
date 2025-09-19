@@ -52,8 +52,8 @@ export default function ProjectPage() {
 
   return (
     <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
-      <header className="w-full flex justify-between gap-2">
-        <div className="flex items-center gap-4">
+      <header className="w-full flex flex-wrap justify-between gap-2">
+        <div className="flex items-center flex-wrap gap-4">
           {/* <p className="text-muted-foreground font-semibold">Testes:</p> */}
           <div className="flex items-center gap-1" title="Tipo do projeto">
             <Type className="size-5 text-muted-foreground" />
@@ -75,23 +75,21 @@ export default function ProjectPage() {
               >
                 <Calendar1 className="size-5 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  {new Date(
-                    currentProject.schedule_date?.from
-                  )?.toLocaleDateString("pt-BR", {
-                    dateStyle: "short",
-                  }) ?? "Não definido"}{" "}
+                  {new Date(currentProject.schedule_date?.from)?.toLocaleString(
+                    "pt-BR",
+                    {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }
+                  ) ?? "Não definido"}{" "}
                   {" - "}
-                  {new Date(
-                    currentProject.schedule_date?.to
-                  )?.toLocaleDateString("pt-BR", {
-                    dateStyle: "short",
-                  }) ?? "Não definido"}
-                  {currentProject.closing_time && (
-                    <span className="text-xs opacity-75">
-                      {" "}
-                      às {currentProject.closing_time}
-                    </span>
-                  )}
+                  {new Date(currentProject.schedule_date?.to)?.toLocaleString(
+                    "pt-BR",
+                    {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }
+                  ) ?? "Não definido"}
                 </span>
               </div>
             )}

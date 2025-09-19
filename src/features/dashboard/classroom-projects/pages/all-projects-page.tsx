@@ -20,7 +20,7 @@ const AllProjectsPage = () => {
     : projects;
 
   return (
-    <main className="w-full h-max py-4 px-2 flex flex-col gap-6 overflow-hidden">
+    <main className="w-full h-max py-4 px-2 flex flex-col overflow-hidden">
       <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
         <div className="w-full max-w-xs min-w-72 flex gap-2 items-center shadow-xs rounded-md border px-2">
           <Input
@@ -37,16 +37,13 @@ const AllProjectsPage = () => {
         </PermissionGuard>
       </header>
 
-      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
+      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 py-6">
         {filteredProjects
           .sort((a, b) => {
-            // Criar datas com hora de fechamento
+            // Criar datas de fechamento
             const getClosingDateTime = (project: typeof a) => {
               if (!project.schedule_date?.to) return 0;
-              const closingTime = project.closing_time || "23:59";
-              const [hours, minutes] = closingTime.split(":").map(Number);
               const date = new Date(project.schedule_date.to);
-              date.setHours(hours, minutes, 59, 999);
               return date.getTime();
             };
 

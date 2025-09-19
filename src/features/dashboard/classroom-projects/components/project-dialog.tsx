@@ -2,10 +2,11 @@
 
 // Global imports
 import { useState } from "react";
-import { Info, LoaderCircle, Pen, Plus } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { LoaderCircle, Pen, Plus, AlertCircle } from "lucide-react";
+import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateRange } from "react-day-picker";
+import { toast } from "sonner";
 
 // Local imports
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
+import { DateTimeRangePicker } from "@/components/shared/date-time-range-picker";
 import ProjectModuleSelect from "./project-module-select";
 import ProjectTypeSelect from "./project-type-select";
 import { useProjectStore } from "../stores";
@@ -58,9 +59,14 @@ const ProjectDialog = ({
   const form = useForm<ProjectFormSchemaT>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: getDefaultFormValues(currentProject),
+    mode: "onChange", // Enable real-time validation
   });
 
   const { createProject, updateProject } = useProjectStore();
+
+  // Watch for form errors to provide better UX
+  const formErrors = form.formState.errors;
+  const hasErrors = Object.keys(formErrors).length > 0;
 
   /**
    * Handles dialog open/close state changes and form reset
@@ -88,11 +94,28 @@ const ProjectDialog = ({
         updateProject
       );
       handleOpenChange(false);
-    } catch {
-      // Error is already handled in handleProjectSubmission
-      // Just need to ensure loading state is reset
+    } catch (error) {
+      // Error is already handled in handleProjectSubmission with toast
+      // Additional client-side validation errors can be handled here
+      console.error("Form submission error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Handles form validation errors
+   * @param errors - Form validation errors from react-hook-form
+   */
+  const handleFormError = (errors: FieldErrors<ProjectFormSchemaT>): void => {
+    console.error("Form validation errors:", errors);
+
+    // Display a general validation error toast if there are multiple errors
+    const errorCount = Object.keys(errors).length;
+    if (errorCount > 1) {
+      toast.error(`Por favor, corrija os ${errorCount} erros no formulário.`);
+    } else if (errorCount === 1) {
+      toast.error("Por favor, corrija o erro no formulário.");
     }
   };
 
@@ -121,19 +144,31 @@ const ProjectDialog = ({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmit, handleFormError)}
             className="w-full h-full flex flex-col gap-6 pt-4"
           >
+            {/* Error Summary */}
+            {hasErrors && <FormMessage />}
             <FormField
               control={form.control}
               name="title"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel className="font-semibold">Título</FormLabel>
+                  <FormLabel className="font-semibold">
+                    Título
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="A teoria das cordas..." {...field} />
+                    <Input
+                      placeholder="A teoria das cordas..."
+                      className={
+                        fieldState.error
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }
+                      {...field}
+                    />
                   </FormControl>
-                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -142,17 +177,20 @@ const ProjectDialog = ({
               <FormField
                 control={form.control}
                 name="module"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">Módulo</FormLabel>
+                    <FormLabel className="font-semibold">
+                      Módulo
+                      <span className="text-destructive ml-1">*</span>
+                    </FormLabel>
                     <FormControl>
                       <ProjectModuleSelect
                         classroomId={classroom_id}
                         value={field.value as ClassroomProjectModuleT | ""}
                         onValueChange={(value: string) => field.onChange(value)}
+                        error={!!fieldState.error}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -160,66 +198,45 @@ const ProjectDialog = ({
               <FormField
                 control={form.control}
                 name="project_type"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">
                       Tipo do projeto
+                      <span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <ProjectTypeSelect
                         value={field.value as ClassroomProjectTypeT | ""}
                         onValueChange={(value: string) => field.onChange(value)}
+                        error={!!fieldState.error}
                       />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="columns-2 items-start">
-              <FormField
-                control={form.control}
-                name="schedule_date"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">
-                      Período de entregas
-                    </FormLabel>
-                    <FormControl>
-                      <DateIntervalPicker
-                        date={field.value as DateRange | undefined}
-                        setDate={field.onChange}
-                        buttonClassName="max-w-max"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="closing_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold flex items-center gap-2">
-                      Hora de fechamento
-                      <div
-                        title="Se não especificado, será definido automaticamente para 23:59"
-                        className="cursor-help"
-                      >
-                        <Info className="size-4 fill-primary" />
-                      </div>
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="time" defaultValue="23:59" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="schedule_date"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">
+                    Período de entregas
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <DateTimeRangePicker
+                      value={field.value as DateRange | undefined}
+                      onChange={field.onChange}
+                      label=""
+                      className={fieldState.error ? "border-destructive" : ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter className="mt-4">
               <DialogClose asChild>
@@ -238,6 +255,9 @@ const ProjectDialog = ({
               >
                 {loading && (
                   <LoaderCircle className="size-5 animate-spin mr-2" />
+                )}
+                {hasErrors && !loading && (
+                  <AlertCircle className="size-4 mr-2" />
                 )}
                 {currentProject?.id ? "Editar projeto" : "Criar projeto"}
               </Button>

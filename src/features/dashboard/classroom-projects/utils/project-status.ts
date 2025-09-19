@@ -1,22 +1,6 @@
 import { ClassroomProjectT } from "../types/project";
 
 /**
- * Creates a project end date time by combining date and closing time
- * @param dateString - The date string
- * @param closingTime - The closing time in HH:MM format
- * @returns The end date time as timestamp
- */
-export const createProjectEndDateTime = (
-  dateString: string,
-  closingTime: string
-): number => {
-  const [hours, minutes] = closingTime.split(":").map(Number);
-  const endDate = new Date(dateString);
-  endDate.setHours(hours, minutes, 59, 999);
-  return endDate.getTime();
-};
-
-/**
  * Checks if a project is currently active (within delivery period)
  * @param project - The project to check
  * @returns True if project is active, false otherwise
@@ -26,10 +10,7 @@ export const isProjectActive = (project: ClassroomProjectT): boolean => {
 
   const now = Date.now();
   const startTime = new Date(project.schedule_date.from).getTime();
-  const endTime = createProjectEndDateTime(
-    project.schedule_date.to.toString(),
-    project.closing_time || "23:59"
-  );
+  const endTime = new Date(project.schedule_date.to).getTime();
 
   return startTime <= now && endTime >= now;
 };
@@ -57,10 +38,7 @@ export const isProjectExpired = (project: ClassroomProjectT): boolean => {
   if (!project.schedule_date?.to) return false;
   
   const now = Date.now();
-  const endTime = createProjectEndDateTime(
-    project.schedule_date.to.toString(),
-    project.closing_time || "23:59"
-  );
+  const endTime = new Date(project.schedule_date.to).getTime();
   
   return endTime < now;
 };

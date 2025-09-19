@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Calendar } from "lucide-react";
+import { FileClock } from "lucide-react";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -37,6 +37,19 @@ import { ProjectAdminControls } from "./project-admin-controls";
 import { useProjectStore } from "../stores";
 import { useDeliveryStore } from "../stores/deliveries";
 import { useCorrectionStore } from "../stores/corrections";
+
+/**
+ * Formats the delivery deadline (to date) with date and time
+ * @param scheduleDate - The date range containing the delivery deadline
+ * @returns Formatted delivery deadline string
+ */
+const formatDeliveryDeadline = (
+  scheduleDate: DateRange | undefined
+): string => {
+  if (!scheduleDate?.to) return "Data não definida";
+
+  return format(scheduleDate.to, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+};
 
 /**
  * ProjectCard component displays project information with role-based functionality.
@@ -121,8 +134,13 @@ const ProjectCard = ({
       >
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
-            <RoleGuard
-              roles={["admin", "class_manager", "employer"]}
+            <PermissionGuard
+              permissions={[
+                "classroom_projects.update_all",
+                "classroom_projects.delete_all",
+                "classroom_projects.update_self",
+                "classroom_projects.delete_self",
+              ]}
               fallback={
                 <h3
                   id={`project-title-${project.id}`}
@@ -134,13 +152,13 @@ const ProjectCard = ({
             >
               <Link
                 href={generateProjectHref(path, project.id, expansive)}
-                className="font-semibold truncate hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 rounded"
+                className="font-semibold truncate hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
                 title={`Ver detalhes do projeto: ${project.title}`}
                 aria-label={`Ver detalhes do projeto: ${project.title}`}
               >
                 <h3 id={`project-title-${project.id}`}>{project.title}</h3>
               </Link>
-            </RoleGuard>
+            </PermissionGuard>
             <p
               className="text-sm h-5 text-muted-foreground font-semibold"
               aria-label={`Módulo ${project.module}`}
@@ -152,32 +170,15 @@ const ProjectCard = ({
                 className="text-sm font-semibold"
                 id={`delivery-period-${project.id}`}
               >
-                Período de entrega:
+                Data final entrega:
               </p>
               <Badge
                 variant="outline"
-                className="text-sm bg-muted gap-2"
+                className="text-sm bg-muted gap-2 h-9"
                 aria-labelledby={`delivery-period-${project.id}`}
               >
-                <Calendar aria-hidden="true" />
-                {project.schedule_date?.to ? (
-                  <>
-                    {format(project.schedule_date?.from || 0, "dd/LL/yy", {
-                      locale: ptBR,
-                    })}{" "}
-                    -{" "}
-                    {format(project.schedule_date.to, "dd/LL/yy", {
-                      locale: ptBR,
-                    })}
-                    <span className="text-xs opacity-75">
-                      até {project.closing_time || "23:59"}
-                    </span>
-                  </>
-                ) : (
-                  format(project.schedule_date?.from || 0, "dd/LL/yy", {
-                    locale: ptBR,
-                  })
-                )}
+                <FileClock aria-hidden="true" className="size-4!" />
+                {formatDeliveryDeadline(scheduleDate)}
               </Badge>
             </div>
           </div>

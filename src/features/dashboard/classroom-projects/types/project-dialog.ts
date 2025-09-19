@@ -9,7 +9,6 @@ export interface ProjectFormDataT {
   module: string;
   project_type: string;
   schedule_date?: DateRange;
-  closing_time?: string;
 }
 
 /**
