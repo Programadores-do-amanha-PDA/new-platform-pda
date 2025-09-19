@@ -1,79 +1,94 @@
 "use client";
 
+// Global imports
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Calendar, LoaderCircle } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-
+import { FileClock } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
-import { Separator } from "@/components/ui/separator";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
-import DateIntervalPicker from "@/components/shared/date-interval/date-interval-picker";
-import PermissionGuard from "@/components/shared/permission-guard";
-import { Badge } from "@/components/ui/badge";
-import useAuth from "@/hooks/use-auth";
-import { DynamicLucideIcon } from "@/components/shared/icons/dynamic-lucide-icon";
-import RoleGuard from "@/components/shared/role-guard";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+// UI Components
+import { Badge } from "@/components/ui/badge";
+
+// Shared Components
+import PermissionGuard from "@/components/shared/permission-guard";
+import RoleGuard from "@/components/shared/role-guard";
+import { DynamicLucideIcon } from "@/components/shared/icons/dynamic-lucide-icon";
+
+// Hooks
+import useAuth from "@/hooks/use-auth";
+
+// Local imports
+import { ProjectCardProps } from "../types/project-card";
+import { projectTypesLabels } from "../utils/project-type-labels";
+import { isProjectActive } from "../utils/project-status";
+import { analyzeDeliveryStatus } from "../utils/project-delivery-status";
+import {
+  hasScheduleChanged,
+  convertProjectScheduleToDateRange,
+  generateProjectHref,
+} from "../utils/project-card-helpers";
+import { handleProjectError } from "../utils/error-handling";
 import ProjectDeliveryModal from "./project-delivery-modal";
+import { ProjectStatusRenderer } from "./project-status-renderer";
+import { ProjectAdminControls } from "./project-admin-controls";
+import { useProjectStore } from "../stores";
+import { useDeliveryStore } from "../stores/deliveries";
+import { useCorrectionStore } from "../stores/corrections";
 
-type ProjectCardProps = {
-  project: ClassroomProjectT;
-  expansive: boolean;
-  classroomId?: string;
+/**
+ * Formats the delivery deadline (to date) with date and time
+ * @param scheduleDate - The date range containing the delivery deadline
+ * @returns Formatted delivery deadline string
+ */
+const formatDeliveryDeadline = (
+  scheduleDate: DateRange | undefined
+): string => {
+  if (!scheduleDate?.to) return "Data não definida";
+
+  return format(scheduleDate.to, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
 };
 
-const projectTypesLabels = {
-  mini_project: { label: "Mini projeto", iconName: "code" },
-  end_module_project: { label: "Projeto final", iconName: "braces" },
-  end_module_english_project: {
-    label: "English final project",
-    iconName: "languages",
-  },
-};
-
-const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
+/**
+ * ProjectCard component displays project information with role-based functionality.
+ * Supports both compact and expanded views with delivery and admin controls.
+ *
+ * @param props - The component props
+ * @param props.project - The project data to display
+ * @param props.expansive - Whether to show expanded view with additional controls
+ * @param props.classroomId - Optional classroom ID for delivery modal
+ * @returns JSX element representing the project card
+ */
+const ProjectCard = ({
+  project,
+  expansive,
+  classroomId,
+}: ProjectCardProps): JSX.Element => {
   const path = usePathname();
   const { updateProject } = useProjectStore();
   const { deliveries } = useDeliveryStore();
   const { corrections } = useCorrectionStore();
   const { user } = useAuth();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
-  const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
+  const [isDeliveryModalOpen, setIsDeliveryModalOpen] =
+    useState<boolean>(false);
 
+  // Initialize schedule date from project data
   useEffect(() => {
-    if (project.schedule_date?.from && project.schedule_date?.to) {
-      setScheduleDate({
-        from: new Date(project.schedule_date.from),
-        to: new Date(project.schedule_date.to),
-      });
-    } else {
-      setScheduleDate(undefined);
-    }
+    setScheduleDate(convertProjectScheduleToDateRange(project));
   }, [project]);
 
-  const isEdit =
-    (project.schedule_date?.from &&
-      scheduleDate?.from &&
-      new Date(project.schedule_date.from).getTime() !==
-        scheduleDate.from.getTime()) ||
-    (project.schedule_date?.to &&
-      scheduleDate?.to &&
-      new Date(project.schedule_date.to).getTime() !==
-        scheduleDate.to.getTime()) ||
-    (project.schedule_date === undefined && scheduleDate !== undefined) ||
-    (scheduleDate === undefined && project.schedule_date !== undefined);
+  // Check if schedule has been modified
+  const hasChanges = hasScheduleChanged(project, scheduleDate);
 
-  const handleUpdateProject = async () => {
+  /**
+   * Handles project update operations with proper error handling
+   */
+  const handleUpdateProject = async (): Promise<void> => {
     setLoading(true);
     try {
       if (!project.id) throw new Error("Project ID is required");
@@ -82,154 +97,103 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
         schedule_date: scheduleDate,
       });
     } catch (error) {
-      console.error("Error updating project:", error);
+      handleProjectError(error, "handleUpdateProject");
     } finally {
       setLoading(false);
     }
   };
 
-  const renderProjectStatus = () => {
-    const projectDeliveries = deliveries.filter(
-      (delivery) => delivery.project_id === project.id
-    );
-    const userProjectDelivery = projectDeliveries.find(
-      (delivery) => delivery.user_id === user?.id
-    );
-    const projectCorrections = corrections.filter(
-      (correction) => correction.project_id === project.id
-    );
-    const userProjectCorrection = projectCorrections.find(
-      (correction) => correction.delivery_id === userProjectDelivery?.id
+  /**
+   * Renders project status based on user role and delivery state
+   */
+  const renderProjectStatus = (): JSX.Element | null => {
+    if (!user?.id) return null;
+
+    const deliveryStatus = analyzeDeliveryStatus(
+      project,
+      user.id,
+      deliveries,
+      corrections
     );
 
-    const projectFromDate = new Date(
-      project.schedule_date?.from || 0
-    ).getTime();
-
-    // Criar data de fechamento com hora específica ou 23:59 como padrão
-    const closingTime = project.closing_time || "23:59";
-    const [hours, minutes] = closingTime.split(":").map(Number);
-    const projectToDate = new Date(project.schedule_date?.to || 0);
-    projectToDate.setHours(hours, minutes, 59, 999); // Definir hora, minuto, segundo e milissegundo
-    const projectToDateTime = projectToDate.getTime();
-
-    const now = Date.now();
-
-    if (!userProjectDelivery) {
-      if (projectFromDate <= now && projectToDateTime >= now) {
-        return (
-          <div className="flex flex-col items-end gap-4 rounded-xl">
-            <Button onClick={() => setIsDeliveryModalOpen(true)}>
-              Entregar projeto
-            </Button>
-          </div>
-        );
-      } else if (projectFromDate > now) {
-        return (
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-sm font-semibold text-primary-foreground">
-              Entrega disponível em breve
-            </p>
-          </div>
-        );
-      } else if (projectToDateTime < now) {
-        return (
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-sm font-semibold text-destructive">
-              Não entregue
-            </p>
-          </div>
-        );
-      }
-    }
-    // Se estiver entregue
-    else {
-      // Sem correção
-      if (!userProjectCorrection) {
-        return (
-          <div className="flex flex-col items-center gap-4">
-            <p className="text-sm font-semibold text-primary-foreground">
-              Correção pendente
-            </p>
-          </div>
-        );
-      }
-      // Com correção - mostrar nota final
-      else {
-        return (
-          <div className="flex flex-col items-start gap-4 bg-green-100 p-4 rounded-xl">
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-semibold text-green-800">
-                Projeto corrigido
-              </p>
-              <Badge variant="secondary" className="w-fit">
-                Nota: {userProjectCorrection.final_note || "N/A"}
-              </Badge>
-            </div>
-          </div>
-        );
-      }
-    }
+    return (
+      <ProjectStatusRenderer
+        deliveryStatus={deliveryStatus}
+        projectTitle={project.title}
+        onOpenDeliveryModal={() => setIsDeliveryModalOpen(true)}
+      />
+    );
   };
 
   return (
     <>
-      <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-6">
+      <li
+        className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-6 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+        role="article"
+        aria-labelledby={`project-title-${project.id}`}
+      >
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 truncate">
-            <RoleGuard
-              roles={["admin", "class_manager", "employer"]}
+            <PermissionGuard
+              permissions={[
+                "classroom_projects.update_all",
+                "classroom_projects.delete_all",
+                "classroom_projects.update_self",
+                "classroom_projects.delete_self",
+              ]}
               fallback={
-                <p className="font-semibold truncate">{project.title}</p>
+                <h3
+                  id={`project-title-${project.id}`}
+                  className="font-semibold truncate"
+                >
+                  {project.title}
+                </h3>
               }
             >
               <Link
-                href={
-                  expansive
-                    ? `${path}/${project.id}`
-                    : `${path}/projects/${project.id}`
-                }
-                className="font-semibold truncate hover:underline cursor-pointer"
-                title={project.title}
+                href={generateProjectHref(path, project.id, expansive)}
+                className="font-semibold truncate hover:underline cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                title={`Ver detalhes do projeto: ${project.title}`}
+                aria-label={`Ver detalhes do projeto: ${project.title}`}
               >
-                {project.title}
+                <h3 id={`project-title-${project.id}`}>{project.title}</h3>
               </Link>
-            </RoleGuard>
-            <p className="text-sm h-5 text-muted-foreground font-semibold">
+            </PermissionGuard>
+            <p
+              className="text-sm h-5 text-muted-foreground font-semibold"
+              aria-label={`Módulo ${project.module}`}
+            >
               Módulo {project.module}
             </p>
             <div className="w-full flex flex-col gap-2">
-              <p className="text-sm font-semibold">Período de entrega:</p>
-              <Badge variant="outline" className="text-sm bg-muted gap-2">
-                <Calendar />
-                {project.schedule_date?.to ? (
-                  <>
-                    {format(project.schedule_date?.from || 0, "dd/LL/yy", {
-                      locale: ptBR,
-                    })}{" "}
-                    -{" "}
-                    {format(project.schedule_date.to, "dd/LL/yy", {
-                      locale: ptBR,
-                    })}
-                    <span className="text-xs opacity-75">
-                      até {project.closing_time || "23:59"}
-                    </span>
-                  </>
-                ) : (
-                  format(project.schedule_date?.from || 0, "dd/LL/yy", {
-                    locale: ptBR,
-                  })
-                )}
+              <p
+                className="text-sm font-semibold"
+                id={`delivery-period-${project.id}`}
+              >
+                Data final entrega:
+              </p>
+              <Badge
+                variant="outline"
+                className="text-sm bg-muted gap-2 h-9"
+                aria-labelledby={`delivery-period-${project.id}`}
+              >
+                <FileClock aria-hidden="true" className="size-4!" />
+                {formatDeliveryDeadline(scheduleDate)}
               </Badge>
             </div>
           </div>
           <div
             className="rounded-full bg-primary/50 p-1"
             title={projectTypesLabels[project.project_type].label}
+            aria-label={`Tipo de projeto: ${
+              projectTypesLabels[project.project_type].label
+            }`}
+            role="img"
           >
             <DynamicLucideIcon
               name={projectTypesLabels[project.project_type].iconName}
               className="size-5 stroke-primary-foreground"
+              aria-hidden="true"
             />
           </div>
         </div>
@@ -243,62 +207,19 @@ const ProjectCard = ({ project, expansive, classroomId }: ProjectCardProps) => {
               "classroom_projects.update_self",
             ]}
           >
-            {expansive &&
-              (project.schedule_date &&
-              project.schedule_date.to &&
-              (() => {
-                const closingTime = project.closing_time || "23:59";
-                const [hours, minutes] = closingTime.split(":").map(Number);
-                const endDate = new Date(project.schedule_date.to);
-                endDate.setHours(hours, minutes, 59, 999);
-                return endDate.getTime() > Date.now();
-              })() ? (
-                <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
-                  <div className="w-full flex flex-col gap-6">
-                    <div className="w-full flex flex-col gap-2">
-                      <Label htmlFor="startDate" className="font-semibold">
-                        Período de entrega:
-                      </Label>
-                      <DateIntervalPicker
-                        date={scheduleDate}
-                        setDate={setScheduleDate}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button disabled={!isEdit} onClick={handleUpdateProject}>
-                      {loading && (
-                        <LoaderCircle className="size-5 animate-spin" />
-                      )}
-                      Salvar alterações
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Separator />
-                  <div className="flex flex-col items-start gap-2">
-                    <p className="text-sm h-5 text-muted-foreground flex gap-1 font-semibold">
-                      Entregas:
-                      <p className="font-normal">
-                        {
-                          deliveries.filter((d) => d.project_id === project.id)
-                            .length
-                        }
-                      </p>
-                    </p>
-                    <p className="text-sm h-5 text-muted-foreground flex gap-1 font-semibold">
-                      Correções:
-                      <p className="font-normal">
-                        {
-                          corrections.filter((c) => c.project_id === project.id)
-                            .length
-                        }
-                      </p>
-                    </p>
-                  </div>
-                </>
-              ))}
+            {expansive && (
+              <ProjectAdminControls
+                project={project}
+                isActive={isProjectActive(project)}
+                scheduleDate={scheduleDate}
+                onScheduleDateChange={setScheduleDate}
+                loading={loading}
+                hasChanges={hasChanges}
+                onUpdateProject={handleUpdateProject}
+                deliveries={deliveries}
+                corrections={corrections}
+              />
+            )}
           </PermissionGuard>
         </RoleGuard>
       </li>

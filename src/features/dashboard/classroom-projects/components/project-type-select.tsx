@@ -10,12 +10,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ClassroomProjectTypeT } from "@/features/dashboard/classroom-projects/types/project";
+import { cn } from "@/lib/utils";
 
 interface ProjectTypeSelectProps
   extends React.HTMLAttributes<HTMLSelectElement> {
   value: ClassroomProjectTypeT | "";
   onValueChange: (newValue: ClassroomProjectTypeT) => void;
   name?: string;
+  error?: boolean;
 }
 
 const projectTypes = [
@@ -27,11 +29,12 @@ const projectTypes = [
 const ProjectTypeSelect = ({
   value,
   onValueChange,
-  name
+  name,
+  error = false
 }: ProjectTypeSelectProps) => {
   return (
     <Select value={value} onValueChange={onValueChange} name={name}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className={cn("w-[180px]", error && "border-destructive focus:ring-destructive")}>
         <SelectValue placeholder="Selecione um tipo" />
       </SelectTrigger>
       <SelectContent>

@@ -2,9 +2,6 @@
 import { useState } from "react";
 
 import { useUsersStore } from "@/stores/modules/users/users-store";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +39,9 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
+import { useProjectStore } from "../../classroom-projects/stores";
+import { useDeliveryStore } from "../../classroom-projects/stores/deliveries";
+import { useCorrectionStore } from "../../classroom-projects/stores/corrections";
 
 
 const projectsShortLabels = {

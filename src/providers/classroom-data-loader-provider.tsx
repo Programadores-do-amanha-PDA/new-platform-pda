@@ -7,9 +7,6 @@ import React, {
   ReactNode,
 } from "react";
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
 import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import PageLoader from "@/components/shared/page-loader";
@@ -17,6 +14,9 @@ import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoo
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
+import { useProjectStore } from "@/features/dashboard/classroom-projects/stores";
+import { useDeliveryStore } from "@/features/dashboard/classroom-projects/stores/deliveries";
+import { useCorrectionStore } from "@/features/dashboard/classroom-projects/stores/corrections";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;
@@ -68,7 +68,9 @@ export function ClassroomDataLoaderProvider({
         correctionStore.getAllCorrectionsByClassroomId(classroomId),
         zoomAccountStore.getAllAccounts(classroomId),
         zoomMeetingStore.getAllMeetings(classroomId),
-        zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(classroomId),
+        zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
+          classroomId
+        ),
         classroomActivityStore.getAllActivitiesByClassroom(classroomId),
       ]);
     } catch (error) {

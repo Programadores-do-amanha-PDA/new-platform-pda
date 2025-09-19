@@ -1,11 +1,12 @@
 "use client";
 
+// Global imports
 import * as React from "react";
 import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 
+// Local imports
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,55 +15,56 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { DateIntervalPickerProps } from "./types";
+import { formatDateRange } from "./utils/date-formatting";
 
-const DateIntervalPicker = ({
+/**
+ * A date interval picker component that allows users to select a date range
+ * @param props - The component props
+ * @returns JSX element for the date interval picker
+ */
+const DateIntervalPicker: React.FC<DateIntervalPickerProps> = ({
   date,
   setDate,
   className,
   buttonClassName,
-}: {
-  date: DateRange | undefined;
-  buttonClassName?: string;
-  setDate: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
-} & React.HTMLAttributes<HTMLDivElement>) => {
+  error = false,
+  ...props
+}) => {
+  const handleDateChange = (newDate: DateRange | undefined): void => {
+    setDate(newDate);
+  };
+
   return (
-    <div className={cn("grid gap-2", className)}>
+    <div className={cn("grid gap-2", className)} {...props}>
       <Popover modal={true}>
         <PopoverTrigger>
           <Button
             type="button"
-            id="date"
-            variant={"outline"}
+            variant="outline"
+            data-slot="popover-trigger"
             className={cn(
               "w-[250px] justify-start text-left font-normal",
               !date && "text-muted-foreground",
+              error && "border-destructive focus-visible:ring-destructive",
               buttonClassName
             )}
+            aria-label="Selecionar intervalo de datas"
+            aria-expanded={false}
           >
-            <CalendarIcon />
-            {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y", { locale: ptBR })} -{" "}
-                  {format(date.to, "LLL dd, y", { locale: ptBR })}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y", { locale: ptBR })
-              )
-            ) : (
-              <span>Selecione um intervalo</span>
-            )}
+            <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
+            <span>{formatDateRange(date)}</span>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
-            initialFocus
             mode="range"
             defaultMonth={date?.from}
             locale={ptBR}
             selected={date}
-            onSelect={setDate}
+            onSelect={handleDateChange}
             numberOfMonths={2}
+            aria-label="Calendário para seleção de intervalo de datas"
           />
         </PopoverContent>
       </Popover>

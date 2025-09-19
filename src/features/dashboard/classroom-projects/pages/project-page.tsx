@@ -1,15 +1,18 @@
 "use client";
+// global imports
 import { useParams } from "next/navigation";
 import { Calendar1, Type } from "lucide-react";
 import { NotFoundState } from "@/components/shared/not-found-state";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import { useProjectStore } from "@/stores/modules/classrooms/projects";
-import { useDeliveryStore } from "@/stores/modules/classrooms/projects/deliveries";
-import { useCorrectionStore } from "@/stores/modules/classrooms/projects/corrections";
+
+// local imports
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
+import ProjectDialog from "../components/project-dialog";
 import { ClassroomProjectT } from "../types";
 import { projectTypesLabels } from "../utils/project-type-labels";
-import ProjectDialog from "../components/project-dialog";
+import { useDeliveryStore } from "../stores/deliveries";
+import { useProjectStore } from "../stores";
+import { useCorrectionStore } from "../stores/corrections";
 
 export default function ProjectPage() {
   const { project_id, classroom_id } = useParams<{
@@ -49,13 +52,13 @@ export default function ProjectPage() {
 
   return (
     <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
-      <header className="w-full flex justify-between gap-2">
-        <div className="flex items-center gap-4">
+      <header className="w-full flex flex-wrap justify-between gap-2">
+        <div className="flex items-center flex-wrap gap-4">
           {/* <p className="text-muted-foreground font-semibold">Testes:</p> */}
           <div className="flex items-center gap-1" title="Tipo do projeto">
             <Type className="size-5 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {projectTypesLabels[currentProject?.project_type]}
+              {projectTypesLabels[currentProject?.project_type].label}
             </span>
           </div>
           <div className="flex items-center gap-1" title="Modulo do projeto">
@@ -72,23 +75,21 @@ export default function ProjectPage() {
               >
                 <Calendar1 className="size-5 text-muted-foreground" />
                 <span className="text-muted-foreground">
-                  {new Date(
-                    currentProject.schedule_date?.from
-                  )?.toLocaleDateString("pt-BR", {
-                    dateStyle: "short",
-                  }) ?? "Não definido"}{" "}
+                  {new Date(currentProject.schedule_date?.from)?.toLocaleString(
+                    "pt-BR",
+                    {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }
+                  ) ?? "Não definido"}{" "}
                   {" - "}
-                  {new Date(
-                    currentProject.schedule_date?.to
-                  )?.toLocaleDateString("pt-BR", {
-                    dateStyle: "short",
-                  }) ?? "Não definido"}
-                  {currentProject.closing_time && (
-                    <span className="text-xs opacity-75">
-                      {" "}
-                      às {currentProject.closing_time}
-                    </span>
-                  )}
+                  {new Date(currentProject.schedule_date?.to)?.toLocaleString(
+                    "pt-BR",
+                    {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }
+                  ) ?? "Não definido"}
                 </span>
               </div>
             )}

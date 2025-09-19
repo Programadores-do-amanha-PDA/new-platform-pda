@@ -7,4 +7,5 @@ export interface ProjectModuleSelectProps
   value: ClassroomProjectModuleT | "";
   onValueChange: (newValue: ClassroomProjectModuleT) => void;
   name?: string;
+  error?: boolean;
 }

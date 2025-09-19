@@ -1,5 +1,15 @@
-export const projectTypesLabels = {
-  mini_project: "Mini projeto",
-  end_module_project: "Projeto final",
-  end_module_english_project: "English final project",
+import { ClassroomProjectTypeT } from "../types/project";
+
+export interface ProjectTypeLabelT {
+  label: string;
+  iconName: string;
+}
+
+export const projectTypesLabels: Record<ClassroomProjectTypeT, ProjectTypeLabelT> = {
+  mini_project: { label: "Mini projeto", iconName: "code" },
+  end_module_project: { label: "Projeto final", iconName: "braces" },
+  end_module_english_project: {
+    label: "English final project",
+    iconName: "languages",
+  },
 };

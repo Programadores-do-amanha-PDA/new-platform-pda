@@ -1,18 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+// Global imports
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Cog, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DateRange } from "react-day-picker";
-import {
-  startOfWeek,
-  endOfWeek,
-  addWeeks,
-  subWeeks,
-  startOfDay,
-  endOfDay,
-  isWithinInterval,
-} from "date-fns";
+
+// Local imports
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,84 +20,48 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import DateIntervalPicker from "./date-interval-picker";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
-import { Separator } from "@/components/ui/separator";
-import { getCurrentModuleRange, getCurrentWeekRange } from "./utils";
-
-type DefaultIntervalType = "manual" | "modules";
-
-interface DateIntervalPaginationControlProps {
-  onDateRangeChange: (dateRange: { from: Date; to: Date }) => void;
-  modules?: ClassroomConfigModulesT[];
-  defaultInterval?: DefaultIntervalType;
-}
+import {
+  getCurrentModule,
+  calculatePreviousInterval,
+  calculateNextInterval,
+  normalizeDateRange,
+  getInitialDateRange,
+  getCurrentWeekRange,
+} from "./utils";
+import { DateIntervalPaginationControlPropsT, DefaultIntervalTypeT } from "./types";
 
 export default function DateIntervalPaginationControl({
   onDateRangeChange,
   modules = [],
   defaultInterval = "manual",
-}: DateIntervalPaginationControlProps) {
+}: DateIntervalPaginationControlPropsT): JSX.Element {
   const [selectedModule, setSelectedModule] = useState<string>();
-  const [intervalType, setIntervalType] = useState<"manual" | "modules">();
+  const [intervalType, setIntervalType] = useState<DefaultIntervalTypeT>();
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
-  const getCurrentModule = useCallback((): string => {
-    if (!modules.length) return "manual";
-
-    const today = new Date();
-    const currentModules = modules.filter((module) => {
-      if (!module.interval?.from || !module.interval?.to) return false;
-      return isWithinInterval(today, {
-        start: module.interval.from,
-        end: module.interval.to,
-      });
-    });
-
-    if (!currentModules.length) return "manual";
-
-    // Se houver múltiplos módulos, seleciona o último criado (created_at)
-    const latestModule = currentModules.reduce((latest, current) => {
-      if (!latest.created_at) return current;
-      if (!current.created_at) return latest;
-      return new Date(current.created_at) > new Date(latest.created_at)
-        ? current
-        : latest;
-    });
-
-    return latestModule?.id || "manual";
-  }, [modules]);
-
-  // Inicializar com o módulo atual se defaultInterval for "modules"
-  useEffect(() => {
+  // Initialize with current module if defaultInterval is "modules"
+  useEffect((): void => {
     if (defaultInterval === "modules" && modules.length > 0) {
-      const currentModuleId = getCurrentModule();
+      const currentModuleId = getCurrentModule(modules);
       if (currentModuleId !== "manual") {
         setSelectedModule(currentModuleId);
         setIntervalType("modules");
       } else {
-        // Se não há módulo atual, usar modo manual com semana atual
+        // If no current module, use manual mode with current week
         setSelectedModule("manual");
         setIntervalType("manual");
-        setDateRange(getCurrentWeekRange());
       }
     } else {
       setSelectedModule("manual");
       setIntervalType("manual");
-      setDateRange(getCurrentWeekRange());
     }
 
-    setDateRange(getInitialDateRange());
+    setDateRange(getInitialDateRange(defaultInterval, modules));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getInitialDateRange = (): DateRange => {
-    return defaultInterval === "modules"
-      ? getCurrentModuleRange(modules)
-      : getCurrentWeekRange();
-  };
-
-  // Notifica mudanças no intervalo de datas
-  useEffect(() => {
+  // Notify date range changes
+  useEffect((): void => {
     if (dateRange?.from && dateRange?.to) {
       onDateRangeChange({
         from: dateRange.from,
@@ -112,103 +71,40 @@ export default function DateIntervalPaginationControl({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange]);
 
-  const handlePreviousInterval = () => {
-    if (dateRange?.from && dateRange?.to) {
-      // Calcula a duração do intervalo atual em dias
-      const intervalDays = Math.ceil(
-        (dateRange.to.getTime() - dateRange.from.getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-
-      // Move o intervalo para trás pela mesma duração
-      const newStart = new Date(dateRange.from);
-      newStart.setDate(dateRange.from.getDate() - intervalDays);
-
-      const newEnd = new Date(dateRange.to);
-      newEnd.setDate(dateRange.to.getDate() - intervalDays);
-
-      setDateRange({
-        from: startOfDay(newStart),
-        to: endOfDay(newEnd),
-      });
-    } else if (dateRange?.from) {
-      // Se só tem data inicial, move uma semana para trás
-      const previousWeekStart = startOfDay(
-        startOfWeek(subWeeks(dateRange.from, 1), { weekStartsOn: 0 })
-      );
-      const previousWeekEnd = endOfDay(
-        endOfWeek(subWeeks(dateRange.from, 1), { weekStartsOn: 0 })
-      );
-      setDateRange({
-        from: previousWeekStart,
-        to: previousWeekEnd,
-      });
+  const handlePreviousInterval = (): void => {
+    const previousInterval = calculatePreviousInterval(dateRange);
+    if (previousInterval) {
+      setDateRange(previousInterval);
     }
   };
 
-  const handleNextInterval = () => {
-    if (dateRange?.from && dateRange?.to) {
-      // Calcula a duração do intervalo atual em dias
-      const intervalDays = Math.ceil(
-        (dateRange.to.getTime() - dateRange.from.getTime()) /
-          (1000 * 60 * 60 * 24)
-      );
-
-      // Move o intervalo para frente pela mesma duração
-      const newStart = new Date(dateRange.from);
-      newStart.setDate(dateRange.from.getDate() + intervalDays);
-
-      const newEnd = new Date(dateRange.to);
-      newEnd.setDate(dateRange.to.getDate() + intervalDays);
-
-      setDateRange({
-        from: startOfDay(newStart),
-        to: endOfDay(newEnd),
-      });
-    } else if (dateRange?.from) {
-      // Se só tem data inicial, move uma semana para frente
-      const nextWeekStart = startOfDay(
-        startOfWeek(addWeeks(dateRange.from, 1), { weekStartsOn: 0 })
-      );
-      const nextWeekEnd = endOfDay(
-        endOfWeek(addWeeks(dateRange.from, 1), { weekStartsOn: 0 })
-      );
-      setDateRange({
-        from: nextWeekStart,
-        to: nextWeekEnd,
-      });
+  const handleNextInterval = (): void => {
+    const nextInterval = calculateNextInterval(dateRange);
+    if (nextInterval) {
+      setDateRange(nextInterval);
     }
   };
 
-  const handleDateRangeChange = (newDateRange: DateRange | undefined) => {
-    if (newDateRange?.from && newDateRange?.to) {
-      setDateRange({
-        from: startOfDay(newDateRange.from),
-        to: endOfDay(newDateRange.to),
-      });
-    } else if (newDateRange?.from) {
-      setDateRange({
-        from: startOfDay(newDateRange.from),
-        to: undefined,
-      });
-    } else {
-      setDateRange(newDateRange);
-    }
+  const handleDateRangeChange = (newDateRange: DateRange | undefined): void => {
+    const normalizedRange = normalizeDateRange(newDateRange);
+    setDateRange(normalizedRange);
     setSelectedModule(""); // Reset module selection when manually changing dates
   };
 
   // Wrapper function that matches the expected Dispatch type for DateIntervalPicker
   const handleDatePickerChange: React.Dispatch<
     React.SetStateAction<DateRange | undefined>
-  > = (value) => {
+  > = (value): void => {
     const newDateRange = typeof value === "function" ? value(dateRange) : value;
-    handleDateRangeChangeWrapper(newDateRange);
+    handleDateRangeChange(newDateRange);
+    setIntervalType("manual");
+    setSelectedModule("manual");
   };
 
   const handleIntervalTypeChange = (
-    type: "manual" | "modules",
+    type: DefaultIntervalTypeT,
     moduleId?: string
-  ) => {
+  ): void => {
     if (type === "manual") {
       setSelectedModule("manual");
       setDateRange(getCurrentWeekRange());
@@ -223,24 +119,16 @@ export default function DateIntervalPaginationControl({
         selectedModuleData?.interval?.from &&
         selectedModuleData?.interval?.to
       ) {
-        setDateRange({
-          from: startOfDay(selectedModuleData.interval.from),
-          to: endOfDay(selectedModuleData.interval.to),
-        });
+        setDateRange(normalizeDateRange({
+          from: selectedModuleData.interval.from,
+          to: selectedModuleData.interval.to,
+        }));
         setIntervalType("modules");
       }
     }
   };
 
-  const handleDateRangeChangeWrapper = (
-    newDateRange: DateRange | undefined
-  ) => {
-    handleDateRangeChange(newDateRange);
-    setIntervalType("manual");
-    setSelectedModule("manual");
-  };
-
-  const getDisplayTitle = () => {
+  const getDisplayTitle = (): JSX.Element | string => {
     if (
       intervalType === "modules" &&
       selectedModule &&
@@ -263,7 +151,7 @@ export default function DateIntervalPaginationControl({
     return "Selecione período";
   };
 
-  const showNavigationControls = intervalType === "manual";
+  const showNavigationControls: boolean = intervalType === "manual";
 
   return (
     <div className="flex h-8 items-center border rounded-lg overflow-hidden">
@@ -272,9 +160,7 @@ export default function DateIntervalPaginationControl({
           <Button
             variant="ghost"
             type="button"
-            onClick={() => {
-              handlePreviousInterval();
-            }}
+            onClick={handlePreviousInterval}
             className="size-8 p-0"
             disabled={!dateRange?.from}
           >
@@ -291,7 +177,7 @@ export default function DateIntervalPaginationControl({
             variant="ghost"
             size="sm"
             type="button"
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>): void => {
               e.stopPropagation();
               handleNextInterval();
             }}
@@ -315,7 +201,7 @@ export default function DateIntervalPaginationControl({
             Tipos de Intervalos
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => handleIntervalTypeChange("manual")}>
+          <DropdownMenuItem onClick={(): void => handleIntervalTypeChange("manual")}>
             <div className="flex items-center justify-between w-full">
               <span>Manual</span>
               {intervalType === "manual" && <Check className="h-4 w-4" />}
@@ -333,7 +219,7 @@ export default function DateIntervalPaginationControl({
               {modules.map((module) => (
                 <DropdownMenuItem
                   key={module.id}
-                  onClick={() => handleIntervalTypeChange("modules", module.id)}
+                  onClick={(): void => handleIntervalTypeChange("modules", module.id)}
                 >
                   <div className="flex items-center justify-between w-full">
                     <span>{module.title}</span>

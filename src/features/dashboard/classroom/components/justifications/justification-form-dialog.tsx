@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import ColorPickerDropdown from "@/components/ui/color-picker-dropdown";
+import ColorPickerDropdown from "@/components/shared/color-picker-dropdown"; 
 import Color, { ColorLike } from "color";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -61,6 +61,7 @@ const JustificationFormDialog = ({
       title: "",
       key: "",
       color: "#d67636",
+      isPresence: false,
     },
   });
 
@@ -122,6 +123,7 @@ const JustificationFormDialog = ({
 
       if (!currentConfig) {
         toast.error("Configuração não encontrada!");
+        setLoading(false);
         return;
       }
 
@@ -133,7 +135,7 @@ const JustificationFormDialog = ({
         created_at:
           currentJustification?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        isPresence: true,
+        isPresence: data.isPresence,
       };
 
       // Get current justifications array
@@ -164,6 +166,8 @@ const JustificationFormDialog = ({
             ? "Justificativa atualizada com sucesso!"
             : "Justificativa criada com sucesso!"
         );
+      } else {
+        toast.error("Erro ao salvar justificativa!");
       }
     } catch (error) {
       console.error("Error saving justification:", error);
@@ -185,7 +189,7 @@ const JustificationFormDialog = ({
         </DialogHeader>
 
         <Form {...form}>
-          <div className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="title"
@@ -238,35 +242,29 @@ const JustificationFormDialog = ({
               />
             </div>
 
-            <div className="">
-              <FormField
-                control={form.control}
-                name="isPresence"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Contar como presença?</FormLabel>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="isPresence"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Contar como presença?</FormLabel>
+                  </div>
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancelar
               </Button>
-              <Button
-                type="submit"
-                onClick={form.handleSubmit(onSubmit)}
-                disabled={loading}
-              >
+              <Button type="submit" disabled={loading}>
                 {loading
                   ? "Salvando..."
                   : isEditing
@@ -274,7 +272,7 @@ const JustificationFormDialog = ({
                   : "Criar Justificativa"}
               </Button>
             </div>
-          </div>
+          </form>
         </Form>
       </DialogContent>
     </Dialog>

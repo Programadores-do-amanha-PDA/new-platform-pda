@@ -97,7 +97,6 @@ export const createColumns = (
       },
       cell: ({ row }) => {
         const value = row.original.attendances[classType.id];
-        console.log(row.original.attendances);
         return (
           <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
             <span className="font-medium">
