@@ -38,7 +38,7 @@ const classroomFormSchema = z.object({
     .max(50, "Nome deve ter no máximo 50 caracteres"),
   period: z.enum(["morning", "afternoon", "evening"]).nullable(),
   status: z.enum(["created", "active", "finished"], {
-    required_error: "Status é obrigatório",
+    message: "Status é obrigatório",
   }),
   icon: z.string().min(1, "Ícone é obrigatório"),
 });

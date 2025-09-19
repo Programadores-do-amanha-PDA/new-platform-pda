@@ -27,7 +27,7 @@ import {
   ClassroomConfigClassTypesFormData,
 } from "@/types/classroom-configs";
 import Color, { ColorLike } from "color";
-import ColorPickerDropdown from "@/components/ui/color-picker-dropdown";
+import ColorPickerDropdown from "@/components/shared/color-picker-dropdown"; 
 import { toast } from "sonner";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { Checkbox } from "@/components/ui/checkbox";
