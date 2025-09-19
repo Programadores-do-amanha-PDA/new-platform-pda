@@ -6,7 +6,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/selectRoles";
+} from "@/components/ui/select-roles";
 
 const BadgeSelector = ({
   placeholder,
