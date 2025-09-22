@@ -62,16 +62,16 @@ export function ClassroomDataLoaderProvider({
     try {
       await Promise.all([
         classroomConfigStore.getConfigByClassroom(classroomId),
-        coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
+        // coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
         projectStore.getAllProjectsByClassroomId(classroomId),
         deliveryStore.getAllDeliveriesByClassroomId(classroomId),
-        correctionStore.getAllCorrectionsByClassroomId(classroomId),
-        zoomAccountStore.getAllAccounts(classroomId),
-        zoomMeetingStore.getAllMeetings(classroomId),
-        zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
-          classroomId
-        ),
-        classroomActivityStore.getAllActivitiesByClassroom(classroomId),
+        // correctionStore.getAllCorrectionsByClassroomId(classroomId),
+        // zoomAccountStore.getAllAccounts(classroomId),
+        // zoomMeetingStore.getAllMeetings(classroomId),
+        // zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
+        //   classroomId
+        // ),
+        // classroomActivityStore.getAllActivitiesByClassroom(classroomId),
       ]);
     } catch (error) {
       console.error("Error loading classroom data:", error);
