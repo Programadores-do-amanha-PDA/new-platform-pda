@@ -52,7 +52,7 @@ export default function useAuthConfirmation() {
     try {
       const data = await handleExchangeAuthCode(code);
 
-      if (!data || data?.session) {
+      if (!data || !data.session) {
         toast.error("Código de recuperação inválido ou expirado.");
         return;
       }
