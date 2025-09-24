@@ -17,6 +17,7 @@ import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classr
 import { useProjectStore } from "@/features/dashboard/classroom-projects/stores";
 import { useDeliveryStore } from "@/features/dashboard/classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "@/features/dashboard/classroom-projects/stores/corrections";
+import useAuth from "@/hooks/use-auth";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;
@@ -43,6 +44,7 @@ export function ClassroomDataLoaderProvider({
   const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
   const classroomActivityStore = useClassroomActivityStore();
   const classroomConfigStore = useClassroomConfigStore();
+  const { userRole } = useAuth();
 
   const isLoading =
     classroomStore.loading ||
@@ -60,19 +62,35 @@ export function ClassroomDataLoaderProvider({
     if (!classroomId) return;
 
     try {
-      await Promise.all([
-        classroomConfigStore.getConfigByClassroom(classroomId),
-        // coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
-        projectStore.getAllProjectsByClassroomId(classroomId),
-        deliveryStore.getAllDeliveriesByClassroomId(classroomId),
-        // correctionStore.getAllCorrectionsByClassroomId(classroomId),
-        // zoomAccountStore.getAllAccounts(classroomId),
-        // zoomMeetingStore.getAllMeetings(classroomId),
-        // zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
-        //   classroomId
-        // ),
-        // classroomActivityStore.getAllActivitiesByClassroom(classroomId),
-      ]);
+      if (userRole === "teacher" || userRole === "admin") {
+        await Promise.all([
+          classroomConfigStore.getConfigByClassroom(classroomId),
+          coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
+          projectStore.getAllProjectsByClassroomId(classroomId),
+          deliveryStore.getAllDeliveriesByClassroomId(classroomId),
+          correctionStore.getAllCorrectionsByClassroomId(classroomId),
+          zoomAccountStore.getAllAccounts(classroomId),
+          zoomMeetingStore.getAllMeetings(classroomId),
+          zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
+            classroomId
+          ),
+          classroomActivityStore.getAllActivitiesByClassroom(classroomId),
+        ]);
+      } else {
+        await Promise.all([
+          classroomConfigStore.getConfigByClassroom(classroomId),
+          // coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
+          projectStore.getAllProjectsByClassroomId(classroomId),
+          deliveryStore.getAllDeliveriesByClassroomId(classroomId),
+          // correctionStore.getAllCorrectionsByClassroomId(classroomId),
+          // zoomAccountStore.getAllAccounts(classroomId),
+          // zoomMeetingStore.getAllMeetings(classroomId),
+          // zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
+          //   classroomId
+          // ),
+          // classroomActivityStore.getAllActivitiesByClassroom(classroomId),
+        ]);
+      }
     } catch (error) {
       console.error("Error loading classroom data:", error);
     }
