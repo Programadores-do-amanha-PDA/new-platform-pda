@@ -11,7 +11,7 @@ export default function LoginPage() {
       <div className="flex h-full w-full flex-col justify-center items-center gap-6">
         <LoginForm />
       </div>
-      <div className="flex w-full h-full flex-col">
+      <div className="hidden w-full h-full flex-col md:flex">
         <div className="flex w-full h-full items-center justify-center text-primary-foreground relative bg-primary/55 rounded-xl overflow-clip">
           <BinaryRainBackground color="#000000" opacity={0.1} speed={60} />
 
