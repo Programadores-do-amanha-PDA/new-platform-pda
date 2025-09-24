@@ -93,7 +93,7 @@ export const ResetPasswordForm = () => {
           <p className="group-hover:underline">Entrar</p>
         </Link>
       </div>
-      <div className="flex flex-col gap-6 bg-b">
+      <div className="flex flex-col gap-6">
         <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
         <div className="flex flex-col gap-3">
           <p className="text-4xl font-bold">Redefinir senha</p>

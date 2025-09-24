@@ -31,7 +31,7 @@ export const getAllProfiles = async () => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(classroom_id)"
+        "id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)"
       );
 
     if (error) throw error;
@@ -50,7 +50,7 @@ export const getAllProfilesFilteredByRole = async (role: RolesT) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "*, user_roles!inner(id, role), classrooms:user_classrooms(classroom_id)"
+        "*, user_roles!inner(id, role), classrooms:user_classrooms(*)"
       )
       .eq("user_roles.role", role);
 
@@ -70,7 +70,7 @@ export const getProfileById = async (id: string) => {
     const { data, error } = await supabase
       .from("profiles")
       .select(
-        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(classroom_id)"
+        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)"
       )
       .eq("id", id)
       .single();
