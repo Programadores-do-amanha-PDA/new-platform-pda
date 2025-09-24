@@ -16,7 +16,7 @@ export default function ResetPasswordPage() {
       <div className="flex h-full w-full flex-col justify-center items-center gap-6">
         {!user ? <RequestResetPasswordForm /> : <ResetPasswordForm />}
       </div>
-      <div className="flex w-full h-full flex-col">
+      <div className="hidden w-full h-full flex-col md:flex">
         <div className="flex w-full h-full items-center justify-center text-primary-foreground rounded-xl relative bg-primary/50 overflow-clip">
           <BinaryRainBackground color="#000000" opacity={0.1} speed={30} />
           <Image
