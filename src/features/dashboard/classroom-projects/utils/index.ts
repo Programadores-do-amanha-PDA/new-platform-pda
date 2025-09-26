@@ -11,5 +11,9 @@ export * from './error-handling';
 export * from './project-dialog-helpers';
 export type { ProjectFormSchemaT } from './project-dialog-helpers';
 
+//project corrections utilities
+import projectsRules from './projectsRules.json';
+export { projectsRules };
+
 // Default modules
 export * from './default-modules';

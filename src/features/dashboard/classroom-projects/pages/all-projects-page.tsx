@@ -6,11 +6,13 @@ import PermissionGuard from "@/components/shared/permission-guard";
 import ProjectCard from "../components/project-card";
 import ProjectDialog from "../components/project-dialog";
 import { useProjectStore } from "../stores";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 const AllProjectsPage = () => {
   const { classroom_id } = useParams<{ classroom_id: string }>();
   const [searchFilter, setSearchFilter] = useState<string>("");
 
+  const { configsByClassroom } = useClassroomConfigStore();
   const { projects } = useProjectStore();
 
   const filteredProjects = searchFilter
@@ -18,6 +20,9 @@ const AllProjectsPage = () => {
         project.title.toLowerCase().includes(searchFilter.toLowerCase())
       )
     : projects;
+
+    const classroomConfig = configsByClassroom[classroom_id as string];
+
 
   return (
     <main className="w-full h-max py-4 px-2 flex flex-col overflow-hidden">
@@ -56,6 +61,7 @@ const AllProjectsPage = () => {
               project={project}
               expansive={true}
               classroomId={classroom_id}
+              classroomConfig={classroomConfig}
             />
           ))}
       </ul>

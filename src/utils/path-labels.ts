@@ -28,6 +28,7 @@ const pathLabels: { [key: string]: string } = {
   activities: "Atividades",
   projects: "Projetos",
   all_projects: "Todos os Projetos",
+  corrections: "Correções",
   coodesh: "Coodesh",
   assessments: "Avaliações",
   zoom: "Zoom",

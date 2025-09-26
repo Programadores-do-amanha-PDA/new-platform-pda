@@ -1,3 +1,4 @@
+import { ClassroomConfigT } from "@/types";
 import { ClassroomProjectT } from "./project";
 
 /**
@@ -10,6 +11,8 @@ export interface ProjectCardProps {
   expansive: boolean;
   /** Optional classroom ID for delivery modal */
   classroomId?: string;
+
+  classroomConfig?: ClassroomConfigT;
 }
 
 /**

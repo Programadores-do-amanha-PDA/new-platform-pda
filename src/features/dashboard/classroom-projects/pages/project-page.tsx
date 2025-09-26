@@ -13,12 +13,14 @@ import { projectTypesLabels } from "../utils/project-type-labels";
 import { useDeliveryStore } from "../stores/deliveries";
 import { useProjectStore } from "../stores";
 import { useCorrectionStore } from "../stores/corrections";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 export default function ProjectPage() {
   const { project_id, classroom_id } = useParams<{
     project_id: string;
     classroom_id: string;
   }>();
+  const { configsByClassroom } = useClassroomConfigStore();
   const { projects, deleteProject } = useProjectStore();
   const { deliveries } = useDeliveryStore();
   const { corrections } = useCorrectionStore();
@@ -26,6 +28,19 @@ export default function ProjectPage() {
   const currentProject: ClassroomProjectT | undefined = projects.find(
     (project) => project.id === project_id
   );
+  if (!currentProject) {
+    return (
+      <NotFoundState
+        title="Projeto não encontrado."
+        subtitle="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
+        href={`/dashboard/classrooms/${classroom_id}/projects`}
+        buttonText="Ver todos os Projetos"
+      />
+    );
+  }
+
+  const classroomModules =
+    configsByClassroom[classroom_id as string].modules || [];
 
   const projectCorrections = corrections.filter(
     (correction) => correction.project_id === project_id
@@ -38,17 +53,6 @@ export default function ProjectPage() {
         projectCorrections.find((corr) => corr.delivery_id === delivery.id)
           ?.created_at || null,
     }));
-
-  if (!currentProject) {
-    return (
-      <NotFoundState
-        title="Projeto não encontrado."
-        subtitle="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
-        href={`/dashboard/classrooms/${classroom_id}/projects`}
-        buttonText="Ver todos os Projetos"
-      />
-    );
-  }
 
   return (
     <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
@@ -64,7 +68,9 @@ export default function ProjectPage() {
           <div className="flex items-center gap-1" title="Modulo do projeto">
             <p className="text-muted-foreground text-xl font-semibold">M</p>
             <span className="text-muted-foreground">
-              {currentProject.module}
+              {classroomModules.find(
+                (module) => module.id === currentProject.module
+              )?.title || currentProject.module}
             </span>
           </div>
           {currentProject.schedule_date?.from &&
@@ -117,6 +123,8 @@ export default function ProjectPage() {
               new Date(b.created_at || 0).getTime()
           )}
           projectType={currentProject.project_type}
+          classroomId={classroom_id}
+          projectId={currentProject.id}
         />
       </div>
     </div>

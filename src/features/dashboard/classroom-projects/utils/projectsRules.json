@@ -1,508 +1,54 @@
 {
-    "P0": {
-        "Personagens": {
-            "Maravilhoso": "Cada integrante contem seu personagem; Cada personagem contem no máximo 40 segundos de tela; Cada personagem apresenta 4 objetivos de vida e 4 metas; Cada personagem está customizado; Existem personagens 'figurantes' além dos personagens dos integrantes.",
-            "Tudo OK": "Cada integrante contem seu personagem; Cada personagem contem no máximo 40 segundos de tela; Cada personagem apresenta 4 objetivos de vida e 4 metas.",
-            "Quase lá": "Alguns integrantes não contem seu personagem; Alguns personagens contem são modelos padrões do Scratch; Alguns personagens não apresenta 4 objetivos de vida e 4 metas.",
-            "Não há como avaliar": "Os integrantes não contem seus personagens; Os personagens são modelos padrões do Scratch."
-        },
-        "Cenários": {
-            "Maravilhoso": "Cada integrante tem seu cenário próprio; Cada cenário contem elementos únicos que representam o integrante;     Em todas as cenas nenhum dos personagens conseguem sair da tela; Existe um/a narrador/a que faz a transição de cenários.",
-            "Tudo OK": "Cada integrante tem seu cenário próprio; Cada cenário contem elementos únicos que representam o integrante; Em todas as cenas nenhum dos personagens conseguem sair da tela.",
-            "Quase lá": "Alguns integrante não contem seu cenário próprio; Alguns cenário não contem elementos únicos que representam os integrantes; Alguns personagens conseguem sair da tela.",
-            "Não há como avaliar": "Os integrante não contem seu cenário próprio; Os cenário não contem elementos únicos que representam os integrantes; Os personagens conseguem sair da tela."
-        },
-        "Criatividade": {
-            "Maravilhoso": "O projeto contem uma variedade de elementos compondo os cenários; O projeto usa diversos recurso áudio-visuais para apresentar os 4 objetivos de vida e as 4 metas de cada participante; O projeto conta com personagens e elementos além dos requeridos.",
-            "Tudo OK": "O projeto contem uma variedade de elementos compondo os cenários; O projeto usa diversos recurso áudio-visuais para apresentar os 4 objetivos de vida e as 4 metas de cada participante.",
-            "Quase lá": "Alguns dos cenários não contem elementos ou os elementos se repetem em diferentes cenários; O projeto não usa diferentes recurso áudio-visuais para apresentar os 4 objetivos de vida e as 4 metas de cada participante.",
-            "Não há como avaliar": "Os cenários não contem elementos ou os elementos se repetem em todos os cenários; O projeto não usa nenhum recurso áudio-visuais para apresentar os 4 objetivos de vida e as 4 metas de cada participante."
-        },
-        "Apresentação": {
-            "Maravilhoso": "Todos os integrantes apresentaram seus personagens e seus respectivos cenários; Todos os integrantes apresentaram seus 4 objetivos de vidas e suas 4 metas para o final do curso.",
-            "Tudo OK": "Todos os integrantes apresentaram seus personagens e seus respectivos cenários; Todos os integrantes apresentaram seus 4 objetivos de vidas e suas 4 metas para o final do curso.",
-            "Quase lá": "Alguns integrantes apresentaram seus personagens e seus respectivos cenários; Alguns integrantes apresentaram seus 4 objetivos de vidas e suas 4 metas para o final do curso.",
-            "Não há como avaliar": "Os integrantes não apresentaram seus personagens e seus respectivos cenários; Os integrantes não apresentaram seus 4 objetivos de vidas e suas 4 metas para o final do curso."
-        }
-    },
     "MP1": {
-        "HTML": {
-            "Maravilhoso": "O projeto está funcionando normalmente. Não contém erros de sintaxe HTML. Está utilizando o conceito de HTML semântico",
-            "Tudo OK": "O projeto está funcionando normalmente. Não contém erros de sintaxe. Utilizou tags html diferentes.",
-            "Quase lá": "O projeto não está funcionando normalmente. Contém alguns erros de sintaxe. Não está usando diferentes tags html.",
-            "Não entregue": "Não há como avaliar."
+        "Funcionalidades": {
+            "Maravilhoso": "Todas as funcionalidades funcionam perfeitamente; Interface intuitiva e amigável; Funcionalidades extras (ex: editar/remover estudantes); Persistência de dados em arquivo JSON",
+            "Tudo OK": "Todas as funcionalidades obrigatórias implementadas; Sistema de menu funcional; Cadastro, busca e cálculos funcionam corretamente",
+            "Quase lá": "O programa não executa; Funcionalidades básicas não implementadas; Não possui sistema de menu; Cadastro não funciona",
+            "Não entregue": "Não há como avaliar"
         },
-        "CSS": {
-            "Maravilhoso": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando responsividade.",
-            "Tudo OK": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando class e ID.",
-            "Quase lá": "O projeto não contém arquivos CSS. O projeto não está utilizando o CSS externo. O CSS não executa ou contém erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
+        "Estrutura de Dados": {
+            "Maravilhoso": "Estrutura de dados bem organizada e eficiente; Validações robustas; Uso de destructuring e spread operator; Tratamento de edge cases",
+            "Tudo OK": "Utiliza arrays de objetos corretamente; Estrutura de dados adequada; Validações básicas implementadas",
+            "Quase lá": "Não utiliza arrays e objetos adequadamente; Estrutura de dados mal organizada; Dados não são validados",
+            "Não entregue": "Não há como avaliar"
         },
-        "Organização": {
-            "Maravilhoso": "O projeto está funcionando normalmente. O projeto está utilizando arquivos HTML e CSS separados. O projeto não contem erros de sintaxe. O projeto contém uma estrutura de organização em pastas.",
-            "Tudo OK": "O projeto está funcionando normalmente. O projeto não contem erros de sintaxe. O projeto está utilizando arquivos HTML e CSS separados",
-            "Quase lá": "O projeto não executa. Os arquivos do projeto não estão organizados ou estão somente em um único arquivo HTML. O projeto contem alguns erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
+        "Métodos de Array": {
+            "Maravilhoso": "Excelente uso de métodos funcionais; Código expressivo e legível; Uso avançado de reduce para cálculos complexos; Combinação eficiente de múltiplos métodos",
+            "Tudo OK": "Utiliza pelo menos 3 métodos funcionais (map, filter, find ou reduce); Implementações corretas; Aplicação adequada de cada método",
+            "Quase lá": "Não utiliza métodos funcionais; Usa apenas loops tradicionais; Implementações incorretas",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Organização do Código": {
+            "Maravilhoso": "Código muito bem estruturado; Separação clara de responsabilidades; Documentação adequada; Aplicação de princípios de código limpo; Modularização em arquivos separados",
+            "Tudo OK": "Código organizado em funções; Nomes descritivos para variáveis e funções; Comentários explicativos; Estrutura lógica clara",
+            "Quase lá": "Código desorganizado; Sem separação em funções; Nomes de variáveis inadequados; Sem comentários",
+            "Não entregue": "Não há como avaliar"
         }
     },
     "P1": {
-        "HTML": {
-            "Maravilhoso": "O projeto está funcionando normalmente. Não contém erros de sintaxe HTML. Está utilizando o conceito de HTML semântico",
-            "Tudo OK": "O projeto está funcionando normalmente. Não contém erros de sintaxe. Utilizou tags html diferentes.",
-            "Quase lá": "O projeto não está funcionando normalmente. Contém alguns erros de sintaxe. Não está usando diferentes tags html.",
-            "Não entregue": "Não há como avaliar."
+        "Funcionalidades": {
+            "Maravilhoso": "Todas as funcionalidades operam perfeitamente; Interface de terminal clara e intuitiva; Implementou funcionalidades extras relevantes ao tema escolhido",
+            "Tudo OK": "Todas as funcionalidades obrigatórias implementadas (CRUD, busca, operação principal); O menu do terminal é funcional",
+            "Quase lá": "O programa não executa ou apresenta erros críticos; Não implementa as operações mínimas de CRUD ou a lógica de negócio principal",
+            "Não entregue": "Não há como avaliar"
         },
-        "CSS": {
-            "Maravilhoso": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando responsividade.",
-            "Tudo OK": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando class e ID.",
-            "Quase lá": "O projeto não contém arquivos CSS. O projeto não está utilizando o CSS externo. O CSS não executa ou contém erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
+        "Estrutura (POO)": {
+            "Maravilhoso": "Estrutura de classes coesa e bem organizada; Excelente aplicação dos conceitos de encapsulamento; Validações robustas e tratamento de casos extremos",
+            "Tudo OK": "Utiliza Classes para modelar as entidades e uma classe principal para orquestração; Os métodos estão bem definidos em suas respectivas classes",
+            "Quase lá": "Não utiliza Classes ou as utiliza de forma inadequada; A lógica de negócio está misturada e não encapsulada nas classes",
+            "Não entregue": "Não há como avaliar"
         },
-        "Javascript": {
-            "Maravilhoso": "Não contem erros de sintaxe Javascript Esta sendo utilizado arquivos Javascript externos. Esta sendo utilizado loops e prompts. O projeto está utilizando o conceito de reutilização de código.",
-            "Tudo OK": "Não contem erros de sintaxe Javascript Esta sendo utilizado arquivos Javascript externos. Esta sendo utilizado loops e prompts.",
-            "Quase lá": "O projeto não contém arquivos JS. O código javascript não executa. O projeto contem alguns erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
+        "Organização do Código": {
+            "Maravilhoso": "Código muito bem estruturado, com clara separação de responsabilidades; Documentação (README.md) completa, explicando o projeto e como executá-lo",
+            "Tudo OK": "Código organizado em módulos (arquivos separados); Nomes descritivos para variáveis e métodos; Comentários explicativos nos pontos-chave",
+            "Quase lá": "Código em um único arquivo; Nomes de variáveis e métodos inadequados; Sem comentários",
+            "Não entregue": "Não há como avaliar"
         },
-        "Organização": {
-            "Maravilhoso": "O projeto está funcionando normalmente. O projeto está utilizando arquivos HTML e CSS separados. O projeto não contem erros de sintaxe. O projeto contém uma estrutura de organização em pastas.",
-            "Tudo OK": "O projeto está funcionando normalmente. O projeto não contem erros de sintaxe. O projeto está utilizando arquivos HTML e CSS separados",
-            "Quase lá": "O projeto não executa. Os arquivos do projeto não estão organizados ou estão somente em um único arquivo HTML. O projeto contem alguns erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O projeto está no GitHub. O projeto contém 3+ commit’s por integrante. As mensagens dos commit’s está clara e objetiva. O projeto está hospedado no GitHub Pages.",
-            "Tudo OK": "O projeto está no GitHub. O projeto contém 3+ commits por integrante.",
-            "Quase lá": "O projeto não está no gitHub. O projeto está no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "PI1": {
-        "Identify the need": {
-            "Marvellous": "Estudantes demonstraram uma compreensão aprofundada da necessidade que identificaram e como ela é relevante para o seu público-alvo.",
-            "All ok": "Estudantes identificaram uma necessidade e explicaram como ela é relevante para o seu público-alvo, mas há algumas lacunas na sua compreensão.",
-            "It lacks Something": "Estudantes identificaram uma necessidade, mas não explicaram adequadamente como ela é relevante para o seu público-alvo.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Develop a business concept": {
-            "Marvellous": "Estudantes articularam claramente a proposta de venda exclusiva e o modelo de negócios de sua empresa e demonstraram uma compreensão completa de seu público-alvo e do mercado em que estão entrando.",
-            "All ok": "Estudantes articularam a proposta de venda exclusiva e o modelo de negócios para sua empresa e demonstraram uma compreensão de seu público-alvo e do mercado em que estão entrando, mas há algumas lacunas em sua compreensão.",
-            "It lacks Something": "Estudantes não articularam adequadamente a proposta de venda exclusiva e o modelo de negócios de sua empresa ou demonstraram uma compreensão de seu público-alvo e do mercado em que estão entrando.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Create a visual identity": {
-            "Marvellous": "Estudantes criaram uma identidade visual coesa que reflete os valores e a missão de sua empresa e fizeram escolhas de design apropriadas para seu público-alvo.",
-            "All ok": "Estudantes criaram uma identidade visual que reflete os valores e a missão de sua empresa, mas há algumas inconsistências nas escolhas de design ou não são totalmente adequadas ao público-alvo.",
-            "It lacks Something": "Estudantes não criaram uma identidade visual coesa que reflita os valores e a missão de sua empresa ou não fizeram escolhas de design apropriadas para seu público-alvo.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Choose a name": {
-            "Marvellous": "Estudantes criaram um nome cativante, memorável e relevante para sua empresa.",
-            "All ok": "Estudantes criaram um nome para sua empresa, mas não é particularmente cativante, memorável ou relevante.",
-            "It lacks Something": "Estudantes não criaram um nome para sua empresa ou o nome que eles criaram não é particularmente um nome cativante, memorável e/ou relevante.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Create a business plan": {
-            "Marvellous": "Estudantes criaram um plano de negócios abrangente que descreve suas estratégias de marketing e vendas, projeções financeiras, marcos, principais parceiros e fornecedores e os recursos e suporte necessários para serem bem-sucedidos.",
-            "All ok": "Estudantes criaram um plano de negócios que descreve algumas de suas estratégias de marketing e vendas, projeções financeiras, marcos, principais parceiros e fornecedores e os recursos e suporte necessários para serem bem-sucedidos, mas existem algumas lacunas ou elementos ausentes.",
-            "It lacks Something": "Estudantes não criaram um plano de negócios ou o plano que criaram não descreve adequadamente suas estratégias de marketing e vendas, projeções financeiras, marcos, principais parceiros e fornecedores e os recursos e suporte de que precisarão para ter sucesso.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Presentation": {
-            "Marvellous": "Estudantes apresentaram sua ideia de negócio, planejaram de forma clara e eficaz, usando recursos visuais e habilidades de linguagem apropriados e fizeram a apresentação dentro do tempo programado.",
-            "All ok": "Estudantes apresentaram sua ideia e plano de negócios, mas há algumas áreas em que a apresentação poderia ter sido melhorada, como o uso de recursos visuais, habilidades de linguagem ou tempo de apresentação.",
-            "It lacks Something": "Estudantes não apresentaram sua ideia de negócio e planejaram de forma eficaz, usando recursos visuais apropriados, habilidades de linguagem ou não apresentaram dentro do tempo previsto.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Team Work": {
-            "Marvellous": "Estudantes dividiram as tarefas de forma eficaz entre os membros da equipe, comunicaram-se de forma eficaz entre si e demonstraram fortes habilidades de colaboração.",
-            "All ok": "Estudantes dividiram as tarefas entre os membros da equipe e se comunicaram de forma eficaz, mas há algumas áreas em que a colaboração poderia ter sido melhorada.",
-            "It lacks Something": "Estudantes não dividiram as tarefas de maneira eficaz entre os membros da equipe, não se comunicaram de maneira eficaz entre si ou demonstraram habilidades de colaboração insatisfatórias.",
-            "Didn't do!": "Não há como avaliar"
-        }
-    },
-    "MP2": {
-        "HTML": {
-            "Maravilhoso": "O projeto está funcionando normalmente. Não contém erros de sintaxe HTML. Está utilizando o conceito de HTML semântico.",
-            "Tudo OK": "O projeto está funcionando normalmente. Não contém erros de sintaxe. Utilizou tags html diferentes.",
-            "Quase lá": "O projeto não está funcionando normalmente. Contém alguns erros de sintaxe. Não está usando diferentes tags html.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "CSS": {
-            "Maravilhoso": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando responsividade.",
-            "Tudo OK": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando class e ID.",
-            "Quase lá": "O projeto não contém arquivos CSS. O projeto não está utilizando o CSS externo. O CSS não executa ou contém erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Javascript": {
-            "Maravilhoso": "O projeto executa normalmente.O projeto contém todas as funcionalidades funcionando. O projeto está usando todos os requisitos. O projeto está usando POO.",
-            "Tudo OK": "O projeto está funcionando normalmente. Nem todas as funcionalidades ou requisitos estão presentes ou funcionando.",
-            "Quase lá": "O projeto não executa. Não contém arquivos Javascript. Não está sendo utilizado a class, o array e o DOM.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Organização": {
-            "Maravilhoso": "O projeto está funcionando normalmente. O projeto está utilizando arquivos HTML e CSS separados. O projeto não contém erros de sintaxe. O projeto contém uma estrutura de organização em pastas.",
-            "Tudo OK": "O projeto está funcionando normalmente. O projeto não contém erros de sintaxe. O projeto está utilizando arquivos HTML e CSS separados.",
-            "Quase lá": "O projeto não está organizado. Os arquivos do projeto não estão organizados ou estão somente em um único arquivo HTML. O projeto contém alguns erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O projeto está no GitHub. O projeto contém 3+ commit’s. As mensagens dos commit’s está clara e objetiva. O projeto está hospedado no GitHub Pages.",
-            "Tudo OK": "O projeto está no GitHub. O projeto contém 3+ commits.",
-            "Quase lá": "O projeto não está no gitHub. O projeto está no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "P2": {
-        "HTML": {
-            "Maravilhoso": "O projeto está funcionando normalmente. Não contém erros de sintaxe HTML. Está utilizando o conceito de HTML semântico",
-            "Tudo OK": "O projeto está funcionando normalmente. Não contém erros de sintaxe. Utilizou tags html diferentes.",
-            "Quase lá": "O projeto não está funcionando normalmente. Contém alguns erros de sintaxe. Não está usando diferentes tags html.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "CSS": {
-            "Maravilhoso": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando responsividade.",
-            "Tudo OK": "Não contém erros de sintaxes CSS. Estão sendo utilizados arquivos externos de CSS. O projeto está utilizando class e ID.",
-            "Quase lá": "O projeto não contém arquivos CSS. O projeto não está utilizando o CSS externo. O CSS não executa ou contém erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Javascript": {
-            "Maravilhoso": "O projeto executa normalmente. O projeto contém todas as funcionalidades funcionando. O projeto está usando todos os requisitos. O projeto está usando POO.",
-            "Tudo OK": "O projeto está funcionando normalmente. Nem todas as funcionalidades ou requisitos estão presentes ou funcionando.",
-            "Quase lá": "O projeto não executa. Não contém arquivos Javascript. Não está sendo utilizado a class, o array e o DOM",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Organização": {
-            "Maravilhoso": "O projeto está funcionando normalmente. O projeto está utilizando arquivos HTML e CSS separados. O projeto não contem erros de sintaxe. O projeto contém uma estrutura de organização em pastas.",
-            "Tudo OK": "O projeto está funcionando normalmente. O projeto não contem erros de sintaxe. O projeto está utilizando arquivos HTML e CSS separados",
-            "Quase lá": "O projeto não executa. Os arquivos do projeto não estão organizados ou estão somente em um único arquivo HTML. O projeto contem alguns erros de sintaxe.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O projeto está no GitHub. O projeto contém 3+ commit’s por integrante. As mensagens dos commit’s está clara e objetiva. O projeto está hospedado no GitHub Pages.",
-            "Tudo OK": "O projeto está no GitHub. O projeto contém 3+ commits por integrante.",
-            "Quase lá": "O projeto não está no gitHub. O projeto está no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "PI2": {
-        "Creativity": {
-            "Marvellous": "Os estudantes demonstrou um alto nível de criatividade tanto na identificação de problemas quanto no desenvolvimento de soluções, apresentando ideias inovadoras e eficazes.",
-            "All ok": "Os estudantes demonstrou algum grau de criatividade na identificação de problemas e no desenvolvimento de soluções, apresentando ideias que foram geralmente eficazes, mas não necessariamente inovadoras.",
-            "It lacks Something": "Os estudantes demonstrou pouca criatividade na identificação de problemas e no desenvolvimento de soluções, apresentando ideias pouco inovadoras ou eficazes.",
-            "Didn't do!": "Os estudantes não demonstrou nenhuma criatividade na identificação de problemas ou no desenvolvimento de soluções."
-        },
-        "Agile fundaments": {
-            "Marvellous": "Os estudantes demonstrou um entendimento profundo dos valores e princípios ágeis, aplicando-os de forma estratégica e efetiva para a solução dos problemas apresentados no caso.",
-            "All ok": "Os estudantes demonstrou um entendimento satisfatório dos valores e princípios ágeis, aplicando-os de forma razoável para a solução dos problemas apresentados no caso.",
-            "It lacks Something": "Os estudantes demonstrou pouco entendimento dos valores e princípios ágeis, aplicando-os de forma inadequada ou inconsistente para a solução dos problemas apresentados no caso",
-            "Didn't do!": "Os estudantes não demonstrou nenhum entendimento dos valores e princípios ágeis ou não os aplicou na solução dos problemas apresentados no caso."
-        },
-        "Different Agile approaches and frameworks utilisation": {
-            "Marvellous": "Os estudantes desenvolveu soluções criativas e eficazes para todos os problemas identificados, demonstrando um profundo entendimento das questões",
-            "All ok": "Os estudantes desenvolveu soluções para a maioria dos problemas identificados que foram geralmente eficazes e demonstraram um entendimento razoável das questões",
-            "It lacks Something": "Os estudantes desenvolveu soluções para alguns dos problemas identificados, mas as soluções não foram tão eficazes ou criativas quanto poderiam ter sido, ou o entendimento da equipe das questões estava um pouco deficiente",
-            "Didn't do!": "Os estudantes não desenvolveu nenhuma solução para os problemas identificados."
-        },
-        "Persuasion": {
-            "Marvellous": "Os estudantes apresentou argumentos convincentes e bem fundamentados para suas soluções, demonstrando habilidades de persuasão excepcionais e conquistando o público-alvo.",
-            "All ok": "Os estudantes apresentou argumentos razoavelmente convincentes e bem fundamentados para suas soluções, demonstrando habilidades de persuasão satisfatórias e conseguindo persuadir a maioria do público-alvo.",
-            "It lacks Something": "Os estudantes apresentou argumentos pouco convincentes ou mal fundamentados para suas soluções, demonstrando habilidades de persuasão limitadas e não conseguindo persuadir a maioria do público-alvo.",
-            "Didn't do!": "Os estudantes não apresentou argumentos ou não demonstrou habilidades de persuasão."
-        },
-        "Presentation": {
-            "Marvellous": "A apresentação da equipe foi envolvente, polida e profissional, comunicando efetivamente suas ideias e soluções de maneira clara e concisa.",
-            "All ok": "A apresentação da equipe foi geralmente eficaz na comunicação de suas ideias e soluções, embora possa ter havido alguns problemas menores com a entrega ou organização.",
-            "It lacks Something": "A apresentação da equipe teve problemas significativos com a entrega ou organização, tornando difícil entender suas ideias e soluções.",
-            "Didn't do!": "Os estudantes não fez uma apresentação."
-        },
-        "Team Work": {
-            "Marvellous": "Estudantes dividiram as tarefas de forma eficaz entre os membros da equipe, comunicaram-se de forma eficaz entre si e demonstraram fortes habilidades de colaboração.",
-            "All ok": "Estudantes dividiram as tarefas entre os membros da equipe e se comunicaram de forma eficaz, mas há algumas áreas em que a colaboração poderia ter sido melhorada.",
-            "It lacks Something": "Estudantes não dividiram as tarefas de maneira eficaz entre os membros da equipe, não se comunicaram de maneira eficaz entre si ou demonstraram habilidades de colaboração insatisfatórias.",
-            "Didn't do!": "Não há como avaliar"
-        }
-    },
-    "MP3": {
-        "Problematização": {
-            "Maravilhoso": "Foi escolhido um problema e o sistema elaborado o soluciona. Foram escolhidos múltiplos problemas e todos eles foram solucionados.",
-            "Tudo OK": "Foi escolhido um problema real e solucionado em partes.",
-            "Quase lá": "Nenhum problema foi escolhido ou foi usado o problema de exemplo.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Diagramação conceitual": {
-            "Maravilhoso": "Há um diagrama conceitual que vai além dos requisitos mínimos.",
-            "Tudo OK": "Há um diagrama conceitual que atende todos os requisitos mínimos.",
-            "Quase lá": "Não há um diagrama conceitual ou o diagrama conceitual não atende os requisitos mínimos.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Diagramação de entidade e relacionamento": {
-            "Maravilhoso": "O diagrama ER foi realizado contendo todas as entidades e atributos do diagrama conceitual. Todos os atributos contem seus tipos de dados corretamente de forma funcional.",
-            "Tudo OK": "O diagrama ER foi realizado contendo todas as entidades e atributos do diagrama conceitual. Todos os atributos contem seus tipos de dados.",
-            "Quase lá": "Não foi realizado o diagrama ER.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Apresentação": {
-            "Maravilhoso": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas vão além dos requisitos, adicionando elementos a mais.",
-            "Tudo OK": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas atendem aos requisitos.",
-            "Quase lá": "Não foi realizada uma apresentação e não foi realizada a publicação no LinkedIn.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "P3": {
-        "Problematização": {
-            "Maravilhoso": "Foi escolhido um problema e o sistema elaborado o soluciona de abordagem criativa. Foram escolhidos múltiplos problemas e todos eles foram solucionados de formas criativas.",
-            "Tudo OK": "Foi escolhido um problema real e solucionado em partes.",
-            "Quase lá": "Nenhum problema foi escolhido ou foi usado o problema de exemplo.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Diagramação conceitual": {
-            "Maravilhoso": "Há um diagrama conceitual que vai além dos requisitos mínimos.",
-            "Tudo OK": "Há um diagrama conceitual que atende todos os requisitos mínimos.",
-            "Quase lá": "Não há um diagrama conceitual ou o diagrama conceitual não atende os requisitos mínimos.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Diagramação de entidade e relacionamento": {
-            "Maravilhoso": "Há um diagrama conceitual contem elementos e relacionamentos que vão além dos requisitos mínimos.",
-            "Tudo OK": "O diagrama ER foi realizado contendo todas as entidades e atributos do diagrama conceitual. Todos os atributos contem seus tipos de dados.",
-            "Quase lá": "O diagrama ER foi realizado porem não contem todas as entidades e atributos do diagrama conceitual. Nem todos os atributos contem seus tipos de dados.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Desenvolvimento": {
-            "Maravilhoso": "O sistema foi baseado no diagrama ER. O sistema contem todas as entidades, atributos e relacionamentos do diagrama. Os tipos de dados correspondem aos do diagrama. Foi adicionado cinco ou mais dados em cada tabela.",
-            "Tudo OK": "O sistema foi baseado no diagrama ER. O sistema contem quase todas as entidades, atributos e relacionamentos do diagrama.",
-            "Quase lá": "O sistema realizado não foi baseado no diagrama ER.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Analise": {
-            "Maravilhoso": "Foi desenvolvido três ou mais consultas por integrante. Foi desenvolvido três ou mais gráficos por integrante. As consultas retornam dados possíveis para a montagem de gráficos e visualizações.",
-            "Tudo OK": "Foi desenvolvido por volta de três consultas por integrante. Foi desenvolvido por volta de três gráficos por integrante.",
-            "Quase lá": "As consultas realizadas não foram baseadas no diagrama ER ou nãõ executam corretamente.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Apresentação": {
-            "Maravilhoso": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas vão além dos requisitos, adicionando elementos a mais.",
-            "Tudo OK": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas atendem aos requisitos.",
-            "Quase lá": "Não foi realizada uma apresentação e não foi realizada a publicação no LinkedIn.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "As consultas estão no GitHub. O repositório contém 3+ commit’s por integrante. As mensagens dos commit’s está clara e objetiva.",
-            "Tudo OK": "As consultas estão no GitHub. O repositório contém 3+ commits por integrante.",
-            "Quase lá": "As consultas não estão no gitHub ou elas estão no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "PI3": {
-        "Justification of the SDG chosen": {
-            "Marvellous": "The justification of the SDG chosen is relevant and aligns with the team's interests and skills.",
-            "All ok": "The justification of the SDG chosen is adequate, but not particularly inspiring.",
-            "It lacks Something": "The justification of the SDG chosen is not very relevant, or it lacks originality or creativity.",
-            "Didn't do!": "The team did not justificate the SDG chosen, or the justification is irrelevant or inappropriate."
-        },
-        "The value proposition for the app/website to be developed": {
-            "Marvellous": "The value proposition is relevant, challenging and aligns with the team's interests and skills.",
-            "All ok": "The value proposition is adequate, but not particularly inspiring or challenging.",
-            "It lacks Something": "The value proposition is not very relevant, or it lacks originality or creativity.",
-            "Didn't do!": "The team did not build a value proposition, or the value proposition is irrelevant or inappropriate."
-        },
-        "Creativity": {
-            "Marvellous": "The app and its documentation are highly creative and innovative, demonstrating unique approaches or solutions to the problem at hand.",
-            "All ok": "The app and its documentation are adequate, with some creative ideas or solutions, but nothing particularly unique or innovative.",
-            "It lacks Something": "The app and its documentation are basic and lack creativity or originality. The team did not take any risks or explore new ideas.",
-            "Didn't do!": "The team did not demonstrate any creativity in the app or its documentation, or the app and documentation were not completed."
-        },
-        "Presentation": {
-            "Marvellous": "The presentation was engaging, clear, and well-structured, demonstrating the team's understanding of the project and their communication skills.",
-            "All ok": "The presentation was good overall, but may have lacked some clarity or structure, or the team may have struggled with public speaking.",
-            "It lacks Something": "The presentation was confusing or disorganized, with unclear or incomplete information. The team may have struggled with public speaking and failed to engage the audience.",
-            "Didn't do!": "The team did not present their app or documentation, or the presentation was completely inadequate."
-        },
-        "Team organization (task division, communication platform and task management platform).": {
-            "Marvellous": "The team organized their work exceptionally well. The tasks were fairly divided. The plataforms chosen for communication and task management  were innovative and effective.",
-            "All ok": "The team organized their work very well. The tasks were fairly divided. The plataforms chosen for communication and task management were effective.",
-            "It lacks Something": "The team organized their work in a simple way. The tasks were not fairly divided. The plataforms chosen for communication and task management were too simple.",
-            "Didn't do!": "The team did not organize their work. The tasks weren't divided. They didn't choose plataforms for communication and task management."
-        }
-    },
-    "MP4": {
-        "Problematização": {
-            "Maravilhoso": "Foi escolhido um problema e o sistema elaborado o soluciona. Foram escolhidos múltiplos problemas e todos eles foram solucionados.",
-            "Tudo OK": "Foi escolhido um problema real e solucionado em partes.",
-            "Quase lá": "Nenhum problema foi escolhido ou foi usado o problema de exemplo.",
-            "Não entregue": ""
-        },
-        "API": {
-            "Maravilhoso": "Há uma API com 3 ou mais que 3 rotas. Todas as rotas estão funcionando corretamente. A API consta com algum tipo de armazenamento de dados simulado.",
-            "Tudo OK": "Há uma API com todas ou quase todas as 3 rotas pedidas. Todas as rotas construídas estão funcionando corretamente.",
-            "Quase lá": "Não há uma API ou a API não atende os requisitos mínimos.",
-            "Não entregue": ""
-        },
-        "JavaScript": {
-            "Maravilhoso": "O código está devidamente identado, organizado e limpo. O código está separado por módulos ES6. O código está executando normalmente. O código está seguindo as boas práticas do Javascript, para nomeação.",
-            "Tudo OK": "O código está devidamente identado, organizado e limpo. O código está separado por módulos ES6. O código está executando normalmente.",
-            "Quase lá": "Não há código JavaScript. O código não executa corretamente.",
-            "Não entregue": ""
-        },
-        "Apresentação": {
-            "Maravilhoso": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas vão além dos requisitos, adicionando elementos a mais.",
-            "Tudo OK": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas atendem aos requisitos.",
-            "Quase lá": "Não foi realizada uma apresentação e não foi realizada a publicação no LinkedIn.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O projeto está no GitHub. O projeto contém 3+ commit’s. As mensagens dos commit’s está clara e objetiva.",
-            "Tudo OK": "O projeto está no GitHub. O projeto contém 3+ commits.",
-            "Quase lá": "O projeto não está no gitHub. O projeto está no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "P4": {
-        "Problematização": {
-            "Maravilhoso": "Foi escolhido um problema e o sistema elaborado o soluciona. Foram escolhidos múltiplos problemas e todos eles foram solucionados.",
-            "Tudo OK": "Foi escolhido um problema real e solucionado em partes.",
-            "Quase lá": "Nenhum problema foi escolhido ou usado um problema de exemplo. A problematização não abrange um problema real.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "API": {
-            "Maravilhoso": "Há uma API com 1  ou mais que rotas por integrante de Squad. Todas as rotas estão funcionando corretamente. A API está usando um ORM corretamente em todos os CRUD’s.",
-            "Tudo OK": "Há uma API com todas ou quase todas as rotas pedidas. Todas as rotas construídas estão funcionando corretamente. A API está usando um ORM corretamente em todos os CRUD’s.",
-            "Quase lá": "Não há uma API ou a API não atende os requisitos mínimos. A API não usa um ORM.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "JavaScript": {
-            "Maravilhoso": "O código está devidamente identado, organizado e limpo. O código está separado por módulos ES6. O código está executando normalmente no ambiente local e na hospedagem. O código está seguindo as boas práticas do Javascript, POO, para nomeação, organização, etc...",
-            "Tudo OK": "O código está devidamente identado, organizado e limpo. O código está separado por módulos ES6. O código está executando normalmente no ambiente local e na hospedagem.",
-            "Quase lá": "Não há código JavaScript. O código não executa corretamente. O código não funciona na hospedagem.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Apresentação": {
-            "Maravilhoso": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas vão além dos requisitos, adicionando elementos a mais.",
-            "Tudo OK": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas atendem aos requisitos.",
-            "Quase lá": "Não foi realizada uma apresentação e não foi realizada a publicação no LinkedIn.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O projeto está no GitHub. O projeto contém 3+ commit’s por integrante. As mensagens dos commit’s está clara e objetiva. O projeto está hospedado no GitHub Pages.",
-            "Tudo OK": "O projeto está no GitHub. O projeto contém 3+ commits por integrante.",
-            "Quase lá": "O projeto não está no gitHub. O projeto está no GitHub, porém, em um arquivo zipado.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "PI4": {
-        "Understanding of the problem": {
-            "Marvellous": "Students showed a deep understanding of the problem and its relevance for the Frontend-Backend Collaboration.",
-            "All ok": "Students showed understanding of the problem and its relevance for the Frontend-Backend Collaboration, but there were some gaps to be filled.",
-            "It lacks Something": "Students showed some understanding of the problem, but not of its relevance for the Frontend-Backend Collaboration.",
-            "Didn't do!": "Students did not show understanding of the problem and its relevance for the Frontend-Backend Collaboration."
-        },
-        "Feasibility of the proposed solution": {
-            "Marvellous": "The proposed solution is entirely feasable and also innovative, demonstrating an unique approach to the problem at hand.",
-            "All ok": "The proposed solution is feasable, but too safe, nothing particularly unique or innovative.",
-            "It lacks Something": "The proposed solution is not entirely feasable, it would require some adaptations to actually be done.",
-            "Didn't do!": "The proposed solution is not feasable at all. It could not be done in the reality we're in right now. "
-        },
-        "Quality of the written proposal": {
-            "Marvellous": "The written proposal is relevant, complete and aligned with the team's skills.",
-            "All ok": "The written proposal is adequate, but not particularly inspiring.",
-            "It lacks Something": "The written proposal is too basic, it lacks some informations or more depth.",
-            "Didn't do!": "The team did not build a written proposal, or the written proposal is inappropriate."
-        },
-        "Presentation skills": {
-            "Marvellous": "The presentation was engaging, clear, and well-structured, demonstrating the team's understanding of the project and their communication skills.",
-            "All ok": "The presentation was good overall, but may have lacked some clarity or structure, or the team may have struggled with public speaking.",
-            "It lacks Something": "The presentation was confusing or disorganized, with unclear or incomplete information. The team may have struggled with public speaking and failed to engage the audience.",
-            "Didn't do!": "The team did not present their app or documentation, or the presentation was completely inadequate."
-        },
-        "Team organization": {
-            "Marvellous": "The team organized their work exceptionally well. The tasks were fairly divided. The plataforms chosen for communication and task management  were innovative and effective.",
-            "All ok": "The team organized their work very well. The tasks were fairly divided. The plataforms chosen for communication and task management were effective.",
-            "It lacks Something": "The team organized their work in a simple way. The tasks were not fairly divided. The plataforms chosen for communication and task management were too simple.",
-            "Didn't do!": "The team did not organize their work. The tasks weren't divided. They didn't choose plataforms for communication and task management."
-        }
-    },
-    "MP5": {
-        "API": {
-            "Maravilhoso": "Foi utilizada a API do mini projeto do M4. Também foram utilizadas outras APIs utilitárias para acrescentar dados à API do mini projeto M4.",
-            "Tudo OK": "Foi parcialmente utilizada a API do mini projeto do M4.",
-            "Quase lá": "Nenhuma API foi utilizada. A API utilizada não foi a do mini projeto do M4.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "React": {
-            "Maravilhoso": "",
-            "Tudo OK": "O código está devidamente identado, organizado e limpo. O código está usando o conceito de componentização; O código está executando normalmente.",
-            "Quase lá": "Não foi utilizado o React. Não há código JSX. O código do projeto não executa corretamente. O código está usando biblioteca de componentes css.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Apresentação": {
-            "Maravilhoso": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas vão além dos requisitos, adicionando elementos a mais.",
-            "Tudo OK": "A apresentação foi realizada juntamente com a publicação no LinkedIn e ambas atendem aos requisitos.",
-            "Quase lá": "Não foi realizada uma apresentação e não foi realizada a publicação no LinkedIn.",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "O código do projeto está no GitHub; O projeto contem um README atendendo todos os requisitos; O projeto contém todas as informações requeridas preenchidas na seção sobre.",
-            "Tudo OK": "O código do projeto está no GitHub; O projeto contem um README atendendo quase todos os requisitos; O projeto contém quase todas as informações requeridas preenchidas na seção sobre.",
-            "Quase lá": "O código não está no GitHub; O código não contém mais de 5 commits.",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "P5": {
-        "Problematização": {
-            "Maravilhoso": "",
-            "Tudo OK": "",
-            "Quase lá": "",
-            "Não entregue": "Não há como avaliar."
-        },
-        "API": {
-            "Maravilhoso": "",
-            "Tudo OK": "",
-            "Quase lá": "",
-            "Não entregue": "Não há como avaliar."
-        },
-        "JavaScript": {
-            "Maravilhoso": "",
-            "Tudo OK": "",
-            "Quase lá": "",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Apresentação": {
-            "Maravilhoso": "",
-            "Tudo OK": "",
-            "Quase lá": "",
-            "Não entregue": "Não há como avaliar."
-        },
-        "Git & Github": {
-            "Maravilhoso": "",
-            "Tudo OK": "",
-            "Quase lá": "",
-            "Não entregue": "Não há como avaliar."
-        }
-    },
-    "PI5": {
-        "Creativity": {
-            "Marvellous": "Estudantes demonstraram uma compreensão aprofundada da necessidade que identificaram e como ela é relevante para o seu público-alvo.",
-            "All ok": "Os estudantes demonstraram uma criatividade sólida, mas podem seguir abordagens comuns. A abordagem de resolução de problemas é eficaz, mas não inovadora.",
-            "It lacks Something": "Os estudantes apresentaram alguma criatividade, mas dependem em grande parte de métodos ou ferramentas familiares. Pode haver falta de talento ou inovação na solução.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Overall content": {
-            "Marvellous": "Compreensão excepcional de problemas do lado do cliente e guias/ferramentas eficazes para solução de problemas. O projeto é bem pesquisado, abrangente e perspicaz.",
-            "All ok": "Os estudantes demonstraram compreensão e execução sólidas, mas podem não ter profundidade ou conhecimento em determinadas áreas. No geral, o conteúdo é forte e relevante.",
-            "It lacks Something": "Os estudantes demonstraram alguma compreensão, mas o conteúdo pode ser superficial, carente de detalhes ou perder alguns aspectos importantes da solução de problemas do lado do cliente.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Group Work": {
-            "Marvellous": "A colaboração dos estudantes foi excepcional dentro da equipe. Cada membro contribuiu significativamente e o trabalho está bem integrado.",
-            "All ok": "Bom trabalho em equipe, com cada membro contribuindo. Algumas áreas podem necessitar de melhor integração ou colaboração.",
-            "It lacks Something": "Os estudantes demonstraram trabalho em equipe até certo ponto, mas é perceptível a falta de coordenação ou a contribuição desigual dos membros.",
-            "Didn't do!": "Não há como avaliar"
-        },
-        "Presentation": {
-            "Marvellous": "Os estudantes mostraram uma apresentação envolvente, bem estruturada e clara. Excelente uso de recursos visuais, articulação clara de ideias e interação dinâmica com o público.",
-            "All ok": "Os estudantes mostraram uma boa apresentação, mas podem faltar alguma sutileza ou elementos envolventes. Geralmente claro, mas pode ter algumas áreas para melhorias.",
-            "It lacks Something": "A apresentação dOs estudantes carece de clareza ou envolvimento. Os recursos visuais podem ser mal utilizados ou pode haver falta de conexão com o público.",
-            "Didn't do!": "Não há como avaliar"
+        "Versionamento": {
+            "Maravilhoso": "Excelente histórico de commits, com mensagens claras; O README.md é bem escrito e informativo; Opcional: Uso de branches para desenvolver funcionalidades separadamente",
+            "Tudo OK": "O projeto está em um repositório no GitHub; Todos os membros do SQUAD realizaram commits, demonstrando colaboração",
+            "Quase lá": "Repositório não foi utilizado ou possui um histórico de commits que não reflete um trabalho em equipe (ex: um único commit por uma única pessoa).",
+            "Não entregue": "Não há como avaliar"
         }
     }
 }

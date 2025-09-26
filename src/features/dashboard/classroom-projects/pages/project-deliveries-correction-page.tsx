@@ -111,12 +111,16 @@ export default function ProjectDeliveriesCorrectionPage() {
             })}
         </ul>
       </section>
-      {currentProject && currentDelivery && (
+      {currentProject && currentDelivery ? (
         <ProjectCorrection
           classroomId={classroom_id}
           project={currentProject}
           selectedDelivery={currentDelivery}
         />
+      ) : (
+        <section className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground bg-primary/15 text-lg">
+          Selecione uma entrega para ver os detalhes e fazer a correção.
+        </section>
       )}
     </div>
   );
