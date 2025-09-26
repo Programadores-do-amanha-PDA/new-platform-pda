@@ -22,7 +22,10 @@ interface CorrectionActions {
   getAllCorrectionsByDeliveryId: (deliveryId: string) => Promise<boolean>;
   getAllCorrectionsByClassroomId: (classroomId: string) => Promise<boolean>;
   createCorrection: (
-    correctionData: Omit<Partial<ClassroomProjectCorrectionT>, "id" | "created_at">
+    correctionData: Omit<
+      Partial<ClassroomProjectCorrectionT>,
+      "id" | "created_at"
+    >
   ) => Promise<boolean>;
   updateCorrection: (
     id: string,
@@ -54,7 +57,9 @@ export const useCorrectionStore = create<CorrectionState & CorrectionActions>()(
           return true;
         } catch (error) {
           console.error(error);
-          toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+          toast.error(
+            "Erro ao carregar correções. Tente novamente mais tarde."
+          );
           return false;
         } finally {
           set({ loading: false });
@@ -65,13 +70,17 @@ export const useCorrectionStore = create<CorrectionState & CorrectionActions>()(
         set({ loading: true });
         try {
           if (!deliveryId) throw new Error("Delivery ID is required");
-          const allCorrections = await getAllCorrectionsByDeliveryId(deliveryId);
+          const allCorrections = await getAllCorrectionsByDeliveryId(
+            deliveryId
+          );
           if (!allCorrections) throw new Error("No corrections found");
-          set({ corrections: allCorrections });
+          set({ corrections: [...get().corrections, ...allCorrections] });
           return true;
         } catch (error) {
           console.error(error);
-          toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+          toast.error(
+            "Erro ao carregar correções. Tente novamente mais tarde."
+          );
           return false;
         } finally {
           set({ loading: false });
@@ -82,13 +91,17 @@ export const useCorrectionStore = create<CorrectionState & CorrectionActions>()(
         set({ loading: true });
         try {
           if (!classroomId) throw new Error("Classroom ID is required");
-          const allCorrections = await getAllCorrectionsByClassroomId(classroomId);
+          const allCorrections = await getAllCorrectionsByClassroomId(
+            classroomId
+          );
           if (!allCorrections) throw new Error("No corrections found");
-          set({ corrections: allCorrections });
+          set({ corrections: [...get().corrections, ...allCorrections] });
           return true;
         } catch (error) {
           console.error(error);
-          toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+          toast.error(
+            "Erro ao carregar correções. Tente novamente mais tarde."
+          );
           return false;
         } finally {
           set({ loading: false });
@@ -128,14 +141,18 @@ export const useCorrectionStore = create<CorrectionState & CorrectionActions>()(
           if (!updatedCorrection) throw new Error("Correction update failed");
           set({
             corrections: get().corrections.map((correction) =>
-              correction.id === updatedCorrection.id ? updatedCorrection : correction
+              correction.id === updatedCorrection.id
+                ? updatedCorrection
+                : correction
             ),
           });
           toast.success("Correção atualizada com sucesso!");
           return true;
         } catch (error) {
           console.error("Error updating correction:", error);
-          toast.error("Erro ao atualizar correção. Tente novamente mais tarde.");
+          toast.error(
+            "Erro ao atualizar correção. Tente novamente mais tarde."
+          );
           return false;
         }
       },

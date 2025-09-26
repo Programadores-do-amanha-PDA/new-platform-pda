@@ -27,7 +27,7 @@ import {
 import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
 import { ProfileT } from "@/types/auth/user";
 import useAuth from "@/hooks/use-auth";
-import { MemberSelectionCombobox } from "./deliveries/delivery/member-selection-combobox";
+import { MemberSelectionCombobox } from "./deliveries/member-selection-combobox";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
