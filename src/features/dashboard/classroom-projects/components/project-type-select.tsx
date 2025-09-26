@@ -39,7 +39,7 @@ const ProjectTypeSelect = ({
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>
-          <SelectLabel>Módulos</SelectLabel>
+          <SelectLabel>Tipos de projeto</SelectLabel>
           {projectTypes.map((type) => (
             <SelectItem key={"type-" + type.value} value={type.value}>
               {type.label}

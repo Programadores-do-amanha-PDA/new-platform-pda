@@ -38,14 +38,17 @@ const ProjectModuleSelect = ({
         <SelectValue placeholder="Selecione um módulo" />
       </SelectTrigger>
       <SelectContent align="start">
-        <SelectGroup accessKey="m">
-          <SelectLabel>Módulos</SelectLabel>
-          {modules.map((module) => (
-            <SelectItem key={"module-" + module.id} value={module.id}>
-              Módulo {module.title}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {modules.length > 0 && (
+          <SelectGroup accessKey="m">
+            <SelectLabel>Módulos da turma</SelectLabel>
+            {modules.map((module) => (
+              <SelectItem key={"module-" + module.id} value={module.id}>
+                Módulo {module.title}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        )}
+
         <SelectGroup accessKey="d">
           <SelectLabel>Módulos padrão</SelectLabel>
           {defaultModules.map((module) => (
