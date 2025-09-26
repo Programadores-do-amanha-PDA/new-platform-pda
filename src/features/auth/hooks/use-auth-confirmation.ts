@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { setSession } from "@/app/actions";
@@ -42,28 +42,7 @@ import useAuth from "@/hooks/use-auth";
  */
 export default function useAuthConfirmation() {
   const router = useRouter();
-  const { updateAuthState, handleExchangeAuthCode } = useAuth();
-
-  /**
-   * Handle password reset flow
-   * @param {string} code - The password reset code from URL
-   */
-  const handleResetPassword = useCallback(async (code: string) => {
-    try {
-      const data = await handleExchangeAuthCode(code);
-
-      if (!data || !data.session) {
-        toast.error("Código de recuperação inválido ou expirado.");
-        return;
-      }
-
-      updateAuthState(data?.session);
-      router.push("/reset-password");
-    } catch (error) {
-      console.error("Erro ao trocar código de autenticação:", error);
-      toast.error("Erro ao processar código de recuperação. Tente novamente.");
-    }
-  }, []);
+  const { updateAuthState } = useAuth();
 
   useEffect(() => {
     // Skip execution in SSR
@@ -71,6 +50,7 @@ export default function useAuthConfirmation() {
 
     /**
      * Main authentication processing function
+     * This is now simplified since PKCE flow is handled by the callback page
      */
     const processAuthParams = async () => {
       // Extract authentication parameters from URL
@@ -82,10 +62,10 @@ export default function useAuthConfirmation() {
       const params = new URLSearchParams(paramsString);
       const accessToken = params.get("access_token");
       const refreshToken = params.get("refresh_token");
-      const verificationCode = params.get("code");
       const authType = params.get("type");
       const expiresAt = params.get("expires_at");
       const errorCode = params.get("error_code");
+      const code = params.get("code");
 
       // Clean authentication parameters from URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -104,14 +84,15 @@ export default function useAuthConfirmation() {
         return;
       }
 
-      // Handle password reset flow (with or without type=recovery)
-      if (verificationCode && (authType === "recovery" || !authType)) {
-        handleResetPassword(verificationCode);
-        return; // Exit early to prevent other authentication flows
+      // If there's a code parameter, redirect to callback page for PKCE handling
+      if (code) {
+        const callbackUrl = `/auth/callback?code=${code}${authType ? `&type=${authType}` : ''}`;
+        router.push(callbackUrl);
+        return;
       }
 
       /**
-       * Helper function to authenticate user
+       * Helper function to authenticate user (for legacy flows)
        * @param {string} accessToken - Supabase access token
        * @param {string} refreshToken - Supabase refresh token
        * @param {Function} [onSuccess] - Optional callback on successful authentication
@@ -141,7 +122,7 @@ export default function useAuthConfirmation() {
         }
       };
 
-      // Handle signup authentication (redirects to dashboard)
+      // Handle legacy token-based authentication (for backwards compatibility)
       if (accessToken && refreshToken && authType === "signup" && expiresAt) {
         await handleAuthentication(accessToken, refreshToken, () => {
           toast.success("Login feito com sucesso!");
@@ -150,12 +131,12 @@ export default function useAuthConfirmation() {
         return;
       }
 
-      // Handle other authentication types like magiclink (no redirect)
+      // Handle other legacy authentication types
       if (accessToken && refreshToken && authType && authType !== "signup") {
         await handleAuthentication(accessToken, refreshToken);
       }
     };
 
     processAuthParams();
-  }, []);
+  }, [router, updateAuthState]);
 }
