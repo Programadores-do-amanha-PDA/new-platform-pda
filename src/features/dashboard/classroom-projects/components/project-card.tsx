@@ -65,6 +65,7 @@ const ProjectCard = ({
   project,
   expansive,
   classroomId,
+  classroomConfig,
 }: ProjectCardProps): JSX.Element => {
   const path = usePathname();
   const { updateProject } = useProjectStore();
@@ -76,6 +77,8 @@ const ProjectCard = ({
   const [scheduleDate, setScheduleDate] = useState<DateRange | undefined>();
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] =
     useState<boolean>(false);
+
+  const classroomModules = classroomConfig?.modules || [];
 
   // Initialize schedule date from project data
   useEffect(() => {
@@ -163,7 +166,8 @@ const ProjectCard = ({
               className="text-sm h-5 text-muted-foreground font-semibold"
               aria-label={`Módulo ${project.module}`}
             >
-              Módulo {project.module}
+              {classroomModules.find((module) => module.id === project.module)
+                ?.title || `Módulo ${project.module}`}
             </p>
             <div className="w-full flex flex-col gap-2">
               <p

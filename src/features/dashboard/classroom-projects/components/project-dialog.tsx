@@ -122,7 +122,7 @@ const ProjectDialog = ({
   return (
     <Dialog modal={true} open={isDialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="default" className="font-semibold">
+        <Button variant={currentProject?.id ? "outline" : "default"} className="font-semibold">
           {currentProject?.id ? (
             <>
               <Pen className="mr-2 h-4 w-4" />
