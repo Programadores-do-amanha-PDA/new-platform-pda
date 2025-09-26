@@ -15,7 +15,7 @@ interface UserClassroomsState {
 
 interface UserClassroomsActions {
   setUsers: (users: Partial<AuthUserWithProfileT>[]) => void;
-  createUserClassrooms: (usersClassrooms: UserClassroomT[]) => Promise<boolean>;
+  createUserClassrooms: (usersClassrooms: Omit<UserClassroomT, "short_id">[]) => Promise<boolean>;
   deleteUserClassroom: (
     userId: string,
     classroomsIds: string[]
@@ -56,6 +56,7 @@ export const useUserClassroomsStore = create<
                 .map((uc) => ({
                   classroom_id: uc.classroom_id,
                   user_id: uc.user_id,
+                  short_id: uc.short_id,
                 }));
 
               return {

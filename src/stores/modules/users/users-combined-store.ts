@@ -31,7 +31,7 @@ interface UsersCombinedActions {
   deleteUser: (userId: string | undefined) => Promise<boolean>;
 
   // User classroom actions
-  createUserClassrooms: (usersClassrooms: UserClassroomT[]) => Promise<boolean>;
+  createUserClassrooms: (usersClassrooms: Omit<UserClassroomT, "short_id">[]) => Promise<boolean>;
   deleteUserClassroom: (
     userId: string,
     classroomsIds: string[]
