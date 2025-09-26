@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, FilePen, MoreHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -38,6 +38,7 @@ import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projec
 import { ClassroomProjectTypeT } from "@/features/dashboard/classroom-projects/types/project";
 import { AuthUserWithProfileT } from "@/types";
 import { useUsersStore } from "@/stores/modules/users/users-store";
+import Link from "next/link";
 
 const createColumns = (
   projectType: ClassroomProjectTypeT,
@@ -273,9 +274,13 @@ const createColumns = (
 export function DeliveryDataTable({
   deliveries,
   projectType,
+  classroomId,
+  projectId,
 }: {
   deliveries: ClassroomProjectDeliveryT[];
   projectType: ClassroomProjectTypeT;
+  classroomId: string;
+  projectId: string;
 }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -320,18 +325,25 @@ export function DeliveryDataTable({
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <Input
-            placeholder="Procurando por alguém?"
-            value={
-              (table.getColumn("members")?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table.getColumn("members")?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm"
-          />
-        </div>
+      <div className="flex items-center justify-between">
+        <Input
+          placeholder="Procurando por alguém?"
+          value={(table.getColumn("members")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("members")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
+        <Button asChild>
+          <Link
+            href={`/dashboard/classrooms/${classroomId}/projects/${projectId}/corrections`}
+            className="hover:underline font-semibold"
+          >
+            <FilePen className="h-4 w-4" />
+            Area de correção
+          </Link>
+        </Button>
+      </div>
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="sticky top-0 bg-white z-10 p-0!">
