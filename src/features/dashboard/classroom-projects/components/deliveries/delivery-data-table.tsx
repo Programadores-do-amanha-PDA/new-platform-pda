@@ -320,7 +320,6 @@ export function DeliveryDataTable({
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
-      {projectType === "mini_project" && (
         <div className="flex items-center justify-between">
           <Input
             placeholder="Procurando por alguém?"
@@ -333,7 +332,6 @@ export function DeliveryDataTable({
             className="max-w-sm"
           />
         </div>
-      )}
       <div className="w-full h-full flex border rounded-lg overflow-hidden">
         <Table>
           <TableHeader className="sticky top-0 bg-white z-10 p-0!">
