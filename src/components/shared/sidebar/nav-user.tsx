@@ -38,7 +38,7 @@ export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-lg cursor-pointer"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user?.profile?.avatarUrl || ""} alt="" />
+                <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
                 <AvatarFallback className="rounded-lg">
                   {user?.profile?.full_name
                     ?.split(" ")
@@ -66,7 +66,7 @@ export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.profile?.avatarUrl || ""} alt="" />
+                  <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
                   <AvatarFallback>
                     {user?.profile?.full_name
                       ?.split(" ")

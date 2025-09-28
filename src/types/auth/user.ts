@@ -12,7 +12,7 @@ export interface ProfileT {
   email: string;
   full_name: string;
   bio?: string;
-  avatarUrl?: string | null;
+  avatar_url?: string | null;
   user_roles?: UserRoleT[];
   created_at?: Date;
   updated_at?: Date;

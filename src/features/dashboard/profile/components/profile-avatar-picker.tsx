@@ -112,13 +112,13 @@ export const ProfileAvatarPicker = ({
       if (!croppedProfileImage || !user.id) {
         throw new Error("cropped profile image and user id is required");
       }
-      if (user.profile?.avatarUrl) {
+      if (user.profile?.avatar_url) {
         const base64Image = await fileToBase64(croppedProfileImage);
         await updateUserAvatar(user.id, base64Image);
 
         onUpdateUser();
         toast.success("Imagem de perfil atualizada com sucesso!");
-      } else if (!user.profile?.avatarUrl) {
+      } else if (!user.profile?.avatar_url) {
         const base64Image = await fileToBase64(croppedProfileImage);
         await uploadUserAvatar(user.id, base64Image);
 
@@ -168,7 +168,7 @@ export const ProfileAvatarPicker = ({
         />
 
         <Avatar className="size-28">
-          <AvatarImage src={user.profile?.avatarUrl || ""} alt="" />
+          <AvatarImage src={user.profile?.avatar_url || ""} alt="" />
           <AvatarFallback>
             {user.profile?.full_name
               ?.split(" ")
@@ -184,9 +184,9 @@ export const ProfileAvatarPicker = ({
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-9 px-4 py-2 cursor-pointer"
           >
             <Camera className="size-5! stroke-2! stroke-primary-foreground" />
-            {user.profile?.avatarUrl ? "Editar" : "Adicionar"}
+            {user.profile?.avatar_url ? "Editar" : "Adicionar"}
           </Label>
-          {user.profile?.avatarUrl && (
+          {user.profile?.avatar_url && (
             <Button variant="destructive" onClick={handleDeleteAvatar}>
               <Trash className="size-5! stroke-2!" />
               Deletar

@@ -98,7 +98,7 @@ const ClassroomGeneralViewDataTable = ({
                 .join("") || "U"}
             </AvatarFallback>
             <AvatarImage
-              src={row.getValue<ProfileT>("profile").avatarUrl || ""}
+              src={row.getValue<ProfileT>("profile").avatar_url || ""}
             />
             <div
               className={cn(

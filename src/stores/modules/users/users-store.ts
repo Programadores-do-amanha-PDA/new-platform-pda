@@ -8,7 +8,7 @@ import {
   updateUser,
   deleteUser,
 } from "@/app/actions/auth_admin";
-import { getManyAvatarUrlsByIds } from "@/app/actions/profile-avatar";
+import { getManyavatar_urlsByIds } from "@/app/actions/profile-avatar";
 import { getProfileById } from "@/app/actions/profiles";
 import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types/auth";
 
@@ -49,14 +49,14 @@ export const useUsersStore = create<UsersState & UsersActions>()(
           const users = await getAllUsers(role);
           if (!users) throw "no users response";
 
-          const usersAvatars = await getManyAvatarUrlsByIds(
+          const usersAvatars = await getManyavatar_urlsByIds(
             users.map((user) => user.id)
           );
           const usersWithAvatars = users.map((user) => ({
             ...user,
             profile: {
               ...user.profile,
-              avatarUrl:
+              avatar_url:
                 usersAvatars?.find(
                   (avatar) => avatar.path === `${user.id}/avatar.png`
                 )?.signedUrl ?? null,

@@ -24,6 +24,7 @@ import BulkPasswordResetButton from "../../components/bulk-password-reset-button
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 import BulkEmailVerificationButton from "../../components/bulk-email-verification-button";
+import BulkUsersCredentialsButton from "../../components/bulk-users-credentials-button";
 
 type ProfilesDataTableProps = {
   excludeRoles?: RolesT[];
@@ -68,7 +69,7 @@ const ProfilesDataTable = ({
                 .join("") || "U"}
             </AvatarFallback>
             <AvatarImage
-              src={row.getValue<ProfileT>("profile").avatarUrl || ""}
+              src={row.getValue<ProfileT>("profile").avatar_url || ""}
             />
             <div
               className={cn(
@@ -474,6 +475,7 @@ const ProfilesDataTable = ({
     clearSelection?: () => void
   ) => (
     <div className="flex gap-4">
+      <BulkUsersCredentialsButton selectedUsers={selectedUsers} />
       <BulkEmailVerificationButton
         selectedUsers={selectedUsers}
         onComplete={clearSelection}
