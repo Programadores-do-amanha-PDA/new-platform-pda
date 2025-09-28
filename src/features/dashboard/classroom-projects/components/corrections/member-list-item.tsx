@@ -25,7 +25,7 @@ const MemberListItem = ({
             .map((name) => name[0])
             .join("") || "U"}
         </AvatarFallback>
-        <AvatarImage src={member?.profile?.avatarUrl || ""} />
+        <AvatarImage src={member?.profile?.avatar_url || ""} />
       </Avatar>
       <div className="w-full flex flex-col justify-center lowercase">
         <p className="text-sm font-bold capitalize">

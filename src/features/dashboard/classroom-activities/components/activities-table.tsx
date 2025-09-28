@@ -100,7 +100,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
               .join("") || "U"}
           </AvatarFallback>
           <AvatarImage
-            src={row.getValue<ProfileT>("profile").avatarUrl || ""}
+            src={row.getValue<ProfileT>("profile").avatar_url || ""}
           />
         </Avatar>
         <div className="w-full flex flex-col justify-center lowercase truncate">

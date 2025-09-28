@@ -360,7 +360,7 @@ const ProjectDeliveryModal = ({
                   <div className="p-4 bg-primary/10 rounded-xl">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={user?.profile.avatarUrl || ""} />
+                        <AvatarImage src={user?.profile.avatar_url || ""} />
                         <AvatarFallback>
                           {user?.profile?.full_name
                             ?.split(" ")

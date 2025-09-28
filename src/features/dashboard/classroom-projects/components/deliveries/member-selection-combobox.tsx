@@ -127,7 +127,7 @@ export function MemberSelectionCombobox({
                         </div>
                       )}
                       <div></div>
-                      <AvatarImage src={user.avatarUrl || undefined} />
+                      <AvatarImage src={user.avatar_url || undefined} />
                       <AvatarFallback className="text-xs text-muted-foreground">
                         {getInitials(user.full_name)}
                       </AvatarFallback>
@@ -160,7 +160,7 @@ export function MemberSelectionCombobox({
                 className="flex items-center gap-2 pr-1 pl-2 py-1"
               >
                 <Avatar className="h-5 w-5">
-                  <AvatarImage src={user.avatarUrl || undefined} />
+                  <AvatarImage src={user.avatar_url || undefined} />
                   <AvatarFallback className="text-xs text-muted-foreground">
                     {getInitials(user.full_name)}
                   </AvatarFallback>
