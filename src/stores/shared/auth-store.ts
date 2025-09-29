@@ -62,7 +62,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             return;
           }
 
-          const [userProfile, userAvatarUrl] = await Promise.all([
+          const [userProfile, useravatar_url] = await Promise.all([
             getProfileById(user.id),
             getAvatarUrlById(user.id),
           ]);
@@ -73,7 +73,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 ...user,
                 profile: {
                   ...(userProfile as ProfileT),
-                  avatarUrl: userAvatarUrl,
+                  avatar_url: useravatar_url,
                 },
               },
               loading: false,

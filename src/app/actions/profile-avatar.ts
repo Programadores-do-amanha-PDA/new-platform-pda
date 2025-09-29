@@ -17,7 +17,7 @@ export const getAvatarUrlById = async (userId: string) => {
   }
 };
 
-export const getManyAvatarUrlsByIds = async (userIds: string[]) => {
+export const getManyavatar_urlsByIds = async (userIds: string[]) => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.storage
