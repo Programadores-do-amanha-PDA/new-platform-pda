@@ -7,7 +7,7 @@ export const projectCorrectionFormSchema = z.object({
     .string()
     .optional()
     .refine(
-      (val) => !val || z.string().email().safeParse(val).success,
+      (val) => !val || z.email().safeParse(val).success,
       "E-mail inválido"
     ),
   rulesSelected: z
@@ -20,17 +20,17 @@ export const projectCorrectionFormSchema = z.object({
     )
     .min(1, "É preciso selecionar pelo menos uma regra"),
   hits: z.object({
-    item1: z.string().optional(),
+    item1: z.string().min(1, "É obrigatório preencher um ponto forte"),
     item2: z.string().optional(),
     item3: z.string().optional(),
   }),
   improvements: z.object({
-    item1: z.string().optional(),
+    item1: z.string().min(1, "É obrigatório preencher ponto de melhoria"),
     item2: z.string().optional(),
     item3: z.string().optional(),
   }),
   next: z.object({
-    item1: z.string().optional(),
+    item1: z.string().min(1, "É obrigatório preencher um proximo passo"),
     item2: z.string().optional(),
     item3: z.string().optional(),
   }),
@@ -46,4 +46,5 @@ export interface ProjectCorrectionPropsT {
   classroomId: string;
   selectedDelivery: ClassroomProjectDeliveryT;
   project: ClassroomProjectT;
+  handleClose: () => void;
 }

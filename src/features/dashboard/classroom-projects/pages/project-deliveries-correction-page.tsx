@@ -58,6 +58,10 @@ export default function ProjectDeliveriesCorrectionPage() {
     else if (currentDelivery?.id !== delivery.id) setCurrentDelivery(delivery);
   };
 
+  const handleClose = () => {
+    setCurrentDelivery(null);
+  };
+
   return (
     <div className="w-full h-full flex flex-col gap-6 *:p-4 overflow-y-auto">
       <section className="w-full h-max flex flex-col gap-2">
@@ -116,6 +120,7 @@ export default function ProjectDeliveriesCorrectionPage() {
           classroomId={classroom_id}
           project={currentProject}
           selectedDelivery={currentDelivery}
+          handleClose={handleClose}
         />
       ) : (
         <section className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground bg-primary/15 text-lg">

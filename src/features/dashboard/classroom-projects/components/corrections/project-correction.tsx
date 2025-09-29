@@ -52,6 +52,7 @@ const messagesTemplatesTyped: Record<
 const ProjectCorrection = ({
   classroomId,
   selectedDelivery,
+  handleClose,
   project,
 }: ProjectCorrectionPropsT) => {
   const [loading, setLoading] = useState(false);
@@ -83,7 +84,8 @@ const ProjectCorrection = ({
 
   const { user } = useAuth();
   const { users } = useUsersStore();
-  const { corrections, createCorrection } = useCorrectionStore();
+  const { corrections, createCorrection, updateCorrection } =
+    useCorrectionStore();
   const { configsByClassroom } = useClassroomConfigStore();
   const classroomConfig = configsByClassroom[classroomId];
 
@@ -92,20 +94,20 @@ const ProjectCorrection = ({
       ?.map((classroom) => classroom.classroom_id)
       .includes(classroomId)
   );
-  const deliveryCorrection = corrections.find(
+  const currentCorrection = corrections.find(
     (correction) => correction.delivery_id === selectedDelivery.id
   );
 
   useEffect(() => {
-    if (deliveryCorrection) {
-      const hitsArray = deliveryCorrection.hits_itens || [];
-      const improvementsArray = deliveryCorrection.improvements_itens || [];
-      const nextArray = deliveryCorrection.next_itens || [];
+    if (currentCorrection) {
+      const hitsArray = currentCorrection.hits_itens || [];
+      const improvementsArray = currentCorrection.improvements_itens || [];
+      const nextArray = currentCorrection.next_itens || [];
 
       form.reset({
-        rulesSelected: deliveryCorrection.rules_selected || [],
-        finalNote: deliveryCorrection.final_note || "",
-        feedback: deliveryCorrection.final_considerations || "",
+        rulesSelected: currentCorrection.rules_selected || [],
+        finalNote: currentCorrection.final_note || "",
+        feedback: currentCorrection.final_considerations || "",
         hits: {
           item1: hitsArray[0] || "",
           item2: hitsArray[1] || "",
@@ -121,7 +123,7 @@ const ProjectCorrection = ({
           item2: nextArray[1] || "",
           item3: nextArray[2] || "",
         },
-        teacherEmail: deliveryCorrection.teacher_email || "",
+        teacherEmail: currentCorrection.teacher_email || "",
       });
     } else {
       form.reset({
@@ -147,7 +149,7 @@ const ProjectCorrection = ({
         feedback: "",
       });
     }
-  }, [selectedDelivery, form, deliveryCorrection]);
+  }, [selectedDelivery, form, currentCorrection]);
 
   const rulesSelected = form.watch("rulesSelected");
   const finalNote = form.watch("finalNote");
@@ -207,15 +209,52 @@ const ProjectCorrection = ({
       return;
     }
 
-    if (selectedDelivery && selectedDelivery.id) {
+    if (!currentCorrection?.id) {
+      if (selectedDelivery && selectedDelivery.id) {
+        try {
+          setLoading(true);
+          await createCorrection({
+            project_id: project.id,
+            delivery_id: selectedDelivery.id,
+            final_note: data.finalNote,
+            final_considerations: data.feedback,
+            teacher_id: user?.id,
+            rules_selected: data.rulesSelected,
+            hits_itens: [
+              data.hits.item1,
+              data.hits.item2,
+              data.hits.item3,
+            ].filter(
+              (item): item is string => item !== undefined && item.trim() !== ""
+            ),
+            improvements_itens: [
+              data.improvements.item1,
+              data.improvements.item2,
+              data.improvements.item3,
+            ].filter(
+              (item): item is string => item !== undefined && item.trim() !== ""
+            ),
+            next_itens: [
+              data.next.item1,
+              data.next.item2,
+              data.next.item3,
+            ].filter(
+              (item): item is string => item !== undefined && item.trim() !== ""
+            ),
+          });
+        } catch (error) {
+          console.error(error);
+          toast.error("Erro ao salvar correção");
+        } finally {
+          setLoading(false);
+        }
+      }
+    } else if (currentCorrection.id) {
       try {
         setLoading(true);
-        await createCorrection({
-          project_id: project.id,
-          delivery_id: selectedDelivery.id,
+        await updateCorrection(currentCorrection.id, {
           final_note: data.finalNote,
           final_considerations: data.feedback,
-          teacher_id: user?.id,
           rules_selected: data.rulesSelected,
           hits_itens: [
             data.hits.item1,
@@ -241,11 +280,37 @@ const ProjectCorrection = ({
         });
       } catch (error) {
         console.error(error);
-        toast.error("Erro ao salvar correção");
+        toast.error("Erro ao atualizar correção");
       } finally {
         setLoading(false);
       }
     }
+  };
+
+  const handleCancel = () => {
+    form.reset({
+      teacherName: "",
+      teacherEmail: "",
+      rulesSelected: [],
+      hits: {
+        item1: "",
+        item2: "",
+        item3: "",
+      },
+      improvements: {
+        item1: "",
+        item2: "",
+        item3: "",
+      },
+      next: {
+        item1: "",
+        item2: "",
+        item3: "",
+      },
+      finalNote: "",
+      feedback: "",
+    });
+    handleClose();
   };
 
   return (
@@ -646,11 +711,7 @@ const ProjectCorrection = ({
 
           <footer className="w-full h-max flex justify-between border-t-2 pt-8 dark:border-gray-50/5 border-gray-900/5 p-4">
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                // onClick={handleCancel}
-              >
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancelar
               </Button>
             </div>
@@ -661,9 +722,7 @@ const ProjectCorrection = ({
               disabled={loading}
             >
               {loading && <LoaderCircle className="size-4 animate-spin" />}
-              {deliveryCorrection?.id
-                ? "Atualizar Correção"
-                : "Salvar Correção"}
+              {currentCorrection?.id ? "Atualizar Correção" : "Salvar Correção"}
             </Button>
           </footer>
         </form>
