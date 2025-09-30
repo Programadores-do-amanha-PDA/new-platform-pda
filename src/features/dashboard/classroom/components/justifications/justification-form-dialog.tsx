@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import ColorPickerDropdown from "@/components/shared/color-picker-dropdown"; 
+import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import Color, { ColorLike } from "color";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -72,7 +72,7 @@ const JustificationFormDialog = ({
         title: currentJustification.title,
         key: currentJustification.key,
         color: currentJustification.color,
-        isPresence: currentJustification.isPresence,
+        isPresence: currentJustification.is_presence,
       });
     }
   }, [currentJustification, form]);
@@ -135,7 +135,7 @@ const JustificationFormDialog = ({
         created_at:
           currentJustification?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        isPresence: data.isPresence,
+        is_presence: data.isPresence,
       };
 
       // Get current justifications array
@@ -254,7 +254,11 @@ const JustificationFormDialog = ({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Contar como presença?</FormLabel>
+                    <FormLabel>Deve contabilizar presença?</FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      Marque se esta justificativa deve ser contabilizada como
+                      presença
+                    </p>
                   </div>
                 </FormItem>
               )}

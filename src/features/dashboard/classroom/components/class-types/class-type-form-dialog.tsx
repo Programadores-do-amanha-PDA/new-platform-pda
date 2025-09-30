@@ -27,7 +27,7 @@ import {
   ClassroomConfigClassTypesFormData,
 } from "@/types/classroom-configs";
 import Color, { ColorLike } from "color";
-import ColorPickerDropdown from "@/components/shared/color-picker-dropdown"; 
+import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import { toast } from "sonner";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -107,8 +107,8 @@ const ClassTypeFormDialog = ({
             color: limit.color,
             min: limit.min,
             max: limit.max,
-            allowJustification: limit.allowJustification,
-            isPresence: limit.isPresence,
+            allowJustification: limit.allow_justification,
+            is_presence: limit.is_presence,
           })) || [],
       });
     }
@@ -235,6 +235,8 @@ const ClassTypeFormDialog = ({
             title: data.title,
             limits: data.limits.map((limit) => ({
               ...limit,
+              is_presence: limit.isPresence,
+              allow_justification: limit.allowJustification,
               max: limit.max === 0 ? undefined : limit.max,
             })),
             updated_at: new Date().toISOString(),
@@ -245,6 +247,8 @@ const ClassTypeFormDialog = ({
           id: crypto.randomUUID(),
           title: data.title,
           limits: data.limits.map((limit) => ({
+            is_presence: limit.isPresence,
+            allow_justification: limit.allowJustification,
             ...limit,
             max: limit.max === 0 ? undefined : limit.max,
           })),
