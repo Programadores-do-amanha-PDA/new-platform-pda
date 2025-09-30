@@ -198,7 +198,7 @@ const InsertManyUsersDialog = ({
 
           if (classrooms && classrooms?.length > 0 && createUserClassrooms) {
             if (user.userClassrooms && user.userClassrooms.length > 0) {
-              const uClassroom: Omit<UserClassroomT, "short_id">[] = user.userClassrooms.map(
+              const uClassroom: Omit<UserClassroomT, "short_id" | "mode">[] = user.userClassrooms.map(
                 (id) => ({
                   user_id: userCreatedId,
                   classroom_id: id,

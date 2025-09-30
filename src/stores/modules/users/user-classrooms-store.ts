@@ -17,7 +17,7 @@ interface UserClassroomsState {
 interface UserClassroomsActions {
   setUsers: (users: Partial<AuthUserWithProfileT>[]) => void;
   createUserClassrooms: (
-    usersClassrooms: Omit<UserClassroomT, "short_id">[]
+    usersClassrooms: Omit<UserClassroomT, "short_id" | "mode">[]
   ) => Promise<boolean>;
   deleteUserClassroom: (
     userId: string,

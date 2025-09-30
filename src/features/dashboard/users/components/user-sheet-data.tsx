@@ -198,7 +198,7 @@ const UserSheetData = ({
       data.userClassrooms.length > 0
     ) {
       try {
-        const uClassroom: Omit<UserClassroomT, "short_id">[] = data.userClassrooms.map((id) => ({
+        const uClassroom: Omit<UserClassroomT, "short_id" | "mode">[] = data.userClassrooms.map((id) => ({
           user_id: userCreatedId,
           classroom_id: id,
         }));
@@ -288,7 +288,7 @@ const UserSheetData = ({
         currentUser.profile?.classrooms?.map((c) => c.classroom_id) || [];
 
       if (currentClassrooms.length === 0 && data.userClassrooms.length > 0) {
-        const uClassroom: Omit<UserClassroomT, "short_id">[] = data.userClassrooms.map((uc) => ({
+        const uClassroom: Omit<UserClassroomT, "short_id" | "mode">[] = data.userClassrooms.map((uc) => ({
           user_id: userId,
           classroom_id: uc,
         }));
@@ -298,7 +298,7 @@ const UserSheetData = ({
         const deleteClassrooms = currentClassrooms.filter(
           (c) => !data.userClassrooms.includes(c)
         );
-        const addClassrooms: Omit<UserClassroomT, "short_id">[] = data.userClassrooms
+        const addClassrooms: Omit<UserClassroomT, "short_id" | "mode">[] = data.userClassrooms
           .filter((c) => !currentClassrooms.includes(c))
           .map((uc) => ({
             user_id: userId,

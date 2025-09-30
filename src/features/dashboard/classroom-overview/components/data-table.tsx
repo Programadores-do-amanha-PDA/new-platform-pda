@@ -81,6 +81,7 @@ export function DataTable<TData, TValue>({
       classTypes: [],
       coodeshTests: [],
       projects: [],
+      userModes: []
     };
 
     return getColumnGroups(
