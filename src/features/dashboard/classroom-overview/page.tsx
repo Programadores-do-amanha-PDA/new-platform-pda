@@ -8,6 +8,7 @@ import {
   StudentOverview,
 } from "@/types/classroom-overview";
 import { useUsersStore } from "@/stores/modules/users/users-store";
+import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
@@ -22,6 +23,8 @@ import {
 import { useProjectStore } from "../classroom-projects/stores";
 import { useDeliveryStore } from "../classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "../classroom-projects/stores/corrections";
+import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { filterDataByDateRange } from "../utils/filter-data-by-date-range";
 
 export default function ClassroomAttendancePage() {
   const params = useParams();
@@ -32,6 +35,7 @@ export default function ClassroomAttendancePage() {
     classTypes: [],
     coodeshTests: [],
     projects: [],
+    userModes: [],
   });
 
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(
@@ -40,6 +44,7 @@ export default function ClassroomAttendancePage() {
 
   const { configsByClassroom } = useClassroomConfigStore();
   const { users } = useUsersStore();
+  const { updateUserMode } = useUserClassroomsStore();
   const { activities } = useClassroomActivityStore();
   const { assessments } = useCoodeshAssessmentStore();
   const { projects } = useProjectStore();
@@ -54,33 +59,11 @@ export default function ClassroomAttendancePage() {
     [currentConfig?.modules]
   );
 
-  // Função para filtrar dados por intervalo de datas
-  const filterDataByDateRange = <T,>(
-    data: T[],
-    dateField: keyof T,
-    dateRange: { from: Date; to: Date } | null
-  ): T[] => {
-    if (!dateRange) return data;
-
-    return data.filter((item) => {
-      const itemDate = item[dateField];
-      if (!itemDate) return false;
-
-      const date = new Date(itemDate as string);
-      // Verificar se a data é válida
-      if (isNaN(date.getTime())) return false;
-
-      return date >= dateRange.from && date <= dateRange.to;
-    });
-  };
-
   useEffect(() => {
-    // Filtrar estudantes que pertencem à turma atual
-    const classroomStudents = users.filter((user) =>
-      user.profile?.classrooms?.some(
-        (classroom) => classroom.classroom_id === classroomId
-      )
-    );
+    // filter users by classroom id & by must be present on user mode
+    const classroomStudents = filterClassroomStudents(users, classroomId, [
+      ...(currentConfig?.user_modes || []),
+    ]);
 
     // Filtrar dados por intervalo de datas se selecionado
     const filteredPastInstances = dateRange
@@ -151,6 +134,11 @@ export default function ClassroomAttendancePage() {
           filteredActivities
         );
 
+        // Obter o modo do usuário atual da relação user_classroom
+        const userClassroom = user.profile?.classrooms?.find(
+          (uc) => uc.classroom_id === classroomId
+        );
+
         return {
           id: user.id || "",
           name: user.profile?.full_name || "",
@@ -160,6 +148,7 @@ export default function ClassroomAttendancePage() {
           activities: activitiesIndicators,
           coodesh: coodeshIndicators,
           projects: projectIndicators,
+          userModeId: userClassroom?.mode || "",
         };
       }
     );
@@ -203,11 +192,15 @@ export default function ClassroomAttendancePage() {
       name: project.title,
     }));
 
+    // Preparar dados dos modos de usuário
+    const userModes = currentConfig?.user_modes || [];
+
     setData({
       students: studentsData,
       classTypes,
       coodeshTests,
       projects: projectsData,
+      userModes,
     });
   }, [
     classroomId,
@@ -227,12 +220,31 @@ export default function ClassroomAttendancePage() {
     setDateRange(newDateRange);
   };
 
+  const handleUserModeChange = async (
+    studentId: string,
+    userModeId: string
+  ) => {
+    // Atualizar no banco de dados
+    const success = await updateUserMode(studentId, classroomId, userModeId);
+
+    if (success) {
+      // Atualizar o estado local apenas se a atualização no banco foi bem-sucedida
+      setData((prevData) => ({
+        ...prevData,
+        students: prevData.students.map((student) =>
+          student.id === studentId ? { ...student, userModeId } : student
+        ),
+      }));
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-4 p-4 overflow-hidden">
       <ClassroomOverviewTable
         data={data}
         modules={modules}
         onDateRangeChange={handleDateRangeChange}
+        onUserModeChange={handleUserModeChange}
       />
     </div>
   );

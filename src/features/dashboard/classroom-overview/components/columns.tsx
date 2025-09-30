@@ -8,13 +8,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserModeSelector from "./user-mode-selector";
 
 const formatPercentage = (value: number) => `${value}%`;
 const formatGrade = (value: number) => value.toFixed(1);
 
 export const createColumns = (
-  data: ClassroomOverviewData
+  data: ClassroomOverviewData,
+  onUserModeChange?: (studentId: string, userModeId: string) => void
 ): ColumnDef<StudentOverview>[] => {
+  // User base columns
   const baseColumns: ColumnDef<StudentOverview>[] = [
     {
       accessorKey: "name",
@@ -71,8 +74,35 @@ export const createColumns = (
         );
       },
     },
+    {
+      accessorKey: "userModeId",
+      header: () => {
+        return (
+          <div className="w-full h-full flex justify-center items-center px-2 border-r">
+            <p className="font-semibold">Modo</p>
+          </div>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[180px]">
+          <UserModeSelector
+            key={`user-mode-select-${row.original.id}`}
+            options={data.userModes}
+            value={row.original.userModeId}
+            onValueChange={(value) => {
+              if (onUserModeChange) {
+                onUserModeChange(row.original.id, value);
+              }
+            }}
+            placeholder="Selecionar modo"
+          />
+        </div>
+      ),
+      enableSorting: false,
+    },
   ];
 
+  // Attendance dynamic columns
   const attendanceColumns: ColumnDef<StudentOverview>[] = data.classTypes.map(
     (classType) => ({
       id: `attendance-${classType.id}`,
@@ -108,40 +138,47 @@ export const createColumns = (
     })
   );
 
+  // Activities dynamic column
   const studentActivities = data.students.reduce((acc, student) => {
     acc += student.activities;
     return acc;
   }, 0);
-  if (studentActivities > 0) {
-    attendanceColumns.push({
-      accessorKey: "activities",
-      header: ({ column }) => {
-        return (
-          <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
-            <p className="font-semibold h-9 flex items-center">Atividades</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() =>
-                column.toggleSorting(column.getIsSorted() === "asc")
-              }
-            >
-              <ArrowUpDown />
-            </Button>
-          </div>
-        );
-      },
-      cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
-          <span className="font-medium">
-            {formatPercentage(row.original.activities)}
-          </span>
-        </div>
-      ),
-    });
-  }
 
-  // Adicionar colunas dinâmicas dos testes Coodesh
+  const activityColumn: ColumnDef<StudentOverview>[] =
+    studentActivities > 0
+      ? [
+          {
+            accessorKey: "activities",
+            header: ({ column }) => {
+              return (
+                <div className="w-full h-full flex justify-between items-end pb-1 px-2 gap-4 border-r">
+                  <p className="font-semibold h-9 flex items-center">
+                    Atividades
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() =>
+                      column.toggleSorting(column.getIsSorted() === "asc")
+                    }
+                  >
+                    <ArrowUpDown />
+                  </Button>
+                </div>
+              );
+            },
+            cell: ({ row }) => (
+              <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
+                <span className="font-medium">
+                  {formatPercentage(row.original.activities)}
+                </span>
+              </div>
+            ),
+          },
+        ]
+      : ([] as ColumnDef<StudentOverview>[]);
+
+  // Coodesh dynamic columns
   const coodeshColumns: ColumnDef<StudentOverview>[] = data.coodeshTests.map(
     (test) => ({
       id: `coodesh-${test.id}`,
@@ -177,7 +214,7 @@ export const createColumns = (
     })
   );
 
-  // Adicionar colunas dinâmicas dos projetos
+  // Project Dynamic columns
   const projectColumns: ColumnDef<StudentOverview>[] = data.projects.map(
     (project) => ({
       id: `project-${project.id}`,
@@ -215,6 +252,7 @@ export const createColumns = (
     new Set([
       ...baseColumns,
       ...attendanceColumns,
+      ...activityColumn,
       ...coodeshColumns,
       ...projectColumns,
     ])

@@ -5,20 +5,50 @@ import {
   ClassroomConfigJustificationT,
 } from "@/types/classroom-configs";
 
+/**
+ * Represents the attendance calculation result for a user in a meeting
+ */
 export interface AttendanceResult {
+  /** Total minutes the user attended the meeting */
   minutesAttended: number;
+  /** The class type limit that applies to this attendance */
   limit?: ClassroomConfigClassTypesLimitT;
+  /** The justification applied (if any) */
   justification?: ClassroomConfigJustificationT;
 }
 
 /**
- * Calcula o status de presença e minutos de participação de um usuário em uma reunião
- *
- * @param meeting - A reunião (ZoomMeetingT ou ZoomMeetingPastInstanceT)
- * @param userEmail - Email do usuário
- * @param currentClassType - Configuração do tipo de aula atual (opcional)
- * @param availableJustifications - Array de justificativas disponíveis (opcional)
- * @returns Objeto com status de presença, minutos participados, limite e justificativa aplicados
+ * Calculates user attendance status and participation minutes for a meeting
+ * 
+ * This function determines attendance based on:
+ * - User participation duration in the meeting
+ * - Available justifications (if user provided one)
+ * - Class type configuration and limits
+ * - Default fallback rules when configuration is missing
+ * 
+ * @param meeting - The Zoom meeting or past instance to analyze
+ * @param userEmail - Email of the user to calculate attendance for
+ * @param currentClassType - Current class type configuration (optional)
+ * @param availableJustifications - Array of available justifications (optional)
+ * @returns Attendance result with status, minutes, and applied rules
+ * 
+ * @example
+ * ```typescript
+ * const result = calculateUserAttendance(
+ *   zoomMeeting,
+ *   'student@email.com',
+ *   programmingClassType,
+ *   availableJustifications
+ * );
+ * 
+ * console.log(result.minutesAttended); // 45
+ * console.log(result.limit?.key); // 'PP'
+ * ```
+ * 
+ * @remarks
+ * - Justifications take precedence over participation time
+ * - Uses default rules when class type configuration is missing
+ * - Handles both ZoomMeetingT and ZoomMeetingPastInstanceT
  */
 export function calculateUserAttendance(
   meeting: ZoomMeetingT | ZoomMeetingPastInstanceT,
@@ -26,13 +56,14 @@ export function calculateUserAttendance(
   currentClassType?: ClassroomConfigClassTypesT,
   availableJustifications?: ClassroomConfigJustificationT[]
 ): AttendanceResult {
-  // Verifica se existe justificativa para o usuário
+  // Check if user has provided a justification for this meeting
   const userJustification = meeting.justifications?.find(
     (justification) => justification.user_email === userEmail
   );
 
+  // Handle justified absence case
   if (userJustification) {
-    // Se não há justificativas disponíveis, usa justificativa padrão
+    // Fallback to default justification if none are configured
     if (!availableJustifications || availableJustifications.length === 0) {
       const defaultJustification = getDefaultJustification();
       return {
@@ -41,8 +72,11 @@ export function calculateUserAttendance(
       };
     }
 
-    // Encontra a melhor justificativa baseada na mensagem do usuário
-    const bestJustification = findBestJustification(availableJustifications);
+    // Find the most appropriate justification based on user message
+    const bestJustification = findBestJustification(
+      userJustification.message,
+      availableJustifications
+    );
 
     return {
       minutesAttended: 0,
@@ -50,13 +84,13 @@ export function calculateUserAttendance(
     };
   }
 
-  // Busca participações do usuário na reunião
+  // Find all user participations in this meeting
   const userParticipations =
     meeting.participants?.filter(
       (participant) => participant.user_email === userEmail
     ) || [];
 
-  // Calcula total de minutos participados
+  // Calculate total minutes attended (convert from seconds to minutes)
   const totalMinutesAttended = Math.round(
     userParticipations.reduce(
       (accumulator, participation) => accumulator + participation.duration,
@@ -64,7 +98,7 @@ export function calculateUserAttendance(
     ) / 60
   );
 
-  // Se não há class_type na meeting ou currentClassType não foi fornecido, usa limites padrão
+  // Use default limits if class type is not specified or configured
   if (!meeting.class_type || !currentClassType) {
     const defaultLimit = getDefaultLimit(totalMinutesAttended);
     return {
@@ -73,7 +107,7 @@ export function calculateUserAttendance(
     };
   }
 
-  // Encontra o limite mais adequado baseado nos minutos participados
+  // Find the most appropriate limit based on minutes attended
   const bestLimit = findBestLimit(
     totalMinutesAttended,
     currentClassType.limits
@@ -86,9 +120,9 @@ export function calculateUserAttendance(
 }
 
 /**
- * Retorna uma justificativa padrão quando não há justificativas configuradas
- *
- * @returns Justificativa padrão
+ * Provides a default justification when no justifications are configured
+ * 
+ * @returns Default justified absence configuration
  */
 function getDefaultJustification(): ClassroomConfigJustificationT {
   return {
@@ -96,35 +130,45 @@ function getDefaultJustification(): ClassroomConfigJustificationT {
     key: "FJ",
     title: "Falta Justificada",
     color: "#0066cc",
-    isPresence: true,
+    is_presence: true,
   };
 }
 
 /**
- * Encontra a melhor justificativa baseada na mensagem do usuário
- *
- * @param message - Mensagem da justificativa do usuário
- * @param justifications - Array de justificativas configuradas
- * @returns A justificativa que melhor se encaixa ou a primeira disponível
+ * Finds the best matching justification based on user's message
+ * 
+ * Currently returns the first available justification, but can be enhanced
+ * with NLP or keyword matching for more sophisticated justification handling
+ * 
+ * @param message - User's justification message
+ * @param justifications - Available justification configurations
+ * @returns Best matching justification or default if none available
  */
 function findBestJustification(
+  message: string,
   justifications: ClassroomConfigJustificationT[]
 ): ClassroomConfigJustificationT {
   if (justifications.length === 0) {
     return getDefaultJustification();
   }
 
-  // Por enquanto, retorna a primeira justificativa disponível
-  // Futuramente pode implementar lógica mais sofisticada baseada na mensagem
+  // TODO: Implement intelligent justification matching based on message content
+  // Potential enhancement: Use NLP or keyword matching to find best fit
+  
+  // For now, return the first available justification
   return justifications[0];
 }
 
 /**
- * Retorna um limite padrão baseado no código antigo quando não há class_type
- * Baseado na lógica: >= 60min = P, >= 30min = PP, < 30min = F
- *
- * @param minutesAttended - Minutos que o usuário participou
- * @returns Limite padrão baseado nos minutos participados
+ * Provides default attendance limits based on legacy logic
+ * 
+ * Legacy rules:
+ * - >= 60 minutes: Present (P)
+ * - >= 30 minutes: Partial Presence (PP) 
+ * - < 30 minutes: Absent (F)
+ * 
+ * @param minutesAttended - Total minutes user participated
+ * @returns Default limit configuration based on minutes
  */
 function getDefaultLimit(
   minutesAttended: number
@@ -136,8 +180,8 @@ function getDefaultLimit(
       key: "P",
       title: "Presente",
       color: "#00ff00",
-      allowJustification: false,
-      isPresence: true,
+      allow_justification: false,
+      is_presence: true,
     };
   } else if (minutesAttended >= 30) {
     return {
@@ -147,8 +191,8 @@ function getDefaultLimit(
       key: "PP",
       title: "Presença Parcial",
       color: "#ffff00",
-      allowJustification: true,
-      isPresence: false,
+      allow_justification: true,
+      is_presence: false,
     };
   } else {
     return {
@@ -158,42 +202,39 @@ function getDefaultLimit(
       key: "F",
       title: "Falta",
       color: "#ff0000",
-      allowJustification: true,
-      isPresence: false,
+      allow_justification: true,
+      is_presence: false,
     };
   }
 }
 
 /**
- * Encontra o limite mais adequado baseado nos minutos participados
- *
- * @param minutesAttended - Minutos que o usuário participou
- * @param limits - Array de limites configurados para o tipo de aula
- * @returns O limite que melhor se encaixa ou undefined se nenhum for encontrado
+ * Finds the most appropriate class type limit based on minutes attended
+ * 
+ * Limits are evaluated from highest to lowest minimum requirements.
+ * The first limit that matches the minute range is returned.
+ * 
+ * @param minutesAttended - Total minutes user participated
+ * @param limits - Available class type limit configurations
+ * @returns Best matching limit or undefined if no match found
  */
 function findBestLimit(
   minutesAttended: number,
   limits: ClassroomConfigClassTypesLimitT[]
 ): ClassroomConfigClassTypesLimitT | undefined {
-  // Ordena os limites por valor mínimo (do menor para o maior)
-  const sortedLimits = [...limits].sort((a, b) => a.min - b.min);
+  // Sort limits by minimum requirement (highest to lowest)
+  const sortedLimits = [...limits].sort((a, b) => b.min - a.min);
 
-  // Encontra o limite mais adequado
-  for (let i = sortedLimits.length - 1; i >= 0; i--) {
-    const limit = sortedLimits[i];
+  // Find the first limit that matches the attendance criteria
+  for (const limit of sortedLimits) {
+    const meetsMinimum = minutesAttended >= limit.min;
+    const withinMaximum = limit.max === undefined || minutesAttended <= limit.max;
 
-    // Verifica se os minutos atendem ao critério mínimo
-    if (minutesAttended >= limit.min) {
-      // Se tem máximo definido, verifica se não excede
-      if (limit.max !== undefined && minutesAttended > limit.max) {
-        continue;
-      }
-
-      // Se chegou aqui, este é o limite adequado
+    if (meetsMinimum && withinMaximum) {
       return limit;
     }
   }
 
-  // Se não encontrou nenhum limite adequado, retorna undefined
+  // No matching limit found
   return undefined;
 }

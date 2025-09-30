@@ -1,6 +1,6 @@
 "use client";
 import Color from "color";
-import { CheckCircle, Edit, Ellipsis, Trash2, XCircle } from "lucide-react";
+import { Edit, Ellipsis, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,35 +12,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
+import { ClassroomConfigUserMode } from "@/types/classroom-configs";
 import { useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
 
-interface JustificationCardProps {
+interface UserModeCardProps {
   configId: string;
-  justification: ClassroomConfigJustificationT;
-  onEdit: (justification: ClassroomConfigJustificationT) => void;
+  userMode: ClassroomConfigUserMode;
+  onEdit: (userMode: ClassroomConfigUserMode) => void;
 }
 
-const JustificationCard = ({
-  configId,
-  justification,
-  onEdit,
-}: JustificationCardProps) => {
+const UserModeCard = ({ configId, userMode, onEdit }: UserModeCardProps) => {
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
-  const handleDeleteJustification = async () => {
+  const handleDeleteUserMode = async () => {
     const currentConfig = Object.values(configsByClassroom).find(
       (config) => config.id === configId
     );
     if (!currentConfig) return;
 
-    const updatedClassTypes = currentConfig.justifications.filter(
-      (j: ClassroomConfigJustificationT) => j.id !== justification.id
+    const updatedUserModes = currentConfig.user_modes.filter(
+      (u: ClassroomConfigUserMode) => u.id !== userMode.id
     );
-    await updateConfigById(configId, { justifications: updatedClassTypes });
+    await updateConfigById(configId, { user_modes: updatedUserModes });
   };
 
   const backgroundColor = (color: string) => {
@@ -56,29 +52,27 @@ const JustificationCard = ({
       <div className="flex flex-col gap-1 flex-1">
         <div className="flex gap-1 items-center">
           <Badge
-            key={`class-type-limit-${justification.id}`}
+            key={`user-mode-${userMode.id}`}
             variant="secondary"
             style={{
-              backgroundColor: backgroundColor(justification.color),
-              color: Color(justification.color).isDark() ? "#fff" : "#000",
+              backgroundColor: backgroundColor(userMode.color),
+              color: Color(userMode.color).isDark() ? "#fff" : "#000",
             }}
           >
-            <p className="font-semibold text-xs!">({justification.key})</p>
+            <p className="font-semibold text-xs!">({userMode.key})</p>
           </Badge>
-          <h3 className="truncate text-sm font-semibold">
-            {justification.title}
-          </h3>
+          <h3 className="truncate text-sm font-semibold">{userMode.title}</h3>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {justification.is_presence ? (
+          {userMode.must_be_present ? (
             <div className="flex items-center gap-1">
               <CheckCircle className="size-3 text-green-600" />
-              <span>Deve estar presente</span>
+              <span>Contabiliza presença</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
               <XCircle className="size-3 text-red-600" />
-              <span>Não precisa estar presente</span>
+              <span>Não contabiliza presença</span>
             </div>
           )}
         </div>
@@ -95,7 +89,7 @@ const JustificationCard = ({
           <DropdownMenuSeparator />
           <DropdownMenuItem
             className="!w-full cursor-pointer text-muted-foreground justify-start"
-            onClick={() => onEdit(justification)}
+            onClick={() => onEdit(userMode)}
           >
             <Edit className="size-4" />
             Editar
@@ -112,11 +106,11 @@ const JustificationCard = ({
       <DeleteConfirmationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onConfirm={handleDeleteJustification}
-        description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE o módulo e todos os dados relacionados a ele."
+        onConfirm={handleDeleteUserMode}
+        description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE o modo de usuário e todos os dados relacionados a ele."
       />
     </li>
   );
 };
 
-export default JustificationCard;
+export default UserModeCard;

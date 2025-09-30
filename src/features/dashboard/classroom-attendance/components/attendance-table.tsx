@@ -253,7 +253,7 @@ export default function AttendanceTable({
               </div>
               {row.original.email &&
                 (userAttendance?.justification ||
-                  userAttendance?.limit?.allowJustification) && (
+                  userAttendance?.limit?.allow_justification) && (
                   <AttendanceJustificationDropdown
                     key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
                     currentMeeting={meeting}

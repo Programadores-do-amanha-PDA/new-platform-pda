@@ -52,7 +52,7 @@ export function calculatePresenceByType(
 
       const attendance = calculateUserAttendance(event, studentEmail || "");
       return (
-        attendance.justification?.isPresence || attendance.limit?.isPresence
+        attendance.justification?.is_presence || attendance.limit?.is_presence
       );
     }).length;
 

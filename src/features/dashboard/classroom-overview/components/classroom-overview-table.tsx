@@ -9,14 +9,16 @@ interface ClassroomOverviewTableProps {
   data: ClassroomOverviewData;
   modules?: ClassroomConfigModulesT[];
   onDateRangeChange?: (dateRange: { from: Date; to: Date }) => void;
+  onUserModeChange?: (studentId: string, userModeId: string) => void;
 }
 
 export function ClassroomOverviewTable({
   data,
   modules = [],
   onDateRangeChange,
+  onUserModeChange,
 }: ClassroomOverviewTableProps) {
-  const columns = createColumns(data);
+  const columns = createColumns(data, onUserModeChange);
 
   return (
     <div className="flex flex-col gap-4 h-full">

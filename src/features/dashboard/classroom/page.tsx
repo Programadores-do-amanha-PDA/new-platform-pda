@@ -7,6 +7,7 @@ import { ClassTypesList } from "./components/class-types";
 import { useParams } from "next/navigation";
 import PermissionGuard from "@/components/shared/permission-guard";
 import { JustificationsList } from "./components/justifications";
+import { UserModesList } from "./components/user-modes";
 
 const ClassroomHomePage = () => {
   const { classroom_id } = useParams();
@@ -38,10 +39,11 @@ const ClassroomHomePage = () => {
           </div>
         }
       >
-        <div className="w-full h-full rounded-md overflow-hidden flex flex-wrap gap-6 p-6">
+        <div className="w-full flex flex-wrap gap-6 p-6">
           <ModulesList classroomId={classroomId} />
           <ClassTypesList classroomId={classroomId} />
           <JustificationsList classroomId={classroomId} />
+          <UserModesList classroomId={classroomId} />
         </div>
       </PermissionGuard>
     </div>

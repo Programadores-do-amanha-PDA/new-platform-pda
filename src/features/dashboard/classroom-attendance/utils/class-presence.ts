@@ -15,7 +15,7 @@ export function calculateClassPresence(
 
   const attendances = users.filter((user) => {
     const attendance = calculateUserAttendance(meeting, user.email || "");
-    return attendance.justification?.isPresence || attendance.limit?.isPresence;
+    return attendance.justification?.is_presence || attendance.limit?.is_presence;
   });
 
   const presencePercentage = (attendances.length / users.length) * 100;

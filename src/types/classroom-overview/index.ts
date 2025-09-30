@@ -19,11 +19,12 @@ export type StudentOverview = {
   activities: number;
   coodesh: StudentCoodeshIndicators;
   projects: StudentProjectIndicators;
+  userModeId?: string;
 };
 
 export type ClassroomOverviewData = {
   students: StudentOverview[];
-    classTypes: Array<{
+  classTypes: Array<{
     id: string;
     name: string;
   }>;
@@ -34,5 +35,12 @@ export type ClassroomOverviewData = {
   projects: Array<{
     id: string;
     name: string;
+  }>;
+  userModes: Array<{
+    id: string;
+    title: string;
+    key: string;
+    color: string;
+    must_be_present: boolean;
   }>;
 };

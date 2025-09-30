@@ -21,61 +21,61 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClassroomConfigJustificationT } from "@/types/classroom-configs";
+import { ClassroomConfigUserMode } from "@/types/classroom-configs";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import Color, { ColorLike } from "color";
 import { Checkbox } from "@/components/ui/checkbox";
 
-const JustificationFormSchema = z.object({
+const UserModeFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   key: z.string().min(1, "Identificador é obrigatório"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hex válido"),
-  isPresence: z.boolean(),
+  mustBePresent: z.boolean(),
 });
 
-type JustificationFormData = z.infer<typeof JustificationFormSchema>;
+type UserModeFormData = z.infer<typeof UserModeFormSchema>;
 
-interface JustificationFormDialogProps {
+interface UserModeFormDialogProps {
   configId: string;
-  currentJustification?: ClassroomConfigJustificationT | null;
+  currentUserMode?: ClassroomConfigUserMode | null;
   trigger?: React.ReactNode;
   onClose?: () => void;
 }
 
-const JustificationFormDialog = ({
+const UserModeFormDialog = ({
   configId,
-  currentJustification,
+  currentUserMode,
   trigger,
   onClose,
-}: JustificationFormDialogProps) => {
+}: UserModeFormDialogProps) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const isEditing = !!currentJustification;
+  const isEditing = !!currentUserMode;
 
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
-  const form = useForm<JustificationFormData>({
-    resolver: zodResolver(JustificationFormSchema),
+  const form = useForm<UserModeFormData>({
+    resolver: zodResolver(UserModeFormSchema),
     defaultValues: {
       title: "",
       key: "",
-      color: "#d67636",
-      isPresence: false,
+      color: "#3bf6a8",
+      mustBePresent: true,
     },
   });
 
   useEffect(() => {
-    if (currentJustification) {
+    if (currentUserMode) {
       setOpen(true);
       form.reset({
-        title: currentJustification.title,
-        key: currentJustification.key,
-        color: currentJustification.color,
-        isPresence: currentJustification.is_presence,
+        title: currentUserMode.title,
+        key: currentUserMode.key,
+        color: currentUserMode.color,
+        mustBePresent: currentUserMode.must_be_present,
       });
     }
-  }, [currentJustification, form]);
+  }, [currentUserMode, form]);
 
   const handleClose = () => {
     setOpen(false);
@@ -113,7 +113,7 @@ const JustificationFormDialog = ({
     [form]
   );
 
-  const onSubmit = async (data: JustificationFormData) => {
+  const onSubmit = async (data: UserModeFormData) => {
     setLoading(true);
 
     try {
@@ -127,51 +127,48 @@ const JustificationFormDialog = ({
         return;
       }
 
-      const newJustification: ClassroomConfigJustificationT = {
-        id: currentJustification?.id || crypto.randomUUID(),
+      const newUserMode: ClassroomConfigUserMode = {
+        id: currentUserMode?.id || crypto.randomUUID(),
         title: data.title.trim(),
         key: data.key.trim(),
         color: data.color,
-        created_at:
-          currentJustification?.created_at || new Date().toISOString(),
+        must_be_present: data.mustBePresent,
+        created_at: currentUserMode?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        is_presence: data.isPresence,
       };
 
-      // Get current justifications array
-      const currentJustifications = currentConfig.justifications || [];
+      // Get current userModes array
+      const currentUserModes = currentConfig.user_modes || [];
 
-      let updatedJustifications: ClassroomConfigJustificationT[];
+      let updatedUserModes: ClassroomConfigUserMode[];
 
-      if (isEditing && currentJustification) {
-        // Update existing justification
-        updatedJustifications = currentJustifications.map((justification) =>
-          justification.id === currentJustification.id
-            ? newJustification
-            : justification
+      if (isEditing && currentUserMode) {
+        // Update existing user mode
+        updatedUserModes = currentUserModes.map((userMode) =>
+          userMode.id === currentUserMode.id ? newUserMode : userMode
         );
       } else {
-        // Add new justification
-        updatedJustifications = [...currentJustifications, newJustification];
+        // Add new user mode
+        updatedUserModes = [...currentUserModes, newUserMode];
       }
 
       const success = await updateConfigById(configId, {
-        justifications: updatedJustifications,
+        user_modes: updatedUserModes,
       });
 
       if (success) {
         handleClose();
         toast.success(
           isEditing
-            ? "Justificativa atualizada com sucesso!"
-            : "Justificativa criada com sucesso!"
+            ? "Modo de usuário atualizado com sucesso!"
+            : "Modo de usuário criado com sucesso!"
         );
       } else {
-        toast.error("Erro ao salvar justificativa!");
+        toast.error("Erro ao salvar modo de usuário!");
       }
     } catch (error) {
-      console.error("Error saving justification:", error);
-      toast.error("Erro ao salvar justificativa!");
+      console.error("Error saving user mode:", error);
+      toast.error("Erro ao salvar modo de usuário!");
     } finally {
       setLoading(false);
     }
@@ -184,7 +181,7 @@ const JustificationFormDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Editar Justificativa" : "Nova Justificativa"}
+            {isEditing ? "Editar Modo de Usuário" : "Novo Modo de Usuário"}
           </DialogTitle>
         </DialogHeader>
 
@@ -197,10 +194,7 @@ const JustificationFormDialog = ({
                 <FormItem>
                   <FormLabel className="font-semibold">Título</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Ex: Justificativa de Falta"
-                      {...field}
-                    />
+                    <Input placeholder="Ex: Síncrono" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -217,7 +211,7 @@ const JustificationFormDialog = ({
                       Identificador
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: JF" {...field} />
+                      <Input placeholder="Ex: S" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -244,7 +238,7 @@ const JustificationFormDialog = ({
 
             <FormField
               control={form.control}
-              name="isPresence"
+              name="mustBePresent"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                   <FormControl>
@@ -256,8 +250,8 @@ const JustificationFormDialog = ({
                   <div className="space-y-1 leading-none">
                     <FormLabel>Deve contabilizar presença?</FormLabel>
                     <p className="text-sm text-muted-foreground">
-                      Marque se esta justificativa deve ser contabilizada como
-                      presença
+                      Marque se este modo de usuário deve fazer parte da
+                      contagem de presença
                     </p>
                   </div>
                 </FormItem>
@@ -273,7 +267,7 @@ const JustificationFormDialog = ({
                   ? "Salvando..."
                   : isEditing
                   ? "Salvar Alterações"
-                  : "Criar Justificativa"}
+                  : "Criar Modo"}
               </Button>
             </div>
           </form>
@@ -283,4 +277,4 @@ const JustificationFormDialog = ({
   );
 };
 
-export default JustificationFormDialog;
+export default UserModeFormDialog;

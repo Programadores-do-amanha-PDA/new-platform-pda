@@ -16,8 +16,8 @@ export interface ClassroomConfigClassTypesLimitT {
   color: string;
   min: number;
   max?: number;
-  allowJustification: boolean;
-  isPresence: boolean;
+  allow_justification: boolean;
+  is_presence: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -27,7 +27,7 @@ export interface ClassroomConfigJustificationT {
   title: string;
   key: string;
   color: string;
-  isPresence: boolean;
+  is_presence: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -40,12 +40,23 @@ export interface ClassroomConfigClassTypesT {
   updated_at?: string;
 }
 
+export interface ClassroomConfigUserMode {
+  id: string;
+  title: string;
+  key: string;
+  color: string;
+  must_be_present: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface ClassroomConfigT {
   id: string;
   classroom_id: string;
   modules: Array<ClassroomConfigModulesT>;
   class_types: Array<ClassroomConfigClassTypesT>;
   justifications: Array<ClassroomConfigJustificationT>;
+  user_modes: Array<ClassroomConfigUserMode>;
 }
 
 // Zod schemas

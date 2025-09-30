@@ -100,3 +100,27 @@ export const deleteUserClassroom = async (
     return false;
   }
 };
+
+export const updateUserClassroomMode = async (
+  userId: string,
+  classroomId: string,
+  mode: string
+) => {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("user_classrooms")
+      .update({ mode })
+      .eq("user_id", userId)
+      .eq("classroom_id", classroomId)
+      .select();
+
+    if (error) throw error;
+
+    return data as UserClassroomT[];
+  } catch (error) {
+    console.error("Error on update user classroom mode", error);
+    return null;
+  }
+};
