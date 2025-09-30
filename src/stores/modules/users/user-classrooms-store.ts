@@ -6,6 +6,7 @@ import { UserClassroomT } from "@/types/auth/user-classroom";
 import {
   insertUserClassroom,
   deleteUserClassroom,
+  updateUserClassroomMode,
 } from "@/app/actions/user-classroom";
 
 interface UserClassroomsState {
@@ -15,10 +16,17 @@ interface UserClassroomsState {
 
 interface UserClassroomsActions {
   setUsers: (users: Partial<AuthUserWithProfileT>[]) => void;
-  createUserClassrooms: (usersClassrooms: Omit<UserClassroomT, "short_id">[]) => Promise<boolean>;
+  createUserClassrooms: (
+    usersClassrooms: Omit<UserClassroomT, "short_id">[]
+  ) => Promise<boolean>;
   deleteUserClassroom: (
     userId: string,
     classroomsIds: string[]
+  ) => Promise<boolean>;
+  updateUserMode: (
+    userId: string,
+    classroomId: string,
+    mode: string
   ) => Promise<boolean>;
   reset: () => void;
 }
@@ -39,7 +47,6 @@ export const useUserClassroomsStore = create<
 
       createUserClassrooms: async (usersClassrooms: UserClassroomT[]) => {
         try {
-          set({ loading: true });
           if (!usersClassrooms.length) {
             toast.error("Nenhum usuário selecionado para vincular à turma!");
             throw new Error("empty users classroom array");
@@ -57,6 +64,7 @@ export const useUserClassroomsStore = create<
                   classroom_id: uc.classroom_id,
                   user_id: uc.user_id,
                   short_id: uc.short_id,
+                  mode: uc.mode || "",
                 }));
 
               return {
@@ -78,14 +86,11 @@ export const useUserClassroomsStore = create<
           toast.error("Erro ao vincular usuários à turma!");
           console.error(error);
           return false;
-        } finally {
-          set({ loading: false });
         }
       },
 
       deleteUserClassroom: async (userId: string, classroomsIds: string[]) => {
         try {
-          set({ loading: true });
           if (!userId || !classroomsIds.length) {
             throw new Error("user id and classroom id are required");
           }
@@ -114,8 +119,45 @@ export const useUserClassroomsStore = create<
           toast.error("Erro ao remover vínculo usuário-turma!");
           console.error(error);
           return false;
-        } finally {
-          set({ loading: false });
+        }
+      },
+
+      updateUserMode: async (
+        userId: string,
+        classroomId: string,
+        mode: string
+      ) => {
+        try {
+          const response = await updateUserClassroomMode(
+            userId,
+            classroomId,
+            mode
+          );
+          if (!response)
+            throw new Error("No update user classroom mode response");
+
+          set((state) => ({
+            users: state.users.map((user) =>
+              user.id === userId
+                ? {
+                    ...user,
+                    profile: {
+                      ...(user.profile || ({} as ProfileT)),
+                      classrooms: (user.profile?.classrooms || []).map((uc) =>
+                        uc.classroom_id === classroomId ? { ...uc, mode } : uc
+                      ),
+                    },
+                  }
+                : user
+            ),
+          }));
+
+          toast.success("Modo do usuário atualizado com sucesso!");
+          return true;
+        } catch (error) {
+          toast.error("Erro ao atualizar modo do usuário!");
+          console.error(error);
+          return false;
         }
       },
 
