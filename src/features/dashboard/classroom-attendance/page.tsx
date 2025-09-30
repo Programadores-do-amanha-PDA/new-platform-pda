@@ -6,16 +6,28 @@ import { useUsersStore } from "@/stores/modules/users/users-store";
 import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
 import AttendanceTable from "./components/attendance-table";
 import { ZoomMeetingT } from "@/types/classroom-zoom";
+import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 export default function AttendancePage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();
+
   const { users } = useUsersStore();
   const { meetings } = useZoomMeetingStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
+  const { configsByClassroom } = useClassroomConfigStore();
 
   if (!classroom_id) {
     return <div>Turma não encontrada.</div>;
   }
+
+  const userModes = configsByClassroom[classroom_id]?.user_modes || [];
+
+  const classroomUsers = filterClassroomStudents(
+    users,
+    classroom_id,
+    userModes
+  );
 
   // Get past instances directly from the store and add meeting info
   const pastsMeetings: ZoomMeetingPastInstanceT[] = pastInstances
@@ -28,15 +40,6 @@ export default function AttendancePage() {
         new Date(b.start_time || 0).getTime() -
         new Date(a.start_time || 0).getTime()
     );
-
-  const classroomUsers = users.filter(
-    (user) =>
-      user.profile?.classrooms
-        ?.map((c) => c.classroom_id)
-        ?.includes(classroom_id) &&
-      (user.profile?.user_roles?.map((r) => r.role).includes("student") ||
-        user.profile?.user_roles?.map((r) => r.role).includes("alumni"))
-  );
 
   const allPastsMeetings = [
     ...pastsMeetings,
