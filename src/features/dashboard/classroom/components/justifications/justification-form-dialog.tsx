@@ -254,7 +254,7 @@ const JustificationFormDialog = ({
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
-                    <FormLabel>Deve contabilizar presença?</FormLabel>
+                    <FormLabel>Deve contabilizar como presença?</FormLabel>
                     <p className="text-sm text-muted-foreground">
                       Marque se esta justificativa deve ser contabilizada como
                       presença

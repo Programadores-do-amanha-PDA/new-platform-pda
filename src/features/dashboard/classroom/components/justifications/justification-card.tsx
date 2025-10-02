@@ -73,12 +73,12 @@ const JustificationCard = ({
           {justification.is_presence ? (
             <div className="flex items-center gap-1">
               <CheckCircle className="size-3 text-green-600" />
-              <span>Deve estar presente</span>
+              <span>Contabiliza como presença</span>
             </div>
           ) : (
             <div className="flex items-center gap-1">
               <XCircle className="size-3 text-red-600" />
-              <span>Não precisa estar presente</span>
+              <span>Não contabiliza como presença</span>
             </div>
           )}
         </div>
