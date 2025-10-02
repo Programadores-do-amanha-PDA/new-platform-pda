@@ -54,7 +54,7 @@ interface ZoomAPIActions {
   ) => Promise<ZoomMeetingPollResultsT[]>;
   getAllPastInstanciesByMeetingIdFromAPI: (
     account: Partial<ZoomAccountT>,
-    meetingId: number | string
+    meetingId: number
   ) => Promise<ZoomMeetingPastInstanceT[]>;
   reset: () => void;
 }
@@ -251,11 +251,8 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
               } as Omit<ZoomMeetingT, "id" | "created_at">;
             }
           } else if (meeting.type === 8 || meeting.type === 3) {
-            const encodedMeetingId = encodeURIComponent(
-              encodeURIComponent(meeting.meeting_id)
-            );
             const allPastInstances = await getPastMeetingInstances(
-              encodedMeetingId,
+              meeting.meeting_id,
               ZOOM_ACCESS_TOKEN
             );
             if (!allPastInstances)
@@ -345,9 +342,11 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
             throw new Error("Failed to get access token");
           }
 
+          // Double encode the meeting ID for Zoom API compatibility
           const encodedMeetingId = encodeURIComponent(
             encodeURIComponent(meetingId)
           );
+
           loadingToast = toast.loading(
             "Obtendo os Participantes da Reunião..."
           );
@@ -358,6 +357,7 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
           );
 
           if (!participants || !Array.isArray(participants)) {
+            console.error("Invalid participants data:", participants);
             throw new Error("Invalid participants data from API");
           }
 
@@ -450,15 +450,11 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
             throw new Error("Failed to get access token");
           }
 
-          const encodedMeetingId = encodeURIComponent(
-            encodeURIComponent(meetingId)
-          );
           loadingToast = toast.loading(
             "Obtendo as Instâncias Passadas da Reunião..."
           );
-
           const pastInstances = await getPastMeetingInstances(
-            encodedMeetingId,
+            meetingId,
             ZOOM_ACCESS_TOKEN
           );
 

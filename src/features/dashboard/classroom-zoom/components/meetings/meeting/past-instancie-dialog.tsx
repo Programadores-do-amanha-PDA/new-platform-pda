@@ -31,6 +31,11 @@ import {
   ZoomMeetingPollResultsT,
 } from "@/types/classroom-zoom/meetings"; // Adjust path if needed
 import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
+import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 // Utility function to format seconds to HH:MM:SS
 const formatDuration = (seconds: number): string => {
@@ -89,7 +94,8 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
     ),
   },
   {
-    accessorKey: "question_details",
+    id: "content",
+    accessorFn: (row) => row.question_details[0]?.answer,
     header: ({ column }) => {
       return (
         <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
@@ -107,13 +113,14 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
         <span className="text-sm">
-          {row.original.question_details[0].answer}
+          {row.original.question_details[0]?.answer}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "question_details",
+    id: "facilitation",
+    accessorFn: (row) => row.question_details[1]?.answer,
     header: ({ column }) => {
       return (
         <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
@@ -131,13 +138,14 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
         <span className="text-sm">
-          {row.original.question_details[1].answer}
+          {row.original.question_details[1]?.answer}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "question_details",
+    id: "self_development",
+    accessorFn: (row) => row.question_details[2]?.answer,
     header: ({ column }) => {
       return (
         <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
@@ -155,7 +163,7 @@ const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
     cell: ({ row }) => (
       <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
         <span className="text-sm">
-          {row.original.question_details[2].answer}
+          {row.original.question_details[2]?.answer}
         </span>
       </div>
     ),
@@ -390,27 +398,79 @@ const PastInstancieDialog = ({
   onClose: (open: boolean) => void;
   instancie: ZoomMeetingPastInstanceT;
 }) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const participantGroups = new Map<string, ZoomMeetingParticipantT>();
   const { meetings } = useZoomMeetingStore();
+  const { refreshInstanceData } = useZoomMeetingPastInstanceStore();
+  const { accounts } = useZoomAccountStore();
 
   const currentMeeting = meetings.find(
     (meeting) => meeting.id === instancie.meeting_id
   );
 
+  const handleRefreshInstanceData = async () => {
+    if (!instancie.id || !instancie.uuid || !currentMeeting?.account_id) {
+      return;
+    }
+
+    setIsRefreshing(true);
+    try {
+      const account = accounts.find(
+        (account) => account.id === currentMeeting.account_id
+      );
+      if (!account) {
+        throw new Error("Account not found");
+      }
+
+      await refreshInstanceData(instancie.id, instancie.uuid, account);
+    } catch (error) {
+      console.error("Error refreshing instance data:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  // Helper function to calculate duration from join_time and leave_time
+  const calculateDurationFromTimes = (
+    joinTime: string,
+    leaveTime: string
+  ): number => {
+    try {
+      const joinDate = new Date(joinTime);
+      const leaveDate = new Date(leaveTime);
+
+      // Return duration in seconds
+      return Math.max(
+        0,
+        Math.floor((leaveDate.getTime() - joinDate.getTime()) / 1000)
+      );
+    } catch (error) {
+      console.error("Error calculating duration from times:", error);
+      return 0;
+    }
+  };
+
   instancie.participants?.forEach((participant) => {
     const existing = participantGroups.get(participant.user_email);
+
+    // Calculate duration from join_time and leave_time
+    const calculatedDuration = calculateDurationFromTimes(
+      participant.join_time,
+      participant.leave_time
+    );
+
     if (existing) {
-      existing.duration += participant.duration;
+      existing.duration += calculatedDuration;
     } else {
       participantGroups.set(participant.user_email, {
         ...participant,
-        duration: participant.duration,
+        duration: calculatedDuration,
       });
     }
   });
 
   const participantsData = Array.from(participantGroups.values()).map((p) => {
-    // Participant duration is already in seconds
+    // Participant duration is already in seconds (calculated from times)
     const participantDurationInSeconds = p.duration;
 
     // Meeting duration is in minutes, convert to seconds
@@ -432,15 +492,29 @@ const PastInstancieDialog = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="w-max h-full !min-w-[50vw] !min-h-[50vh] !max-w-[90vw] !max-h-[90vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6">
-          <DialogTitle>
-            Instância ocorrida em{" "}
-            {instancie.start_time
-              ? format(new Date(instancie.start_time), "dd/MM/yyyy", {
-                  locale: ptBR,
-                })
-              : "Data não disponível"}
-          </DialogTitle>
+        <DialogHeader className="p-6 pt-12">
+          <div className="flex justify-between items-center">
+            <DialogTitle>
+              Instância ocorrida em{" "}
+              {instancie.start_time
+                ? format(new Date(instancie.start_time), "dd/MM/yyyy", {
+                    locale: ptBR,
+                  })
+                : "Data não disponível"}
+            </DialogTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshInstanceData}
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw
+                className={cn("size-4", isRefreshing && "animate-spin")}
+              />
+              Atualizar
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="flex w-full h-full overflow-hidden px-6 pb-6">

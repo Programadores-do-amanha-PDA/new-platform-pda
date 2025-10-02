@@ -48,6 +48,10 @@ type MeetingPastInstance = ZoomMeetingPastInstanceT & {
     updates: Partial<ZoomMeetingPastInstanceT>
   ) => Promise<boolean>;
   handleOpenDialog: (instance: string) => void;
+  handleRefreshInstanceData: (
+    instanceId: string,
+    uuid: string
+  ) => Promise<void>;
 };
 
 const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
@@ -167,11 +171,19 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
         </div>
       );
     },
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">{row.original.duration || 0} Minutos</p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const duration = row.original.duration || 0;
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+
+      return (
+        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+          <p className="font-medium">
+            {hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`}
+          </p>
+        </div>
+      );
+    },
   },
   {
     id: "participants",
@@ -248,6 +260,36 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
         <p className="font-medium">
           {row.original.poll_results?.filter(Boolean)?.length || 0}
         </p>
+      </div>
+    ),
+  },
+  {
+    id: "refresh",
+    header: () => {
+      return (
+        <div className="w-full h-full flex justify-center items-center px-2">
+          <p>Atualizar</p>
+        </div>
+      );
+    },
+    cell: ({ row }: { row: { original: MeetingPastInstance } }) => (
+      <div
+        key={`refresh-${row.original.uuid}`}
+        className="w-full h-full flex justify-center items-center border-b"
+      >
+        <RefreshButton
+          handleClick={async () =>
+            void row.original.handleRefreshInstanceData(
+              row.original.id,
+              row.original.uuid
+            )
+          }
+          variant="ghost"
+          size="icon"
+          className="cursor-pointer"
+        >
+          <RefreshCw className="size-4 text-primary" />
+        </RefreshButton>
       </div>
     ),
   },
@@ -436,11 +478,19 @@ const meetingOccurrencesColumns: ColumnDef<MeetingOccurrence>[] = [
         </div>
       );
     },
-    cell: ({ row }: { row: { original: MeetingOccurrence } }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">{`${row.original.duration} minutos`}</p>
-      </div>
-    ),
+    cell: ({ row }: { row: { original: MeetingOccurrence } }) => {
+      const duration = row.original.duration || 0;
+      const hours = Math.floor(duration / 60);
+      const minutes = duration % 60;
+
+      return (
+        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+          <p className="font-medium">
+            {hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`}
+          </p>
+        </div>
+      );
+    },
   },
 ];
 
@@ -456,7 +506,7 @@ export default function ZoomRecurrenceMeetingPage({
 
   const { accounts } = useZoomAccountStore();
   const { refreshAndUpdateMeeting, deleteMeeting } = useZoomMeetingStore();
-  const { pastInstances, updatePastInstanceById } =
+  const { pastInstances, updatePastInstanceById, refreshInstanceData } =
     useZoomMeetingPastInstanceStore();
 
   const handleRefreshMeeting = async () => {
@@ -484,6 +534,21 @@ export default function ZoomRecurrenceMeetingPage({
     if (!instancie) return toast.error("Instância não encontrada!");
     setSelectedInstancie(instancie);
     setIsDialogOpen(true);
+  };
+
+  const handleRefreshInstanceData = async (
+    instanceId: string,
+    uuid: string
+  ) => {
+    const account = accounts.find(
+      (account) => account.id === currentMeeting.account_id
+    );
+    if (!account) {
+      toast.error("Conta não encontrada!");
+      return;
+    }
+
+    await refreshInstanceData(instanceId, uuid, account);
   };
 
   const meetingOccurrences = currentMeeting?.occurrences
@@ -514,6 +579,7 @@ export default function ZoomRecurrenceMeetingPage({
         participants: Array.from(participantGroups.values()),
         updatePastInstanceById,
         handleOpenDialog,
+        handleRefreshInstanceData,
       };
     });
 

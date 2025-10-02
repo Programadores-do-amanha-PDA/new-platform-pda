@@ -194,15 +194,19 @@ const meetingParticipantsColumns: ColumnDef<
         </div>
       );
     },
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">
-          {Math.floor(row.original.duration / 60) > 60
-            ? `${Math.floor(row.original.duration / 60 / 60)} Horas`
-            : `${Math.floor(row.original.duration / 60)} Minutos`}
-        </p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const durationMinutes = Math.floor(row.original.duration / 60);
+      const hours = Math.floor(durationMinutes / 60);
+      const minutes = durationMinutes % 60;
+
+      return (
+        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+          <p className="font-medium">
+            {hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`}
+          </p>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "absence",
@@ -220,15 +224,19 @@ const meetingParticipantsColumns: ColumnDef<
         </div>
       );
     },
-    cell: ({ row }) => (
-      <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-        <p className="font-medium">
-          {row.original.absence > 60
-            ? `${Math.floor(row.original.absence / 60)} Horas`
-            : `${row.original.absence} Minutos`}
-        </p>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const absenceMinutes = row.original.absence;
+      const hours = Math.floor(absenceMinutes / 60);
+      const minutes = absenceMinutes % 60;
+
+      return (
+        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+          <p className="font-medium">
+            {hours > 0 ? `${hours}h ${minutes}min` : `${minutes} min`}
+          </p>
+        </div>
+      );
+    },
   },
 ];
 
@@ -265,30 +273,65 @@ export default function ZoomPastMeetingPage({
   const currentPollResults = currentMeeting.poll_results || [];
   const currentParticipants = currentMeeting.participants || [];
 
+  // Helper function to calculate duration from join_time and leave_time
+  const calculateDurationFromTimes = (
+    joinTime: string,
+    leaveTime: string
+  ): number => {
+    try {
+      const joinDate = new Date(joinTime);
+      const leaveDate = new Date(leaveTime);
+
+      // Return duration in seconds
+      return Math.max(
+        0,
+        Math.floor((leaveDate.getTime() - joinDate.getTime()) / 1000)
+      );
+    } catch (error) {
+      console.error("Error calculating duration from times:", error);
+      return 0;
+    }
+  };
+
   const participantGroups = new Map<
     string,
-    (typeof currentParticipants)[number]
+    (typeof currentParticipants)[number] & { calculatedDuration: number }
   >();
+
   currentParticipants.forEach((participant) => {
     const existing = participantGroups.get(participant.user_email);
+
+    // Calculate duration from join_time and leave_time
+    const calculatedDuration = calculateDurationFromTimes(
+      participant.join_time,
+      participant.leave_time
+    );
+
     if (existing) {
-      existing.duration += participant.duration;
+      existing.calculatedDuration += calculatedDuration;
     } else {
       participantGroups.set(participant.user_email, {
         ...participant,
-        duration: participant.duration,
+        calculatedDuration,
       });
     }
   });
 
-  const participantsData = Array.from(participantGroups.values()).map((p) => ({
-    ...p,
-    absence:
-      currentMeeting?.duration &&
-      Math.round(currentMeeting.duration - Math.floor(p.duration / 60)) > 0
-        ? Math.round(currentMeeting.duration - Math.floor(p.duration / 60))
-        : 0,
-  }));
+  const participantsData = Array.from(participantGroups.values()).map((p) => {
+    // Convert calculated duration from seconds to minutes
+    const participantDurationMinutes = Math.floor(p.calculatedDuration / 60);
+
+    // Calculate absence in minutes (meeting duration is already in minutes)
+    const absenceMinutes = currentMeeting?.duration
+      ? Math.max(0, currentMeeting.duration - participantDurationMinutes)
+      : 0;
+
+    return {
+      ...p,
+      duration: p.calculatedDuration, // Use calculated duration instead of original
+      absence: absenceMinutes,
+    };
+  });
 
   return (
     <div className="w-full h-full p-4 overflow-hidden flex flex-col gap-8">
@@ -313,9 +356,11 @@ export default function ZoomPastMeetingPage({
           <p className="text-muted-foreground flex gap-1 font-semibold">
             Duração:
             <p className="font-normal">
-              {currentMeeting?.duration > 60
-                ? `${Math.floor(currentMeeting.duration / 60)} Horas`
-                : `${currentMeeting.duration} Minutos`}
+              {currentMeeting?.duration && currentMeeting.duration > 60
+                ? `${Math.floor(currentMeeting.duration / 60)}h ${
+                    currentMeeting.duration % 60
+                  }min`
+                : `${currentMeeting?.duration || 0} min`}
             </p>
           </p>
         </div>

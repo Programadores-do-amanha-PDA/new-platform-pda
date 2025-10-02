@@ -94,7 +94,7 @@ export function decodeUUID(encodedUUID: string): string {
     return singleDecoded;
   } catch (error) {
     // If decoding fails, return the original string
-    console.warn('Failed to decode UUID, returning original:', error);
+    console.error('Failed to decode UUID, returning original:', error);
     return encodedUUID;
   }
 }
