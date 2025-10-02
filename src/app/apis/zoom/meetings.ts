@@ -3,7 +3,7 @@ import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/classroom-zoom";
 import axiosZoomInstancie from ".";
 import { encodeUUID } from "@/utils/encode-UUID";
 
-const DEFAULT_PAGE_SIZE = 10000;
+const DEFAULT_PAGE_SIZE = 300;
 
 /**
  * Fetches all meetings for the current user.
@@ -72,7 +72,7 @@ export const getMeetingById = async (
     return {
       ...restMeetingData,
       meeting_id: Number(id),
-      polls: meetingPolls.polls,
+      polls: meetingPolls,
     } as Omit<ZoomMeetingT, "id">;
   } catch (error) {
     console.error("Error fetching meeting details:", error);
@@ -84,18 +84,16 @@ export const getMeetingById = async (
  * Fetches past meeting instances for a recurring meeting.
  */
 export const getPastMeetingInstances = async (
-  meetingId: string,
+  meetingId: number,
   ZOOM_ACCESS_TOKEN: string
 ) => {
   try {
-    const encodedMeetingId = encodeUUID(meetingId);
     const response = await axiosZoomInstancie.get(
-      `/past_meetings/${encodedMeetingId}/instances`,
+      `/past_meetings/${meetingId}/instances`,
       {
         headers: {
           Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
         },
-        params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
     return (
@@ -143,19 +141,31 @@ export const getPastedMeetingParticipants = async (
 ) => {
   try {
     const encodedMeetingId = encodeUUID(meetingId);
-    const response = await axiosZoomInstancie.get(
-      `/past_meetings/${encodedMeetingId}/participants`,
-      {
-        headers: {
-          Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
-        },
-        params: { page_size: DEFAULT_PAGE_SIZE },
-      }
-    );
-    if (response.status !== 200)
-      throw new Error("Failed to fetch participants")
 
-    return response.data.participants?.filter(Boolean);
+    const participants = [];
+    let nextPageToken: string | undefined;
+
+    do {
+      const response = await axiosZoomInstancie.get(
+        `/past_meetings/${encodedMeetingId}/participants`,
+        {
+          headers: {
+            Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
+          },
+          params: nextPageToken
+            ? { next_page_token: nextPageToken, page_size: DEFAULT_PAGE_SIZE }
+            : { page_size: DEFAULT_PAGE_SIZE },
+        }
+      );
+
+      if (response.status !== 200)
+        throw new Error("Failed to fetch participants");
+
+      participants.push(...response.data.participant);
+      nextPageToken = response.data.next_page_token;
+    } while (nextPageToken);
+
+    return participants?.filter(Boolean);
   } catch (error) {
     console.error("Error fetching participants:", error);
     throw error;
@@ -176,12 +186,14 @@ export const getPastMeetingPolls = async (
         headers: {
           Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
         },
-        params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
     if (response.status !== 200) throw new Error("Failed to fetch polls");
-    return response.data;
+
+    console.log(response);
+    return response.data.polls;
   } catch (error) {
+    console.error(error);
     // If meeting polls are disabled (code 4400), return null instead of throwing
     const { response } = error as { response: { data: { code: number } } };
     if (response?.data?.code === 4400) {
@@ -208,7 +220,6 @@ export const getPastMeetingsPollResults = async (
         headers: {
           Authorization: `Bearer ${ZOOM_ACCESS_TOKEN}`,
         },
-        params: { page_size: DEFAULT_PAGE_SIZE },
       }
     );
     if (response.status !== 200)
