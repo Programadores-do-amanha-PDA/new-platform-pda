@@ -59,7 +59,7 @@ export const ProjectRuleSelector = ({
         const categoryRules = projectData[ruleLabel];
 
         if (!categoryRules) {
-          console.warn(
+          console.error(
             `Categoria ${ruleLabel} não encontrada no projeto ${projectRulesId}`
           );
           return (
