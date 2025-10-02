@@ -63,6 +63,11 @@ interface ZoomMeetingActions {
     account: Partial<ZoomAccountT>,
     pastInstances: Partial<ZoomMeetingPastInstanceT>[]
   ) => Promise<void>;
+  updateExistingPastInstances: (
+    meetingId: string,
+    account: Partial<ZoomAccountT>,
+    pastInstances: Partial<ZoomMeetingPastInstanceT>[]
+  ) => Promise<void>;
   fetchAllPastInstancesData: (
     account: Partial<ZoomAccountT>,
     pastInstances: Partial<ZoomMeetingPastInstanceT>[]
@@ -454,9 +459,17 @@ export const useZoomMeetingStore = create<
 
         if (!updatedMeeting) throw new Error("no meeting update response");
 
-        // Handle new past instances
+        // Handle past instances (both new and existing)
         if (past_instances && past_instances.length > 0) {
+          // Process new instances
           await get().processNewPastInstances(
+            meeting.id!,
+            account,
+            past_instances
+          );
+
+          // Update existing instances with fresh data
+          await get().updateExistingPastInstances(
             meeting.id!,
             account,
             past_instances
@@ -615,6 +628,96 @@ export const useZoomMeetingStore = create<
         toast.success(
           `${newPastInstances.length} novas instâncias passadas foram salvas!`
         );
+      },
+
+      updateExistingPastInstances: async (
+        meetingId: string,
+        account: Partial<ZoomAccountT>,
+        pastInstances: Partial<ZoomMeetingPastInstanceT>[]
+      ) => {
+        // Get existing past instances
+        const existingPastInstances = await useZoomMeetingPastInstanceStore
+          .getState()
+          .getAllPastInstancesByMeeting(meetingId);
+
+        if (!existingPastInstances) return;
+
+        const currentPastInstances =
+          useZoomMeetingPastInstanceStore.getState().pastInstances;
+        const existingUuids = new Set(
+          currentPastInstances.map((instance) => instance.uuid)
+        );
+
+        // Filter only existing instances that need to be updated
+        const existingInstancesToUpdate = pastInstances.filter(
+          (instance) => instance.uuid && existingUuids.has(instance.uuid)
+        );
+
+        if (existingInstancesToUpdate.length === 0) return;
+
+        // Fetch fresh participants and poll results for existing instances
+        const enrichedPastInstances = await get().fetchAllPastInstancesData(
+          account,
+          existingInstancesToUpdate
+        );
+
+        // Get classroom participants for visibility logic
+        const classroomParticipantsEmails = useUsersStore
+          .getState()
+          .users.filter((user) =>
+            user.profile?.classrooms
+              ?.map((c) => c.classroom_id)
+              .includes(account.classroom_id || "")
+          )
+          .map((user) => user.email)
+          .filter((email): email is string => email !== undefined);
+
+        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 1;
+
+        // Process existing instances for update
+        const existingInstancesUpdates = enrichedPastInstances
+          .map((instance) => {
+            const existingInstance = currentPastInstances.find(
+              (existing) => existing.uuid === instance.uuid
+            );
+
+            if (!existingInstance) return null;
+
+            const instanceParticipants = instance.participants ?? [];
+            const hasMatchingParticipants =
+              hasClassroomEmails && instanceParticipants.length > 1
+                ? instanceParticipants.some((p: ZoomMeetingParticipantT) =>
+                    classroomParticipantsEmails?.includes(p.user_email)
+                  )
+                : false;
+
+            const hasParticipantsOnInstance = hasClassroomEmails
+              ? hasMatchingParticipants
+              : instance.is_visible_on_schedule;
+
+            return {
+              instanceId: existingInstance.id,
+              updates: {
+                participants: instance.participants || [],
+                poll_results: instance.poll_results || [],
+                synchronized_at: new Date().toISOString(),
+                is_visible_on_schedule: hasParticipantsOnInstance,
+              },
+            };
+          })
+          .filter((item): item is NonNullable<typeof item> => item !== null);
+
+        // Update existing instances with fresh data
+        if (existingInstancesUpdates.length > 0) {
+          const pastInstanceStore = useZoomMeetingPastInstanceStore.getState();
+          for (const { instanceId, updates } of existingInstancesUpdates) {
+            await pastInstanceStore.updatePastInstanceById(instanceId, updates);
+          }
+
+          toast.success(
+            `${existingInstancesUpdates.length} instâncias existentes foram atualizadas com dados frescos!`
+          );
+        }
       },
 
       fetchAllPastInstancesData: async (
@@ -850,46 +953,82 @@ export const useZoomMeetingStore = create<
               );
 
               // Get existing instances from the store
-              const pastInstanceStore = useZoomMeetingPastInstanceStore.getState();
+              const pastInstanceStore =
+                useZoomMeetingPastInstanceStore.getState();
               await pastInstanceStore.getAllPastInstancesByMeeting(meeting.id!);
               const existingInstances = pastInstanceStore.pastInstances;
 
-              // Prepare instances for bulk refresh
-              const instancesToRefresh = enrichedPastInstances
+              // Separate new and existing instances
+              const newInstancesToCreate = pastInstancesData.filter(
+                (instanceData) =>
+                  !existingInstances.some(
+                    (existing) => existing.uuid === instanceData.uuid
+                  )
+              );
+
+              const existingInstancesToUpdate = enrichedPastInstances
                 .map((instance) => {
                   // Find existing instance by UUID
                   const existingInstance = existingInstances.find(
                     (existing) => existing.uuid === instance.uuid
                   );
-                  
+
                   if (existingInstance && instance.uuid) {
+                    const instanceParticipants = instance.participants ?? [];
+                    const hasMatchingParticipants =
+                      hasClassroomEmails && instanceParticipants.length > 1
+                        ? instanceParticipants.some(
+                            (p: ZoomMeetingParticipantT) =>
+                              classroomParticipantsEmails?.includes(
+                                p.user_email
+                              )
+                          )
+                        : false;
+
+                    const hasParticipantsOnInstance = hasClassroomEmails
+                      ? hasMatchingParticipants
+                      : instance.is_visible_on_schedule;
+
                     return {
                       instanceId: existingInstance.id,
-                      uuid: instance.uuid,
-                      account: account as ZoomAccountT,
+                      updates: {
+                        participants: instance.participants || [],
+                        poll_results: instance.poll_results || [],
+                        synchronized_at: new Date().toISOString(),
+                        is_visible_on_schedule: hasParticipantsOnInstance,
+                      },
                     };
                   }
                   return null;
                 })
-                .filter((item): item is NonNullable<typeof item> => item !== null);
-
-              // Create new instances for those that don't exist
-              const newInstancesToCreate = pastInstancesData.filter((instanceData) => 
-                !existingInstances.some((existing) => existing.uuid === instanceData.uuid)
-              );
+                .filter(
+                  (item): item is NonNullable<typeof item> => item !== null
+                );
 
               // Create new instances if any
               if (newInstancesToCreate.length > 0) {
-                await pastInstanceStore.createMultiplePastInstances(newInstancesToCreate);
+                await pastInstanceStore.createMultiplePastInstances(
+                  newInstancesToCreate
+                );
               }
 
-              // Refresh existing instances with latest data
-              if (instancesToRefresh.length > 0) {
-                await pastInstanceStore.refreshMultipleInstancesData(instancesToRefresh);
+              // Update existing instances with fresh data from API (no additional API calls needed)
+              if (existingInstancesToUpdate.length > 0) {
+                for (const {
+                  instanceId,
+                  updates,
+                } of existingInstancesToUpdate) {
+                  await pastInstanceStore.updatePastInstanceById(
+                    instanceId,
+                    updates
+                  );
+                }
               }
 
+              const totalProcessed =
+                newInstancesToCreate.length + existingInstancesToUpdate.length;
               toast.success(
-                `Todas as ${enrichedPastInstances.length} instâncias passadas foram atualizadas!`
+                `Todas as ${totalProcessed} instâncias passadas foram processadas (${newInstancesToCreate.length} novas, ${existingInstancesToUpdate.length} atualizadas)!`
               );
             } else {
               toast.info(
