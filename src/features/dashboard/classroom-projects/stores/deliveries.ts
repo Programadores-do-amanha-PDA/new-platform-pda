@@ -11,27 +11,35 @@ import {
 import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
 
 interface DeliveryState {
-  deliveries: ClassroomProjectDeliveryT[];
+  deliveries: Record<string, ClassroomProjectDeliveryT[]>;
   loading: boolean;
 }
 
 interface DeliveryActions {
-  setDeliveries: (deliveries: ClassroomProjectDeliveryT[]) => void;
+  setDeliveries: (
+    classroomId: string,
+    deliveries: ClassroomProjectDeliveryT[]
+  ) => void;
+  getDeliveriesForClassroom: (
+    classroomId: string
+  ) => ClassroomProjectDeliveryT[];
   getAllDeliveriesByProjectId: (projectId: string) => Promise<boolean>;
   getAllDeliveriesByClassroomId: (classroomId: string) => Promise<boolean>;
   createDelivery: (
-    deliveryData: Omit<Partial<ClassroomProjectDeliveryT>, "id" | "created_at">
+    deliveryData: Omit<Partial<ClassroomProjectDeliveryT>, "id" | "created_at">,
+    classroomId: string
   ) => Promise<boolean>;
   updateDelivery: (
     id: string,
-    deliveryData: Partial<ClassroomProjectDeliveryT>
+    deliveryData: Partial<ClassroomProjectDeliveryT>,
+    classroomId: string
   ) => Promise<boolean>;
-  deleteDelivery: (id: string) => Promise<boolean>;
+  deleteDelivery: (id: string, classroomId: string) => Promise<boolean>;
   reset: () => void;
 }
 
 const initialState: DeliveryState = {
-  deliveries: [],
+  deliveries: {},
   loading: false,
 };
 
@@ -40,7 +48,22 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
     (set, get) => ({
       ...initialState,
 
-      setDeliveries: (deliveries) => set({ deliveries }),
+      setDeliveries: (classroomId, deliveries) => {
+        const currentDeliveries = get().deliveries[classroomId] || [];
+        const existingIds = new Set(currentDeliveries.map((d) => d.id));
+        const newDeliveries = deliveries.filter((d) => !existingIds.has(d.id));
+
+        set((state) => ({
+          deliveries: {
+            ...state.deliveries,
+            [classroomId]: [...currentDeliveries, ...newDeliveries],
+          },
+        }));
+      },
+
+      getDeliveriesForClassroom: (classroomId) => {
+        return get().deliveries[classroomId] || [];
+      },
 
       getAllDeliveriesByProjectId: async (projectId) => {
         set({ loading: true });
@@ -48,7 +71,45 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
           if (!projectId) throw new Error("Project ID is required");
           const allDeliveries = await getAllDeliveriesByProjectId(projectId);
           if (!allDeliveries) throw new Error("No deliveries found");
-          set({ deliveries: allDeliveries });
+
+          // Group deliveries by classroom_id and prevent duplicates
+          const currentDeliveries = get().deliveries;
+          const deliveriesByClassroom = allDeliveries.reduce(
+            (acc, delivery) => {
+              const classroomId = delivery.classroom_id;
+              if (!acc[classroomId]) {
+                acc[classroomId] = [];
+              }
+
+              // Check if delivery already exists in current state
+              const existingDeliveries = currentDeliveries[classroomId] || [];
+              const existingIds = new Set(existingDeliveries.map((d) => d.id));
+
+              if (!existingIds.has(delivery.id)) {
+                acc[classroomId].push(delivery);
+              }
+              return acc;
+            },
+            {} as Record<string, ClassroomProjectDeliveryT[]>
+          );
+
+          // Merge with existing deliveries
+          set((state) => ({
+            deliveries: Object.keys(deliveriesByClassroom).reduce(
+              (acc, classroomId) => {
+                const existing = state.deliveries[classroomId] || [];
+                acc[classroomId] = [
+                  ...existing,
+                  ...deliveriesByClassroom[classroomId],
+                ];
+                return acc;
+              },
+              { ...state.deliveries } as Record<
+                string,
+                ClassroomProjectDeliveryT[]
+              >
+            ),
+          }));
           return true;
         } catch (error) {
           console.error(error);
@@ -67,7 +128,19 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
             classroomId
           );
           if (!allDeliveries) throw new Error("No deliveries found");
-          set({ deliveries: allDeliveries });
+
+          const currentDeliveries = get().deliveries[classroomId] || [];
+          const existingIds = new Set(currentDeliveries.map((d) => d.id));
+          const newDeliveries = allDeliveries.filter(
+            (d) => !existingIds.has(d.id)
+          );
+
+          set((state) => ({
+            deliveries: {
+              ...state.deliveries,
+              [classroomId]: [...currentDeliveries, ...newDeliveries],
+            },
+          }));
           return true;
         } catch (error) {
           console.error(error);
@@ -78,18 +151,31 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
         }
       },
 
-      createDelivery: async (deliveryData) => {
+      createDelivery: async (deliveryData, classroomId) => {
         try {
           if (!deliveryData.project_id || !deliveryData.user_id) {
             throw new Error("Project ID and user ID are required");
           }
-          const deliveryCreated = await createClassroomProjectDelivery(
-            deliveryData
-          );
-          if (!deliveryCreated) throw new Error("Delivery creation failed");
-          set({
-            deliveries: [...get().deliveries, deliveryCreated],
+          if (!classroomId) throw new Error("Classroom ID is required");
+
+          const deliveryCreated = await createClassroomProjectDelivery({
+            ...deliveryData,
+            classroom_id: classroomId,
           });
+          if (!deliveryCreated) throw new Error("Delivery creation failed");
+
+          const currentDeliveries = get().deliveries[classroomId] || [];
+          const existingIds = new Set(currentDeliveries.map((d) => d.id));
+
+          // Only add if delivery doesn't already exist
+          if (!existingIds.has(deliveryCreated.id)) {
+            set((state) => ({
+              deliveries: {
+                ...state.deliveries,
+                [classroomId]: [...currentDeliveries, deliveryCreated],
+              },
+            }));
+          }
           toast.success("Entrega criada com sucesso!");
           return true;
         } catch (error) {
@@ -99,21 +185,28 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
         }
       },
 
-      updateDelivery: async (id, deliveryData) => {
+      updateDelivery: async (id, deliveryData, classroomId) => {
         try {
           if (!id || !deliveryData) {
             throw new Error("Delivery ID and update data are required");
           }
+          if (!classroomId) throw new Error("Classroom ID is required");
+
           const updatedDelivery = await updateClassroomProjectDeliveryById(
             id,
             deliveryData
           );
           if (!updatedDelivery) throw new Error("Delivery update failed");
-          set({
-            deliveries: get().deliveries.map((delivery) =>
-              delivery.id === updatedDelivery.id ? updatedDelivery : delivery
-            ),
-          });
+
+          const currentDeliveries = get().deliveries[classroomId] || [];
+          set((state) => ({
+            deliveries: {
+              ...state.deliveries,
+              [classroomId]: currentDeliveries.map((delivery) =>
+                delivery.id === updatedDelivery.id ? updatedDelivery : delivery
+              ),
+            },
+          }));
           toast.success("Entrega atualizada com sucesso!");
           return true;
         } catch (error) {
@@ -123,16 +216,23 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
         }
       },
 
-      deleteDelivery: async (id) => {
+      deleteDelivery: async (id, classroomId) => {
         try {
           if (!id) throw new Error("Delivery ID is required");
+          if (!classroomId) throw new Error("Classroom ID is required");
+
           const success = await deleteDeliveryById(id);
           if (!success) throw new Error("Delivery deletion failed");
-          set({
-            deliveries: get().deliveries.filter(
-              (delivery) => delivery.id !== id
-            ),
-          });
+
+          const currentDeliveries = get().deliveries[classroomId] || [];
+          set((state) => ({
+            deliveries: {
+              ...state.deliveries,
+              [classroomId]: currentDeliveries.filter(
+                (delivery) => delivery.id !== id
+              ),
+            },
+          }));
           toast.success("Entrega deletada com sucesso!");
           return true;
         } catch (error) {

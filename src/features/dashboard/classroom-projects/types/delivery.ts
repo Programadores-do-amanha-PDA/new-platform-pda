@@ -1,6 +1,7 @@
 export interface ClassroomProjectDeliveryT {
   id: string;
   project_id: string;
+  classroom_id: string;
   user_id: string;
   members: string[];
   members_id: string[];
