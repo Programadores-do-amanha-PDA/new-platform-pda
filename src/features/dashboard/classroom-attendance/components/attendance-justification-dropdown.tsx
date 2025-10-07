@@ -9,11 +9,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/classroom-zoom";
 import { Loader, Pen, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../classroom-zoom/stores";
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
 
 export function AttendanceJustificationDropdown({
   currentMeeting,

@@ -7,7 +7,7 @@ import { generateNoAccessSidebarConfig } from "@/providers/admin/sidebar-config"
 import PageLoader from "@/components/shared/page-loader";
 import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
-import NoAccessPage from "@/components/shared/no-access-page";
+import NoAccessPage from "@/components/shared/empty-states/no-access-page";
 import pathLabels from "@/utils/path-labels";
 import { SidebarDataT } from "@/types/sidebar";
 

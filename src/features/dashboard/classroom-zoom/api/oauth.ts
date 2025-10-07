@@ -1,7 +1,7 @@
 "use server";
-import { ZoomAccountT } from "@/types/classroom-zoom";
 import { Buffer } from "buffer";
 import { cookies } from "next/headers";
+import { ZoomAccountT } from "../types";
 
 type TokenData = {
   access_token: string;

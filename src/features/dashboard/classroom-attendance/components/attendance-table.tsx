@@ -2,6 +2,8 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { isWithinInterval } from "date-fns";
+import { DateRange } from "react-day-picker";
+import Color from "color";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -27,17 +29,18 @@ import {
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { AuthUserWithProfileT, ProfileT, ZoomMeetingT } from "@/types";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
+import { useZoomMeetingPastInstanceStore } from "@/features/dashboard/classroom-zoom/stores/past-instances";
+import { AuthUserWithProfileT, ProfileT } from "@/types";
 import { calculateUserAttendance } from "@/utils/attendance-calculator";
+import {
+  ZoomMeetingPastInstanceT,
+  ZoomMeetingT,
+} from "../../classroom-zoom/types";
 import { calculateClassPresence } from "../utils/class-presence";
-import { DateRange } from "react-day-picker";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import Color from "color";
 
 interface AttendanceTableProps {
   users: Partial<AuthUserWithProfileT>[];

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -9,7 +10,6 @@ import {
   YAxis,
   ReferenceLine,
 } from "recharts";
-import { ArrowRight } from "lucide-react";
 import {
   Card,
   CardContent,

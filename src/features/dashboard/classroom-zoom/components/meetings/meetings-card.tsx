@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -8,24 +9,25 @@ import {
   LoaderCircle,
   RefreshCw,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
+
+import {
+  useZoomAccountStore,
+  useZoomMeetingStore,
+  useZoomMeetingPastInstanceStore,
+} from "../../stores";
 import {
   RECURRING_MEETING_TYPES,
   isFutureMeeting,
   formatDateTime,
   formatDate,
   getMeetingType,
-} from "../../utils/meeting-utils";
-import {
   getMeetingPastInstances,
   getUpcomingOccurrences,
   refreshMeetingData,
-} from "@features/dashboard/classroom-zoom/utils/meeting-card-utils";
+} from "../../utils";
 import {
   CalendarButtonProps,
   MeetingHeaderProps,
@@ -33,7 +35,7 @@ import {
   MeetingStatsProps,
   RefreshButtonProps,
   ZoomMeetingsCardProps,
-} from "../../meetings-card";
+} from "../../types";
 
 const MeetingHeader = ({ meeting, classroomId }: MeetingHeaderProps) => (
   <div className="flex flex-col gap-1">
@@ -194,7 +196,7 @@ export default function ZoomMeetingsCard({
   const [loading, setLoading] = useState(false);
 
   const { accounts } = useZoomAccountStore();
-  const { refreshAndUpdateMeeting } = useZoomMeetingStore();
+  const { refreshAndAddOnlyNewPastInstances } = useZoomMeetingStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
 
   const meetingPastInstances = getMeetingPastInstances(
@@ -207,7 +209,7 @@ export default function ZoomMeetingsCard({
     await refreshMeetingData({
       meeting,
       accounts,
-      refreshAndUpdateMeeting,
+      refreshAndAddOnlyNewPastInstances,
       setLoading,
       setAllMeetingLoading,
     });

@@ -1,6 +1,6 @@
 "use server";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "@/types/classroom-zoom";
-import axiosZoomInstancie from ".";
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../types"; 
+import axiosZoomInstancie from "./instancie";
 import { encodeUUID } from "@/utils/encode-UUID";
 
 // Zoom API supports max 300 participants per page for past meeting participants

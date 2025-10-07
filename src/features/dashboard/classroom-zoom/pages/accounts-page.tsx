@@ -1,8 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
+
+import { useZoomAccountStore } from "../stores/accounts";
 import CreateAccountDialog from "../components/accounts/create-account-dialog";
 import ZoomAccountCard from "../components/accounts/account-card";
 
@@ -37,9 +39,7 @@ export default function AccountsPage() {
           className="max-w-xs min-w-72 "
         />
 
-        <CreateAccountDialog
-          classroom_id={classroom_id}
-        />
+        <CreateAccountDialog classroom_id={classroom_id} />
       </header>
 
       <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto">

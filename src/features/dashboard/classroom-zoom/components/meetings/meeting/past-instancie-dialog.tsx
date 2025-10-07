@@ -1,13 +1,7 @@
 "use client";
 import { ArrowUpDown } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -17,6 +11,15 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { cn } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -25,17 +28,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom";
+
 import {
+  useZoomMeetingPastInstanceStore,
+  useZoomMeetingStore,
+  useZoomAccountStore,
+} from "../../../stores";
+import {
+  ZoomMeetingPastInstanceT,
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
-} from "@/types/classroom-zoom/meetings"; // Adjust path if needed
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { RefreshCw } from "lucide-react";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
+} from "../../../types";
 
 // Utility function to format seconds to HH:MM:SS
 const formatDuration = (seconds: number): string => {

@@ -1,10 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
-import { LoaderCircle } from "lucide-react";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomAPIStore } from "@/stores/modules/classrooms/zoom/api";
+import { ArrowUpLeft, LoaderCircle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -25,17 +25,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import MeetingsSheetDataItem from "./meetings-sheet-data-item";
-import { ZoomAccountT, ZoomMeetingT } from "@/types/classroom-zoom";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import EmptyState from "@/components/shared/empty-states/empty-state";
 
-export default function MeetingsSheetData({
-  classroom_id,
-}: {
-  classroom_id: string;
-}) {
+import {
+  useZoomAccountStore,
+  useZoomMeetingStore,
+  useZoomAPIStore,
+} from "../../stores";
+import MeetingsSheetDataItem from "./meetings-sheet-data-item";
+import { ZoomAccountT, ZoomMeetingT } from "../../types";
+
+const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [meetingsSearch, setMeetingsSearch] = useState<string>("");
   const [selectedAccount, setSelectedAccount] = useState<string | "all">("all");
   const [isAddingMeeting, setIsAddingMeeting] = useState<string | null>(null);
@@ -50,10 +57,10 @@ export default function MeetingsSheetData({
   useEffect(() => {
     const loadMeetings = async () => {
       if (openModal) {
-        setLoading(true);
+        setIsLoading(true);
 
         const filteredAccounts = accounts.filter(
-          (account) => account.classroom_id === classroom_id
+          (account) => account.classroom_id === classroomId
         );
         setClassroomZoomAccounts(filteredAccounts);
 
@@ -61,9 +68,9 @@ export default function MeetingsSheetData({
           await getAllMeetingsByAPI(account);
         }
 
-        setLoading(false);
+        setIsLoading(false);
       } else {
-        setLoading(false);
+        setIsLoading(false);
         setMeetingsSearch("");
         setSelectedAccount("all");
         setIsAddingMeeting(null);
@@ -72,9 +79,9 @@ export default function MeetingsSheetData({
     };
 
     loadMeetings();
-  }, [openModal, classroom_id]);
+  }, [openModal, classroomId]);
 
-  // Memoize IDs para evitar recalcular a cada iteração
+  // Memorizing IDs
   const existingMeetingIds = new Set(meetings.map((m) => m.meeting_id));
   const existingIds = new Set(meetings.map((m) => m.id));
 
@@ -85,22 +92,17 @@ export default function MeetingsSheetData({
   );
 
   const filteredMeetings = classroomMeetingsByAPI.filter((meeting) => {
-    // Remove reuniões já adicionadas
     if (existingMeetingIds.has(meeting.meeting_id)) return false;
-    // Filtro por busca de texto
     if (meetingsSearch) {
       const searchMatch = meeting.topic
         .toLowerCase()
         .includes(meetingsSearch.toLowerCase());
 
-      // Se não há reuniões existentes, apenas verifica a busca
       if (!meetings.length) return searchMatch;
 
-      // Verifica busca e se não está duplicado
       return searchMatch && !existingIds.has(meeting.id);
     }
 
-    // Sem busca, apenas verifica se não está duplicado
     return !existingIds.has(meeting.id);
   });
 
@@ -129,13 +131,23 @@ export default function MeetingsSheetData({
             Adicione abaixo as reuniões do Zoom que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
-        <main className="h-full flex flex-col gap-4 py-2 overflow-hidden">
-          <div className="flex gap-2 p-2">
-            <Input
-              placeholder="Procurar reuniões..."
-              onChange={(e) => setMeetingsSearch(e.target.value)}
-              value={meetingsSearch}
-            />
+        <main className="h-full flex flex-col gap-0 overflow-hidden">
+          <header className="flex flex-col items-end gap-4 p-2">
+            <InputGroup>
+              <InputGroupInput
+                placeholder="Procurar reuniões..."
+                onChange={(e) => setMeetingsSearch(e.target.value)}
+                value={meetingsSearch}
+              />
+              <InputGroupAddon>
+                <Search />
+              </InputGroupAddon>
+              {meetingsSearch.length > 0 && (
+                <InputGroupAddon align="inline-end">
+                  {filteredMeetings.length} resultados
+                </InputGroupAddon>
+              )}
+            </InputGroup>
             <Select onValueChange={setSelectedAccount} value={selectedAccount}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Todas as contas" />
@@ -157,9 +169,9 @@ export default function MeetingsSheetData({
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </header>
 
-          {!loading ? (
+          {filteredMeetings.length > 0 ? (
             <ul className="p-2 h-full flex flex-col gap-4 overflow-y-auto">
               {filteredMeetings.map((meeting: ZoomMeetingT) => (
                 <MeetingsSheetDataItem
@@ -169,39 +181,59 @@ export default function MeetingsSheetData({
                   handleAddMeeting={handleAddMeeting}
                 />
               ))}
-
-              {filteredMeetings.length === 0 && (
-                <div className="flex flex-col gap-2 h-full items-center justify-center">
-                  <h2 className="text-sm font-bold text-gray-800">
-                    {meetingsSearch
-                      ? "Não há reuniões com esse título"
-                      : "Não há reuniões disponíveis"}
-                  </h2>
-                  <i className="text-xs text-muted-foreground text-center">
-                    {meetingsSearch
-                      ? "(Reuniões que já estão associadas não aparecem aqui.)"
-                      : "(Selecione outra conta ou verifique as reuniões existentes.)"}
-                  </i>
-                </div>
-              )}
             </ul>
           ) : (
-            <div className="h-full w-full flex items-center justify-center">
-              <LoaderCircle className="size-6 stroke-primary animate-spin" />
+            <div className="flex w-full h-full items-center justify-center">
+              <EmptyState
+                icon={<Search className="size-6 stroke-primary" />}
+                title={
+                  meetingsSearch
+                    ? "Nenhuma reunião encontrada..."
+                    : "Não há reuniões disponíveis"
+                }
+                description={
+                  meetingsSearch
+                    ? "Reuniões que já estão associadas não aparecem aqui."
+                    : accounts.length > 0
+                    ? "Selecione outra conta ou verifique as reuniões existentes."
+                    : "Adicione uma conta do Zoom para conseguir ver as reuniões!!"
+                }
+                action={
+                  <SheetClose asChild>
+                    <Button variant="link" asChild>
+                      <Link
+                        href={`/dashboard/classrooms/${classroomId}/zoom/accounts`}
+                      >
+                        <ArrowUpLeft /> Ir para Zoom Accounts
+                      </Link>
+                    </Button>
+                  </SheetClose>
+                }
+              />
             </div>
           )}
+
+          {isLoading && (
+            <>
+              <div className="h-full w-full flex items-center justify-center">
+                <LoaderCircle className="size-6 stroke-primary animate-spin" />
+              </div>
+              <SheetFooter>
+                <SheetClose asChild>
+                  <Button
+                    className="font-semibold cursor-pointer"
+                    disabled={isAddingMeeting !== null || isLoading}
+                  >
+                    Finalizar
+                  </Button>
+                </SheetClose>
+              </SheetFooter>
+            </>
+          )}
         </main>
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button
-              className="font-semibold cursor-pointer"
-              disabled={isAddingMeeting !== null || loading}
-            >
-              Finalizar
-            </Button>
-          </SheetClose>
-        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
-}
+};
+
+export default MeetingsSheetData;

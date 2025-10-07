@@ -1,19 +1,20 @@
 "use client";
+
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import ZoomAccountCard from "../components/accounts/account-card";
+
+import {
+  useZoomMeetingStore,
+  useZoomAccountStore,
+  useZoomMeetingPastInstanceStore,
+} from "../stores";
 import { MeetingsParticipantsChart } from "../components/meetings-participants-chart";
-import { ZoomMeetingParticipantT } from "@/types";
+import ZoomAccountCard from "../components/accounts/account-card";
+import { ZoomMeetingParticipantT } from "../types";
 
 export default function ZoomHomePage() {
-  const params = useParams();
-  const classroom_id = Array.isArray(params.classroom_id)
-    ? params.classroom_id[0]
-    : params.classroom_id || "";
+  const { classroom_id } = useParams<{ classroom_id: string }>();
   const { accounts } = useZoomAccountStore();
   const { meetings } = useZoomMeetingStore();
   const { pastInstances } = useZoomMeetingPastInstanceStore();
@@ -29,12 +30,14 @@ export default function ZoomHomePage() {
           const account_label = account?.me?.display_name || "Conta sem nome";
           const participantGroups = new Map<string, ZoomMeetingParticipantT>();
 
-          instance?.participants?.forEach((participant) => {
-            const existing = participantGroups.get(participant.user_email);
-            if (!existing) {
-              participantGroups.set(participant.user_email, participant);
+          instance?.participants?.forEach(
+            (participant: ZoomMeetingParticipantT) => {
+              const existing = participantGroups.get(participant.user_email);
+              if (!existing) {
+                participantGroups.set(participant.user_email, participant);
+              }
             }
-          });
+          );
 
           return {
             account_id: instance.account_id,
@@ -57,12 +60,14 @@ export default function ZoomHomePage() {
           const account = accounts.find((acc) => acc.id === meeting.account_id);
           const account_label = account?.me?.display_name || "Conta sem nome";
           const participantGroups = new Map<string, ZoomMeetingParticipantT>();
-          meeting?.participants?.forEach((participant) => {
-            const existing = participantGroups.get(participant.user_email);
-            if (!existing) {
-              participantGroups.set(participant.user_email, participant);
+          meeting?.participants?.forEach(
+            (participant: ZoomMeetingParticipantT) => {
+              const existing = participantGroups.get(participant.user_email);
+              if (!existing) {
+                participantGroups.set(participant.user_email, participant);
+              }
             }
-          });
+          );
 
           return {
             account_id: meeting.account_id,

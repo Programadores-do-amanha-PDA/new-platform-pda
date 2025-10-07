@@ -1,22 +1,21 @@
 "use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, RefreshCw } from "lucide-react";
-
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import { useZoomMeetingStore, useZoomAccountStore } from "../stores";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import {
   ZoomMeetingParticipantT,
   ZoomMeetingPollResultsT,
   ZoomMeetingT,
-} from "@/types/classroom-zoom/meetings";
-import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
+} from "../types";
 
 const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
   {

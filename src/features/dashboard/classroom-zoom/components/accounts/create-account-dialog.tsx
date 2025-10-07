@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
+
+import { useZoomAccountStore } from "../../stores";
+import { ZoomAccountT } from "../../types";
 
 export default function CreateAccountDialog({
   classroom_id,
@@ -31,7 +32,6 @@ export default function CreateAccountDialog({
   });
 
   const { createAccount } = useZoomAccountStore();
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -54,7 +54,7 @@ export default function CreateAccountDialog({
       });
 
       if (!account) throw new Error("no account created");
-      
+
       toast.success("Conta criada com sucesso!");
       setOpen(false);
       setAccountData({
@@ -92,7 +92,8 @@ export default function CreateAccountDialog({
         <DialogHeader>
           <DialogTitle>Adicionar Nova Conta</DialogTitle>
           <DialogDescription>
-            Adicione as informações de conexão do App server to server da conta do Zoom.
+            Adicione as informações de conexão do App server to server da conta
+            do Zoom.
           </DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-6 py-4" onSubmit={handleSubmit}>

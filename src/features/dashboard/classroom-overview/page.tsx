@@ -10,8 +10,6 @@ import {
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { useCoodeshAssessmentStore } from "../classroom-coodesh/stores/assessments";
 import {
@@ -25,6 +23,7 @@ import { useDeliveryStore } from "../classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "../classroom-projects/stores/corrections";
 import { filterClassroomStudents } from "../utils/filter-classroom-students";
 import { filterDataByDateRange } from "../utils/filter-data-by-date-range";
+import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../classroom-zoom/stores";
 
 export default function ClassroomAttendancePage() {
   const params = useParams();

@@ -6,18 +6,23 @@ import React, {
   useCallback,
   ReactNode,
 } from "react";
-import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+
+import useAuth from "@/hooks/use-auth";
 import PageLoader from "@/components/shared/page-loader";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
+
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+
+import {
+  useZoomMeetingStore,
+  useZoomMeetingPastInstanceStore,
+} from "@/features/dashboard/classroom-zoom/stores";
 import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
 import { useProjectStore } from "@/features/dashboard/classroom-projects/stores";
 import { useDeliveryStore } from "@/features/dashboard/classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "@/features/dashboard/classroom-projects/stores/corrections";
-import useAuth from "@/hooks/use-auth";
+import { useZoomAccountStore } from "@/features/dashboard/classroom-zoom/stores/accounts";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;

@@ -1,5 +1,5 @@
 "use server"
-import axiosZoomInstancie from ".";
+import axiosZoomInstancie from "./instancie";
 
 export const getMeAccount = async (ZOOM_ACCESS_TOKEN: string) => {
   try {

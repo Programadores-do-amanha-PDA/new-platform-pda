@@ -8,8 +8,9 @@ import {
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
-import { useZoomAPIStore } from "./api";
-import { useZoomMeetingPastInstanceStore } from "./past-instances";
+import { useUsersStore } from "@/stores/modules/users/users-store";
+
+import { useZoomMeetingPastInstanceStore, useZoomAPIStore } from "./";
 import {
   ZoomAccountT,
   ZoomMeetingOccurrenceT,
@@ -17,73 +18,10 @@ import {
   ZoomMeetingWithPastInstancies,
   ZoomMeetingPastInstanceT,
   ZoomMeetingParticipantT,
-} from "@/types";
-import { useUsersStore } from "../../users/users-store";
-
-interface ZoomMeetingState {
-  meetings: ZoomMeetingT[];
-  loading: boolean;
-}
-
-interface ZoomMeetingActions {
-  setMeetings: (meetings: ZoomMeetingT[]) => void;
-  getAllMeetings: (classroomId: string) => Promise<boolean>;
-  getMeetingById: (meetingId: string) => Promise<ZoomMeetingT | boolean>;
-  createMeeting: (
-    account: Partial<ZoomAccountT>,
-    meetingData: Partial<ZoomMeetingT>
-  ) => Promise<string | false>;
-  updateMeeting: (
-    meetingId: string,
-    updates: Partial<ZoomMeetingT>
-  ) => Promise<boolean>;
-  updateMeetingOccurrence: (
-    meetingId: string,
-    occurrenceId: string,
-    updates: Partial<ZoomMeetingOccurrenceT>
-  ) => Promise<boolean>;
-  refreshAndUpdateMeeting: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
-  ) => Promise<boolean>;
-  handleRecurrentMeetingUpdate: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>,
-    currentMeeting: ZoomMeetingT,
-    updatedMeetingData: Omit<ZoomMeetingWithPastInstancies, "id" | "created_at">
-  ) => Promise<void>;
-  handleNonRecurrentMeetingUpdate: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>,
-    currentMeeting: ZoomMeetingT,
-    updatedMeetingData: Partial<ZoomMeetingT>
-  ) => Promise<void>;
-  processNewPastInstances: (
-    meetingId: string,
-    account: Partial<ZoomAccountT>,
-    pastInstances: Partial<ZoomMeetingPastInstanceT>[]
-  ) => Promise<void>;
-  updateExistingPastInstances: (
-    meetingId: string,
-    account: Partial<ZoomAccountT>,
-    pastInstances: Partial<ZoomMeetingPastInstanceT>[]
-  ) => Promise<void>;
-  fetchAllPastInstancesData: (
-    account: Partial<ZoomAccountT>,
-    pastInstances: Partial<ZoomMeetingPastInstanceT>[]
-  ) => Promise<Partial<ZoomMeetingPastInstanceT>[]>;
-  fetchNewPastInstancesData: (
-    account: Partial<ZoomAccountT>,
-    pastInstances: Partial<ZoomMeetingPastInstanceT>[],
-    existingUuids: Set<string>
-  ) => Promise<Partial<ZoomMeetingPastInstanceT>[]>;
-  refreshAllPastInstancesForMeeting: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
-  ) => Promise<boolean>;
-  deleteMeeting: (meetingId: string) => Promise<boolean>;
-  reset: () => void;
-}
+  ZoomMeetingState,
+  ZoomMeetingActions,
+} from "../types";
+import { NON_RECURRING_MEETING_TYPES, RECURRING_MEETING_TYPES } from "../utils";
 
 const initialState: ZoomMeetingState = {
   meetings: [],
@@ -150,21 +88,12 @@ export const useZoomMeetingStore = create<
             .getMeetingByAPI(account, meetingData);
           if (!meetingResponse) throw new Error("no meeting response");
 
-          const meetingEndTime = new Date(
-            new Date(
-              meetingData.start_time || meetingData.created_at || 0
-            ).getTime() +
-              (meetingData?.duration || 0) * 60000
-          ).getTime();
-
-          // Lógica para reuniões recorrentes
+          // Recurrence meeting process
           if (
-            meetingResponse &&
-            ("past_instances" in meetingResponse ||
-              meetingResponse.type === 8 ||
-              meetingResponse.type === 3)
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              meetingResponse.type
+            )
           ) {
-            // Reunião recorrente - buscar todas as instâncias passadas
             const meetingWithPastInstances = meetingResponse as Omit<
               ZoomMeetingWithPastInstancies,
               "id" | "created_at"
@@ -172,10 +101,10 @@ export const useZoomMeetingStore = create<
             const { past_instances, ...restOfMeeting } =
               meetingWithPastInstances;
 
+            // saving meeting data
             loadingToastId = toast.loading(
               "Criando a reunião, por favor aguarde..."
             );
-
             const newMeeting = await createZoomMeetingByClassroomId({
               ...meetingData,
               synchronized_at: new Date().toISOString(),
@@ -183,25 +112,28 @@ export const useZoomMeetingStore = create<
               classroom_id: account?.classroom_id,
             });
             if (!newMeeting) throw new Error("no meeting create response");
+            if (loadingToastId) toast.dismiss(loadingToastId);
 
-            // Criar instâncias passadas se existirem
+            // create all past instancies if exists
             if (past_instances && past_instances.length > 0) {
+              const classroomParticipantsEmails = useUsersStore
+                .getState()
+                .users.filter((user) =>
+                  user.profile?.classrooms
+                    ?.map((c) => c.classroom_id)
+                    .includes(account.classroom_id || "")
+                )
+                .map((user) => user.email)
+                .filter((email): email is string => email !== undefined);
+
+              const hasClassroomEmails =
+                classroomParticipantsEmails?.length ?? 0 > 2;
+
               const pastInstancesData = past_instances.map((instance) => {
-                const classroomParticipantsEmails = useUsersStore
-                  .getState()
-                  .users.filter((user) =>
-                    user.profile?.classrooms
-                      ?.map((c) => c.classroom_id)
-                      .includes(account.classroom_id || "")
-                  )
-                  .map((user) => user.email)
-                  .filter((email): email is string => email !== undefined);
-                const hasClassroomEmails =
-                  classroomParticipantsEmails?.length ?? 0 > 1;
                 const instanceParticipants = instance.participants ?? [];
 
                 const hasMatchingParticipants =
-                  hasClassroomEmails && instanceParticipants.length > 1
+                  hasClassroomEmails && instanceParticipants.length > 2
                     ? instanceParticipants.some((p) =>
                         classroomParticipantsEmails?.includes(p.user_email)
                       )
@@ -212,72 +144,42 @@ export const useZoomMeetingStore = create<
                   : instance.is_visible_on_schedule;
 
                 return {
-                  classroom_id: account.classroom_id,
-                  account_id: account.id,
+                  classroom_id: account.classroom_id!,
+                  account_id: account.id!,
                   meeting_id: newMeeting.id,
-                  uuid: instance.uuid,
+                  uuid: instance.uuid!,
                   start_time: instance.start_time,
                   class_type: instance.class_type,
                   participants: instance.participants || [],
                   poll_results: instance.poll_results || [],
                   justifications: instance.justifications || [],
-                  synchronized_at: new Date().toISOString(),
                   is_visible_on_schedule: hasParticipantsOnInstance,
                 };
               });
 
+              loadingToastId = toast.loading(
+                "Criando todas as instancias passadas da reunião, por favor aguarde..."
+              );
               await useZoomMeetingPastInstanceStore
                 .getState()
                 .createMultiplePastInstances(pastInstancesData);
             }
+            if (loadingToastId) toast.dismiss(loadingToastId);
 
             set({ meetings: [newMeeting, ...get().meetings] });
-            toast.dismiss(loadingToastId);
             toast.success(`Reunião "${newMeeting.topic}" criada com sucesso!`);
             return newMeeting.id as string;
-          } else {
-            let meetingToCreate;
-            // Reunião futura
-            if (meetingEndTime > Date.now()) {
-              meetingToCreate = {
-                ...meetingResponse,
-                participants: [],
-                account_id: account.id,
-              };
-            }
-            // Reunião passada
-            else {
-              const participants = await useZoomAPIStore
-                .getState()
-                .getAllParticipantsByMeetingIdFromAPI(
-                  account,
-                  meetingData.meeting_id
-                );
-              const pollResults = await useZoomAPIStore
-                .getState()
-                .getAllPollResultsByMeetingIdFromAPI(
-                  account,
-                  meetingData.meeting_id
-                );
-
-              meetingToCreate = {
-                ...meetingResponse,
-                participants: participants || [],
-                account_id: account.id,
-              };
-
-              if (pollResults && pollResults.length > 0) {
-                (meetingToCreate as ZoomMeetingT).poll_results = pollResults;
-              }
-            }
-
+          } else if (
+            (NON_RECURRING_MEETING_TYPES as readonly number[]).includes(
+              meetingResponse.type
+            )
+          ) {
             loadingToastId = toast.loading(
               "Criando a reunião, por favor aguarde..."
             );
             const newMeeting = await createZoomMeetingByClassroomId({
               ...meetingData,
               synchronized_at: new Date().toISOString(),
-              ...meetingToCreate,
               classroom_id: account?.classroom_id,
             });
             if (!newMeeting) throw new Error("no meeting create response");
@@ -292,7 +194,7 @@ export const useZoomMeetingStore = create<
           toast.error("Erro ao criar nova reunião!");
           return false;
         } finally {
-          toast.dismiss(loadingToastId);
+          if (loadingToastId) toast.dismiss(loadingToastId);
         }
       },
 
@@ -437,7 +339,8 @@ export const useZoomMeetingStore = create<
         updatedMeetingData: Omit<
           ZoomMeetingWithPastInstancies,
           "id" | "created_at"
-        >
+        >,
+        instanciesUpdateMode: "new" | "existing" | "all" = "all"
       ) => {
         const { past_instances, ...restOfMeeting } = updatedMeetingData;
 
@@ -445,15 +348,7 @@ export const useZoomMeetingStore = create<
         const updatedMeeting = await updateZoomMeetingById(meeting.id!, {
           ...currentMeeting,
           ...restOfMeeting,
-          occurrences: updatedMeetingData?.occurrences?.map((occurrence) => {
-            const currentOccurrence = currentMeeting?.occurrences?.find(
-              (currentOccurrence) =>
-                currentOccurrence.occurrence_id === occurrence.occurrence_id
-            );
-            return currentOccurrence
-              ? { ...occurrence, ...currentOccurrence }
-              : occurrence;
-          }),
+          occurrences: updatedMeetingData?.occurrences || [],
           synchronized_at: new Date().toISOString(),
         });
 
@@ -462,18 +357,32 @@ export const useZoomMeetingStore = create<
         // Handle past instances (both new and existing)
         if (past_instances && past_instances.length > 0) {
           // Process new instances
-          await get().processNewPastInstances(
-            meeting.id!,
-            account,
-            past_instances
-          );
-
+          if (instanciesUpdateMode === "new") {
+            await get().processNewPastInstances(
+              meeting.id!,
+              account,
+              past_instances
+            );
+          }
           // Update existing instances with fresh data
-          await get().updateExistingPastInstances(
-            meeting.id!,
-            account,
-            past_instances
-          );
+          else if (instanciesUpdateMode === "existing") {
+            await get().updateExistingPastInstances(
+              meeting.id!,
+              account,
+              past_instances
+            );
+          } else if (instanciesUpdateMode === "all") {
+            await get().processNewPastInstances(
+              meeting.id!,
+              account,
+              past_instances
+            );
+            await get().updateExistingPastInstances(
+              meeting.id!,
+              account,
+              past_instances
+            );
+          }
         }
 
         // Update state
@@ -537,7 +446,6 @@ export const useZoomMeetingStore = create<
           ),
           synchronized_at: new Date().toISOString(),
         });
-
         if (!updatedMeeting) throw new Error("no meeting update response");
 
         set({
@@ -552,15 +460,16 @@ export const useZoomMeetingStore = create<
         account: Partial<ZoomAccountT>,
         pastInstances: Partial<ZoomMeetingPastInstanceT>[]
       ) => {
-        // Get existing past instances to avoid duplicates
+        // Get existing past instances to avoid duplicates (without overwriting state)
         const existingPastInstances = await useZoomMeetingPastInstanceStore
           .getState()
-          .getAllPastInstancesByMeeting(meetingId);
+          ._getPastInstancesByMeetingId(meetingId);
 
         if (!existingPastInstances) return;
 
-        const currentPastInstances =
-          useZoomMeetingPastInstanceStore.getState().pastInstances;
+        const currentPastInstances = Array.isArray(existingPastInstances)
+          ? existingPastInstances
+          : useZoomMeetingPastInstanceStore.getState().pastInstances;
         const existingUuids = new Set(
           currentPastInstances.map((instance) => instance.uuid)
         );
@@ -590,13 +499,13 @@ export const useZoomMeetingStore = create<
           .map((user) => user.email)
           .filter((email): email is string => email !== undefined);
 
-        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 1;
+        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 2;
 
         // Process new instances with participants and poll results
         const pastInstancesData = enrichedPastInstances.map((instance) => {
           const instanceParticipants = instance.participants ?? [];
           const hasMatchingParticipants =
-            hasClassroomEmails && instanceParticipants.length > 1
+            hasClassroomEmails && instanceParticipants.length > 2
               ? instanceParticipants.some((p: ZoomMeetingParticipantT) =>
                   classroomParticipantsEmails?.includes(p.user_email)
                 )
@@ -610,7 +519,7 @@ export const useZoomMeetingStore = create<
             classroom_id: account.classroom_id!,
             account_id: account.id!,
             meeting_id: meetingId!,
-            uuid: instance.uuid,
+            uuid: instance.uuid!,
             start_time: instance.start_time,
             class_type: instance.class_type,
             participants: instance.participants || [],
@@ -635,15 +544,16 @@ export const useZoomMeetingStore = create<
         account: Partial<ZoomAccountT>,
         pastInstances: Partial<ZoomMeetingPastInstanceT>[]
       ) => {
-        // Get existing past instances
+        // Get existing past instances (without overwriting state)
         const existingPastInstances = await useZoomMeetingPastInstanceStore
           .getState()
-          .getAllPastInstancesByMeeting(meetingId);
+          ._getPastInstancesByMeetingId(meetingId);
 
         if (!existingPastInstances) return;
 
-        const currentPastInstances =
-          useZoomMeetingPastInstanceStore.getState().pastInstances;
+        const currentPastInstances = Array.isArray(existingPastInstances)
+          ? existingPastInstances
+          : useZoomMeetingPastInstanceStore.getState().pastInstances;
         const existingUuids = new Set(
           currentPastInstances.map((instance) => instance.uuid)
         );
@@ -672,7 +582,7 @@ export const useZoomMeetingStore = create<
           .map((user) => user.email)
           .filter((email): email is string => email !== undefined);
 
-        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 1;
+        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 2;
 
         // Process existing instances for update
         const existingInstancesUpdates = enrichedPastInstances
@@ -685,7 +595,7 @@ export const useZoomMeetingStore = create<
 
             const instanceParticipants = instance.participants ?? [];
             const hasMatchingParticipants =
-              hasClassroomEmails && instanceParticipants.length > 1
+              hasClassroomEmails && instanceParticipants.length > 2
                 ? instanceParticipants.some((p: ZoomMeetingParticipantT) =>
                     classroomParticipantsEmails?.includes(p.user_email)
                   )
@@ -696,23 +606,30 @@ export const useZoomMeetingStore = create<
               : instance.is_visible_on_schedule;
 
             return {
-              instanceId: existingInstance.id,
-              updates: {
-                participants: instance.participants || [],
-                poll_results: instance.poll_results || [],
-                synchronized_at: new Date().toISOString(),
-                is_visible_on_schedule: hasParticipantsOnInstance,
-              },
+              classroom_id: account.classroom_id!,
+              account_id: account.id!,
+              meeting_id: meetingId,
+              uuid: instance.uuid!,
+              start_time: instance.start_time,
+              class_type: instance.class_type,
+              participants: instance.participants || [],
+              poll_results: instance.poll_results || [],
+              // CRITICAL: Preserve existing justifications to prevent data loss
+              justifications:
+                existingInstance.justifications ||
+                instance.justifications ||
+                [],
+              synchronized_at: new Date().toISOString(),
+              is_visible_on_schedule: hasParticipantsOnInstance,
             };
           })
           .filter((item): item is NonNullable<typeof item> => item !== null);
 
         // Update existing instances with fresh data
         if (existingInstancesUpdates.length > 0) {
-          const pastInstanceStore = useZoomMeetingPastInstanceStore.getState();
-          for (const { instanceId, updates } of existingInstancesUpdates) {
-            await pastInstanceStore.updatePastInstanceById(instanceId, updates);
-          }
+          await useZoomMeetingPastInstanceStore
+            .getState()
+            .upsertMultiplePastInstances(existingInstancesUpdates);
 
           toast.success(
             `${existingInstancesUpdates.length} instâncias existentes foram atualizadas com dados frescos!`
@@ -902,7 +819,7 @@ export const useZoomMeetingStore = create<
             const { past_instances } = meetingWithPastInstances;
 
             if (past_instances && past_instances.length > 0) {
-              // Fetch participants and poll results for ALL instances
+              // Fetch participants and poll results for ALL instances in ONE go
               const enrichedPastInstances =
                 await get().fetchAllPastInstancesData(account, past_instances);
 
@@ -918,14 +835,24 @@ export const useZoomMeetingStore = create<
                 .filter((email): email is string => email !== undefined);
 
               const hasClassroomEmails =
-                classroomParticipantsEmails?.length ?? 0 > 1;
+                classroomParticipantsEmails?.length ?? 0 > 2;
 
-              // Process all instances with participants and poll results
+              // Get existing instances to preserve justifications
+              const existingPastInstances =
+                await useZoomMeetingPastInstanceStore
+                  .getState()
+                  ._getPastInstancesByMeetingId(meeting.id!);
+
+              const currentPastInstances = Array.isArray(existingPastInstances)
+                ? existingPastInstances
+                : [];
+
+              // Process all instances with participants and poll results for UPSERT
               const pastInstancesData = enrichedPastInstances.map(
                 (instance) => {
                   const instanceParticipants = instance.participants ?? [];
                   const hasMatchingParticipants =
-                    hasClassroomEmails && instanceParticipants.length > 1
+                    hasClassroomEmails && instanceParticipants.length > 2
                       ? instanceParticipants.some(
                           (p: ZoomMeetingParticipantT) =>
                             classroomParticipantsEmails?.includes(p.user_email)
@@ -936,6 +863,11 @@ export const useZoomMeetingStore = create<
                     ? hasMatchingParticipants
                     : instance.is_visible_on_schedule;
 
+                  // Find existing instance to preserve justifications
+                  const existingInstance = currentPastInstances.find(
+                    (existing) => existing.uuid === instance.uuid
+                  );
+
                   return {
                     classroom_id: account.classroom_id!,
                     account_id: account.id!,
@@ -945,90 +877,24 @@ export const useZoomMeetingStore = create<
                     class_type: instance.class_type,
                     participants: instance.participants || [],
                     poll_results: instance.poll_results || [],
-                    justifications: instance.justifications || [],
+                    // CRITICAL: Preserve existing justifications to prevent data loss
+                    justifications:
+                      existingInstance?.justifications ||
+                      instance.justifications ||
+                      [],
                     synchronized_at: new Date().toISOString(),
                     is_visible_on_schedule: hasParticipantsOnInstance,
                   };
                 }
               );
 
-              // Get existing instances from the store
-              const pastInstanceStore =
-                useZoomMeetingPastInstanceStore.getState();
-              await pastInstanceStore.getAllPastInstancesByMeeting(meeting.id!);
-              const existingInstances = pastInstanceStore.pastInstances;
+              // Use UPSERT to handle both new and existing instances in one operation
+              await useZoomMeetingPastInstanceStore
+                .getState()
+                .upsertMultiplePastInstances(pastInstancesData);
 
-              // Separate new and existing instances
-              const newInstancesToCreate = pastInstancesData.filter(
-                (instanceData) =>
-                  !existingInstances.some(
-                    (existing) => existing.uuid === instanceData.uuid
-                  )
-              );
-
-              const existingInstancesToUpdate = enrichedPastInstances
-                .map((instance) => {
-                  // Find existing instance by UUID
-                  const existingInstance = existingInstances.find(
-                    (existing) => existing.uuid === instance.uuid
-                  );
-
-                  if (existingInstance && instance.uuid) {
-                    const instanceParticipants = instance.participants ?? [];
-                    const hasMatchingParticipants =
-                      hasClassroomEmails && instanceParticipants.length > 1
-                        ? instanceParticipants.some(
-                            (p: ZoomMeetingParticipantT) =>
-                              classroomParticipantsEmails?.includes(
-                                p.user_email
-                              )
-                          )
-                        : false;
-
-                    const hasParticipantsOnInstance = hasClassroomEmails
-                      ? hasMatchingParticipants
-                      : instance.is_visible_on_schedule;
-
-                    return {
-                      instanceId: existingInstance.id,
-                      updates: {
-                        participants: instance.participants || [],
-                        poll_results: instance.poll_results || [],
-                        synchronized_at: new Date().toISOString(),
-                        is_visible_on_schedule: hasParticipantsOnInstance,
-                      },
-                    };
-                  }
-                  return null;
-                })
-                .filter(
-                  (item): item is NonNullable<typeof item> => item !== null
-                );
-
-              // Create new instances if any
-              if (newInstancesToCreate.length > 0) {
-                await pastInstanceStore.createMultiplePastInstances(
-                  newInstancesToCreate
-                );
-              }
-
-              // Update existing instances with fresh data from API (no additional API calls needed)
-              if (existingInstancesToUpdate.length > 0) {
-                for (const {
-                  instanceId,
-                  updates,
-                } of existingInstancesToUpdate) {
-                  await pastInstanceStore.updatePastInstanceById(
-                    instanceId,
-                    updates
-                  );
-                }
-              }
-
-              const totalProcessed =
-                newInstancesToCreate.length + existingInstancesToUpdate.length;
               toast.success(
-                `Todas as ${totalProcessed} instâncias passadas foram processadas (${newInstancesToCreate.length} novas, ${existingInstancesToUpdate.length} atualizadas)!`
+                `Todas as ${pastInstancesData.length} instâncias passadas foram processadas com dados atualizados!`
               );
             } else {
               toast.info(
@@ -1045,6 +911,93 @@ export const useZoomMeetingStore = create<
         } catch (error) {
           console.error(error);
           toast.error("Erro ao atualizar todas as instâncias passadas!");
+          return false;
+        } finally {
+          toast.dismiss(loadingToastId);
+        }
+      },
+
+      refreshAndAddOnlyNewPastInstances: async (meeting, account) => {
+        let loadingToastId;
+        try {
+          if (
+            !account.account_id ||
+            !account.id ||
+            !account.client_id ||
+            !account.client_secret
+          )
+            throw new Error("Account data is missing");
+          if (!meeting.id || !meeting.meeting_id || !meeting.uuid)
+            throw new Error("Meeting data is missing");
+
+          loadingToastId = toast.loading(
+            "Buscando novas instâncias passadas da reunião...",
+            {
+              closeButton: true,
+            }
+          );
+
+          // Get meeting data from Zoom API with all past instances
+          const updatedMeetingData = await useZoomAPIStore
+            .getState()
+            .getMeetingByAPI(account, meeting);
+
+          if (!updatedMeetingData) throw new Error("no meeting response");
+
+          // Check if it's a recurrent meeting with past instances
+          if (
+            updatedMeetingData &&
+            ("past_instances" in updatedMeetingData ||
+              updatedMeetingData.type === 8 ||
+              updatedMeetingData.type === 3)
+          ) {
+            const meetingWithPastInstances = updatedMeetingData as Omit<
+              ZoomMeetingWithPastInstancies,
+              "id" | "created_at"
+            >;
+            const { past_instances, occurrences } = meetingWithPastInstances;
+
+            if (past_instances && past_instances.length > 0) {
+              // Only process NEW instances (don't touch existing ones)
+              await get().processNewPastInstances(
+                meeting.id!,
+                account,
+                past_instances
+              );
+            } else {
+              toast.info(
+                "Nenhuma instância passada encontrada para esta reunião."
+              );
+            }
+
+            const currentOccurrences =
+              get()
+                .meetings.find((m) => m.id === meeting.id)
+                ?.occurrences?.map((o) => o.occurrence_id) || [];
+
+            const isOccurrencesChange =
+              occurrences &&
+              occurrences.length !== currentOccurrences.length &&
+              occurrences.some(
+                (o) => !currentOccurrences.includes(o.occurrence_id)
+              );
+
+            if (isOccurrencesChange) {
+              // Only process NEW occurrences (don't touch existing ones)
+              await get().updateMeeting(meeting.id, {
+                occurrences,
+              });
+            }
+          } else {
+            toast.info(
+              "Esta reunião não é recorrente ou não possui instâncias passadas."
+            );
+          }
+
+          return true;
+        } catch (error) {
+          console.error(error);
+          toast.error("Erro ao buscar novas instâncias passadas!");
           return false;
         } finally {
           toast.dismiss(loadingToastId);

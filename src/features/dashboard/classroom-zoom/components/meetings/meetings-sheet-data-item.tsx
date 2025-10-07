@@ -1,14 +1,17 @@
 "use client";
-import { LoaderCircle, Plus } from "lucide-react";
+import { LoaderCircle, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ZoomMeetingT } from "@/types/classroom-zoom/meetings";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 
-const meetingTypes = {
-  1: "Reunião instantânea",
-  2: "Reunião agendada",
-  3: "Reunião recorrente sem horário fixo",
-  8: "Reunião recorrente com horário fixo",
-};
+import { ZoomMeetingT } from "../../types";
+import { MEETING_TYPES } from "../../utils/meeting-utils";
 
 export default function MeetingsSheetDataItem({
   meeting,
@@ -20,25 +23,36 @@ export default function MeetingsSheetDataItem({
   isAddingMeeting: string | null;
 }) {
   return (
-    <li key={meeting.id} className="p-2 border rounded-lg">
-      <div className="flex items-center gap-4 justify-between">
-        <div className="flex flex-col gap-1 truncate">
-          <h2 className="font-semibold text-sm truncate" title={meeting.topic}>
-            {meeting.topic}
-          </h2>
-          <p className="text-xs text-gray-500 truncate">
-            {meeting.agenda || "Sem descrição"}
-          </p>
-          <p className="text-xs text-gray-500 truncate">
-            {meetingTypes[meeting.type as keyof typeof meetingTypes] ||
-              "Sem tipo"}
-          </p>
-        </div>
+    <Item variant="outline" className="hover:bg-muted">
+      <ItemMedia variant="icon">
+        <Video />
+      </ItemMedia>
+      <ItemContent>
+        <ItemTitle className="font-semibold">{meeting.topic}</ItemTitle>
+        <ItemDescription>
+          {meeting.agenda && <p>{meeting.agenda}</p>}
+          {meeting.type && (
+            <p>
+              {MEETING_TYPES[meeting.type as keyof typeof MEETING_TYPES] ||
+                "Sem tipo"}
+            </p>
+          )}
+        </ItemDescription>
+      </ItemContent>
+      <ItemActions>
         <Button
           onClick={() => handleAddMeeting(meeting)}
-          className="font-semibold min-w-9 min-h-9 cursor-pointer"
-          size="icon"
+          size="sm"
+          variant="default"
           disabled={isAddingMeeting !== null}
+          className="cursor-pointer"
+          title={
+            isAddingMeeting !== null
+              ? isAddingMeeting === meeting.id
+                ? "Adicionando reunião a turma..."
+                : "Adicionando uma reunião a turma... Por favor aguarde!"
+              : "Adicionar esta reunião a turma"
+          }
         >
           {isAddingMeeting === meeting.id ? (
             <LoaderCircle className="size-4 animate-spin" />
@@ -46,7 +60,7 @@ export default function MeetingsSheetDataItem({
             <Plus className="size-4" />
           )}
         </Button>
-      </div>
-    </li>
+      </ItemActions>
+    </Item>
   );
 }

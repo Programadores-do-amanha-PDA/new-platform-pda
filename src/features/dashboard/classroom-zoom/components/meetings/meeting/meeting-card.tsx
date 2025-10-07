@@ -1,16 +1,19 @@
+"use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 import {
   CalendarMinus,
   CalendarPlus,
   LoaderCircle,
   RefreshCw,
 } from "lucide-react";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { Button } from "@/components/ui/button";
-import { ZoomMeetingT } from "@/types";
-import { cn } from "@/lib/utils";
+
+import { useZoomAccountStore } from "../../../stores/accounts";
+import { ZoomMeetingT } from "../../../types";
 
 const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeetingT }) => {
   const path = usePathname();

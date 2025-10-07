@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomProjectT } from "@/types";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types";
 
 export const createClassroomProject = async (
   projectData: Omit<ClassroomProjectT, "id" | "created_at">

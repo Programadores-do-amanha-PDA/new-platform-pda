@@ -1,5 +1,5 @@
-import { ClassroomProjectModuleT } from "@/types";
 import React from "react";
+import { ClassroomProjectModuleT } from "./";
 
 export interface ProjectModuleSelectProps
   extends React.HTMLAttributes<HTMLSelectElement> {

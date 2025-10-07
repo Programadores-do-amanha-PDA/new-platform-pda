@@ -6,15 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ClassroomConfigClassTypesT } from "@/types";
-import { ZoomClassT } from "@/types/classroom-zoom/meetings";
-
-// const meetingTypes = [
-//   { id: "programming", name: "Programação" },
-//   { id: "english", name: "Inglês" },
-//   { id: "soft-skills", name: "Soft Skills" },
-//   { id: "community", name: "Comunidade" },
-//   { id: "employability", name: "Empregabilidade" },
-// ];
+import { ZoomClassT } from "../../classroom-zoom/types";
 
 const MeetingTypeSelector = ({
   options,

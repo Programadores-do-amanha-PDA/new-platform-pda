@@ -13,7 +13,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
+
+import { ZoomAccountT } from "../../types";
 
 export default function EditAccountDialog({
   currentAccount,
@@ -52,7 +53,7 @@ export default function EditAccountDialog({
         client_id,
         client_secret,
       });
-      
+
       if (!success) throw new Error("no account updated");
 
       toast.success("Conta atualizada com sucesso!");
@@ -87,7 +88,8 @@ export default function EditAccountDialog({
         <DialogHeader>
           <DialogTitle>Atualizar Conta</DialogTitle>
           <DialogDescription>
-            Atualize as informações de conexão do App server to server da conta do Zoom.
+            Atualize as informações de conexão do App server to server da conta
+            do Zoom.
           </DialogDescription>
         </DialogHeader>
         <form className="flex flex-col gap-6 py-4" onSubmit={handleSubmit}>

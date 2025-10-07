@@ -1,9 +1,9 @@
-import { ZoomMeetingT, ZoomMeetingPastInstanceT } from "@/types";
 import {
   ClassroomConfigClassTypesT,
   ClassroomConfigClassTypesLimitT,
   ClassroomConfigJustificationT,
 } from "@/types/classroom-configs";
+import { ZoomMeetingT, ZoomMeetingPastInstanceT } from "@/features/dashboard/classroom-zoom/types";
 
 /**
  * Represents the attendance calculation result for a user in a meeting

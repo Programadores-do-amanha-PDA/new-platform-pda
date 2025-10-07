@@ -10,8 +10,8 @@ import {
   createZoomAccountByClassroomId,
 } from "@/app/actions/classrooms/zoom/accounts";
 
-import { ZoomAccountT } from "@/types";
-import { useZoomAPIStore } from "./api";
+import { ZoomAccountT } from "../types";
+import { useZoomAPIStore } from "./";
 
 interface ZoomAccountState {
   accounts: ZoomAccountT[];

@@ -1,13 +1,18 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { useUsersStore } from "@/stores/modules/users/users-store";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
-import AttendanceTable from "./components/attendance-table";
-import { ZoomMeetingT } from "@/types/classroom-zoom";
-import { filterClassroomStudents } from "../utils/filter-classroom-students";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useUsersStore } from "@/stores/modules/users/users-store";
+
+import AttendanceTable from "./components/attendance-table";
+import {
+  ZoomMeetingT,
+  ZoomMeetingPastInstanceT,
+} from "../classroom-zoom/types";
+import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import {
+  useZoomMeetingStore,
+  useZoomMeetingPastInstanceStore,
+} from "../classroom-zoom/stores";
 
 export default function AttendancePage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();

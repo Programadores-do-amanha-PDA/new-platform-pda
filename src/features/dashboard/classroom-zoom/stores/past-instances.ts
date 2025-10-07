@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import {
@@ -7,59 +8,15 @@ import {
   getPastInstanceByUuid,
   createPastInstance,
   createMultiplePastInstances,
+  upsertMultiplePastInstances,
   updatePastInstanceById,
   updatePastInstanceByUuid,
   deletePastInstanceById,
 } from "@/app/actions/classrooms/zoom/past-instances";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
-import { useZoomAPIStore } from "./api";
-import { toast } from "sonner";
 
-interface ZoomMeetingPastInstanceState {
-  pastInstances: ZoomMeetingPastInstanceT[];
-  loading: boolean;
-}
+import { useZoomAPIStore } from "./";
+import { ZoomMeetingPastInstanceT, ZoomAccountT, ZoomMeetingPastInstanceState, ZoomMeetingPastInstanceActions } from "../types";
 
-interface ZoomMeetingPastInstanceActions {
-  setPastInstances: (pastInstances: ZoomMeetingPastInstanceT[]) => void;
-  getAllPastInstancesByClassroom: (classroomId: string) => Promise<boolean>;
-  getAllPastInstancesByMeeting: (meetingId: string) => Promise<boolean>;
-  getPastInstanceById: (
-    pastInstanceId: string
-  ) => Promise<ZoomMeetingPastInstanceT | boolean>;
-  getPastInstanceByUuid: (
-    uuid: string
-  ) => Promise<ZoomMeetingPastInstanceT | boolean>;
-  createPastInstance: (
-    pastInstanceData: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>
-  ) => Promise<boolean>;
-  createMultiplePastInstances: (
-    pastInstancesData: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>[]
-  ) => Promise<boolean>;
-  updatePastInstanceById: (
-    pastInstanceId: string,
-    updates: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>
-  ) => Promise<boolean>;
-  updatePastInstanceByUuid: (
-    uuid: string,
-    updates: Partial<Omit<ZoomMeetingPastInstanceT, "id | ">>
-  ) => Promise<boolean>;
-  deletePastInstance: (pastInstanceId: string) => Promise<boolean>;
-  refreshInstanceData: (
-    instanceId: string,
-    uuid: string,
-    account: ZoomAccountT
-  ) => Promise<boolean>;
-  refreshMultipleInstancesData: (
-    instances: Array<{
-      instanceId: string;
-      uuid: string;
-      account: ZoomAccountT;
-    }>
-  ) => Promise<boolean>;
-  reset: () => void;
-}
 
 const initialState: ZoomMeetingPastInstanceState = {
   pastInstances: [],
@@ -106,6 +63,20 @@ export const useZoomMeetingPastInstanceStore = create<
           return false;
         } finally {
           set({ loading: false });
+        }
+      },
+
+      // Internal function to get instances by meeting without overwriting state
+      _getPastInstancesByMeetingId: async (meetingId: string) => {
+        try {
+          const pastInstancesResponse = await getAllPastInstancesByMeetingId(
+            meetingId
+          );
+          if (!pastInstancesResponse) throw "no past instances response";
+          return pastInstancesResponse;
+        } catch (error) {
+          console.error("Error fetching past instances by meeting ID:", error);
+          return false;
         }
       },
 
@@ -214,6 +185,87 @@ export const useZoomMeetingPastInstanceStore = create<
         } catch (error) {
           console.error("Error creating multiple past instances:", error);
           toast.error("Erro ao criar múltiplas instâncias passadas!");
+          return false;
+        } finally {
+          if (loadingToastId !== undefined) {
+            toast.dismiss(loadingToastId);
+          }
+        }
+      },
+
+      upsertMultiplePastInstances: async (pastInstancesData) => {
+        let loadingToastId: string | number | undefined;
+        try {
+          if (!pastInstancesData || pastInstancesData.length === 0) {
+            toast.error("Nenhuma instância passada foi fornecida!");
+            throw new Error("No past instances data provided");
+          }
+
+          // Validar se todos os itens têm os campos obrigatórios
+          for (const pastInstanceData of pastInstancesData) {
+            if (
+              !pastInstanceData.classroom_id ||
+              !pastInstanceData.meeting_id ||
+              !pastInstanceData.uuid
+            ) {
+              toast.error(
+                "Dados obrigatórios estão faltando em uma ou mais instâncias!"
+              );
+              throw new Error(
+                "Missing required fields: classroom_id, meeting_id, or uuid in one or more instances"
+              );
+            }
+          }
+
+          loadingToastId = toast.loading(
+            `Processando ${pastInstancesData.length} instâncias passadas...`
+          );
+
+          const upsertedPastInstances = await upsertMultiplePastInstances(
+            pastInstancesData,
+            { preserveUserData: true } // Preserve justifications and other user data
+          );
+          if (!upsertedPastInstances)
+            throw new Error("no multiple past instances upsert response");
+
+          // Update the store with upserted instances, preserving other instances
+          const currentInstances = get().pastInstances;
+          const upsertedUuids = new Set(upsertedPastInstances.map(instance => instance.uuid));
+          
+          // Merge existing justifications with new data to prevent data loss
+          const mergedInstances = upsertedPastInstances.map(upsertedInstance => {
+            const existingInstance = currentInstances.find(
+              existing => existing.uuid === upsertedInstance.uuid
+            );
+            
+            // Preserve existing justifications if they exist
+            if (existingInstance?.justifications && existingInstance.justifications.length > 0) {
+              return {
+                ...upsertedInstance,
+                justifications: existingInstance.justifications
+              };
+            }
+            
+            return upsertedInstance;
+          });
+          
+          // Remove old versions of upserted instances and add merged ones
+          const filteredInstances = currentInstances.filter(
+            instance => !upsertedUuids.has(instance.uuid)
+          );
+          
+          set({
+            pastInstances: [...mergedInstances, ...filteredInstances]
+          });
+
+          toast.dismiss(loadingToastId);
+          toast.success(
+            `${upsertedPastInstances.length} instâncias passadas processadas com sucesso!`
+          );
+          return true;
+        } catch (error) {
+          console.error("Error upserting multiple past instances:", error);
+          toast.error("Erro ao processar múltiplas instâncias passadas!");
           return false;
         } finally {
           if (loadingToastId !== undefined) {

@@ -22,9 +22,11 @@ import RefreshButton from "@/components/shared/refresh-button";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import { cn } from "@/lib/utils";
 
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
-import { useZoomMeetingPastInstanceStore } from "@/stores/modules/classrooms/zoom/past-instances";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
+import {
+  useZoomMeetingStore,
+  useZoomAccountStore,
+  useZoomMeetingPastInstanceStore,
+} from "../stores";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import PastInstancieDialog from "../components/meetings/meeting/past-instancie-dialog";
 import {
@@ -32,7 +34,7 @@ import {
   ZoomMeetingParticipantT,
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
-} from "@/types/classroom-zoom";
+} from "../types";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceT & {
   topic: string | undefined;
@@ -565,12 +567,14 @@ export default function ZoomRecurrenceMeetingPage({
     ?.map((pastInstance) => {
       const participantGroups = new Map<string, ZoomMeetingParticipantT>();
 
-      pastInstance?.participants?.forEach((participant) => {
-        const existing = participantGroups.get(participant.user_email);
-        if (!existing) {
-          participantGroups.set(participant.user_email, participant);
+      pastInstance?.participants?.forEach(
+        (participant: ZoomMeetingParticipantT) => {
+          const existing = participantGroups.get(participant.user_email);
+          if (!existing) {
+            participantGroups.set(participant.user_email, participant);
+          }
         }
-      });
+      );
 
       return {
         ...pastInstance,

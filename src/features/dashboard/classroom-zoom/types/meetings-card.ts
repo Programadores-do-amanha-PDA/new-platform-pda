@@ -1,4 +1,5 @@
-import { ZoomMeetingT } from "@/types";
+import { ZoomMeetingT } from ".";
+
 
 export interface ZoomMeetingsCardProps {
   meeting: ZoomMeetingT;

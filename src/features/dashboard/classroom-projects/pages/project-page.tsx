@@ -2,7 +2,7 @@
 // global imports
 import { useParams } from "next/navigation";
 import { Calendar1, Type } from "lucide-react";
-import { NotFoundState } from "@/components/shared/not-found-state";
+import { NotFoundState } from "@/components/shared/empty-states/not-found-state";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
 // local imports
@@ -32,7 +32,7 @@ export default function ProjectPage() {
     return (
       <NotFoundState
         title="Projeto não encontrado."
-        subtitle="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
+        description="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
         href={`/dashboard/classrooms/${classroom_id}/projects`}
         buttonText="Ver todos os Projetos"
       />

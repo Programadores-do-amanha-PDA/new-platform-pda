@@ -1,11 +1,17 @@
-import { ZoomMeetingT, ZoomMeetingOccurrenceT } from "@/types/classroom-zoom/meetings";
-import { ZoomMeetingPastInstanceT } from "@/types/classroom-zoom/past-instances";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
+import {
+  ZoomMeetingPastInstanceT,
+  ZoomMeetingT,
+  ZoomMeetingOccurrenceT,
+  ZoomAccountT,
+} from "../types";
 
 interface RefreshMeetingDataParams {
   meeting: ZoomMeetingT;
   accounts: ZoomAccountT[];
-  refreshAndUpdateMeeting: (meeting: Partial<ZoomMeetingT>, account: Partial<ZoomAccountT>) => Promise<boolean>;
+  refreshAndAddOnlyNewPastInstances: (
+    meeting: Partial<ZoomMeetingT>,
+    account: Partial<ZoomAccountT>
+  ) => Promise<boolean>;
   setLoading: (loading: boolean) => void;
   setAllMeetingLoading: (loading: boolean) => void;
 }
@@ -17,9 +23,7 @@ export const getMeetingPastInstances = (
   pastInstances: ZoomMeetingPastInstanceT[],
   meetingId: string
 ): ZoomMeetingPastInstanceT[] => {
-  return pastInstances.filter(
-    (instance) => instance.meeting_id === meetingId
-  );
+  return pastInstances.filter((instance) => instance.meeting_id === meetingId);
 };
 
 /**
@@ -34,24 +38,22 @@ export const getUpcomingOccurrences = (
 };
 
 /**
- * Handles meeting refresh logic
+ * Handles meeting refresh logic - only adds new past instances without affecting existing ones
  */
 export const refreshMeetingData = async ({
   meeting,
   accounts,
-  refreshAndUpdateMeeting,
+  refreshAndAddOnlyNewPastInstances,
   setLoading,
   setAllMeetingLoading,
 }: RefreshMeetingDataParams): Promise<void> => {
   setAllMeetingLoading(true);
   setLoading(true);
 
-  const account = accounts.find(
-    (account) => account.id === meeting.account_id
-  );
-  
+  const account = accounts.find((account) => account.id === meeting.account_id);
+
   if (account) {
-    await refreshAndUpdateMeeting(meeting, account);
+    await refreshAndAddOnlyNewPastInstances(meeting, account);
   }
 
   setAllMeetingLoading(false);

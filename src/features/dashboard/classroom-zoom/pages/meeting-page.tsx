@@ -1,9 +1,10 @@
 "use client";
-import { useZoomMeetingStore } from "@/stores/modules/classrooms/zoom/meetings";
-import ZoomRecurrenceMeetingPage from "./recurrence-meeting-page";
-import ZoomPastMeetingPage from "./past-meeting-page";
 import { useParams } from "next/navigation";
-import { NotFoundState } from "@/components/shared/not-found-state";
+import { NotFoundState } from "@/components/shared/empty-states/not-found-state"; 
+
+import ZoomPastMeetingPage from "./past-meeting-page";
+import ZoomRecurrenceMeetingPage from "./recurrence-meeting-page";
+import { useZoomMeetingStore } from "../stores/meetings";
 
 export default function ZoomMeetingPage() {
   const { meeting_id, classroom_id } = useParams<{
@@ -18,7 +19,7 @@ export default function ZoomMeetingPage() {
     return (
       <NotFoundState
         title="Reunião não encontrada."
-        subtitle="Verifique se o ID da reunião está correto ou se a reunião esta cadastrada na turma."
+        description="Verifique se o ID da reunião está correto ou se a reunião esta cadastrada na turma."
         href={`/dashboard/classrooms/${classroom_id}/zoom/meetings`}
         buttonText="Ver todas as reuniões"
       />

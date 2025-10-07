@@ -2,16 +2,17 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
+
 import {
+  getAccessToken,
+  getMeAccount,
   getAllMeetingsByAccount,
   getMeetingById,
   getPastedMeetingParticipants,
   getPastMeetingsPollResults,
   getPastMeetingInstances,
   getPastedMeetingDetails,
-} from "@/app/apis/zoom/meetings";
-import { getAccessToken } from "@/app/apis/zoom/oauth";
-import { getMeAccount } from "@/app/apis/zoom/account";
+} from "../api";
 import {
   ZoomAccountMeT,
   ZoomAccountT,
@@ -20,12 +21,9 @@ import {
   ZoomMeetingT,
   ZoomMeetingWithPastInstancies,
   ZoomMeetingPastInstanceT,
-} from "@/types";
-
-interface ZoomAPIState {
-  meetingsByAPI: ZoomMeetingT[];
-  loading: boolean;
-}
+  ZoomAPIState,
+} from "../types";
+import { NON_RECURRING_MEETING_TYPES, RECURRING_MEETING_TYPES } from "../utils";
 
 interface ZoomAPIActions {
   setMeetingsByAPI: (meetings: ZoomMeetingT[]) => void;
@@ -135,26 +133,33 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
           })) as ZoomMeetingT[];
 
           set((state) => {
-            // Filtra meetings que já existem no estado
-            const existingMeetingIds = new Set(
+            // Create a map of existing meetings by UUID for faster lookup
+            const existingMeetingsMap = new Map(
               state.meetingsByAPI
                 .filter((meeting) => meeting.account_id === account.id)
-                .map((meeting) => meeting.uuid)
+                .map((meeting) => [meeting.uuid, meeting])
             );
 
+            // Filter only truly new meetings to prevent duplicates
             const uniqueNewMeetings = newMeetings.filter(
-              (meeting) => !existingMeetingIds.has(meeting.uuid)
+              (meeting) => !existingMeetingsMap.has(meeting.uuid)
             );
 
-            // Remove meetings antigos da mesma conta e adiciona os novos
+            // Keep meetings from other accounts unchanged
             const meetingsFromOtherAccounts = state.meetingsByAPI.filter(
               (meeting) => meeting.account_id !== account.id
             );
 
+            // Only update if there are actually new meetings to prevent unnecessary re-renders
+            if (uniqueNewMeetings.length === 0) {
+              return state; // No changes needed
+            }
+
             return {
               meetingsByAPI: [
                 ...meetingsFromOtherAccounts,
-                ...uniqueNewMeetings,
+                ...Array.from(existingMeetingsMap.values()), // Keep existing meetings from this account
+                ...uniqueNewMeetings, // Add only new meetings
               ],
             };
           });
@@ -197,24 +202,25 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
 
           toast.dismiss(loadingToast);
           loadingToast = toast.loading("Obtendo dados da Reunião...");
+          const meetingDuration = (meetingData.duration || 0) * 60000;
           const meetingEndTime = new Date(
-            new Date(
-              meetingData.start_time || meetingData.created_at || 0
-            ).getTime() +
-              (meetingData?.duration || 0) * 60000
+            new Date(meetingData.start_time!).getTime() + meetingDuration
           ).getTime();
+          const now = Date.now();
 
+          // getting meeting data
           let meeting;
           if (
-            meetingEndTime <= Date.now() ||
-            meetingData.type === 8 ||
-            meetingData.type === 3
+            meetingEndTime <= now ||
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              meetingData.type!
+            )
           ) {
             meeting = await getMeetingById(
               meetingData.meeting_id,
               ZOOM_ACCESS_TOKEN
             );
-          } else if (meetingEndTime > Date.now()) {
+          } else if (meetingEndTime > now) {
             meeting = await getPastedMeetingDetails(
               meetingData.uuid,
               ZOOM_ACCESS_TOKEN
@@ -222,83 +228,76 @@ export const useZoomAPIStore = create<ZoomAPIState & ZoomAPIActions>()(
           }
           if (!meeting)
             throw new Error("No meetingData data returned from API");
+          if (loadingToast) toast.dismiss(loadingToast);
 
-          // Lógica para reuniões não recorrentes
-          if (meeting.type === 1 || meeting.type === 2) {
-            if (meetingEndTime > Date.now()) {
-              return {
-                ...meetingData,
-                participants: [],
-                account_id: account.id,
-              } as Omit<ZoomMeetingT, "id" | "created_at">;
-            } else if (meetingEndTime <= Date.now()) {
-              const participants =
-                await get().getAllParticipantsByMeetingIdFromAPI(
-                  account,
-                  meetingData.meeting_id
-                );
-              const pollResults =
-                await get().getAllPollResultsByMeetingIdFromAPI(
-                  account,
-                  meetingData.meeting_id
-                );
+          // processing recurrence or non recurrence meeting data
+          const meetingDataProcessed: Omit<ZoomMeetingT, "id" | "created_at"> =
+            {
+              ...meeting,
+              participants: [],
+              poll_results: [],
+              account_id: account.id,
+            };
 
-              return {
-                ...meetingData,
-                participants: participants || [],
-                poll_results: pollResults || [],
-                account_id: account.id,
-              } as Omit<ZoomMeetingT, "id" | "created_at">;
+          // if meeting type is a non recurrence
+          if (
+            (NON_RECURRING_MEETING_TYPES as readonly number[]).includes(
+              meetingData.type!
+            )
+          ) {
+            // if is not a past meeting
+            if (meetingEndTime >= now) {
+              return meetingDataProcessed;
             }
-          } else if (meeting.type === 8 || meeting.type === 3) {
+            // if is a past meeting
+            else if (meetingEndTime < now) {
+              loadingToast = toast.loading(
+                "Obtendo participantes e resultados de polls da reunião..."
+              );
+              const [participants, pollResults] = await Promise.all([
+                get().getAllParticipantsByMeetingIdFromAPI(
+                  account,
+                  meetingData.meeting_id
+                ),
+                get().getAllPollResultsByMeetingIdFromAPI(
+                  account,
+                  meetingData.meeting_id
+                ),
+              ]);
+              if (loadingToast) toast.dismiss(loadingToast);
+
+              meetingDataProcessed["participants"] = participants || [];
+              meetingDataProcessed["poll_results"] = pollResults || [];
+
+              return meetingDataProcessed;
+            }
+          }
+          // if meeting type is a recurrence
+          else if (
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              meetingData.type!
+            )
+          ) {
+            loadingToast = toast.loading(
+              `Obtendo todas as instancias passadas`
+            );
             const allPastInstances = await getPastMeetingInstances(
               meeting.meeting_id,
               ZOOM_ACCESS_TOKEN
             );
             if (!allPastInstances)
               throw new Error("No past instances data returned from API");
-
-            const pastInstancesData = [];
-            // Dismiss previous toast before creating new one
-            if (loadingToast) {
-              toast.dismiss(loadingToast);
-            }
-            loadingToast = toast.loading(
-              `Obtendo Participantes e Respostas da de ${allPastInstances.length} instancias ...`
-            );
-            for (let i = 0; i < allPastInstances.length; i++) {
-              const instance = allPastInstances[i];
-              if (!instance.uuid) continue;
-
-              try {
-                const processedInstance = {
-                  ...instance,
-                  participants:
-                    await get().getAllParticipantsByMeetingIdFromAPI(
-                      account,
-                      instance.uuid
-                    ),
-                  poll_results: await get().getAllPollResultsByMeetingIdFromAPI(
-                    account,
-                    instance.uuid
-                  ),
-                };
-                pastInstancesData.push(processedInstance);
-              } catch (error) {
-                console.error(`Error processing instance ${i + 1}:`, error);
-                // Continue with next instance even if one fails
-              }
-            }
-
-            // Ensure final toast is dismissed
-            if (loadingToast) {
-              toast.dismiss(loadingToast);
-            }
+            if (loadingToast) toast.dismiss(loadingToast);
 
             return {
-              ...meetingData,
-              account_id: account.id,
-              past_instances: pastInstancesData,
+              ...meetingDataProcessed,
+              past_instances: allPastInstances.map((instance) => ({
+                ...instance,
+                participants: [],
+                poll_results: [],
+                justifications: [],
+                account_id: account.id,
+              })),
             } as Omit<ZoomMeetingWithPastInstancies, "id" | "created_at">;
           }
 

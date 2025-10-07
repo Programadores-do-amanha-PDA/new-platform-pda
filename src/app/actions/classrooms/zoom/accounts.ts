@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ZoomAccountT } from "@/types";
+import { ZoomAccountT } from "@/features/dashboard/classroom-zoom/types";
 
 const getAllZoomAccountsByClassroomId = async (classroomId: string) => {
   try {

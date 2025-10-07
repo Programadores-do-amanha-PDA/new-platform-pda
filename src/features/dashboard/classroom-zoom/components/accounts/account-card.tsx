@@ -9,10 +9,11 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useZoomAccountStore } from "@/stores/modules/classrooms/zoom/accounts";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
+
+import { useZoomAccountStore } from "../../stores";
 import EditAccountDialog from "./edit-account-dialog";
-import { ZoomAccountT } from "@/types/classroom-zoom/accounts";
+import { ZoomAccountT } from "../../types";
 
 const ZoomAccountCard = ({
   account,

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { formatDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { NotFoundState } from "@/components/shared/not-found-state";
+import { NotFoundState } from "@/components/shared/empty-states/not-found-state";
 
 import { useCorrectionStore } from "../stores/corrections";
 import { useDeliveryStore } from "../stores/deliveries";
@@ -34,7 +34,7 @@ export default function ProjectDeliveriesCorrectionPage() {
     return (
       <NotFoundState
         title="Projeto não encontrado."
-        subtitle="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
+        description="Verifique se o ID do projeto está correto ou se o projeto esta cadastrado na turma."
         href={`/dashboard/classrooms/${classroom_id}/projects`}
         buttonText="Ver todos os Projetos"
       />

@@ -1,12 +1,12 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types";
+import { ZoomMeetingT } from "@/features/dashboard/classroom-zoom/types";
 import {
   AuthUserWithProfileT,
   SidebarDataT,
   ClassroomT,
-  ZoomMeetingT,
   ClassroomCoodeshAssessmentT,
-  ClassroomProjectT,
 } from "@/types";
 import pathLabels from "@/utils/path-labels";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";

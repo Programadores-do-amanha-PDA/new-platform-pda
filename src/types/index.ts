@@ -9,6 +9,4 @@ export * from './auth';
 export * from './classroom-activities';
 export * from './classroom-configs';
 export * from './classroom-coodesh';
-export * from '../features/dashboard/classroom-projects/types';
-export * from './classroom-zoom';
  export * from './classrooms';
