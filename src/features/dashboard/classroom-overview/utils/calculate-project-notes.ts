@@ -1,5 +1,4 @@
-import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
-import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
+import { ClassroomProjectDeliveryT, ClassroomProjectT} from "../../classroom-projects/types"; 
 import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
 
 export function calculateProjectNotes(

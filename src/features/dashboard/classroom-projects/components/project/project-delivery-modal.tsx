@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
+import { ClassroomProjectT } from "../../types";
 import { ProfileT } from "@/types/auth/user";
 import useAuth from "@/hooks/use-auth";
 import { MemberSelectionCombobox } from "../deliveries/member-selection-combobox";
@@ -32,6 +32,8 @@ import { useUsersStore } from "@/stores/modules/users/users-store";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeliveryStore } from "../../stores/deliveries";
+import { projectTypesLabels } from "../../utils";
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 type LinkType = {
   url: string;
@@ -41,12 +43,6 @@ const squads = Array.from({ length: 19 }, (_, i) => ({
   id: i === 0 ? "0" : i.toString(),
   name: i === 0 ? "Selecione sua Squad" : `Squad ${i}`,
 }));
-
-const projectTypeLabels = {
-  mini_project: "Mini Projeto",
-  end_module_project: "Projeto Final",
-  end_module_english_project: "English Final Project",
-};
 
 interface ProjectDeliveryModalProps {
   project: ClassroomProjectT;
@@ -80,6 +76,13 @@ const ProjectDeliveryModal = ({
   const [url, setUrl] = useState("");
   const [links, setLinks] = useState<LinkType[]>([]);
   const [observation, setObservation] = useState("");
+
+  const { configsByClassroom } = useClassroomConfigStore();
+  const classroomModules =
+    configsByClassroom[project.classroom_id].modules || [];
+  const projectModule =
+    classroomModules.find((module) => module.id === project.module)?.title ||
+    `M${project.module}`;
 
   // Filter users by classroom
   useEffect(() => {
@@ -206,10 +209,10 @@ const ProjectDeliveryModal = ({
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle className="h-6 w-6 text-green-600" />
               {isEnglishProject
-                ? `M${project.module} Final Project Delivery`
-                : `Entrega do ${projectTypeLabels[project.project_type]} do M${
-                    project.module
-                  }`}
+                ? `${projectModule} Final Project Delivery`
+                : `Entrega do ${
+                    projectTypesLabels[project.project_type]
+                  } do ${projectModule}`}
             </DialogTitle>
           </DialogHeader>
 
@@ -255,10 +258,10 @@ const ProjectDeliveryModal = ({
         <DialogHeader>
           <DialogTitle>
             {isEnglishProject
-              ? `M${project.module} Final Project Delivery`
-              : `Entrega do ${projectTypeLabels[project.project_type]} do M${
-                  project.module
-                }`}
+              ? `${project.module} Final Project Delivery`
+              : `Entrega do ${
+                  projectTypesLabels[project.project_type]
+                } do ${projectModule}`}
           </DialogTitle>
         </DialogHeader>
 

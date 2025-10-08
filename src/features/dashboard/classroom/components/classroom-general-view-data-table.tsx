@@ -25,7 +25,7 @@ import {
 
 import { cn } from "@/lib/utils";
 import { AuthUserWithProfileT, ProfileT } from "@/types/auth";
-import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
+import { ClassroomProjectT } from "../../classroom-projects/types";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -42,7 +42,6 @@ import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown } from "lucide-react";
 import { useProjectStore } from "../../classroom-projects/stores";
 import { useDeliveryStore } from "../../classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "../../classroom-projects/stores/corrections";
-
 
 const projectsShortLabels = {
   mini_project: "MP",
@@ -68,6 +67,8 @@ const ClassroomGeneralViewDataTable = ({
   const classroomProjects = projects.filter(
     (project) => project.classroom_id === classroom_id
   );
+  const classroomDeliveries = deliveries[classroom_id] || [];
+  const classroomCorrections = corrections[classroom_id] || [];
 
   const columns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     {
@@ -234,7 +235,7 @@ const ClassroomGeneralViewDataTable = ({
         const user = row.original;
         const userProjects = classroomProjects
           .filter((project: ClassroomProjectT) => {
-            const projectDeliveries = deliveries.filter(
+            const projectDeliveries = classroomDeliveries.filter(
               (delivery) => delivery.project_id === project.id
             );
             return projectDeliveries.some((delivery) =>
@@ -257,7 +258,7 @@ const ClassroomGeneralViewDataTable = ({
           <div className="flex items-center justify-start w-full">
             {userProjects.length > 0 ? (
               userProjects.map((project: ClassroomProjectT) => {
-                const projectCorrections = corrections.filter(
+                const projectCorrections = classroomCorrections.filter(
                   (correction) => correction.project_id === project.id
                 );
                 const notes = projectCorrections

@@ -3,7 +3,7 @@ import {
   ClassroomProjectCorrectionT,
   ClassroomProjectDeliveryT,
   ClassroomProjectT,
-  DeliveryStatusResult,
+  DeliveryStatusResultT,
 } from "../../types";
 
 /**
@@ -19,7 +19,7 @@ export const analyzeDeliveryStatus = (
   userId: string,
   deliveries: ClassroomProjectDeliveryT[],
   corrections: ClassroomProjectCorrectionT[]
-): DeliveryStatusResult => {
+): DeliveryStatusResultT => {
   const projectDeliveries = deliveries?.filter(
     (delivery) => delivery.project_id === project.id
   );

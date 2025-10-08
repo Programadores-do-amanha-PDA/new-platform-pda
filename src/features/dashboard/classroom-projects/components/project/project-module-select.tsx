@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ProjectModuleSelectProps } from "../../types";
+import { ProjectModuleSelectPropsT } from "../../types";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { getDefaultModules } from "../../utils/projects/default-modules";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ const ProjectModuleSelect = ({
   onValueChange,
   name,
   error = false,
-}: ProjectModuleSelectProps) => {
+}: ProjectModuleSelectPropsT) => {
   const { configsByClassroom } = useClassroomConfigStore();
   const currentConfig = configsByClassroom[classroomId];
   const modules = currentConfig?.modules;
