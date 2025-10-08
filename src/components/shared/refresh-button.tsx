@@ -1,36 +1,35 @@
 "use client";
 import { useCallback, useState } from "react";
-import { Button, buttonVariants } from "../ui/button";
-import { type VariantProps } from "class-variance-authority";
+import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
-type ButtonVariantProps = VariantProps<typeof buttonVariants>;
+
+interface RefreshButtonProps
+  extends Omit<React.ComponentProps<typeof Button>, "onClick"> {
+  onRefresh?: () => Promise<void> | void;
+}
 
 const RefreshButton = ({
   children,
-  handleClick,
   className,
   variant,
   size,
+  onRefresh,
   ...rest
-}: {
-  children: React.ReactNode;
-  handleClick: () => Promise<void>;
-  className?: string;
-  variant?: ButtonVariantProps["variant"];
-  size?: ButtonVariantProps["size"];
-}) => {
+}: RefreshButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnClick = useCallback(async () => {
+    if (!onRefresh) return;
+
     setIsLoading(true);
     try {
-      await handleClick();
+      await onRefresh();
     } catch (error) {
-      console.error("Error in handleClick:", error);
+      console.error("Error in refresh action:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [handleClick]);
+  }, [onRefresh]);
 
   return (
     <Button
