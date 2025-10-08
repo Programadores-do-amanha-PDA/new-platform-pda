@@ -1,6 +1,10 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { ArrowUpDown, FilePen, MoreHorizontal } from "lucide-react";
+
+import { useUsersStore } from "@/stores/modules/users/users-store";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,8 +17,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, FilePen, MoreHorizontal } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -34,11 +36,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ClassroomProjectDeliveryT } from "@/features/dashboard/classroom-projects/types/delivery";
-import { ClassroomProjectTypeT } from "@/features/dashboard/classroom-projects/types/project";
 import { AuthUserWithProfileT } from "@/types";
-import { useUsersStore } from "@/stores/modules/users/users-store";
-import Link from "next/link";
+
+import { ClassroomProjectDeliveryT, ClassroomProjectTypeT } from "../../types";
 
 const createColumns = (
   projectType: ClassroomProjectTypeT,

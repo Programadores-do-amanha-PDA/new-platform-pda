@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import PermissionGuard from "@/components/shared/permission-guard";
-import ProjectCard from "../components/project-card";
-import ProjectDialog from "../components/project-dialog";
+import ProjectCard from "../components/project/project-card";
+import ProjectDialog from "../components/project/project-dialog";
 import { useProjectStore } from "../stores";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 

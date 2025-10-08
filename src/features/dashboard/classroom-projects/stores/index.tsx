@@ -1,18 +1,14 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
+
 import {
   createClassroomProject,
   getAllProjectsByClassroomId,
   updateClassroomProjectById,
   deleteProjectById,
 } from "@/app/actions/classrooms/projects";
-import { ClassroomProjectT } from "@/features/dashboard/classroom-projects/types/project";
-
-interface ProjectState {
-  projects: ClassroomProjectT[];
-  loading: boolean;
-}
+import { ClassroomProjectT, ProjectStoreStateT } from "../types";
 
 interface ProjectActions {
   setProjects: (projects: ClassroomProjectT[]) => void;
@@ -28,12 +24,12 @@ interface ProjectActions {
   reset: () => void;
 }
 
-const initialState: ProjectState = {
+const initialState: ProjectStoreStateT = {
   projects: [],
   loading: false,
 };
 
-export const useProjectStore = create<ProjectState & ProjectActions>()(
+export const useProjectStore = create<ProjectStoreStateT & ProjectActions>()(
   devtools(
     (set, get) => ({
       ...initialState,
@@ -56,8 +52,6 @@ export const useProjectStore = create<ProjectState & ProjectActions>()(
           set({ loading: false });
         }
       },
-
-
 
       createProject: async (projectData) => {
         try {

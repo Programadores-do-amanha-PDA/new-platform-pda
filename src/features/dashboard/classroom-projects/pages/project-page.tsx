@@ -7,9 +7,9 @@ import { DeleteConfirmationButton } from "@/components/shared/delete-confirmatio
 
 // local imports
 import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
-import ProjectDialog from "../components/project-dialog";
+import ProjectDialog from "../components/project/project-dialog";
 import { ClassroomProjectT } from "../types";
-import { projectTypesLabels } from "../utils/project-type-labels";
+import { projectTypesLabels } from "../utils/projects/project-type-labels";
 import { useDeliveryStore } from "../stores/deliveries";
 import { useProjectStore } from "../stores";
 import { useCorrectionStore } from "../stores/corrections";
@@ -45,7 +45,7 @@ export default function ProjectPage() {
   const projectCorrections = classroomCorrections?.filter(
     (correction) => correction.project_id === project_id
   );
-  const projectDeliveries = classroomDeliveries
+  const projectDeliveriesWithLastCorrection = classroomDeliveries
     ?.filter((delivery) => delivery.project_id === project_id)
     .map((delivery) => ({
       ...delivery,
@@ -61,7 +61,7 @@ export default function ProjectPage() {
           <div className="flex items-center gap-1" title="Tipo do projeto">
             <Type className="size-5 text-muted-foreground" />
             <span className="text-muted-foreground">
-              {projectTypesLabels[currentProject?.project_type].label}
+              {projectTypesLabels[currentProject?.project_type]?.label}
             </span>
           </div>
           <div className="flex items-center gap-1" title="Modulo do projeto">
@@ -116,7 +116,7 @@ export default function ProjectPage() {
 
       <div className="w-full h-full flex overflow-hidden">
         <DeliveryDataTable
-          deliveries={projectDeliveries.sort(
+          deliveries={projectDeliveriesWithLastCorrection.sort(
             (a, b) =>
               new Date(a.created_at || 0).getTime() -
               new Date(b.created_at || 0).getTime()

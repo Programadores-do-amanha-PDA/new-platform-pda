@@ -2,7 +2,7 @@
 
 import { formatDate } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Check, Clock } from "lucide-react";
+import { Check, Clock, MailCheck } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -13,14 +13,14 @@ import {
   ItemMedia,
 } from "@/components/ui/item";
 
-import { DeliveryListItemProps } from "../../types/delivery-list-item";
+import { DeliveryListItemProps } from "../../types/deliveries/delivery-list-item";
 
 export function DeliveryListItem({
   delivery,
   deliveryIndex,
   deliveryAuthor,
   projectType,
-  hasCorrection,
+  correction,
   isSelected,
   onSelect,
 }: DeliveryListItemProps) {
@@ -38,8 +38,10 @@ export function DeliveryListItem({
       variant="outline"
       className={cn(
         "min-w-xs max-w-xs cursor-pointer hover:bg-accent/50 transition-colors",
-        isSelected && hasCorrection
-          ? "border-2 border-green-200!"
+        isSelected && correction?.id
+          ? correction.has_feedback_sent
+            ? "border-2 border-blue-200!"
+            : "border-2 border-green-200!"
           : isSelected && "border-2 border-amber-200!"
       )}
       onClick={() => onSelect(delivery)}
@@ -52,12 +54,22 @@ export function DeliveryListItem({
       </ItemContent>
       <ItemMedia
         className={cn("size-10 flex items-center justify-center rounded-xl")}
-        title={hasCorrection ? "Corrigido" : "Correção pendente"}
+        title={
+          correction?.id
+            ? correction.has_feedback_sent
+              ? "Feedback enviado"
+              : "Corrigido"
+            : "Correção pendente"
+        }
       >
-        {hasCorrection ? (
-          <Check className="size-5 stroke-green-600 stroke-3" />
+        {correction?.id ? (
+          correction.has_feedback_sent ? (
+            <MailCheck className="size-5 stroke-blue-600 stroke-2" />
+          ) : (
+            <Check className="size-5 stroke-green-600 stroke-2" />
+          )
         ) : (
-          <Clock className="size-5 stroke-amber-400 stroke-3" />
+          <Clock className="size-5 stroke-amber-400 stroke-" />
         )}
       </ItemMedia>
     </Item>
