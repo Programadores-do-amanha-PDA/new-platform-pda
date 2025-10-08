@@ -46,7 +46,7 @@ export const getProjectFeedbackTemplate = ({
           padding-bottom: 16px;
           color: #1f2937;
         ">
-        ${hitsItens.join(" ")}}
+        ${hitsItens.join(" ")}
         </ul>`
         );
       } else if (typeof values.hits_itens === "string") {
@@ -95,7 +95,7 @@ export const getProjectFeedbackTemplate = ({
           padding-bottom: 16px;
           color: #1f2937;
         ">
-        ${improvementsItens.join(" ")}}
+        ${improvementsItens.join(" ")}
         </ul>`
         );
       } else if (typeof values.improvements_itens === "string") {

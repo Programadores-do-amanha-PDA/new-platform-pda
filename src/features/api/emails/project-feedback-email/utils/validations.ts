@@ -10,7 +10,7 @@ export const projectFeedbackValuesSchema = z.object({
   hits_itens: z
     .array(
       z.object({
-        emoji: z.literal("🥇"),
+        emoji: z.string().min(1, "This field cannot be empty"),
         text: z.string().min(1, "This field cannot be empty"),
       })
     )
@@ -18,7 +18,7 @@ export const projectFeedbackValuesSchema = z.object({
   improvements_itens: z
     .array(
       z.object({
-        emoji: z.literal("🗡️"),
+        emoji: z.string().min(1, "This field cannot be empty"),
         text: z.string().min(1, "This field cannot be empty"),
       })
     )
@@ -35,7 +35,7 @@ export const projectFeedbackValuesSchema = z.object({
   next_itens: z
     .array(
       z.object({
-        emoji: z.literal("👨‍🚀"),
+        emoji: z.string().min(1, "This field cannot be empty"),
         text: z.string().min(1, "This field cannot be empty"),
       })
     )
@@ -45,7 +45,6 @@ export const projectFeedbackValuesSchema = z.object({
 export const projectFeedbackSchema = z.object({
   email: z.email("Email inválido"),
   subject: z.string().min(1, "Assunto é obrigatório"),
-  template: z.string().min(1, "Template é obrigatório"),
   values: projectFeedbackValuesSchema,
 });
 

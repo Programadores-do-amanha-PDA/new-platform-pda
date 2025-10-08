@@ -2,7 +2,6 @@ import nodemailer from "nodemailer";
 import { randomUUID } from "crypto";
 import path from "path";
 import fs from "fs/promises";
-import { ApiError } from "@/lib/errors/api-error";
 import { ProjectFeedbackInput } from "./validations";
 import { extractValuesAndKeys } from "../../utils/extractValuesAndKeys";
 import { getProjectFeedbackTemplate } from "../template/useTemplate";
@@ -11,7 +10,7 @@ export class ProjectFeedbackEmailService {
   static async sendProjectFeedbackEmail(params: ProjectFeedbackInput) {
     const templatePath = path.resolve(
       process.cwd(),
-      "src/features/api/emails/project-feedbacks-emails/template/index.html"
+      "src/features/api/emails/project-feedback-email/template/index.html"
     );
 
     // Verifica se o arquivo existe
@@ -57,30 +56,10 @@ export class ProjectFeedbackEmailService {
       },
     });
 
-    const imagePath = path.join(
-      process.cwd(),
-      "public",
-      "Logo_PDA_Principal_FundoAmarelo.png"
-    );
-
-    // Verifica se a imagem existe
-    try {
-      await fs.access(imagePath);
-    } catch {
-      throw new ApiError(403, "Imagem de logo não encontrada");
-    }
-
     const mailOptions = {
       to: params.email,
       subject: params.subject,
       html: finalTemplate,
-      attachments: [
-        {
-          filename: "image.png",
-          path: imagePath,
-          cid: cid,
-        },
-      ],
     };
 
     await transporter.sendMail(mailOptions);
