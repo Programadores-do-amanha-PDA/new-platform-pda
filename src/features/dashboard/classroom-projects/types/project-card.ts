@@ -9,8 +9,8 @@ export interface ProjectCardProps {
   project: ClassroomProjectT;
   /** Whether to show expanded view with additional controls */
   expansive: boolean;
-  /** Optional classroom ID for delivery modal */
-  classroomId?: string;
+  /** The classroom ID for delivery modal */
+  classroomId: string;
 
   classroomConfig?: ClassroomConfigT;
 }

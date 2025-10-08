@@ -38,15 +38,15 @@ export default function ProjectPage() {
       />
     );
   }
+  const classroomDeliveries = deliveries[classroom_id];
+  const classroomCorrections = corrections[classroom_id];
+  const classroomModules = configsByClassroom[classroom_id].modules || [];
 
-  const classroomModules =
-    configsByClassroom[classroom_id as string].modules || [];
-
-  const projectCorrections = corrections.filter(
+  const projectCorrections = classroomCorrections?.filter(
     (correction) => correction.project_id === project_id
   );
-  const projectDeliveries = deliveries
-    .filter((delivery) => delivery.project_id === project_id)
+  const projectDeliveries = classroomDeliveries
+    ?.filter((delivery) => delivery.project_id === project_id)
     .map((delivery) => ({
       ...delivery,
       lastCorrection:
@@ -58,7 +58,6 @@ export default function ProjectPage() {
     <div className="w-full h-full flex flex-col gap-8 p-4 overflow-y">
       <header className="w-full flex flex-wrap justify-between gap-2">
         <div className="flex items-center flex-wrap gap-4">
-          {/* <p className="text-muted-foreground font-semibold">Testes:</p> */}
           <div className="flex items-center gap-1" title="Tipo do projeto">
             <Type className="size-5 text-muted-foreground" />
             <span className="text-muted-foreground">

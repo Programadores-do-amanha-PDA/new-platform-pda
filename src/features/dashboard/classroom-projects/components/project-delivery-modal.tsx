@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Trash2, Link as LinkIcon, Loader2, CheckCircle} from "lucide-react";
+import { Trash2, Link as LinkIcon, Loader2, CheckCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -173,9 +173,10 @@ const ProjectDeliveryModal = ({
         members_id: selectedMemberIds,
         links: links.map((l) => l.url),
         observation: observation.trim(),
+        classroom_id: classroomId,
       };
 
-      const success = await createDelivery(deliveryData);
+      const success = await createDelivery(deliveryData, classroomId);
       if (success) {
         setIsProjectDelivered(true);
       }
@@ -194,18 +195,24 @@ const ProjectDeliveryModal = ({
   if (isProjectDelivered) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className={isMobile ? "w-full h-full max-w-none m-0 rounded-none" : "max-w-4xl max-h-[90vh] overflow-y-auto"}>
+        <DialogContent
+          className={
+            isMobile
+              ? "w-full h-full max-w-none m-0 rounded-none"
+              : "max-w-4xl max-h-[90vh] overflow-y-auto"
+          }
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CheckCircle className="h-6 w-6 text-green-600" />
               {isEnglishProject
                 ? `M${project.module} Final Project Delivery`
-                : `Entrega do ${
-                    projectTypeLabels[project.project_type]
-                  } do M${project.module}`}
+                : `Entrega do ${projectTypeLabels[project.project_type]} do M${
+                    project.module
+                  }`}
             </DialogTitle>
           </DialogHeader>
-          
+
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
               <div className="space-y-1">
@@ -238,7 +245,13 @@ const ProjectDeliveryModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={isMobile ? "w-full h-full max-w-none m-0 rounded-none" : "max-w-[700px]! max-h-[90vh] overflow-y-auto"}>
+      <DialogContent
+        className={
+          isMobile
+            ? "w-full h-full max-w-none m-0 rounded-none"
+            : "max-w-[700px]! max-h-[90vh] overflow-y-auto"
+        }
+      >
         <DialogHeader>
           <DialogTitle>
             {isEnglishProject
@@ -301,7 +314,9 @@ const ProjectDeliveryModal = ({
             <Card ref={squadRef}>
               <CardHeader>
                 <CardTitle>
-                  {isEnglishProject ? "*Number of the SQUAD" : "*Número da Squad"}
+                  {isEnglishProject
+                    ? "*Number of the SQUAD"
+                    : "*Número da Squad"}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -371,7 +386,9 @@ const ProjectDeliveryModal = ({
                       </Avatar>
 
                       <div>
-                        <p className="font-medium">{user?.profile?.full_name}</p>
+                        <p className="font-medium">
+                          {user?.profile?.full_name}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {user?.profile?.email}
                         </p>
@@ -431,7 +448,9 @@ const ProjectDeliveryModal = ({
                         <LinkIcon className="h-4 w-4" />
                         <span className="font-semibold">
                           {links.length}{" "}
-                          {isEnglishProject ? "Links added" : "Links adicionados"}
+                          {isEnglishProject
+                            ? "Links added"
+                            : "Links adicionados"}
                         </span>
                       </div>
                       <div className="space-y-2">
@@ -501,7 +520,9 @@ const ProjectDeliveryModal = ({
                   className="w-full md:w-auto"
                   size="lg"
                 >
-                  {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {isLoading && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   {isLoading
                     ? isEnglishProject
                       ? "Submitting..."

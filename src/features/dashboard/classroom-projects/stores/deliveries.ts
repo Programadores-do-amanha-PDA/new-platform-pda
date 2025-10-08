@@ -192,10 +192,10 @@ export const useDeliveryStore = create<DeliveryState & DeliveryActions>()(
           }
           if (!classroomId) throw new Error("Classroom ID is required");
 
-          const updatedDelivery = await updateClassroomProjectDeliveryById(
-            id,
-            deliveryData
-          );
+          const updatedDelivery = await updateClassroomProjectDeliveryById(id, {
+            ...deliveryData,
+            classroom_id: classroomId,
+          });
           if (!updatedDelivery) throw new Error("Delivery update failed");
 
           const currentDeliveries = get().deliveries[classroomId] || [];

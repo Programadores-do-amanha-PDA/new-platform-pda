@@ -32,6 +32,10 @@ import {
   projectCorrectionFormSchema,
   ProjectCorrectionPropsT,
 } from "../../types/project-correction-form";
+import {
+  ClassroomProjectCorrectionT,
+  ClassroomProjectCorrectionRulesSelectedT,
+} from "../../types/corrections";
 import { ProjectRuleSelector } from "./project-rule-selector";
 import { useCorrectionStore } from "../../stores/corrections";
 import MemberListItem from "./member-list-item";
@@ -87,14 +91,15 @@ const ProjectCorrection = ({
   const { corrections, createCorrection, updateCorrection } =
     useCorrectionStore();
   const { configsByClassroom } = useClassroomConfigStore();
-  const classroomConfig = configsByClassroom[classroomId];
 
+  const classroomConfig = configsByClassroom[classroomId];
+  const classroomCorrections = corrections[classroomId];
   const classroomUsers = users.filter((user) =>
     user?.profile?.classrooms
       ?.map((classroom) => classroom.classroom_id)
       .includes(classroomId)
   );
-  const currentCorrection = corrections.find(
+  const currentCorrection = classroomCorrections?.find(
     (correction) => correction.delivery_id === selectedDelivery.id
   );
 
@@ -201,6 +206,58 @@ const ProjectCorrection = ({
       .map((r) => r.ruleNote)
       ?.reduce((accum, curr) => accum + curr, 0) / rulesLabels?.length || 0;
 
+  // Helper function to get only changed fields
+  const getChangedFields = (
+    current: ClassroomProjectCorrectionT,
+    newData: {
+      final_note: string;
+      final_considerations: string;
+      rules_selected: ClassroomProjectCorrectionRulesSelectedT[];
+      hits_itens: string[];
+      improvements_itens: string[];
+      next_itens: string[];
+    }
+  ) => {
+    const changes: Partial<ClassroomProjectCorrectionT> = {};
+
+    if (current.final_note !== newData.final_note) {
+      changes.final_note = newData.final_note;
+    }
+
+    if (current.final_considerations !== newData.final_considerations) {
+      changes.final_considerations = newData.final_considerations;
+    }
+
+    // Deep comparison for arrays
+    if (
+      JSON.stringify(current.rules_selected) !==
+      JSON.stringify(newData.rules_selected)
+    ) {
+      changes.rules_selected = newData.rules_selected;
+    }
+
+    if (
+      JSON.stringify(current.hits_itens) !== JSON.stringify(newData.hits_itens)
+    ) {
+      changes.hits_itens = newData.hits_itens;
+    }
+
+    if (
+      JSON.stringify(current.improvements_itens) !==
+      JSON.stringify(newData.improvements_itens)
+    ) {
+      changes.improvements_itens = newData.improvements_itens;
+    }
+
+    if (
+      JSON.stringify(current.next_itens) !== JSON.stringify(newData.next_itens)
+    ) {
+      changes.next_itens = newData.next_itens;
+    }
+
+    return changes;
+  };
+
   const onSubmit = async (data: ProjectCorrectionFormT) => {
     if (data.rulesSelected.length !== rulesLabels.length) {
       toast.error(
@@ -209,39 +266,38 @@ const ProjectCorrection = ({
       return;
     }
 
+    const formattedData = {
+      final_note: data.finalNote,
+      final_considerations: data.feedback,
+      rules_selected: data.rulesSelected,
+      hits_itens: [data.hits.item1, data.hits.item2, data.hits.item3].filter(
+        (item): item is string => item !== undefined && item.trim() !== ""
+      ),
+      improvements_itens: [
+        data.improvements.item1,
+        data.improvements.item2,
+        data.improvements.item3,
+      ].filter(
+        (item): item is string => item !== undefined && item.trim() !== ""
+      ),
+      next_itens: [data.next.item1, data.next.item2, data.next.item3].filter(
+        (item): item is string => item !== undefined && item.trim() !== ""
+      ),
+    };
+
     if (!currentCorrection?.id) {
       if (selectedDelivery && selectedDelivery.id) {
         try {
           setLoading(true);
-          await createCorrection({
-            project_id: project.id,
-            delivery_id: selectedDelivery.id,
-            final_note: data.finalNote,
-            final_considerations: data.feedback,
-            teacher_id: user?.id,
-            rules_selected: data.rulesSelected,
-            hits_itens: [
-              data.hits.item1,
-              data.hits.item2,
-              data.hits.item3,
-            ].filter(
-              (item): item is string => item !== undefined && item.trim() !== ""
-            ),
-            improvements_itens: [
-              data.improvements.item1,
-              data.improvements.item2,
-              data.improvements.item3,
-            ].filter(
-              (item): item is string => item !== undefined && item.trim() !== ""
-            ),
-            next_itens: [
-              data.next.item1,
-              data.next.item2,
-              data.next.item3,
-            ].filter(
-              (item): item is string => item !== undefined && item.trim() !== ""
-            ),
-          });
+          await createCorrection(
+            {
+              project_id: project.id,
+              delivery_id: selectedDelivery.id,
+              teacher_id: user?.id,
+              ...formattedData,
+            },
+            selectedDelivery.classroom_id
+          );
         } catch (error) {
           console.error(error);
           toast.error("Erro ao salvar correção");
@@ -252,32 +308,21 @@ const ProjectCorrection = ({
     } else if (currentCorrection.id) {
       try {
         setLoading(true);
-        await updateCorrection(currentCorrection.id, {
-          final_note: data.finalNote,
-          final_considerations: data.feedback,
-          rules_selected: data.rulesSelected,
-          hits_itens: [
-            data.hits.item1,
-            data.hits.item2,
-            data.hits.item3,
-          ].filter(
-            (item): item is string => item !== undefined && item.trim() !== ""
-          ),
-          improvements_itens: [
-            data.improvements.item1,
-            data.improvements.item2,
-            data.improvements.item3,
-          ].filter(
-            (item): item is string => item !== undefined && item.trim() !== ""
-          ),
-          next_itens: [
-            data.next.item1,
-            data.next.item2,
-            data.next.item3,
-          ].filter(
-            (item): item is string => item !== undefined && item.trim() !== ""
-          ),
-        });
+        const changedFields = getChangedFields(
+          currentCorrection,
+          formattedData
+        );
+
+        // Only update if there are actual changes
+        if (Object.keys(changedFields).length > 0) {
+          await updateCorrection(
+            currentCorrection.id,
+            changedFields,
+            selectedDelivery?.classroom_id || classroomId
+          );
+        } else {
+          toast.info("Nenhuma alteração detectada");
+        }
       } catch (error) {
         console.error(error);
         toast.error("Erro ao atualizar correção");
@@ -286,7 +331,6 @@ const ProjectCorrection = ({
       }
     }
   };
-
   const handleCancel = () => {
     form.reset({
       teacherName: "",
@@ -586,9 +630,7 @@ const ProjectCorrection = ({
                           <Input
                             {...field}
                             type="number"
-                            placeholder={String(
-                              Math.round(finalProjectPlaceholder)
-                            )}
+                            defaultValue={Math.round(finalProjectPlaceholder)}
                             className="w-60"
                           />
                         </FormControl>

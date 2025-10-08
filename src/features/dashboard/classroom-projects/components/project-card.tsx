@@ -79,6 +79,8 @@ const ProjectCard = ({
     useState<boolean>(false);
 
   const classroomModules = classroomConfig?.modules || [];
+  const classroomDeliveries = deliveries[classroomId];
+  const classroomCorrections = corrections[classroomId];
 
   // Initialize schedule date from project data
   useEffect(() => {
@@ -115,8 +117,8 @@ const ProjectCard = ({
     const deliveryStatus = analyzeDeliveryStatus(
       project,
       user.id,
-      deliveries,
-      corrections
+      classroomDeliveries,
+      classroomCorrections
     );
 
     return (
@@ -220,8 +222,8 @@ const ProjectCard = ({
                 loading={loading}
                 hasChanges={hasChanges}
                 onUpdateProject={handleUpdateProject}
-                deliveries={deliveries}
-                corrections={corrections}
+                deliveries={classroomDeliveries}
+                corrections={classroomCorrections}
               />
             )}
           </PermissionGuard>

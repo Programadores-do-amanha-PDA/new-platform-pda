@@ -8,7 +8,12 @@ export interface DeliveryStatusResult {
   hasCorrection: boolean;
   delivery?: ClassroomProjectDeliveryT;
   correction?: ClassroomProjectCorrectionT;
-  status: 'can-deliver' | 'future' | 'not-delivered' | 'pending-correction' | 'corrected';
+  status:
+    | "can-deliver"
+    | "future"
+    | "not-delivered"
+    | "pending-correction"
+    | "corrected";
 }
 
 /**
@@ -25,16 +30,18 @@ export const analyzeDeliveryStatus = (
   deliveries: ClassroomProjectDeliveryT[],
   corrections: ClassroomProjectCorrectionT[]
 ): DeliveryStatusResult => {
-  const projectDeliveries = deliveries.filter(
+  const projectDeliveries = deliveries?.filter(
     (delivery) => delivery.project_id === project.id
   );
-  
-  const userDelivery = projectDeliveries.find(
+
+  const userDelivery = projectDeliveries?.find(
     (delivery) => delivery.user_id === userId
   );
-  
-  const userCorrection = userDelivery 
-    ? corrections.find((correction) => correction.delivery_id === userDelivery.id)
+
+  const userCorrection = userDelivery
+    ? corrections?.find(
+        (correction) => correction.delivery_id === userDelivery.id
+      )
     : undefined;
 
   const projectStatus = getProjectStatus(project);
@@ -42,24 +49,24 @@ export const analyzeDeliveryStatus = (
   // User has not delivered
   if (!userDelivery) {
     switch (projectStatus) {
-      case 'active':
+      case "active":
         return {
           hasDelivery: false,
           hasCorrection: false,
-          status: 'can-deliver'
+          status: "can-deliver",
         };
-      case 'future':
+      case "future":
         return {
           hasDelivery: false,
           hasCorrection: false,
-          status: 'future'
+          status: "future",
         };
-      case 'expired':
-      case 'no-schedule':
+      case "expired":
+      case "no-schedule":
         return {
           hasDelivery: false,
           hasCorrection: false,
-          status: 'not-delivered'
+          status: "not-delivered",
         };
     }
   }
@@ -70,7 +77,7 @@ export const analyzeDeliveryStatus = (
       hasDelivery: true,
       hasCorrection: false,
       delivery: userDelivery,
-      status: 'pending-correction'
+      status: "pending-correction",
     };
   }
 
@@ -80,7 +87,7 @@ export const analyzeDeliveryStatus = (
     hasCorrection: true,
     delivery: userDelivery,
     correction: userCorrection,
-    status: 'corrected'
+    status: "corrected",
   };
 };
 
@@ -96,17 +103,17 @@ export const getProjectStatistics = (
   deliveries: ClassroomProjectDeliveryT[],
   corrections: ClassroomProjectCorrectionT[]
 ) => {
-  const projectDeliveries = deliveries.filter(
+  const projectDeliveries = deliveries?.filter(
     (delivery) => delivery.project_id === project.id
   );
-  
-  const projectCorrections = corrections.filter(
+
+  const projectCorrections = corrections?.filter(
     (correction) => correction.project_id === project.id
   );
 
   return {
-    totalDeliveries: projectDeliveries.length,
-    totalCorrections: projectCorrections.length,
-    pendingCorrections: projectDeliveries.length - projectCorrections.length
+    totalDeliveries: projectDeliveries?.length,
+    totalCorrections: projectCorrections?.length,
+    pendingCorrections: projectDeliveries?.length - projectCorrections?.length,
   };
 };
