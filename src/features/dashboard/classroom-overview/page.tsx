@@ -29,9 +29,7 @@ import {
 } from "../classroom-zoom/stores";
 
 export default function ClassroomAttendancePage() {
-  const params = useParams();
-  const classroomId = params.classroom_id as string;
-
+  const { classroom_id } = useParams<{ classroom_id: string }>();
   const [data, setData] = useState<ClassroomOverviewData>({
     students: [],
     classTypes: [],
@@ -39,7 +37,6 @@ export default function ClassroomAttendancePage() {
     projects: [],
     userModes: [],
   });
-
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(
     null
   );
@@ -55,17 +52,23 @@ export default function ClassroomAttendancePage() {
   const { pastInstances } = useZoomMeetingPastInstanceStore();
   const { meetings } = useZoomMeetingStore();
 
-  const currentConfig = configsByClassroom[classroomId];
+  const currentConfig = configsByClassroom[classroom_id];
   const modules = useMemo(
     () => currentConfig?.modules || [],
     [currentConfig?.modules]
   );
-  const classroomDeliveries = deliveries[classroomId];
-  const classroomCorrections = corrections[classroomId];
+  const classroomDeliveries = useMemo(
+    () => deliveries[classroom_id] || [],
+    [deliveries, classroom_id]
+  );
+  const classroomCorrections = useMemo(
+    () => corrections[classroom_id] || [],
+    [corrections, classroom_id]
+  );
 
   useEffect(() => {
     // filter users by classroom id & by must be present on user mode
-    const classroomStudents = filterClassroomStudents(users, classroomId, [
+    const classroomStudents = filterClassroomStudents(users, classroom_id, [
       ...(currentConfig?.user_modes || []),
     ]);
 
@@ -102,9 +105,13 @@ export default function ClassroomAttendancePage() {
         )
       : assessments.filter((a) => a.is_visible_on_schedule === true);
 
+    // Filtrar projetos por classroom_id primeiro, depois por data se necessário
+    const classroomProjects = projects.filter(
+      (project) => project.classroom_id === classroom_id
+    );
     const filteredProjects = dateRange
-      ? filterDataByDateRange(projects, "created_at", dateRange)
-      : projects;
+      ? filterDataByDateRange(classroomProjects, "created_at", dateRange)
+      : classroomProjects;
 
     // Criar dados dos estudantes com indicadores
     const studentsData: StudentOverview[] = classroomStudents.map(
@@ -125,8 +132,10 @@ export default function ClassroomAttendancePage() {
         );
 
         // Calcular notas dos projetos com dados filtrados
+        // Usar ID do usuário como identificador principal
+        const studentId = user.id || "";
         const projectIndicators = calculateProjectNotes(
-          studentEmail,
+          studentId,
           filteredProjects,
           classroomDeliveries,
           classroomCorrections
@@ -140,7 +149,7 @@ export default function ClassroomAttendancePage() {
 
         // Obter o modo do usuário atual da relação user_classroom
         const userClassroom = user.profile?.classrooms?.find(
-          (uc) => uc.classroom_id === classroomId
+          (uc) => uc.classroom_id === classroom_id
         );
 
         return {
@@ -196,6 +205,14 @@ export default function ClassroomAttendancePage() {
       name: project.title,
     }));
 
+    // Debug temporário - remover depois
+    if (filteredProjects.length > 0 && classroomDeliveries.length > 0) {
+      console.log("DEBUG: Projects found:", filteredProjects.length);
+      console.log("DEBUG: Deliveries found:", classroomDeliveries.length);
+      console.log("DEBUG: Corrections found:", classroomCorrections.length);
+      console.log("DEBUG: Sample student data:", studentsData[0]?.projects);
+    }
+
     // Preparar dados dos modos de usuário
     const userModes = currentConfig?.user_modes || [];
 
@@ -207,7 +224,7 @@ export default function ClassroomAttendancePage() {
       userModes,
     });
   }, [
-    classroomId,
+    classroom_id,
     currentConfig,
     users,
     dateRange,
@@ -216,8 +233,8 @@ export default function ClassroomAttendancePage() {
     activities,
     assessments,
     projects,
-    deliveries,
-    corrections,
+    classroomDeliveries,
+    classroomCorrections,
   ]);
 
   const handleDateRangeChange = (newDateRange: { from: Date; to: Date }) => {
@@ -229,7 +246,7 @@ export default function ClassroomAttendancePage() {
     userModeId: string
   ) => {
     // Atualizar no banco de dados
-    const success = await updateUserMode(studentId, classroomId, userModeId);
+    const success = await updateUserMode(studentId, classroom_id, userModeId);
 
     if (success) {
       // Atualizar o estado local apenas se a atualização no banco foi bem-sucedida

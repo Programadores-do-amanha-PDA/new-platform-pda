@@ -237,10 +237,13 @@ export const createColumns = (
       },
       cell: ({ row }) => {
         const value = row.original.projects[project.id];
+        const hasValue = value !== undefined && value !== null;
+        const displayValue = hasValue ? formatGrade(value) : "-";
+        
         return (
           <div className="w-full h-full flex justify-center items-center p-2 border-r border-b min-w-[120px]">
             <span className="font-medium">
-              {value ? formatGrade(value) : "-"}
+              {displayValue}
             </span>
           </div>
         );
