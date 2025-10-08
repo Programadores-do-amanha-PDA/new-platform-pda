@@ -23,7 +23,10 @@ import { useDeliveryStore } from "../classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "../classroom-projects/stores/corrections";
 import { filterClassroomStudents } from "../utils/filter-classroom-students";
 import { filterDataByDateRange } from "../utils/filter-data-by-date-range";
-import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../classroom-zoom/stores";
+import {
+  useZoomMeetingStore,
+  useZoomMeetingPastInstanceStore,
+} from "../classroom-zoom/stores";
 
 export default function ClassroomAttendancePage() {
   const params = useParams();
@@ -57,6 +60,8 @@ export default function ClassroomAttendancePage() {
     () => currentConfig?.modules || [],
     [currentConfig?.modules]
   );
+  const classroomDeliveries = deliveries[classroomId];
+  const classroomCorrections = corrections[classroomId];
 
   useEffect(() => {
     // filter users by classroom id & by must be present on user mode
@@ -123,8 +128,8 @@ export default function ClassroomAttendancePage() {
         const projectIndicators = calculateProjectNotes(
           studentEmail,
           filteredProjects,
-          deliveries,
-          corrections
+          classroomDeliveries,
+          classroomCorrections
         );
 
         // Calcular presença geral das atividades com dados filtrados
