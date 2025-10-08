@@ -269,7 +269,7 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     id: "refresh",
     header: () => {
       return (
-        <div className="w-full h-full flex justify-center items-center px-2">
+        <div className="w-full h-full flex justify-center items-center px-2 border-r">
           <p>Atualizar</p>
         </div>
       );
@@ -277,10 +277,11 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     cell: ({ row }: { row: { original: MeetingPastInstance } }) => (
       <div
         key={`refresh-${row.original.uuid}`}
-        className="w-full h-full flex justify-center items-center border-b"
+        className="w-full h-full flex justify-center items-center border-b border-r"
       >
         <RefreshButton
-          handleClick={async () =>
+          disabled={true}
+          onRefresh={async () =>
             void row.original.handleRefreshInstanceData(
               row.original.id,
               row.original.uuid
@@ -310,7 +311,7 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
         className="w-full h-full flex justify-center items-center border-b"
       >
         <RefreshButton
-          handleClick={async () =>
+          onRefresh={async () =>
             void row.original.updatePastInstanceById(row.original.id, {
               is_visible_on_schedule: !row.original.is_visible_on_schedule,
             })
@@ -612,7 +613,7 @@ export default function ZoomRecurrenceMeetingPage({
             </div>
             <div className="flex gap-4">
               <Button
-                disabled={isUpdating}
+                disabled={true || isUpdating}
                 onClick={handleRefreshMeeting}
                 title="Atualizar"
                 className="font-semibold cursor-pointer"

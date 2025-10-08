@@ -159,7 +159,8 @@ const RefreshButton = ({
 }: RefreshButtonProps) => (
   <Button
     size="icon"
-    disabled={loading || allMeetingLoading}
+    // disabled={loading || allMeetingLoading}
+    disabled={true || loading || allMeetingLoading}
     onClick={onRefresh}
     title="Atualizar"
     className="cursor-pointer"

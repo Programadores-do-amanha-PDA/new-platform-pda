@@ -365,7 +365,7 @@ export default function ZoomPastMeetingPage({
         </div>
         <div className="flex gap-4">
           <Button
-            disabled={isUpdating}
+            disabled={true || isUpdating}
             onClick={handleRefreshMeeting}
             title="Atualizar"
             className="font-semibold"
