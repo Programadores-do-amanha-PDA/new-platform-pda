@@ -193,15 +193,20 @@ export const useZoomMeetingPastInstanceStore = create<
         }
       },
 
+      
       upsertMultiplePastInstances: async (pastInstancesData) => {
-        let loadingToastId: string | number | undefined;
+        let loadingToastId;
         try {
+          // Validating if array is provided
           if (!pastInstancesData || pastInstancesData.length === 0) {
             toast.error("Nenhuma instância passada foi fornecida!");
             throw new Error("No past instances data provided");
           }
 
-          // Validar se todos os itens têm os campos obrigatórios
+          // accessing current store state
+          const currentStore = get();
+
+          // Validating if all items have required fields
           for (const pastInstanceData of pastInstancesData) {
             if (
               !pastInstanceData.classroom_id ||
@@ -220,7 +225,7 @@ export const useZoomMeetingPastInstanceStore = create<
           loadingToastId = toast.loading(
             `Processando ${pastInstancesData.length} instâncias passadas...`
           );
-
+          // Upsert instances, preserving user data like justifications
           const upsertedPastInstances = await upsertMultiplePastInstances(
             pastInstancesData,
             { preserveUserData: true } // Preserve justifications and other user data
@@ -229,13 +234,14 @@ export const useZoomMeetingPastInstanceStore = create<
             throw new Error("no multiple past instances upsert response");
 
           // Update the store with upserted instances, preserving other instances
-          const currentInstances = get().pastInstances;
-          const upsertedUuids = new Set(upsertedPastInstances.map(instance => instance.uuid));
+          const currentInstances = currentStore.pastInstances;
+          const upsertedUuids = new Set(upsertedPastInstances.map(instance => instance.id));
           
           // Merge existing justifications with new data to prevent data loss
           const mergedInstances = upsertedPastInstances.map(upsertedInstance => {
+            // Find existing instance by ID
             const existingInstance = currentInstances.find(
-              existing => existing.uuid === upsertedInstance.uuid
+              existing => existing.id === upsertedInstance.id
             );
             
             // Preserve existing justifications if they exist
@@ -251,7 +257,7 @@ export const useZoomMeetingPastInstanceStore = create<
           
           // Remove old versions of upserted instances and add merged ones
           const filteredInstances = currentInstances.filter(
-            instance => !upsertedUuids.has(instance.uuid)
+            instance => !upsertedUuids.has(instance.id)
           );
           
           set({
