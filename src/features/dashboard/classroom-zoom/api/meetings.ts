@@ -1,5 +1,5 @@
 "use server";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../types"; 
+import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../types";
 import axiosZoomInstancie from "./instancie";
 import { encodeUUID } from "@/utils/encode-UUID";
 
@@ -225,7 +225,9 @@ export const getPastedMeetingParticipants = async (
 
     // Final validation
     if (totalParticipants === 0) {
-      console.error(`[Zoom API] No participants found for meeting ${meetingId}`);
+      console.error(
+        `[Zoom API] No participants found for meeting ${meetingId}`
+      );
     }
 
     return participants;
@@ -326,8 +328,11 @@ export const getPastMeetingsPollResults = async (
     );
     if (response.status !== 200)
       throw new Error("Failed to fetch poll results");
-    return response.data.questions?.filter(Boolean);
+
+    console.log(response.data)
+    return response.data.questions;
   } catch (error) {
+    console.log(error)
     console.error("Error fetching poll results:", error);
     throw error;
   }
