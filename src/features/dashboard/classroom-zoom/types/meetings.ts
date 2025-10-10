@@ -179,65 +179,70 @@ export interface ZoomMeetingState {
   loading: boolean;
 }
 
+export type ZoomMeetingActionsAccountPickT = Pick<
+  ZoomAccountT,
+  "account_id" | "id" | "client_id" | "client_secret" | "classroom_id"
+>;
+
+export type ZoomMeetingActionsMeetingPickT = Pick<ZoomMeetingT, "id" | "meeting_id" | "uuid">
 export interface ZoomMeetingActions {
   setMeetings: (meetings: ZoomMeetingT[]) => void;
   getAllMeetings: (classroomId: string) => Promise<boolean>;
   getMeetingById: (meetingId: string) => Promise<ZoomMeetingT | boolean>;
   createMeeting: (
-    account: Partial<ZoomAccountT>,
+    account: ZoomMeetingActionsAccountPickT,
     meetingData: Partial<ZoomMeetingT>
   ) => Promise<string | false>;
   updateMeeting: (
     meetingId: string,
     updates: Partial<ZoomMeetingT>
   ) => Promise<boolean>;
-  updateMeetingOccurrence: (
-    meetingId: string,
-    occurrenceId: string,
-    updates: Partial<ZoomMeetingOccurrenceT>
+  refreshAllMeetingOccurrenceByMeetingId: (
+    account: ZoomMeetingActionsAccountPickT,
+    meeting: ZoomMeetingActionsMeetingPickT,
+    currentOccurrencesUpdated?: ZoomMeetingOccurrenceT[]
   ) => Promise<boolean>;
   refreshAndUpdateMeeting: (
     meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
+    account: ZoomMeetingActionsAccountPickT
   ) => Promise<boolean>;
   handleRecurrentMeetingUpdate: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>,
-    currentMeeting: ZoomMeetingT,
-    updatedMeetingData: Omit<ZoomMeetingWithPastInstancies, "id" | "created_at">
-  ) => Promise<void>;
+    meeting: ZoomMeetingActionsMeetingPickT,
+    account: ZoomMeetingActionsAccountPickT,
+    updatedMeetingData: Omit<ZoomMeetingWithPastInstancies, "id" | "created_at">,
+    instanciesUpdateMode?: "new" | "existing" | "all"
+  ) => Promise<boolean>;
   handleNonRecurrentMeetingUpdate: (
     meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>,
+    account: ZoomMeetingActionsAccountPickT,
     currentMeeting: ZoomMeetingT,
     updatedMeetingData: Partial<ZoomMeetingT>
   ) => Promise<void>;
   processNewPastInstances: (
-    meetingId: string,
-    account: Partial<ZoomAccountT>,
+    meeting: ZoomMeetingActionsMeetingPickT,
+    account: ZoomMeetingActionsAccountPickT,
     pastInstances: Partial<ZoomMeetingPastInstanceT>[]
   ) => Promise<void>;
   updateExistingPastInstances: (
     meetingId: string,
-    account: Partial<ZoomAccountT>,
+    account: ZoomMeetingActionsAccountPickT,
     pastInstances: Partial<ZoomMeetingPastInstanceT>[]
   ) => Promise<void>;
   fetchAllPastInstancesData: (
-    account: Partial<ZoomAccountT>,
+    account: ZoomMeetingActionsAccountPickT,
     pastInstances: Partial<ZoomMeetingPastInstanceT>[]
   ) => Promise<Partial<ZoomMeetingPastInstanceT>[]>;
   fetchNewPastInstancesData: (
-    account: Partial<ZoomAccountT>,
-    pastInstances: Partial<ZoomMeetingPastInstanceT>[],
-    existingUuids: Set<string>
+    account: ZoomMeetingActionsAccountPickT,
+    newPastInstances: Partial<ZoomMeetingPastInstanceT>[],
   ) => Promise<Partial<ZoomMeetingPastInstanceT>[]>;
   refreshAllPastInstancesForMeeting: (
     meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
+    account: ZoomMeetingActionsAccountPickT
   ) => Promise<boolean>;
   refreshAndAddOnlyNewPastInstances: (
     meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
+    account: ZoomMeetingActionsAccountPickT
   ) => Promise<boolean>;
   deleteMeeting: (meetingId: string) => Promise<boolean>;
   reset: () => void;

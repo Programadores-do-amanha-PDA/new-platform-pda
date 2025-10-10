@@ -69,6 +69,6 @@ export interface ZoomMeetingPastInstanceActions {
   ) => Promise<boolean>;
   _getPastInstancesByMeetingId: (
     meetingId: string
-  ) => Promise<ZoomMeetingPastInstanceT[] | boolean>;
+  ) => Promise<ZoomMeetingPastInstanceT[] | false>;
   reset: () => void;
 }
