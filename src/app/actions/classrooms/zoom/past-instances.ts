@@ -33,7 +33,7 @@ const getAllPastInstancesByMeetingId = async (meetingId: string) => {
     return data;
   } catch (error) {
     console.error("Error fetching past instances by meeting ID:", error);
-    return false;
+    return null;
   }
 };
 
