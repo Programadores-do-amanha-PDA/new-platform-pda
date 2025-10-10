@@ -131,7 +131,7 @@ export default function AttendanceTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-  const { updatePastInstanceByUuid } = useZoomMeetingPastInstanceStore();
+  const { updatePastInstanceById } = useZoomMeetingPastInstanceStore();
   const { configsByClassroom } = useClassroomConfigStore();
 
   const currentConfig = useMemo(() => {
@@ -206,7 +206,7 @@ export default function AttendanceTable({
                 value={meeting.class_type}
                 options={classroomClassTypes}
                 handleValueChange={(value) =>
-                  updatePastInstanceByUuid(meeting.uuid, {
+                  updatePastInstanceById(meeting.id, {
                     class_type: value,
                   })
                 }
