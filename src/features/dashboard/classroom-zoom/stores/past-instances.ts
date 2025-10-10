@@ -15,8 +15,11 @@ import {
 } from "@/app/actions/classrooms/zoom/past-instances";
 
 import { useZoomAPIStore } from "./";
-import { ZoomMeetingPastInstanceT, ZoomAccountT, ZoomMeetingPastInstanceState, ZoomMeetingPastInstanceActions } from "../types";
-
+import {
+  ZoomAccountT,
+  ZoomMeetingPastInstanceState,
+  ZoomMeetingPastInstanceActions,
+} from "../types";
 
 const initialState: ZoomMeetingPastInstanceState = {
   pastInstances: [],
@@ -193,7 +196,6 @@ export const useZoomMeetingPastInstanceStore = create<
         }
       },
 
-      
       upsertMultiplePastInstances: async (pastInstancesData) => {
         let loadingToastId;
         try {
@@ -235,33 +237,40 @@ export const useZoomMeetingPastInstanceStore = create<
 
           // Update the store with upserted instances, preserving other instances
           const currentInstances = currentStore.pastInstances;
-          const upsertedUuids = new Set(upsertedPastInstances.map(instance => instance.id));
-          
+          const upsertedUuids = new Set(
+            upsertedPastInstances.map((instance) => instance.id)
+          );
+
           // Merge existing justifications with new data to prevent data loss
-          const mergedInstances = upsertedPastInstances.map(upsertedInstance => {
-            // Find existing instance by ID
-            const existingInstance = currentInstances.find(
-              existing => existing.id === upsertedInstance.id
-            );
-            
-            // Preserve existing justifications if they exist
-            if (existingInstance?.justifications && existingInstance.justifications.length > 0) {
-              return {
-                ...upsertedInstance,
-                justifications: existingInstance.justifications
-              };
+          const mergedInstances = upsertedPastInstances.map(
+            (upsertedInstance) => {
+              // Find existing instance by ID
+              const existingInstance = currentInstances.find(
+                (existing) => existing.id === upsertedInstance.id
+              );
+
+              // Preserve existing justifications if they exist
+              if (
+                existingInstance?.justifications &&
+                existingInstance.justifications.length > 0
+              ) {
+                return {
+                  ...upsertedInstance,
+                  justifications: existingInstance.justifications,
+                };
+              }
+
+              return upsertedInstance;
             }
-            
-            return upsertedInstance;
-          });
-          
+          );
+
           // Remove old versions of upserted instances and add merged ones
           const filteredInstances = currentInstances.filter(
-            instance => !upsertedUuids.has(instance.id)
+            (instance) => !upsertedUuids.has(instance.id)
           );
-          
+
           set({
-            pastInstances: [...mergedInstances, ...filteredInstances]
+            pastInstances: [...mergedInstances, ...filteredInstances],
           });
 
           toast.dismiss(loadingToastId);
@@ -355,6 +364,7 @@ export const useZoomMeetingPastInstanceStore = create<
       refreshInstanceData: async (instanceId, uuid, account) => {
         let loadingToastId: string | number | undefined;
         try {
+          // Check instanceId, uuid and account
           if (!instanceId || !uuid || !account) {
             toast.error("Dados obrigatórios estão faltando!");
             throw new Error(
@@ -362,18 +372,80 @@ export const useZoomMeetingPastInstanceStore = create<
             );
           }
 
-          const loadingToast = toast.loading(
-            "Atualizando dados da instância..."
-          );
+          //
+          const currentState = get();
 
-          // Buscar novos participantes e poll results da API do Zoom usando a store da API
+          // Find the instance in the current state
+          const currentInstance = currentState.pastInstances.find(
+            (instance) => instance.id === instanceId
+          );
+          if (!currentInstance) {
+            toast.error("Instância não encontrada no estado atual!");
+            throw new Error("Instance not found in current state");
+          }
+
+          // fetch new participants and poll results data from Zoom API
+          const loadingToast = toast.loading(
+            "Buscando novos dados da instancia na API do Zoom..."
+          );
           const zoomAPIStore = useZoomAPIStore.getState();
           const [newParticipants, newPollResults] = await Promise.all([
             zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(account, uuid),
             zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(account, uuid),
           ]);
+          toast.dismiss(loadingToast);
+          toast.success("Dados buscados na API do Zoom!");
 
-          // Atualizar a instância no banco de dados
+          console.log("Fetched new data from Zoom API:", {
+            newParticipants,
+            newPollResults,
+          });
+
+          // Check if there's any new data to update
+          const hasNewParticipants =
+            newParticipants && newParticipants.length > 0;
+          const hasNewPollResults = newPollResults && newPollResults.length > 0;
+
+          // Check if participants are up to date
+          const participantsUpToDate =
+            !hasNewParticipants ||
+            (currentInstance.participants?.length === newParticipants?.length &&
+              currentInstance.participants?.every((participant) =>
+                newParticipants?.some(
+                  (newPart) => newPart.user_email === participant.user_email
+                )
+              ));
+
+          // Check if poll results are up to date
+          const pollResultsUpToDate =
+            !hasNewPollResults ||
+            (currentInstance.poll_results?.length === newPollResults?.length &&
+              currentInstance.poll_results?.every((poll) =>
+                newPollResults?.some((newPoll) => newPoll.email === poll.email)
+              ));
+
+          const isInstanceUpToDate =
+            participantsUpToDate && pollResultsUpToDate;
+
+          if (!hasNewParticipants && !hasNewPollResults) {
+            toast.error("Nenhum novo dado encontrado na API do Zoom!");
+            return false;
+          }
+
+          if (isInstanceUpToDate) {
+            toast.info("Os dados da instância já estão atualizados!");
+            return true;
+          }
+
+          //  Update the instance on Supabase
+          loadingToastId = toast.loading(
+            "Atualizando os dados da instância..."
+          );
+          console.log({
+            participants: newParticipants,
+            poll_results: newPollResults,
+            synchronized_at: new Date().toISOString(),
+          });
           const updatedPastInstance = await updatePastInstanceById(instanceId, {
             participants: newParticipants,
             poll_results: newPollResults,
@@ -428,59 +500,37 @@ export const useZoomMeetingPastInstanceStore = create<
           const zoomAPIStore = useZoomAPIStore.getState();
           const updatePromises = instances.map(
             async ({ instanceId, uuid, account }) => {
-              try {
-                // Buscar novos dados da API do Zoom
-                const [newParticipants, newPollResults] = await Promise.all([
-                  zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(
-                    account,
-                    uuid
-                  ),
-                  zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(
-                    account,
-                    uuid
-                  ),
-                ]);
+              // Buscar novos dados da API do Zoom
+              const [newParticipants, newPollResults] = await Promise.all([
+                zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(
+                  account,
+                  uuid
+                ),
+                zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(account, uuid),
+              ]);
 
-                // Atualizar a instância no banco de dados
-                const updatedPastInstance = await updatePastInstanceById(
-                  instanceId,
-                  {
-                    participants: newParticipants,
-                    poll_results: newPollResults,
-                    synchronized_at: new Date().toISOString(),
-                  }
-                );
-
-                return updatedPastInstance;
-              } catch (error) {
-                console.error(`Error updating instance ${instanceId}:`, error);
-                return null;
-              } finally {
-                if (loadingToastId !== undefined) {
-                  toast.dismiss(loadingToastId);
+              // Atualizar a instância no banco de dados
+              const updatedPastInstance = await updatePastInstanceById(
+                instanceId,
+                {
+                  participants: newParticipants,
+                  poll_results: newPollResults,
+                  synchronized_at: new Date().toISOString(),
                 }
-              }
+              );
+
+              return updatedPastInstance;
             }
           );
 
-          const results = await Promise.allSettled(updatePromises);
-          const successfulUpdates = results
-            .filter(
-              (
-                result
-              ): result is PromiseFulfilledResult<ZoomMeetingPastInstanceT> =>
-                result.status === "fulfilled" && result.value !== null
-            )
-            .map((result) => result.value);
-
-          const failedCount = results.length - successfulUpdates.length;
+          const updatedInstances = await Promise.all(updatePromises);
 
           // Atualizar o estado local com as instâncias atualizadas
-          if (successfulUpdates.length > 0) {
+          if (updatedInstances.length > 0) {
             set({
               pastInstances: get().pastInstances.map((pastInstance) => {
-                const updatedInstance = successfulUpdates.find(
-                  (updated) => updated.id === pastInstance.id
+                const updatedInstance = updatedInstances.find(
+                  (updated) => updated && updated.id === pastInstance.id
                 );
                 return updatedInstance || pastInstance;
               }),
@@ -488,19 +538,9 @@ export const useZoomMeetingPastInstanceStore = create<
           }
 
           toast.dismiss(loadingToastId);
-
-          if (failedCount === 0) {
-            toast.success(
-              `Todas as ${successfulUpdates.length} instâncias foram atualizadas com sucesso!`
-            );
-          } else if (successfulUpdates.length > 0) {
-            toast.warning(
-              `${successfulUpdates.length} instâncias atualizadas com sucesso, ${failedCount} falharam.`
-            );
-          } else {
-            toast.error("Falha ao atualizar todas as instâncias!");
-            return false;
-          }
+          toast.success(
+            `Todas as ${updatedInstances.length} instâncias foram atualizadas com sucesso!`
+          );
 
           return true;
         } catch (error) {

@@ -329,10 +329,8 @@ export const getPastMeetingsPollResults = async (
     if (response.status !== 200)
       throw new Error("Failed to fetch poll results");
 
-    console.log(response.data)
     return response.data.questions;
   } catch (error) {
-    console.log(error)
     console.error("Error fetching poll results:", error);
     throw error;
   }

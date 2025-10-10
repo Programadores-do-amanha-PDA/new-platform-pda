@@ -82,6 +82,7 @@ export const useZoomAccountStore = create<
         try {
           if (
             !accountData.classroom_id ||
+            !accountData.id ||
             !accountData.account_id ||
             !accountData.client_id ||
             !accountData.client_secret
@@ -89,17 +90,19 @@ export const useZoomAccountStore = create<
             toast.error("Dados obrigatórios da conta estão faltando!");
             throw new Error("Missing required account data");
           }
-          
+
           toast.info("Verificando as credenciais da conta...");
-                    
-          const me = await useZoomAPIStore
-            .getState()
-            .getZoomMeAccountDataByAPI(
-              accountData.account_id,
-              accountData.client_id,
-              accountData.client_secret,
-              true // forçar renovação do token
-            );
+
+          const me = await useZoomAPIStore.getState().getZoomMeAccountDataByAPI(
+            {
+              account_id: accountData.account_id,
+              id: accountData.id!,
+              client_id: accountData.client_id,
+              client_secret: accountData.client_secret,
+              classroom_id: accountData.classroom_id,
+            },
+            true // forçar renovação do token
+          );
           if (!me) throw new Error("no me data");
           toast.success("Credenciais verificadas com sucesso!");
 

@@ -8,20 +8,23 @@ import {
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
 } from "@/app/actions/classrooms/zoom/meetings";
-import { useUsersStore } from "@/stores/modules/users/users-store";
 
 import { useZoomMeetingPastInstanceStore, useZoomAPIStore } from "./";
 import {
-  ZoomAccountT,
   ZoomMeetingOccurrenceT,
   ZoomMeetingT,
   ZoomMeetingWithPastInstancies,
-  ZoomMeetingPastInstanceT,
-  ZoomMeetingParticipantT,
   ZoomMeetingState,
   ZoomMeetingActions,
+  ZoomMeetingActionsMeetingPickT,
 } from "../types";
-import { NON_RECURRING_MEETING_TYPES, RECURRING_MEETING_TYPES } from "../utils";
+import {
+  calculateVisibility,
+  NON_RECURRING_MEETING_TYPES,
+  RECURRING_MEETING_TYPES,
+  validateMeeting,
+  validateZoomAccount,
+} from "../utils";
 
 const initialState: ZoomMeetingState = {
   meetings: [],
@@ -39,15 +42,20 @@ export const useZoomMeetingStore = create<
 
       getAllMeetings: async (classroomId) => {
         try {
+          // Validating classroom ID
+          if (!classroomId) throw new Error("Classroom ID is required");
+
+          // Fetching meetings from API
           set({ loading: true });
           const meetingsResponse = await getAllZoomMeetingsByClassroomId(
             classroomId
           );
           if (!meetingsResponse) throw "no meetings response";
+
           set({ meetings: meetingsResponse });
           return true;
         } catch (error) {
-          console.error(error);
+          if (error instanceof Error) console.error(error);
           return false;
         } finally {
           set({ loading: false });
@@ -56,12 +64,17 @@ export const useZoomMeetingStore = create<
 
       getMeetingById: async (meetingId) => {
         try {
+          // Validating meeting ID
+          if (!meetingId) throw new Error("Meeting ID is required");
+
+          // Fetching meeting by ID from API
           set({ loading: true });
           const meetingResponse = await getZoomMeetingById(meetingId);
           if (!meetingResponse) throw "no meeting response";
+
           return meetingResponse;
         } catch (error) {
-          console.error(error);
+          if (error instanceof Error) console.error(error);
           return false;
         } finally {
           set({ loading: false });
@@ -71,37 +84,47 @@ export const useZoomMeetingStore = create<
       createMeeting: async (account, meetingData) => {
         let loadingToastId;
         try {
-          if (
-            !account.account_id ||
-            !account.id ||
-            !account.client_id ||
-            !account.client_secret
-          ) {
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account)) {
             throw new Error("Account data is missing");
           }
+          // Validating the meeting data before proceeding with API
           if (!meetingData.meeting_id || !meetingData.uuid) {
             throw new Error("Meeting data is missing");
           }
 
-          const meetingResponse = await useZoomAPIStore
-            .getState()
-            .getMeetingByAPI(account, meetingData);
-          if (!meetingResponse) throw new Error("no meeting response");
+          // Initializing zoom api store
+          const zoomApiStore = useZoomAPIStore.getState();
 
-          // Recurrence meeting process
+          // Fetch the meeting details from Zoom API
+          loadingToastId = toast.loading(
+            "Pegando dados da reunião, por favor aguarde..."
+          );
+          const meetingResponse = await zoomApiStore.getMeetingByAPI(
+            account,
+            meetingData
+          );
+          if (!meetingResponse) throw new Error("no meeting response");
+          toast.dismiss(loadingToastId);
+          toast.success("Dados da reunião obtidos com sucesso!");
+
+          // Check if meeting is recurrent
           if (
             (RECURRING_MEETING_TYPES as readonly number[]).includes(
               meetingResponse.type
             )
           ) {
+            // Saving meeting with past instances
             const meetingWithPastInstances = meetingResponse as Omit<
               ZoomMeetingWithPastInstancies,
               "id" | "created_at"
             >;
+
+            // Extract past instances and rest of meeting data
             const { past_instances, ...restOfMeeting } =
               meetingWithPastInstances;
 
-            // saving meeting data
+            // Create the meeting on Supabase
             loadingToastId = toast.loading(
               "Criando a reunião, por favor aguarde..."
             );
@@ -111,37 +134,29 @@ export const useZoomMeetingStore = create<
               ...restOfMeeting,
               classroom_id: account?.classroom_id,
             });
-            if (!newMeeting) throw new Error("no meeting create response");
+            if (!newMeeting || !newMeeting.id) {
+              throw new Error("Falha ao criar reunião no banco de dados");
+            }
             if (loadingToastId) toast.dismiss(loadingToastId);
+            toast.success("Reunião criada com sucesso!");
 
             // create all past instancies if exists
             if (past_instances && past_instances.length > 0) {
-              const classroomParticipantsEmails = useUsersStore
-                .getState()
-                .users.filter((user) =>
-                  user.profile?.classrooms
-                    ?.map((c) => c.classroom_id)
-                    .includes(account.classroom_id || "")
-                )
-                .map((user) => user.email)
-                .filter((email): email is string => email !== undefined);
+              // Accessing past instance store for creating instances
+              const pastInstanceStore =
+                useZoomMeetingPastInstanceStore.getState();
 
-              const hasClassroomEmails =
-                classroomParticipantsEmails?.length ?? 0 > 2;
-
+              // Process past instances with participants and poll results
               const pastInstancesData = past_instances.map((instance) => {
+                // Get classroom participants for visibility logic
                 const instanceParticipants = instance.participants ?? [];
-
-                const hasMatchingParticipants =
-                  hasClassroomEmails && instanceParticipants.length > 2
-                    ? instanceParticipants.some((p) =>
-                        classroomParticipantsEmails?.includes(p.user_email)
-                      )
-                    : false;
-
-                const hasParticipantsOnInstance = hasClassroomEmails
-                  ? hasMatchingParticipants
-                  : instance.is_visible_on_schedule;
+                const isInstanceMustBeVisible = calculateVisibility(
+                  {
+                    participants: instanceParticipants,
+                    is_visible_on_schedule: instance.is_visible_on_schedule,
+                  },
+                  account.classroom_id!
+                );
 
                 return {
                   classroom_id: account.classroom_id!,
@@ -153,27 +168,34 @@ export const useZoomMeetingStore = create<
                   participants: instance.participants || [],
                   poll_results: instance.poll_results || [],
                   justifications: instance.justifications || [],
-                  is_visible_on_schedule: hasParticipantsOnInstance,
+                  is_visible_on_schedule: isInstanceMustBeVisible,
                 };
               });
 
+              // Save past instances to the store
               loadingToastId = toast.loading(
                 "Criando todas as instancias passadas da reunião, por favor aguarde..."
               );
-              await useZoomMeetingPastInstanceStore
-                .getState()
-                .createMultiplePastInstances(pastInstancesData);
-            }
-            if (loadingToastId) toast.dismiss(loadingToastId);
 
-            set({ meetings: [newMeeting, ...get().meetings] });
+              await pastInstanceStore.createMultiplePastInstances(
+                pastInstancesData
+              );
+            }
+            toast.dismiss(loadingToastId);
+
+            toast.success("Instâncias passadas criadas com sucesso!");
+
+            set((state) => ({ meetings: [newMeeting, ...state.meetings] }));
             toast.success(`Reunião "${newMeeting.topic}" criada com sucesso!`);
             return newMeeting.id as string;
-          } else if (
+          }
+          // Check if meeting is non-recurrent
+          else if (
             (NON_RECURRING_MEETING_TYPES as readonly number[]).includes(
               meetingResponse.type
             )
           ) {
+            // Create the meeting on Supabase
             loadingToastId = toast.loading(
               "Criando a reunião, por favor aguarde..."
             );
@@ -183,15 +205,17 @@ export const useZoomMeetingStore = create<
               classroom_id: account?.classroom_id,
             });
             if (!newMeeting) throw new Error("no meeting create response");
-
-            set({ meetings: [newMeeting, ...get().meetings] });
             toast.dismiss(loadingToastId);
+
             toast.success(`Reunião "${newMeeting.topic}" criada com sucesso!`);
+            set({ meetings: [newMeeting, ...get().meetings] });
             return newMeeting.id as string;
           }
         } catch (error) {
-          console.error(error);
-          toast.error("Erro ao criar nova reunião!");
+          toast.error(
+            "Erro ao criar nova reunião! Tente novamente mais tarde."
+          );
+          if (error instanceof Error) console.error(error);
           return false;
         } finally {
           if (loadingToastId) toast.dismiss(loadingToastId);
@@ -200,20 +224,25 @@ export const useZoomMeetingStore = create<
 
       updateMeeting: async (meetingId, updates) => {
         try {
+          // Checking the required fields
           if (!meetingId || !updates) {
             throw new Error("id and updates fields are required");
           }
+
+          // update meeting on Supabase by ID
           const updatedMeeting = await updateZoomMeetingById(
             meetingId,
             updates
           );
           if (!updatedMeeting) throw new Error("no update meeting response");
 
-          set({
-            meetings: get().meetings.map((meeting) =>
+          // Updating the meeting in the store
+          set((state) => ({
+            meetings: state.meetings.map((meeting) =>
               meeting.id === meetingId ? updatedMeeting : meeting
             ),
-          });
+          }));
+
           toast.success("Reunião atualizada com sucesso!");
           return true;
         } catch (error) {
@@ -223,36 +252,75 @@ export const useZoomMeetingStore = create<
         }
       },
 
-      updateMeetingOccurrence: async (meetingId, occurrenceId, updates) => {
+      refreshAllMeetingOccurrenceByMeetingId: async (
+        account,
+        meeting,
+        currentOccurrencesUpdated
+      ) => {
         try {
-          if (!meetingId || !occurrenceId || !updates) {
+          // Checking the required fields
+          if (!validateMeeting(meeting) || !validateZoomAccount(account)) {
             throw new Error("id and updates fields are required");
           }
+
+          // Fetching the current meeting to ensure it exists
           const currentMeeting = get().meetings.find(
-            (meeting) => meeting.id === meetingId
+            (meeting) => meeting.id === meeting.id
           );
-          const updatedOccurrences = currentMeeting?.occurrences?.map(
-            (occurrence) =>
-              occurrence.occurrence_id === occurrenceId
-                ? { ...occurrence, ...updates }
-                : occurrence
-          );
+          if (!currentMeeting) {
+            throw new Error("Meeting not found");
+          }
+
+          // If no occurrences were passed, we fetch the meeting from the API to get the latest occurrences
+          let updatedOccurrences: ZoomMeetingOccurrenceT[] = [];
+          if (!Array.isArray(currentOccurrencesUpdated)) {
+            //  Initializing zoom api store
+            const zoomAPIStore = useZoomAPIStore.getState();
+
+            // Updating the specific occurrence within the meeting
+            const fetchedMeeting = await zoomAPIStore.getMeetingByAPI(
+              account,
+              meeting
+            );
+            if (!fetchedMeeting)
+              throw new Error("no meeting response from API");
+
+            // Extracting the occurrences from the fetched meeting
+            const { occurrences } = fetchedMeeting;
+
+            // Using the fetched occurrences if available
+            if (Array.isArray(occurrences)) {
+              updatedOccurrences = occurrences;
+            }
+          }
+          // If occurrences were passed, we use them directly
+          else if (Array.isArray(currentOccurrencesUpdated)) {
+            updatedOccurrences = currentMeeting.occurrences || [];
+          }
+
+          // Updating the meeting with the new occurrences
           const updatedMeeting: ZoomMeetingT | false =
-            await updateZoomMeetingById(meetingId, {
+            await updateZoomMeetingById(meeting.id, {
               occurrences: updatedOccurrences,
             });
           if (!updatedMeeting) throw new Error("no update meeting response");
 
-          set({
-            meetings: get().meetings.map((meeting) =>
-              meeting.id === meetingId ? updatedMeeting : meeting
+          // Updating the meeting in the store
+          set((state) => ({
+            meetings: state.meetings.map((meeting) =>
+              meeting.id === meeting.id ? updatedMeeting : meeting
             ),
-          });
+          }));
+
           toast.success("Reunião atualizada com sucesso!");
           return true;
         } catch (error) {
-          console.error(error);
           toast.error("Erro ao atualizar a reunião!");
+
+          // Logging the error only if it's an instance of Error
+          if (error instanceof Error) {
+            console.error(error);
+          }
           return false;
         }
       },
@@ -260,65 +328,79 @@ export const useZoomMeetingStore = create<
       refreshAndUpdateMeeting: async (meeting, account) => {
         let loadingToastId;
         try {
-          if (
-            !account.account_id ||
-            !account.id ||
-            !account.client_id ||
-            !account.client_secret
-          )
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account)) {
             throw new Error("Account data is missing");
+          }
+
+          // Validating the meeting data before proceeding with API
           if (
             !meeting.id ||
             !meeting.meeting_id ||
             !meeting.uuid ||
             !meeting.start_time ||
             !meeting.duration
-          )
+          ) {
             throw new Error("Meeting data is missing");
+          }
 
-          loadingToastId = toast.loading("Atualizando dados da reunião...", {
-            closeButton: true,
-          });
+          //
+          const currentState = get();
 
-          const currentMeeting = get().meetings.find(
+          // Fetch the current meeting from the store to ensure it exists
+          const currentMeeting = currentState.meetings.find(
             (m) => m.id === meeting.id
           );
-
           if (!currentMeeting) {
             throw new Error("Meeting not found in current meetings");
           }
 
-          // Buscar dados atualizados da reunião da API do Zoom
-          const updatedMeetingData = await useZoomAPIStore
-            .getState()
-            .getMeetingByAPI(account, meeting);
+          loadingToastId = toast.loading("Buscando novos dados da reunião...", {
+            closeButton: true,
+          });
+          // Initialize zoom api store
+          const zoomApiStore = useZoomAPIStore.getState();
 
+          // Fetch the latest meeting data from Zoom API
+          const updatedMeetingData = await zoomApiStore.getMeetingByAPI(
+            account,
+            meeting
+          );
           if (!updatedMeetingData) throw new Error("no meeting response");
+          toast.dismiss(loadingToastId);
+          toast.success("Novos dados da reunião obtidos com sucesso!");
 
           // Check if meeting is recurrent
           const isRecurrentMeeting =
             updatedMeetingData &&
-            ("past_instances" in updatedMeetingData ||
-              updatedMeetingData.type === 8 ||
-              updatedMeetingData.type === 3);
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              updatedMeetingData.type
+            );
+
+          // Check if meeting is non-recurrent
+          const isNonRecurrentMeeting =
+            updatedMeetingData &&
+            (NON_RECURRING_MEETING_TYPES as readonly number[]).includes(
+              updatedMeetingData.type
+            );
 
           if (isRecurrentMeeting) {
-            await get().handleRecurrentMeetingUpdate(
-              meeting,
+            await currentState.handleRecurrentMeetingUpdate(
+              meeting as ZoomMeetingActionsMeetingPickT,
               account,
-              currentMeeting,
               updatedMeetingData as Omit<
                 ZoomMeetingWithPastInstancies,
                 "id" | "created_at"
               >
             );
-          } else {
-            await get().handleNonRecurrentMeetingUpdate(
-              meeting,
+          } else if (isNonRecurrentMeeting) {
+            await currentState.handleNonRecurrentMeetingUpdate(
+              meeting as ZoomMeetingActionsMeetingPickT,
               account,
-              currentMeeting,
               updatedMeetingData
             );
+          } else {
+            throw new Error("Tipo de reunião inválido ou não suportado");
           }
 
           toast.success("Dados da reunião atualizados com sucesso!");
@@ -333,331 +415,458 @@ export const useZoomMeetingStore = create<
       },
 
       handleRecurrentMeetingUpdate: async (
-        meeting: Partial<ZoomMeetingT>,
-        account: Partial<ZoomAccountT>,
-        currentMeeting: ZoomMeetingT,
-        updatedMeetingData: Omit<
-          ZoomMeetingWithPastInstancies,
-          "id" | "created_at"
-        >,
-        instanciesUpdateMode: "new" | "existing" | "all" = "all"
+        meeting,
+        account,
+        updatedMeetingData,
+        instanciesUpdateMode = "all"
       ) => {
-        const { past_instances, ...restOfMeeting } = updatedMeetingData;
+        let loadingToastId;
+        try {
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
+            throw new Error("Account data is missing");
+          // Validating the meeting data before proceeding with API
+          if (!validateMeeting(meeting))
+            throw new Error("Meeting ID is required");
 
-        // Update meeting basic data
-        const updatedMeeting = await updateZoomMeetingById(meeting.id!, {
-          ...currentMeeting,
-          ...restOfMeeting,
-          occurrences: updatedMeetingData?.occurrences || [],
-          synchronized_at: new Date().toISOString(),
-        });
+          // Accessing current state for utility functions
+          const currentState = get();
 
-        if (!updatedMeeting) throw new Error("no meeting update response");
+          // Extract past instances and rest of meeting data
+          const { past_instances, ...restOfMeeting } = updatedMeetingData;
 
-        // Handle past instances (both new and existing)
-        if (past_instances && past_instances.length > 0) {
-          // Process new instances
-          if (instanciesUpdateMode === "new") {
-            await get().processNewPastInstances(
-              meeting.id!,
-              account,
-              past_instances
-            );
+          // Update meeting basic data on Supabase
+          loadingToastId = toast.loading("Atualizando dados da reunião...");
+          const updatedMeeting = await updateZoomMeetingById(meeting.id!, {
+            ...restOfMeeting,
+            occurrences: updatedMeetingData?.occurrences || [],
+            synchronized_at: new Date().toISOString(),
+          });
+          if (!updatedMeeting) throw new Error("no meeting update response");
+          toast.dismiss(loadingToastId);
+          toast.success("Dados da reunião atualizados com sucesso!");
+
+          // Handle past instances (both new and existing)
+          if (past_instances && past_instances.length > 0) {
+            // Process new instances
+            if (instanciesUpdateMode === "new") {
+              await currentState.processNewPastInstances(
+                meeting,
+                account,
+                past_instances
+              );
+            }
+            // Update existing instances with fresh data
+            else if (instanciesUpdateMode === "existing") {
+              await currentState.updateExistingPastInstances(
+                meeting.id!,
+                account,
+                past_instances
+              );
+            }
+            // Process all instances (new and existing)
+            else if (instanciesUpdateMode === "all") {
+              await currentState.processNewPastInstances(
+                meeting,
+                account,
+                past_instances
+              );
+              await currentState.updateExistingPastInstances(
+                meeting.id!,
+                account,
+                past_instances
+              );
+            }
           }
-          // Update existing instances with fresh data
-          else if (instanciesUpdateMode === "existing") {
-            await get().updateExistingPastInstances(
-              meeting.id!,
-              account,
-              past_instances
-            );
-          } else if (instanciesUpdateMode === "all") {
-            await get().processNewPastInstances(
-              meeting.id!,
-              account,
-              past_instances
-            );
-            await get().updateExistingPastInstances(
-              meeting.id!,
-              account,
-              past_instances
-            );
+
+          // Update the meeting in the store
+          set((state) => ({
+            meetings: state.meetings.map((m) =>
+              m.id === updatedMeeting.id ? updatedMeeting : m
+            ),
+          }));
+
+          toast.success("Reunião recorrente atualizada com sucesso!");
+          return true;
+        } catch (error) {
+          if (error instanceof Error) {
+            console.error(error);
           }
+          toast.error("Erro ao atualizar reunião recorrente!");
+          throw error;
+        } finally {
+          if (loadingToastId) toast.dismiss(loadingToastId);
         }
-
-        // Update state
-        set({
-          meetings: get().meetings.map((m) =>
-            m.id === currentMeeting.id ? updatedMeeting : m
-          ),
-        });
       },
 
       handleNonRecurrentMeetingUpdate: async (
-        meeting: Partial<ZoomMeetingT>,
-        account: Partial<ZoomAccountT>,
-        currentMeeting: ZoomMeetingT,
-        updatedMeetingData: Partial<ZoomMeetingT>
+        meeting,
+        account,
+        updatedMeetingData
       ) => {
-        const meetingStartTime = new Date(
-          updatedMeetingData.start_time || 0
-        ).getTime();
-        const currentTime = new Date().getTime();
+        try {
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
+            throw new Error("Account data is missing");
+          // Validating the meeting data before proceeding with API
+          if (!validateMeeting(meeting))
+            throw new Error("Meeting ID is required");
 
-        let finalMeetingData = { ...updatedMeetingData };
+          // Accessing current state for utility functions
+          const zoomAPIStore = useZoomAPIStore.getState();
 
-        // If meeting has already happened, fetch participants and poll results
-        if (meetingStartTime < currentTime) {
-          const [participants, pollResults] = await Promise.all([
-            useZoomAPIStore
-              .getState()
-              .getAllParticipantsByMeetingIdFromAPI(
+          // Determine if we need to fetch participants and poll results
+          const meetingStartTime = new Date(
+            updatedMeetingData.start_time || 0
+          ).getTime();
+          const currentTime = Date.now();
+
+          let finalMeetingData = { ...updatedMeetingData };
+
+          // If meeting has already happened, fetch participants and poll results
+          if (meetingStartTime < currentTime) {
+            const [participants, pollResults] = await Promise.all([
+              zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(
                 account,
                 meeting.meeting_id!
               ),
-            useZoomAPIStore
-              .getState()
-              .getAllPollResultsByMeetingIdFromAPI(
+              zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(
                 account,
                 meeting.meeting_id!
               ),
-          ]);
+            ]);
 
-          finalMeetingData = {
+            finalMeetingData = {
+              ...finalMeetingData,
+              participants: participants || [],
+              poll_results: pollResults || [],
+            };
+          }
+
+          const updatedMeeting = await updateZoomMeetingById(meeting.id!, {
             ...finalMeetingData,
-            participants: participants || [],
-            poll_results: pollResults || [],
-          };
-        }
-
-        const updatedMeeting = await updateZoomMeetingById(meeting.id!, {
-          ...currentMeeting,
-          ...finalMeetingData,
-          occurrences: finalMeetingData?.occurrences?.map(
-            (occurrence: ZoomMeetingOccurrenceT) => {
-              const currentOccurrence = currentMeeting?.occurrences?.find(
-                (currentOccurrence) =>
-                  currentOccurrence.occurrence_id === occurrence.occurrence_id
-              );
-              return currentOccurrence
-                ? { ...occurrence, ...currentOccurrence }
-                : occurrence;
-            }
-          ),
-          synchronized_at: new Date().toISOString(),
-        });
-        if (!updatedMeeting) throw new Error("no meeting update response");
-
-        set({
-          meetings: get().meetings.map((m) =>
-            m.id === currentMeeting.id ? updatedMeeting : m
-          ),
-        });
-      },
-
-      processNewPastInstances: async (
-        meetingId: string,
-        account: Partial<ZoomAccountT>,
-        pastInstances: Partial<ZoomMeetingPastInstanceT>[]
-      ) => {
-        // Get existing past instances to avoid duplicates (without overwriting state)
-        const existingPastInstances = await useZoomMeetingPastInstanceStore
-          .getState()
-          ._getPastInstancesByMeetingId(meetingId);
-
-        if (!existingPastInstances) return;
-
-        const currentPastInstances = Array.isArray(existingPastInstances)
-          ? existingPastInstances
-          : useZoomMeetingPastInstanceStore.getState().pastInstances;
-        const existingUuids = new Set(
-          currentPastInstances.map((instance) => instance.uuid)
-        );
-
-        // Filter only new instances that don't exist in database
-        const newPastInstances = pastInstances.filter(
-          (instance) => instance.uuid && !existingUuids.has(instance.uuid)
-        );
-
-        if (newPastInstances.length === 0) return;
-
-        // Fetch participants and poll results for new instances only
-        const enrichedPastInstances = await get().fetchNewPastInstancesData(
-          account,
-          newPastInstances,
-          existingUuids
-        );
-
-        // Get classroom participants for visibility logic
-        const classroomParticipantsEmails = useUsersStore
-          .getState()
-          .users.filter((user) =>
-            user.profile?.classrooms
-              ?.map((c) => c.classroom_id)
-              .includes(account.classroom_id || "")
-          )
-          .map((user) => user.email)
-          .filter((email): email is string => email !== undefined);
-
-        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 2;
-
-        // Process new instances with participants and poll results
-        const pastInstancesData = enrichedPastInstances.map((instance) => {
-          const instanceParticipants = instance.participants ?? [];
-          const hasMatchingParticipants =
-            hasClassroomEmails && instanceParticipants.length > 2
-              ? instanceParticipants.some((p: ZoomMeetingParticipantT) =>
-                  classroomParticipantsEmails?.includes(p.user_email)
-                )
-              : false;
-
-          const hasParticipantsOnInstance = hasClassroomEmails
-            ? hasMatchingParticipants
-            : instance.is_visible_on_schedule;
-
-          return {
-            classroom_id: account.classroom_id!,
-            account_id: account.id!,
-            meeting_id: meetingId!,
-            uuid: instance.uuid!,
-            start_time: instance.start_time,
-            class_type: instance.class_type,
-            participants: instance.participants || [],
-            poll_results: instance.poll_results || [],
-            justifications: instance.justifications || [],
             synchronized_at: new Date().toISOString(),
-            is_visible_on_schedule: hasParticipantsOnInstance,
-          };
-        });
+          });
+          if (!updatedMeeting) throw new Error("no meeting update response");
 
-        await useZoomMeetingPastInstanceStore
-          .getState()
-          .createMultiplePastInstances(pastInstancesData);
-
-        toast.success(
-          `${newPastInstances.length} novas instâncias passadas foram salvas!`
-        );
+          set((state) => ({
+            meetings: state.meetings.map((m) =>
+              m.id === meeting.id ? updatedMeeting : m
+            ),
+          }));
+        } catch (error) {
+          toast.error("Erro ao atualizar reunião não recorrente!");
+          if (error instanceof Error) {
+            console.error(error);
+          }
+          throw error;
+        }
       },
 
-      updateExistingPastInstances: async (
-        meetingId: string,
-        account: Partial<ZoomAccountT>,
-        pastInstances: Partial<ZoomMeetingPastInstanceT>[]
-      ) => {
-        // Get existing past instances (without overwriting state)
-        const existingPastInstances = await useZoomMeetingPastInstanceStore
-          .getState()
-          ._getPastInstancesByMeetingId(meetingId);
+      processNewPastInstances: async (meeting, account, pastInstances) => {
+        let loadingToastId;
+        try {
+          // Accessing current state for utility functions
+          const currentState = get();
 
-        if (!existingPastInstances) return;
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
+            throw new Error("Account data is missing");
 
-        const currentPastInstances = Array.isArray(existingPastInstances)
-          ? existingPastInstances
-          : useZoomMeetingPastInstanceStore.getState().pastInstances;
-        const existingUuids = new Set(
-          currentPastInstances.map((instance) => instance.uuid)
-        );
+          // Validating the meeting data before proceeding with API
+          if (!validateMeeting(meeting))
+            throw new Error("Meeting ID is required");
+          
+          // If no past instances, exit early
+          if (pastInstances.length === 0) {
+            toast.info("Todas as instâncias passadas já estão atualizadas!");
+            return;
+          }
 
-        // Filter only existing instances that need to be updated
-        const existingInstancesToUpdate = pastInstances.filter(
-          (instance) => instance.uuid && existingUuids.has(instance.uuid)
-        );
+          loadingToastId = toast.loading("Processando novas instâncias...");
+          // Get meetingId from meeting object
+          const zoomPastInstancieStore =
+            useZoomMeetingPastInstanceStore.getState();
 
-        if (existingInstancesToUpdate.length === 0) return;
+          // Get existing past instances to avoid duplicates (without overwriting state)
+          const existingPastInstances =
+            await zoomPastInstancieStore._getPastInstancesByMeetingId(
+              meeting.id!
+            );
+          if (!existingPastInstances) {
+            throw new Error("Error fetching existing past instances");
+          }
+          toast.dismiss(loadingToastId);
 
-        // Fetch fresh participants and poll results for existing instances
-        const enrichedPastInstances = await get().fetchAllPastInstancesData(
-          account,
-          existingInstancesToUpdate
-        );
+          // If no existing past instances found, we proceed with all provided instances
+          const currentPastInstances = Array.isArray(existingPastInstances)
+            ? existingPastInstances
+            : zoomPastInstancieStore.pastInstances;
 
-        // Get classroom participants for visibility logic
-        const classroomParticipantsEmails = useUsersStore
-          .getState()
-          .users.filter((user) =>
-            user.profile?.classrooms
-              ?.map((c) => c.classroom_id)
-              .includes(account.classroom_id || "")
-          )
-          .map((user) => user.email)
-          .filter((email): email is string => email !== undefined);
+          // Create a set of existing UUIDs for quick lookup
+          const existingUUIDs = new Set(
+            currentPastInstances.map((instance) => instance.uuid)
+          );
 
-        const hasClassroomEmails = classroomParticipantsEmails?.length ?? 0 > 2;
+          // Filter only new instances that don't exist in database
+          const newPastInstances = pastInstances.filter((instance) => {
+            return (
+              instance.uuid &&
+              !existingUUIDs.has(instance.uuid) &&
+              instance.uuid.trim() !== ""
+            );
+          });
+          if (newPastInstances.length === 0) {
+            toast.info("Todas as instâncias passadas já estão atualizadas!");
+            return;
+          }
 
-        // Process existing instances for update
-        const existingInstancesUpdates = enrichedPastInstances
-          .map((instance) => {
-            const existingInstance = currentPastInstances.find(
-              (existing) => existing.uuid === instance.uuid
+          // Fetch participants and poll results for new instances only
+          loadingToastId = toast.loading(
+            `Obtendo dados de ${newPastInstances.length} novas instâncias passadas...`
+          );
+          const enrichedPastInstances =
+            await currentState.fetchPastInstancesData(
+              account,
+              newPastInstances
             );
 
-            if (!existingInstance) return null;
+          // Ensure we have the enriched data
+          if (!enrichedPastInstances) {
+            throw new Error("Error fetching past instances data");
+          }
+          toast.dismiss(loadingToastId);
 
-            const instanceParticipants = instance.participants ?? [];
-            const hasMatchingParticipants =
-              hasClassroomEmails && instanceParticipants.length > 2
-                ? instanceParticipants.some((p: ZoomMeetingParticipantT) =>
-                    classroomParticipantsEmails?.includes(p.user_email)
-                  )
-                : false;
-
-            const hasParticipantsOnInstance = hasClassroomEmails
-              ? hasMatchingParticipants
-              : instance.is_visible_on_schedule;
+          // Process new instances with participants and poll results
+          const pastInstancesData = enrichedPastInstances.map((instance) => {
+            // Get classroom participants for visibility logic
+            const isInstanceMustBeVisible = calculateVisibility(
+              {
+                participants: instance.participants,
+                is_visible_on_schedule: instance.is_visible_on_schedule,
+              },
+              account.classroom_id!
+            );
 
             return {
               classroom_id: account.classroom_id!,
               account_id: account.id!,
-              meeting_id: meetingId,
+              meeting_id: meeting.id!,
               uuid: instance.uuid!,
               start_time: instance.start_time,
               class_type: instance.class_type,
               participants: instance.participants || [],
               poll_results: instance.poll_results || [],
-              // CRITICAL: Preserve existing justifications to prevent data loss
-              justifications:
-                existingInstance.justifications ||
-                instance.justifications ||
-                [],
+              justifications: instance.justifications || [],
               synchronized_at: new Date().toISOString(),
-              is_visible_on_schedule: hasParticipantsOnInstance,
+              is_visible_on_schedule: isInstanceMustBeVisible,
             };
-          })
-          .filter((item): item is NonNullable<typeof item> => item !== null);
+          });
 
-        // Update existing instances with fresh data
-        if (existingInstancesUpdates.length > 0) {
-          await useZoomMeetingPastInstanceStore
-            .getState()
-            .upsertMultiplePastInstances(existingInstancesUpdates);
-
-          toast.success(
-            `${existingInstancesUpdates.length} instâncias existentes foram atualizadas com dados frescos!`
+          // Save new past instances to the store
+          loadingToastId = toast.loading(
+            `Salvando ${newPastInstances.length} novas instâncias passadas...`
           );
+          const success =
+            await zoomPastInstancieStore.createMultiplePastInstances(
+              pastInstancesData
+            );
+          if (!success) throw new Error("Error creating new past instances");
+
+          toast.dismiss(loadingToastId);
+          toast.success(
+            `${newPastInstances.length} novas instâncias passadas foram salvas!`
+          );
+          return;
+        } catch (error) {
+          toast.error("Erro ao processar novas instâncias passadas!");
+          if (error instanceof Error) {
+            console.error(error);
+          }
+          throw error;
+        } finally {
+          if (loadingToastId) toast.dismiss(loadingToastId);
         }
       },
 
-      fetchAllPastInstancesData: async (
-        account: Partial<ZoomAccountT>,
-        pastInstances: Partial<ZoomMeetingPastInstanceT>[]
+      updateExistingPastInstances: async (
+        meetingId,
+        account,
+        pastInstances
       ) => {
-        const zoomAPIStore = useZoomAPIStore.getState();
-        const enrichedInstances = [];
-
-        const loadingToast = toast.loading(
-          `Obtendo dados de TODAS as ${pastInstances.length} instâncias passadas...`
-        );
-
+        let loadingToastId;
         try {
-          for (let i = 0; i < pastInstances.length; i++) {
-            const instance = pastInstances[i];
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
+            throw new Error("Account data is missing");
+          // Validating the meeting data before proceeding with API
+          if (!meetingId) throw new Error("Meeting ID is required");
+
+          // If no past instances, exit early
+          if (pastInstances.length === 0) {
+            toast.info("Todas as instâncias passadas já estão atualizadas!");
+            return;
+          }
+
+          // Accessing current state for utility functions
+          const currentState = get();
+
+          // Accessing past instance store for utility functions
+          const pastInstanciesStore =
+            useZoomMeetingPastInstanceStore.getState();
+
+          // Get existing past instances (without overwriting state)
+          loadingToastId = toast.loading("Buscando instâncias existentes...");
+          const existingPastInstances =
+            await pastInstanciesStore._getPastInstancesByMeetingId(meetingId);
+          if (!existingPastInstances) return;
+          toast.dismiss(loadingToastId);
+          toast.success("Instâncias existentes obtidas com sucesso!");
+
+          // If no existing past instances found, exit early
+          if (existingPastInstances.length === 0) {
+            toast.info("Todas as instâncias passadas já estão atualizadas!");
+            return;
+          }
+
+          // Determine which instances are existing vs new
+          const currentPastInstances = Array.isArray(existingPastInstances)
+            ? existingPastInstances
+            : pastInstanciesStore.pastInstances;
+
+          // Create a set of existing UUIDs for quick lookup
+          const existingUUIDs = new Set(
+            currentPastInstances.map((instance) => instance.uuid)
+          );
+
+          // Filter only existing instances that need to be updated
+          const existingInstancesToUpdate = pastInstances.filter(
+            (instance) => instance.uuid && existingUUIDs.has(instance.uuid)
+          );
+
+          // If no existing instances to update, exit early
+          if (existingInstancesToUpdate.length === 0) {
+            toast.info("Todas as instâncias passadas já estão atualizadas!");
+            return;
+          }
+
+          // Fetch fresh participants and poll results for existing instances
+          const enrichedPastInstances =
+            await currentState.fetchPastInstancesData(
+              account,
+              existingInstancesToUpdate
+            );
+          if (!enrichedPastInstances) {
+            throw new Error("Error fetching past instances data");
+          }
+
+          console.log(enrichedPastInstances)
+
+          // Process existing instances for update
+          const existingInstancesUpdates = enrichedPastInstances
+            .map((instance) => {
+              // Find the existing instance to preserve justifications
+              const existingInstance = currentPastInstances.find(
+                (existing) => existing.uuid === instance.uuid
+              );
+
+              // If somehow instance not found, skip it
+              if (!existingInstance) return null;
+
+              // Get classroom participants for visibility logic
+              const instanceParticipants = instance.participants ?? [];
+              const isInstanceMustBeVisible = calculateVisibility(
+                {
+                  participants: instanceParticipants,
+                  is_visible_on_schedule: instance.is_visible_on_schedule,
+                },
+                account.classroom_id!
+              );
+
+              return {
+                classroom_id: account.classroom_id!,
+                account_id: account.id!,
+                meeting_id: meetingId,
+                uuid: instance.uuid!,
+                start_time: instance.start_time,
+                class_type: instance.class_type,
+                participants: instance.participants || [],
+                poll_results: instance.poll_results || [],
+                // CRITICAL: Preserve existing justifications to prevent data loss
+                justifications:
+                  existingInstance.justifications ||
+                  instance.justifications ||
+                  [],
+                synchronized_at: new Date().toISOString(),
+                is_visible_on_schedule: isInstanceMustBeVisible,
+              };
+            })
+            .filter((item): item is NonNullable<typeof item> => item !== null);
+
+          // Update existing instances with fresh data
+          if (existingInstancesUpdates.length > 0) {
+            loadingToastId = toast.loading(
+              `Atualizando ${existingInstancesUpdates.length} instâncias existentes...`
+            );
+            const success =
+              await pastInstanciesStore.upsertMultiplePastInstances(
+                existingInstancesUpdates
+              );
+            if (!success) throw new Error("Error updating existing instances");
+            toast.dismiss(loadingToastId);
+
+            toast.success(
+              `${existingInstancesUpdates.length} instâncias existentes foram atualizadas com sucesso!`
+            );
+          }
+          return;
+        } catch (error) {
+          toast.error("Erro ao atualizar instâncias passadas existentes!");
+          if (error instanceof Error) {
+            console.error(error);
+          }
+          throw error;
+        } finally {
+          if (loadingToastId) toast.dismiss(loadingToastId);
+        }
+      },
+
+      fetchPastInstancesData: async (account, instances) => {
+        let loadingToast;
+        try {
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
+            throw new Error("Account data is missing");
+
+          // If no past instances, exit early
+          if (instances.length === 0) {
+            toast.info("Nenhuma instância para processar.");
+            return [];
+          }
+
+          // Accessing zoom api store for utility functions
+          const zoomAPIStore = useZoomAPIStore.getState();
+
+          // Fetch participants and poll results for each instance in parallel
+          loadingToast = toast.loading(
+            `Obtendo dados de ${instances.length} instâncias passadas...`
+          );
+
+          const enrichedInstances = [];
+
+          for (const instance of instances) {
+            // If no UUID, skip fetching participants and poll results
             if (!instance.uuid) {
-              enrichedInstances.push(instance);
+              enrichedInstances.push({ 
+                ...instance, 
+                participants: [], 
+                poll_results: [] 
+              });
               continue;
             }
 
             try {
-              // Fetch participants and poll results in parallel for each instance
+              // Fetch participants and poll results in parallel
               const [participants, pollResults] = await Promise.all([
                 zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(
                   account,
@@ -675,8 +884,10 @@ export const useZoomMeetingStore = create<
                 poll_results: pollResults || [],
               });
             } catch (error) {
-              console.error(`Error processing instance ${i + 1}:`, error);
-              // Continue with next instance even if one fails
+              console.error(
+                `Error processing instance ${instance.uuid}:`,
+                error
+              );
               enrichedInstances.push({
                 ...instance,
                 participants: [],
@@ -684,91 +895,18 @@ export const useZoomMeetingStore = create<
               });
             }
           }
+
+          console.log("enrichedInstances", enrichedInstances);
 
           toast.success(
             `Dados de ${enrichedInstances.length} instâncias obtidos com sucesso!`
           );
+
           return enrichedInstances;
         } catch (error) {
-          console.error("Error fetching all past instances data:", error);
-          toast.error("Erro ao obter dados de todas as instâncias passadas");
-          return pastInstances.map((instance) => ({
-            ...instance,
-            participants: [],
-            poll_results: [],
-          }));
-        } finally {
-          toast.dismiss(loadingToast);
-        }
-      },
-
-      fetchNewPastInstancesData: async (
-        account: Partial<ZoomAccountT>,
-        pastInstances: Partial<ZoomMeetingPastInstanceT>[],
-        existingUuids: Set<string>
-      ) => {
-        const zoomAPIStore = useZoomAPIStore.getState();
-        const enrichedInstances = [];
-
-        // Filter only new instances that don't exist in database
-        const newInstances = pastInstances.filter(
-          (instance) => instance.uuid && !existingUuids.has(instance.uuid)
-        );
-
-        if (newInstances.length === 0) {
-          toast.info("Nenhuma nova instância encontrada para processar.");
-          return [];
-        }
-
-        const loadingToast = toast.loading(
-          `Obtendo dados de ${newInstances.length} NOVAS instâncias passadas...`
-        );
-
-        try {
-          for (let i = 0; i < newInstances.length; i++) {
-            const instance = newInstances[i];
-            if (!instance.uuid) {
-              enrichedInstances.push(instance);
-              continue;
-            }
-
-            try {
-              // Fetch participants and poll results in parallel for each new instance
-              const [participants, pollResults] = await Promise.all([
-                zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(
-                  account,
-                  instance.uuid
-                ),
-                zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(
-                  account,
-                  instance.uuid
-                ),
-              ]);
-
-              enrichedInstances.push({
-                ...instance,
-                participants: participants || [],
-                poll_results: pollResults || [],
-              });
-            } catch (error) {
-              console.error(`Error processing new instance ${i + 1}:`, error);
-              // Continue with next instance even if one fails
-              enrichedInstances.push({
-                ...instance,
-                participants: [],
-                poll_results: [],
-              });
-            }
-          }
-
-          toast.success(
-            `Dados de ${enrichedInstances.length} novas instâncias obtidos com sucesso!`
-          );
-          return enrichedInstances;
-        } catch (error) {
-          console.error("Error fetching new past instances data:", error);
-          toast.error("Erro ao obter dados das novas instâncias passadas");
-          return newInstances.map((instance) => ({
+          console.error("Error fetching past instances data:", error);
+          toast.error("Erro ao obter dados das instâncias passadas");
+          return instances.map((instance) => ({
             ...instance,
             participants: [],
             poll_results: [],
@@ -781,130 +919,58 @@ export const useZoomMeetingStore = create<
       refreshAllPastInstancesForMeeting: async (meeting, account) => {
         let loadingToastId;
         try {
-          if (
-            !account.account_id ||
-            !account.id ||
-            !account.client_id ||
-            !account.client_secret
-          )
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
             throw new Error("Account data is missing");
-          if (!meeting.id || !meeting.meeting_id || !meeting.uuid)
+          // Validating the meeting data before proceeding with API
+          if (!validateMeeting(meeting))
             throw new Error("Meeting data is missing");
 
-          loadingToastId = toast.loading(
-            "Buscando todas as instâncias passadas da reunião...",
-            {
-              closeButton: true,
-            }
+          // Accessing current state for utility functions
+          const currentState = get();
+
+          // Fetch the current meeting from the store to ensure it exists
+          const currentMeeting = currentState.meetings.find(
+            (m) => m.id === meeting.id
           );
+          if (!currentMeeting) {
+            throw new Error("Meeting not found in current meetings");
+          }
 
           // Get meeting data from Zoom API with all past instances
+          loadingToastId = toast.loading(
+            "Buscando todas as instâncias passadas da reunião..."
+          );
           const updatedMeetingData = await useZoomAPIStore
             .getState()
             .getMeetingByAPI(account, meeting);
 
           if (!updatedMeetingData) throw new Error("no meeting response");
 
-          // Check if it's a recurrent meeting with past instances
+          // Check if it's a recurrent meeting
           if (
             updatedMeetingData &&
-            ("past_instances" in updatedMeetingData ||
-              updatedMeetingData.type === 8 ||
-              updatedMeetingData.type === 3)
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              updatedMeetingData.type
+            )
           ) {
+            // Update all instances (new and existing)
             const meetingWithPastInstances = updatedMeetingData as Omit<
               ZoomMeetingWithPastInstancies,
               "id" | "created_at"
             >;
-            const { past_instances } = meetingWithPastInstances;
+            const result = await currentState.handleRecurrentMeetingUpdate(
+              meeting,
+              account,
+              meetingWithPastInstances,
+              "all"
+            );
 
-            if (past_instances && past_instances.length > 0) {
-              // Fetch participants and poll results for ALL instances in ONE go
-              const enrichedPastInstances =
-                await get().fetchAllPastInstancesData(account, past_instances);
-
-              // Get classroom participants for visibility logic
-              const classroomParticipantsEmails = useUsersStore
-                .getState()
-                .users.filter((user) =>
-                  user.profile?.classrooms
-                    ?.map((c) => c.classroom_id)
-                    .includes(account.classroom_id || "")
-                )
-                .map((user) => user.email)
-                .filter((email): email is string => email !== undefined);
-
-              const hasClassroomEmails =
-                classroomParticipantsEmails?.length ?? 0 > 2;
-
-              // Get existing instances to preserve justifications
-              const existingPastInstances =
-                await useZoomMeetingPastInstanceStore
-                  .getState()
-                  ._getPastInstancesByMeetingId(meeting.id!);
-
-              const currentPastInstances = Array.isArray(existingPastInstances)
-                ? existingPastInstances
-                : [];
-
-              // Process all instances with participants and poll results for UPSERT
-              const pastInstancesData = enrichedPastInstances.map(
-                (instance) => {
-                  const instanceParticipants = instance.participants ?? [];
-                  const hasMatchingParticipants =
-                    hasClassroomEmails && instanceParticipants.length > 2
-                      ? instanceParticipants.some(
-                          (p: ZoomMeetingParticipantT) =>
-                            classroomParticipantsEmails?.includes(p.user_email)
-                        )
-                      : false;
-
-                  const hasParticipantsOnInstance = hasClassroomEmails
-                    ? hasMatchingParticipants
-                    : instance.is_visible_on_schedule;
-
-                  // Find existing instance to preserve justifications
-                  const existingInstance = currentPastInstances.find(
-                    (existing) => existing.uuid === instance.uuid
-                  );
-
-                  return {
-                    classroom_id: account.classroom_id!,
-                    account_id: account.id!,
-                    meeting_id: meeting.id!,
-                    uuid: instance.uuid,
-                    start_time: instance.start_time,
-                    class_type: instance.class_type,
-                    participants: instance.participants || [],
-                    poll_results: instance.poll_results || [],
-                    // CRITICAL: Preserve existing justifications to prevent data loss
-                    justifications:
-                      existingInstance?.justifications ||
-                      instance.justifications ||
-                      [],
-                    synchronized_at: new Date().toISOString(),
-                    is_visible_on_schedule: hasParticipantsOnInstance,
-                  };
-                }
-              );
-
-              // Use UPSERT to handle both new and existing instances in one operation
-              await useZoomMeetingPastInstanceStore
-                .getState()
-                .upsertMultiplePastInstances(pastInstancesData);
-
-              toast.success(
-                `Todas as ${pastInstancesData.length} instâncias passadas foram processadas com dados atualizados!`
-              );
-            } else {
-              toast.info(
-                "Nenhuma instância passada encontrada para esta reunião."
-              );
+            if (!result) {
+              throw new Error("Error updating past instances");
             }
           } else {
-            toast.info(
-              "Esta reunião não é recorrente ou não possui instâncias passadas."
-            );
+            throw new Error("Meeting is not recurrent");
           }
 
           return true;
@@ -920,36 +986,43 @@ export const useZoomMeetingStore = create<
       refreshAndAddOnlyNewPastInstances: async (meeting, account) => {
         let loadingToastId;
         try {
-          if (
-            !account.account_id ||
-            !account.id ||
-            !account.client_id ||
-            !account.client_secret
-          )
+          // Validating the account data before proceeding with API
+          if (!validateZoomAccount(account))
             throw new Error("Account data is missing");
-          if (!meeting.id || !meeting.meeting_id || !meeting.uuid)
+          // Validating the meeting data before proceeding with API
+          if (!validateMeeting(meeting))
             throw new Error("Meeting data is missing");
 
-          loadingToastId = toast.loading(
-            "Buscando novas instâncias passadas da reunião...",
-            {
-              closeButton: true,
-            }
+          // Accessing current state for utility functions
+          const currentState = get();
+
+          // Fetch the current meeting from the store to ensure it exists
+          const currentMeeting = currentState.meetings.find(
+            (m) => m.id === meeting.id
           );
+          if (!currentMeeting) {
+            throw new Error("Meeting not found in current meetings");
+          }
+
+          const zoomAPIStore = useZoomAPIStore.getState();
 
           // Get meeting data from Zoom API with all past instances
-          const updatedMeetingData = await useZoomAPIStore
-            .getState()
-            .getMeetingByAPI(account, meeting);
-
+          loadingToastId = toast.loading("Buscando os dados da reunião...");
+          const updatedMeetingData = await zoomAPIStore.getMeetingByAPI(
+            account,
+            meeting
+          );
           if (!updatedMeetingData) throw new Error("no meeting response");
+          toast.dismiss(loadingToastId);
+          toast.success("Dados da reunião obtidos com sucesso!");
 
           // Check if it's a recurrent meeting with past instances
           if (
             updatedMeetingData &&
-            ("past_instances" in updatedMeetingData ||
-              updatedMeetingData.type === 8 ||
-              updatedMeetingData.type === 3)
+            (RECURRING_MEETING_TYPES as readonly number[]).includes(
+              updatedMeetingData.type
+            ) &&
+            "past_instances" in updatedMeetingData
           ) {
             const meetingWithPastInstances = updatedMeetingData as Omit<
               ZoomMeetingWithPastInstancies,
@@ -960,7 +1033,7 @@ export const useZoomMeetingStore = create<
             if (past_instances && past_instances.length > 0) {
               // Only process NEW instances (don't touch existing ones)
               await get().processNewPastInstances(
-                meeting.id!,
+                meeting,
                 account,
                 past_instances
               );
@@ -970,11 +1043,13 @@ export const useZoomMeetingStore = create<
               );
             }
 
+            // Check for occurrences changes
             const currentOccurrences =
-              get()
-                .meetings.find((m) => m.id === meeting.id)
+              currentState.meetings
+                .find((m) => m.id === meeting.id)
                 ?.occurrences?.map((o) => o.occurrence_id) || [];
 
+            // If no occurrences in the current meeting, we consider an empty array
             const isOccurrencesChange =
               occurrences &&
               occurrences.length !== currentOccurrences.length &&
@@ -984,7 +1059,7 @@ export const useZoomMeetingStore = create<
 
             if (isOccurrencesChange) {
               // Only process NEW occurrences (don't touch existing ones)
-              await get().updateMeeting(meeting.id, {
+              await currentState.updateMeeting(meeting.id, {
                 occurrences,
               });
             }
@@ -996,33 +1071,48 @@ export const useZoomMeetingStore = create<
 
           return true;
         } catch (error) {
-          console.error(error);
           toast.error("Erro ao buscar novas instâncias passadas!");
+          if (error instanceof Error) console.error(error);
           return false;
         } finally {
-          toast.dismiss(loadingToastId);
+          if (loadingToastId) toast.dismiss(loadingToastId);
         }
       },
 
       deleteMeeting: async (meetingId) => {
         let loadingToastId;
         try {
+          // Validating the meeting ID before proceeding
           if (!meetingId) throw new Error("meeting id is required to delete");
 
+          // Fetch the current meeting from the store to ensure it exists
+          const currentState = get();
+
+          // Confirm the meeting exists in the store
+          const currentMeeting = currentState.meetings.find(
+            (m) => m.id === meetingId
+          );
+          if (!currentMeeting) {
+            throw new Error("Meeting not found in current meetings");
+          }
+
+          // Proceed to delete the meeting on Supabase
           loadingToastId = toast.loading("Excluindo os dados da conta...");
           const response = await deleteZoomMeetingById(meetingId);
           if (!response) throw new Error("no delete meeting response");
+          toast.dismiss(loadingToastId);
 
           set({
-            meetings: get().meetings.filter(
+            meetings: currentState.meetings.filter(
               (meeting) => meeting.id !== meetingId
             ),
           });
+
           toast.success("Reunião deletada com sucesso!");
           return true;
         } catch (error) {
-          console.error(error);
           toast.error("Erro ao deletar reunião. Tente novamente mais tarde!");
+          if (error instanceof Error) console.error(error);
           return false;
         } finally {
           toast.dismiss(loadingToastId);

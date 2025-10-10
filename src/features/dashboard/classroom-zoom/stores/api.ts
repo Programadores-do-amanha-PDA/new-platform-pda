@@ -142,7 +142,6 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
         }
       },
 
-      // TODO optimize this function to only get new past instances instead of all
       getMeetingByAPI: async (account, meetingData) => {
         let loadingToast;
         try {
@@ -153,20 +152,21 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
             throw new Error("Meeting data is missing");
 
           set({ loading: true });
-          loadingToast = toast.loading("Acessando a conta do Zoom...");
 
+          // Get access token
+          loadingToast = toast.loading("Acessando a conta do Zoom...");
           const accessData = {
             account_id: account.account_id,
             client_id: account.client_id,
             client_secret: account.client_secret,
           };
+
           const ZOOM_ACCESS_TOKEN = await getAccessToken(accessData);
           if (!ZOOM_ACCESS_TOKEN) {
             throw new Error("Failed to get access token");
           }
-
           toast.dismiss(loadingToast);
-          loadingToast = toast.loading("Obtendo dados da Reunião...");
+
           const meetingDuration = (meetingData.duration || 0) * 60000;
           const meetingEndTime = new Date(
             new Date(meetingData.start_time!).getTime() + meetingDuration
@@ -174,7 +174,10 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
           const now = Date.now();
 
           // getting meeting data
+          loadingToast = toast.loading("Obtendo dados da Reunião...");
           let meeting;
+
+          // Decide which API endpoint to use based on meeting status and type
           if (
             meetingEndTime <= now ||
             (RECURRING_MEETING_TYPES as readonly number[]).includes(
@@ -191,9 +194,10 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
               ZOOM_ACCESS_TOKEN
             );
           }
-          if (!meeting)
+          if (!meeting) {
             throw new Error("No meetingData data returned from API");
-          if (loadingToast) toast.dismiss(loadingToast);
+          }
+          toast.dismiss(loadingToast);
 
           // processing recurrence or non recurrence meeting data
           const meetingDataProcessed: Omit<ZoomMeetingT, "id" | "created_at"> =
@@ -274,12 +278,13 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
             account_id: account.id,
           } as ZoomMeetingT;
         } catch (error) {
-          console.error("Error fetching Zoom meeting data:", error);
+          console.error("Error fetching Zoom meeting data:");
+          if (error instanceof Error) console.error(error);
           toast.error("Falha ao buscar reuniões da API do Zoom");
           return null;
         } finally {
           set({ loading: false });
-          toast.dismiss(loadingToast);
+          if (loadingToast) toast.dismiss(loadingToast);
         }
       },
 
@@ -386,9 +391,9 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
           );
 
           // Filter out any null or undefined entries from the poll results
-          const nonNullablePollResults = pollResults
-            .flatMap((p) => p.questions)
-            .filter(Boolean) as ZoomMeetingPollResultsT[];
+          const nonNullablePollResults = pollResults.filter(
+            Boolean
+          ) as ZoomMeetingPollResultsT[];
           return nonNullablePollResults;
         } catch (error) {
           toast.error("Falha ao buscar resultados de pesquisas da reunião.");
