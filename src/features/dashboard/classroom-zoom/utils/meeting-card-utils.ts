@@ -3,14 +3,16 @@ import {
   ZoomMeetingT,
   ZoomMeetingOccurrenceT,
   ZoomAccountT,
+  ZoomMeetingActionsMeetingPickT,
+  ZoomMeetingActionsAccountPickT,
 } from "../types";
 
 interface RefreshMeetingDataParams {
   meeting: ZoomMeetingT;
   accounts: ZoomAccountT[];
   refreshAndAddOnlyNewPastInstances: (
-    meeting: Partial<ZoomMeetingT>,
-    account: Partial<ZoomAccountT>
+    meeting: ZoomMeetingActionsMeetingPickT,
+    account: ZoomMeetingActionsAccountPickT
   ) => Promise<boolean>;
   setLoading: (loading: boolean) => void;
   setAllMeetingLoading: (loading: boolean) => void;
@@ -53,7 +55,22 @@ export const refreshMeetingData = async ({
   const account = accounts.find((account) => account.id === meeting.account_id);
 
   if (account) {
-    await refreshAndAddOnlyNewPastInstances(meeting, account);
+    // Cast to the required types for the store function
+    const meetingPick: ZoomMeetingActionsMeetingPickT = {
+      id: meeting.id,
+      meeting_id: meeting.meeting_id,
+      uuid: meeting.uuid,
+    };
+    
+    const accountPick: ZoomMeetingActionsAccountPickT = {
+      account_id: account.account_id,
+      id: account.id,
+      client_id: account.client_id,
+      client_secret: account.client_secret,
+      classroom_id: account.classroom_id,
+    };
+
+    await refreshAndAddOnlyNewPastInstances(meetingPick, accountPick);
   }
 
   setAllMeetingLoading(false);

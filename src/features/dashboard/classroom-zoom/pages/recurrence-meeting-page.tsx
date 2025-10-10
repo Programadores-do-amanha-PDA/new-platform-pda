@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ColumnDef } from "@tanstack/react-table";
@@ -280,7 +280,6 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
         className="w-full h-full flex justify-center items-center border-b border-r"
       >
         <RefreshButton
-          disabled={true}
           onRefresh={async () =>
             void row.original.handleRefreshInstanceData(
               row.original.id,
@@ -508,7 +507,8 @@ export default function ZoomRecurrenceMeetingPage({
     useState<ZoomMeetingPastInstanceT | null>(null);
 
   const { accounts } = useZoomAccountStore();
-  const { refreshAndUpdateMeeting, deleteMeeting } = useZoomMeetingStore();
+  const { refreshAndAddOnlyNewPastInstances, deleteMeeting } =
+    useZoomMeetingStore();
   const { pastInstances, updatePastInstanceById, refreshInstanceData } =
     useZoomMeetingPastInstanceStore();
 
@@ -523,7 +523,7 @@ export default function ZoomRecurrenceMeetingPage({
       );
       if (!account) return;
 
-      await refreshAndUpdateMeeting(currentMeeting, account);
+      await refreshAndAddOnlyNewPastInstances(currentMeeting, account);
 
       setIsUpdating(false);
     } catch {
@@ -554,39 +554,45 @@ export default function ZoomRecurrenceMeetingPage({
     await refreshInstanceData(instanceId, uuid, account);
   };
 
-  const meetingOccurrences = currentMeeting?.occurrences
-    ?.filter(Boolean)
-    ?.map((occurrence) => ({
-      ...occurrence,
-      topic: currentMeeting.topic,
-      meeting_id: currentMeeting.id,
-    }));
+  const meetingOccurrences = useMemo(
+    () =>
+      currentMeeting?.occurrences?.filter(Boolean)?.map((occurrence) => ({
+        ...occurrence,
+        topic: currentMeeting.topic,
+        meeting_id: currentMeeting.id,
+      })),
+    [currentMeeting]
+  );
 
-  const meetingPastInstances = pastInstances
-    ?.filter(Boolean)
-    .filter((p) => p.meeting_id === currentMeeting?.id)
-    ?.map((pastInstance) => {
-      const participantGroups = new Map<string, ZoomMeetingParticipantT>();
+  const meetingPastInstances = useMemo(
+    () =>
+      pastInstances
+        ?.filter(Boolean)
+        .filter((p) => p.meeting_id === currentMeeting?.id)
+        ?.map((pastInstance) => {
+          const participantGroups = new Map<string, ZoomMeetingParticipantT>();
 
-      pastInstance?.participants?.forEach(
-        (participant: ZoomMeetingParticipantT) => {
-          const existing = participantGroups.get(participant.user_email);
-          if (!existing) {
-            participantGroups.set(participant.user_email, participant);
-          }
-        }
-      );
+          pastInstance?.participants?.forEach(
+            (participant: ZoomMeetingParticipantT) => {
+              const existing = participantGroups.get(participant.user_email);
+              if (!existing) {
+                participantGroups.set(participant.user_email, participant);
+              }
+            }
+          );
 
-      return {
-        ...pastInstance,
-        topic: currentMeeting?.topic,
-        duration: currentMeeting?.duration,
-        participants: Array.from(participantGroups.values()),
-        updatePastInstanceById,
-        handleOpenDialog,
-        handleRefreshInstanceData,
-      };
-    });
+          return {
+            ...pastInstance,
+            topic: currentMeeting?.topic,
+            duration: currentMeeting?.duration,
+            participants: Array.from(participantGroups.values()),
+            updatePastInstanceById,
+            handleOpenDialog,
+            handleRefreshInstanceData,
+          };
+        }),
+    [currentMeeting, pastInstances]
+  );
 
   const currentMeetingOccurrences = meetingOccurrences || [];
   const currentMeetingPastInstances = meetingPastInstances || [];
@@ -613,7 +619,7 @@ export default function ZoomRecurrenceMeetingPage({
             </div>
             <div className="flex gap-4">
               <Button
-                disabled={true || isUpdating}
+                disabled={isUpdating}
                 onClick={handleRefreshMeeting}
                 title="Atualizar"
                 className="font-semibold cursor-pointer"

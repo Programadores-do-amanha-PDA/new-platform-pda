@@ -160,7 +160,7 @@ const RefreshButton = ({
   <Button
     size="icon"
     // disabled={loading || allMeetingLoading}
-    disabled={true || loading || allMeetingLoading}
+    disabled={loading || allMeetingLoading}
     onClick={onRefresh}
     title="Atualizar"
     className="cursor-pointer"

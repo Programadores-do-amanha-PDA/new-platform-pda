@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, RefreshCw } from "lucide-react";
+import { ArrowUpDown, ChevronDownIcon, FolderX, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +16,15 @@ import {
   ZoomMeetingPollResultsT,
   ZoomMeetingT,
 } from "../types";
+import EmptyState from "@/components/shared/empty-states/empty-state";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const meetingPollResultsColumns: ColumnDef<ZoomMeetingPollResultsT>[] = [
   {
@@ -364,28 +373,50 @@ export default function ZoomPastMeetingPage({
           </p>
         </div>
         <div className="flex gap-4">
-          <Button
-            disabled={true || isUpdating}
-            onClick={handleRefreshMeeting}
-            title="Atualizar"
-            className="font-semibold"
-          >
-            <RefreshCw className={cn("size-5", isUpdating && "animate-spin")} />
-            Atualizar
-          </Button>
-          <DeleteConfirmationButton
-            onConfirm={() => deleteMeeting(currentMeeting.id)}
-            buttonText="Deletar Reunião"
-            dialogTitle="Deletar Reunião"
-            description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as presenças e entregas (polls) associadas serão permanentemente removidas.`}
-            confirmText="Deletar Reunião"
-          />
+          <ButtonGroup>
+            <Button
+              variant="default"
+              disabled={isUpdating}
+              onClick={handleRefreshMeeting}
+              title="Atualizar"
+              className="font-semibold border"
+            >
+              <RefreshCw
+                className={cn("size-5", isUpdating && "animate-spin")}
+              />
+              Atualizar dados
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button
+                  variant="outline"
+                  type="submit"
+                  className="border-l-0 rounded-l-none"
+                >
+                  <ChevronDownIcon />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="[--radius:1rem]">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <DeleteConfirmationButton
+                      onConfirm={() => deleteMeeting(currentMeeting.id)}
+                      buttonText="Deletar Reunião"
+                      dialogTitle="Deletar Reunião"
+                      description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as presenças e entregas (polls) associadas serão permanentemente removidas.`}
+                      confirmText="Deletar Reunião"
+                    />
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
         </div>
       </header>
 
-      {(participantsData.length || currentPollResults.length) && (
+      {participantsData.length > 0 || currentPollResults.length > 0 ? (
         <Tabs
-          defaultValue={participantsData.length ? "upcoming" : "completed"}
+          defaultValue={participantsData.length > 0 ? "upcoming" : "completed"}
           className="w-full h-full flex flex-col overflow-hidden"
         >
           <TabsList className="w-max flex gap-2 overflow-hidden">
@@ -402,7 +433,7 @@ export default function ZoomPastMeetingPage({
             )}
           </TabsList>
 
-          {participantsData.length && (
+          {participantsData.length && participantsData.length > 0 && (
             <TabsContent
               value="upcoming"
               className="w-full h-full overflow-hidden"
@@ -426,6 +457,25 @@ export default function ZoomPastMeetingPage({
             </TabsContent>
           )}
         </Tabs>
+      ) : (
+        <EmptyState
+          icon={<FolderX />}
+          title="Nenhum participantes ou respostas"
+          description="Tente atualizar os dados da reunião para pegar os novos dados vindo da API do Zoom!"
+          action={
+            <Button
+              disabled={isUpdating}
+              onClick={handleRefreshMeeting}
+              title="Atualizar"
+              className="font-semibold"
+            >
+              <RefreshCw
+                className={cn("size-5", isUpdating && "animate-spin")}
+              />
+              Atualizar os dados da reunião
+            </Button>
+          }
+        />
       )}
     </div>
   );

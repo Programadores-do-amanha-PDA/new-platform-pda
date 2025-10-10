@@ -1,10 +1,11 @@
 "use client";
 import { useParams } from "next/navigation";
-import { NotFoundState } from "@/components/shared/empty-states/not-found-state"; 
+import { NotFoundState } from "@/components/shared/empty-states/not-found-state";
 
 import ZoomPastMeetingPage from "./past-meeting-page";
 import ZoomRecurrenceMeetingPage from "./recurrence-meeting-page";
 import { useZoomMeetingStore } from "../stores/meetings";
+import { NON_RECURRING_MEETING_TYPES, RECURRING_MEETING_TYPES } from "../utils";
 
 export default function ZoomMeetingPage() {
   const { meeting_id, classroom_id } = useParams<{
@@ -26,9 +27,21 @@ export default function ZoomMeetingPage() {
     );
   }
 
-  if (currentMeeting.type === 8 || currentMeeting.type === 3) {
+  console.log(currentMeeting);
+
+  if (
+    currentMeeting?.type &&
+    (RECURRING_MEETING_TYPES as readonly number[]).includes(
+      currentMeeting.type as number
+    )
+  ) {
     return <ZoomRecurrenceMeetingPage currentMeeting={currentMeeting} />;
-  } else {
+  } else if (
+    currentMeeting?.type &&
+    (NON_RECURRING_MEETING_TYPES as readonly number[]).includes(
+      currentMeeting?.type as number
+    )
+  ) {
     return <ZoomPastMeetingPage currentMeeting={currentMeeting} />;
   }
 }
