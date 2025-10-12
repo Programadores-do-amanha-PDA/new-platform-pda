@@ -39,7 +39,7 @@ export default function RootLayout({
         <AuthStoreProvider>
           <main className="w-full h-full flex overflow-hidden">{children}</main>
         </AuthStoreProvider>
-        <Toaster closeButton richColors />
+        <Toaster closeButton={true} expand richColors visibleToasts={9} />
       </body>
     </html>
   );
