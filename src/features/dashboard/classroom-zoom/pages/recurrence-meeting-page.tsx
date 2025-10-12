@@ -12,17 +12,28 @@ import {
   CalendarMinus,
   CalendarPlus,
   ChevronDownIcon,
+  Ellipsis,
   RefreshCw,
   RotateCw,
   Siren,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import RefreshButton from "@/components/shared/refresh-button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import AsyncActionButton from "@/components/shared/async-action-button";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
-import { cn } from "@/lib/utils";
 
 import {
   useZoomMeetingStore,
@@ -37,15 +48,6 @@ import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "../types";
-import { ButtonGroup } from "@/components/ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceT & {
   topic: string | undefined;
@@ -277,41 +279,11 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
     ),
   },
   {
-    id: "refresh",
-    header: () => {
-      return (
-        <div className="w-full h-full flex justify-center items-center px-2 border-r">
-          <p>Atualizar</p>
-        </div>
-      );
-    },
-    cell: ({ row }: { row: { original: MeetingPastInstance } }) => (
-      <div
-        key={`refresh-${row.original.uuid}`}
-        className="w-full h-full flex justify-center items-center border-b border-r"
-      >
-        <RefreshButton
-          onRefresh={async () =>
-            void row.original.handleRefreshInstanceData(
-              row.original.id,
-              row.original.uuid
-            )
-          }
-          variant="ghost"
-          size="icon"
-          className="cursor-pointer"
-        >
-          <RefreshCw className="size-4 text-primary" />
-        </RefreshButton>
-      </div>
-    ),
-  },
-  {
     id: "actions",
     header: () => {
       return (
         <div className="w-full h-full flex justify-center items-center px-2">
-          <p>Calendário</p>
+          <p>Ações</p>
         </div>
       );
     },
@@ -320,23 +292,50 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
         key={row.original.uuid}
         className="w-full h-full flex justify-center items-center border-b"
       >
-        <RefreshButton
-          onRefresh={async () =>
-            void row.original.updatePastInstanceById(row.original.id, {
-              is_visible_on_schedule: !row.original.is_visible_on_schedule,
-            })
-          }
-          variant="ghost"
-          size="icon"
-          className="cursor-pointer"
-        >
-          {row.original.is_visible_on_schedule === undefined ||
-          row.original.is_visible_on_schedule === true ? (
-            <CalendarMinus className="size-4 text-destructive" />
-          ) : (
-            <CalendarPlus className="size-4 text-primary-foreground" />
-          )}
-        </RefreshButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Ellipsis className="size-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <AsyncActionButton
+                onAction={async () =>
+                  void row.original.updatePastInstanceById(row.original.id, {
+                    is_visible_on_schedule:
+                      !row.original.is_visible_on_schedule,
+                  })
+                }
+                variant="ghost"
+                size="icon"
+                className="cursor-pointer"
+              >
+                {row.original.is_visible_on_schedule === undefined ||
+                row.original.is_visible_on_schedule === true ? (
+                  <CalendarMinus className="size-4 text-destructive" />
+                ) : (
+                  <CalendarPlus className="size-4 text-primary-foreground" />
+                )}
+              </AsyncActionButton>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <AsyncActionButton
+                onAction={async () =>
+                  void row.original.handleRefreshInstanceData(
+                    row.original.id,
+                    row.original.uuid
+                  )
+                }
+                variant="ghost"
+                size="icon"
+                className="cursor-pointer"
+              >
+                <RefreshCw className="size-4 text-primary" />
+              </AsyncActionButton>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     ),
   },
@@ -588,7 +587,7 @@ export default function ZoomRecurrenceMeetingPage({
 
       await refreshInstanceData(instanceId, uuid, account);
     },
-    [accounts, currentMeeting]
+    [accounts, currentMeeting.account_id, refreshInstanceData]
   );
 
   const meetingOccurrences = useMemo(
@@ -683,7 +682,11 @@ export default function ZoomRecurrenceMeetingPage({
                     <ChevronDownIcon />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="[--radius:1rem]">
+                <DropdownMenuContent
+                  align="end"
+                  className="[--radius:1rem]"
+                  autoFocus={false}
+                >
                   <DropdownMenuGroup>
                     <DropdownMenuItem asChild>
                       <Button

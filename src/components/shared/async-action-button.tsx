@@ -3,33 +3,33 @@ import { useCallback, useState } from "react";
 import { Button } from "../ui/button";
 import { LoaderCircle } from "lucide-react";
 
-interface RefreshButtonProps
+interface AsyncActionButtonProps
   extends Omit<React.ComponentProps<typeof Button>, "onClick"> {
-  onRefresh?: () => Promise<void> | void;
+  onAction?: () => Promise<void> | void;
 }
 
-const RefreshButton = ({
+const AsyncActionButton = ({
   children,
   className,
   variant,
   size,
-  onRefresh,
+  onAction,
   ...rest
-}: RefreshButtonProps) => {
+}: AsyncActionButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleOnClick = useCallback(async () => {
-    if (!onRefresh) return;
+    if (!onAction) return;
 
     setIsLoading(true);
     try {
-      await onRefresh();
+      await onAction();
     } catch (error) {
-      console.error("Error in refresh action:", error);
+      console.error("Error in async action:", error);
     } finally {
       setIsLoading(false);
     }
-  }, [onRefresh]);
+  }, [onAction]);
 
   return (
     <Button
@@ -45,4 +45,4 @@ const RefreshButton = ({
   );
 };
 
-export default RefreshButton;
+export default AsyncActionButton;
