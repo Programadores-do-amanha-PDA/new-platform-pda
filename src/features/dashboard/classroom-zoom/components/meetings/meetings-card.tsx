@@ -26,7 +26,6 @@ import {
   getMeetingType,
   getMeetingPastInstances,
   getUpcomingOccurrences,
-  refreshMeetingData,
 } from "../../utils";
 import {
   CalendarButtonProps,
@@ -159,7 +158,6 @@ const RefreshButton = ({
 }: RefreshButtonProps) => (
   <Button
     size="icon"
-    // disabled={loading || allMeetingLoading}
     disabled={loading || allMeetingLoading}
     onClick={onRefresh}
     title="Atualizar"
@@ -206,19 +204,31 @@ export default function ZoomMeetingsCard({
   );
   const upcomingOccurrences = getUpcomingOccurrences(meeting.occurrences);
 
-  const handleRefreshMeeting = async (): Promise<void> => {
-    await refreshMeetingData({
-      meeting,
-      accounts,
-      refreshAndAddOnlyNewPastInstances,
-      setLoading,
-      setAllMeetingLoading,
-    });
+  const handleRefreshMeeting = async () => {
+    setAllMeetingLoading(true);
+    setLoading(true);
+
+    try {
+      if (!meeting) throw new Error("Meeting not found");
+
+      const account = accounts.find(
+        (account) => account.id === meeting.account_id
+      );
+      if (!account) return;
+
+      await refreshAndAddOnlyNewPastInstances(meeting, account);
+
+      setAllMeetingLoading(false);
+      setLoading(false);
+    } catch {
+      setAllMeetingLoading(false);
+      setLoading(false);
+    }
   };
 
-  const isRecurringMeeting = RECURRING_MEETING_TYPES.includes(
-    meeting.type as 3 | 8
-  );
+  const isRecurringMeeting = (
+    RECURRING_MEETING_TYPES as readonly number[]
+  ).includes(meeting.type);
   const classroomId = classroom_id as string;
 
   return (

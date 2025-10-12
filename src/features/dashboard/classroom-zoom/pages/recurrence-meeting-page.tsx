@@ -11,7 +11,9 @@ import {
   ArrowUpDown,
   CalendarMinus,
   CalendarPlus,
+  ChevronDownIcon,
   RefreshCw,
+  RotateCw,
   Siren,
 } from "lucide-react";
 
@@ -35,6 +37,15 @@ import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "../types";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type MeetingOccurrence = ZoomMeetingOccurrenceT & {
   topic: string | undefined;
@@ -507,12 +518,15 @@ export default function ZoomRecurrenceMeetingPage({
     useState<ZoomMeetingPastInstanceT | null>(null);
 
   const { accounts } = useZoomAccountStore();
-  const { refreshAndAddOnlyNewPastInstances, deleteMeeting } =
-    useZoomMeetingStore();
+  const {
+    refreshAndAddOnlyNewPastInstances,
+    refreshAndUpdateMeeting,
+    deleteMeeting,
+  } = useZoomMeetingStore();
   const { pastInstances, updatePastInstanceById, refreshInstanceData } =
     useZoomMeetingPastInstanceStore();
 
-  const handleRefreshMeeting = async () => {
+  const handleRefreshNewMeetingData = async () => {
     setIsUpdating(true);
 
     try {
@@ -532,27 +546,50 @@ export default function ZoomRecurrenceMeetingPage({
     }
   };
 
-  const handleOpenDialog = (instancieId: string) => {
-    const instancie = pastInstances.find((p) => p.id === instancieId);
-    if (!instancie) return toast.error("Instância não encontrada!");
-    setSelectedInstancie(instancie);
-    setIsDialogOpen(true);
-  };
+  const handleRefreshAllMeetingData = async () => {
+    setIsUpdating(true);
 
-  const handleRefreshInstanceData = async (
-    instanceId: string,
-    uuid: string
-  ) => {
-    const account = accounts.find(
-      (account) => account.id === currentMeeting.account_id
-    );
-    if (!account) {
-      toast.error("Conta não encontrada!");
-      return;
+    try {
+      if (!currentMeeting) throw new Error("Meeting not found");
+
+      const account = accounts.find(
+        (account) => account.id === currentMeeting.account_id
+      );
+      if (!account) return;
+
+      await refreshAndUpdateMeeting(currentMeeting, account);
+
+      setIsUpdating(false);
+    } catch {
+      toast.error("Erro ao atualizar a reunião!");
+      setIsUpdating(false);
     }
-
-    await refreshInstanceData(instanceId, uuid, account);
   };
+
+  const handleOpenDialog = useMemo(
+    () => (instancieId: string) => {
+      const instancie = pastInstances.find((p) => p.id === instancieId);
+      if (!instancie) return toast.error("Instância não encontrada!");
+      setSelectedInstancie(instancie);
+      setIsDialogOpen(true);
+    },
+    [pastInstances]
+  );
+
+  const handleRefreshInstanceData = useMemo(
+    () => async (instanceId: string, uuid: string) => {
+      const account = accounts.find(
+        (account) => account.id === currentMeeting.account_id
+      );
+      if (!account) {
+        toast.error("Conta não encontrada!");
+        return;
+      }
+
+      await refreshInstanceData(instanceId, uuid, account);
+    },
+    [accounts, currentMeeting]
+  );
 
   const meetingOccurrences = useMemo(
     () =>
@@ -591,7 +628,15 @@ export default function ZoomRecurrenceMeetingPage({
             handleRefreshInstanceData,
           };
         }),
-    [currentMeeting, pastInstances]
+    [
+      currentMeeting?.duration,
+      currentMeeting?.id,
+      currentMeeting?.topic,
+      handleOpenDialog,
+      handleRefreshInstanceData,
+      pastInstances,
+      updatePastInstanceById,
+    ]
   );
 
   const currentMeetingOccurrences = meetingOccurrences || [];
@@ -617,26 +662,72 @@ export default function ZoomRecurrenceMeetingPage({
                 <p className="font-normal">{currentMeeting?.host_email}</p>
               </p>
             </div>
-            <div className="flex gap-4">
+            <ButtonGroup>
               <Button
                 disabled={isUpdating}
-                onClick={handleRefreshMeeting}
-                title="Atualizar"
-                className="font-semibold cursor-pointer"
+                onClick={handleRefreshNewMeetingData}
+                className="font-semibold cursor-pointer border"
               >
-                <RefreshCw
+                <RotateCw
                   className={cn("size-5", isUpdating && "animate-spin")}
                 />
-                Atualizar
+                Buscar novos dados
               </Button>
-              <DeleteConfirmationButton
-                onConfirm={() => deleteMeeting(currentMeeting.id)}
-                buttonText="Deletar Reunião"
-                dialogTitle="Deletar Reunião"
-                description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as instancias futuras e passadas associadas serão permanentemente removidas juntamente com suas presenças e entregas (polls) a elas vinculadas.`}
-                confirmText="Deletar Reunião"
-              />
-            </div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Button
+                    variant="outline"
+                    className="border-l-0 rounded-l-none cursor-pointer"
+                  >
+                    <ChevronDownIcon />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="[--radius:1rem]">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Button
+                        variant="default"
+                        disabled={isUpdating}
+                        onClick={handleRefreshAllMeetingData}
+                        className="font-semibold cursor-pointer h-max gap-4"
+                      >
+                        <RefreshCw
+                          className={cn("size-5", isUpdating && "animate-spin")}
+                        />
+                        <div className="flex flex-col items-start">
+                          <p>Atualizar todos os dados</p>
+
+                          <p className="text-xs font-normal">
+                            Levará cerca de{" "}
+                            <mark className="font-semibold bg-transparent">
+                              {(
+                                (currentMeetingPastInstances.length * 7300) /
+                                60000
+                              ).toFixed()}{" "}
+                              minutos
+                            </mark>
+                          </p>
+                        </div>
+                      </Button>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <DeleteConfirmationButton
+                        onConfirm={() => deleteMeeting(currentMeeting.id)}
+                        buttonText="Deletar Reunião"
+                        dialogTitle="Deletar Reunião"
+                        description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as instancias futuras e passadas associadas serão permanentemente removidas juntamente com suas presenças e entregas (polls) a elas vinculadas.`}
+                        confirmText="Deletar Reunião"
+                        buttonClassName="w-full cursor-pointer"
+                      />
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </ButtonGroup>
           </div>
 
           {meetingOccurrences &&
