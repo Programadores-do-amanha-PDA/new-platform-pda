@@ -196,9 +196,12 @@ export const useZoomMeetingPastInstanceStore = create<
         }
       },
 
-      upsertMultiplePastInstances: async (pastInstancesData) => {
+      upsertMultiplePastInstances: async (classroomId, pastInstancesData) => {
         let loadingToastId;
         try {
+          // Validating classroom id
+          if (!classroomId) throw new Error("no classroom id provided");
+
           // Validating if array is provided
           if (!pastInstancesData || pastInstancesData.length === 0) {
             toast.error("Nenhuma instância passada foi fornecida!");
@@ -227,8 +230,11 @@ export const useZoomMeetingPastInstanceStore = create<
           loadingToastId = toast.loading(
             `Processando ${pastInstancesData.length} instâncias passadas...`
           );
+
+          console.log("pastInstancesData", pastInstancesData.length);
           // Upsert instances, preserving user data like justifications
           const upsertedPastInstances = await upsertMultiplePastInstances(
+            classroomId,
             pastInstancesData,
             { preserveUserData: true } // Preserve justifications and other user data
           );

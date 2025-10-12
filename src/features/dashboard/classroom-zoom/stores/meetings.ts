@@ -576,7 +576,7 @@ export const useZoomMeetingStore = create<
           // Validating the meeting data before proceeding with API
           if (!validateMeeting(meeting))
             throw new Error("Meeting ID is required");
-          
+
           // If no past instances, exit early
           if (pastInstances.length === 0) {
             toast.info("Todas as instâncias passadas já estão atualizadas!");
@@ -760,8 +760,6 @@ export const useZoomMeetingStore = create<
             throw new Error("Error fetching past instances data");
           }
 
-          console.log(enrichedPastInstances)
-
           // Process existing instances for update
           const existingInstancesUpdates = enrichedPastInstances
             .map((instance) => {
@@ -810,6 +808,7 @@ export const useZoomMeetingStore = create<
             );
             const success =
               await pastInstanciesStore.upsertMultiplePastInstances(
+                account.classroom_id,
                 existingInstancesUpdates
               );
             if (!success) throw new Error("Error updating existing instances");
@@ -857,10 +856,10 @@ export const useZoomMeetingStore = create<
           for (const instance of instances) {
             // If no UUID, skip fetching participants and poll results
             if (!instance.uuid) {
-              enrichedInstances.push({ 
-                ...instance, 
-                participants: [], 
-                poll_results: [] 
+              enrichedInstances.push({
+                ...instance,
+                participants: [],
+                poll_results: [],
               });
               continue;
             }
@@ -895,8 +894,6 @@ export const useZoomMeetingStore = create<
               });
             }
           }
-
-          console.log("enrichedInstances", enrichedInstances);
 
           toast.success(
             `Dados de ${enrichedInstances.length} instâncias obtidos com sucesso!`

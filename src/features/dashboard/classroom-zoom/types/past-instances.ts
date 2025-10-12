@@ -44,6 +44,7 @@ export interface ZoomMeetingPastInstanceActions {
     pastInstancesData: Partial<Omit<ZoomMeetingPastInstanceT, "id" | "created_at">>[]
   ) => Promise<boolean>;
   upsertMultiplePastInstances: (
+    classroomId: string,
     pastInstancesData: Partial<Omit<ZoomMeetingPastInstanceT, "id" | "created_at">>[]
   ) => Promise<boolean>;
   updatePastInstanceById: (
