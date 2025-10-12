@@ -176,6 +176,7 @@ const createMultiplePastInstances = async (
 };
 
 const upsertMultiplePastInstances = async (
+  classroomId: string,
   pastInstancesData: Partial<
     Omit<ZoomMeetingPastInstanceT, "id | create_at">
   >[],
@@ -202,22 +203,24 @@ const upsertMultiplePastInstances = async (
     // If preserveUserData is true, merge with existing data
     if (options.preserveUserData) {
       // Get existing records to preserve important fields like justifications
-      const ids = pastInstancesData
-        .map((instance) => instance.id)
+      const UUIDs = pastInstancesData
+        .map((instance) => instance.uuid)
         .filter(Boolean);
+
       const { data: existingRecords } = await supabase
         .from("classroom_zoom_meeting_past_instancies")
         .select("*")
-        .in("id", ids);
+        .eq("classroom_id", classroomId)
+        .in("uuid", UUIDs);
 
       // Create a map of existing records by ID for quick lookup
       const existingRecordsMap = new Map(
-        (existingRecords || []).map((record) => [record.id, record])
+        (existingRecords || []).map((record) => [record.uuid!, record])
       );
 
       // Merge new data with existing data, preserving important fields
       dataToUpsert = pastInstancesData.map((newInstance) => {
-        const existingInstance = existingRecordsMap.get(newInstance.id!);
+        const existingInstance = existingRecordsMap.get(newInstance.uuid!);
 
         if (existingInstance) {
           // For existing records, preserve important fields and update API data
