@@ -33,7 +33,7 @@ const AsyncActionButton = ({
 
   return (
     <Button
-      onClick={handleOnClick}
+      onClick={() => handleOnClick()}
       className={className}
       variant={variant}
       size={size}
