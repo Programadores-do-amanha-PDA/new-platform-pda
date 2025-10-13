@@ -33,7 +33,6 @@ import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { useZoomMeetingPastInstanceStore } from "@/features/dashboard/classroom-zoom/stores/past-instances";
 import { AuthUserWithProfileT, ProfileT } from "@/types";
 import { calculateUserAttendance } from "@/utils/attendance-calculator";
 import {
@@ -131,7 +130,6 @@ export default function AttendanceTable({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-  const { updatePastInstanceById } = useZoomMeetingPastInstanceStore();
   const { configsByClassroom } = useClassroomConfigStore();
 
   const currentConfig = useMemo(() => {
@@ -203,13 +201,8 @@ export default function AttendanceTable({
             <div className="w-[155px]! h-11 flex justify-center items-center p-2">
               <MeetingTypeSelector
                 key={`MeetingTypeSelector-${meeting.id}-${index}`}
-                value={meeting.class_type}
+                meeting={meeting}
                 options={classroomClassTypes}
-                handleValueChange={(value) =>
-                  updatePastInstanceById(meeting.id, {
-                    class_type: value,
-                  })
-                }
               />
             </div>
             <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">

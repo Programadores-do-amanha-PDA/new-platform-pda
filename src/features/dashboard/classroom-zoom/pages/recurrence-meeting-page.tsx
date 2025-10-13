@@ -26,13 +26,10 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import AsyncActionButton from "@/components/shared/async-action-button";
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
 import {
@@ -296,43 +293,51 @@ const meetingPastInstancesColumns: ColumnDef<MeetingPastInstance>[] = [
           <DropdownMenuTrigger>
             <Ellipsis className="size-4" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <AsyncActionButton
-                onAction={async () =>
-                  void row.original.updatePastInstanceById(row.original.id, {
+          <DropdownMenuContent className="space-y-1">
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await row.original.updatePastInstanceById(row.original.id, {
                     is_visible_on_schedule:
                       !row.original.is_visible_on_schedule,
-                  })
+                  });
+                } catch (error) {
+                  console.error("Error updating visibility:", error);
                 }
-                variant="ghost"
-                size="icon"
-                className="cursor-pointer"
-              >
-                {row.original.is_visible_on_schedule === undefined ||
-                row.original.is_visible_on_schedule === true ? (
-                  <CalendarMinus className="size-4 text-destructive" />
-                ) : (
-                  <CalendarPlus className="size-4 text-primary-foreground" />
-                )}
-              </AsyncActionButton>
+              }}
+              className="cursor-pointer"
+              variant={row.original.is_visible_on_schedule === undefined ||
+              row.original.is_visible_on_schedule === true ? "destructive" : "default"}
+            >
+              {row.original.is_visible_on_schedule === undefined ||
+              row.original.is_visible_on_schedule === true ? (
+                <>
+                  <CalendarMinus className="size-4 stroke-destructive" />
+                  Remover do calendário
+                </>
+              ) : (
+                <>
+                  <CalendarPlus className="size-4 stroke-primary-foreground" />
+                  Adicionar ao calendário
+                </>
+              )}
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <AsyncActionButton
-                onAction={async () =>
-                  void row.original.handleRefreshInstanceData(
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await row.original.handleRefreshInstanceData(
                     row.original.id,
                     row.original.uuid
-                  )
+                  );
+                } catch (error) {
+                  console.error("Error refreshing instance:", error);
                 }
-                variant="ghost"
-                size="icon"
-                className="cursor-pointer"
-              >
-                <RefreshCw className="size-4 text-primary" />
-              </AsyncActionButton>
+              }}
+              className="cursor-pointer"
+              variant="default"
+            >
+              <RefreshCw className="size-4" />
+              Atualizar instância
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -511,7 +516,10 @@ export default function ZoomRecurrenceMeetingPage({
 }: {
   currentMeeting: ZoomMeetingT;
 }) {
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isRefreshingNewMeetingData, setIsRefreshingNewMeetingData] =
+    useState<boolean>(false);
+  const [isRefreshingAllMeetingData, setIsRefreshingAllMeetingData] =
+    useState<boolean>(false);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedInstancie, setSelectedInstancie] =
     useState<ZoomMeetingPastInstanceT | null>(null);
@@ -526,7 +534,7 @@ export default function ZoomRecurrenceMeetingPage({
     useZoomMeetingPastInstanceStore();
 
   const handleRefreshNewMeetingData = async () => {
-    setIsUpdating(true);
+    setIsRefreshingNewMeetingData(true);
 
     try {
       if (!currentMeeting) throw new Error("Meeting not found");
@@ -537,16 +545,15 @@ export default function ZoomRecurrenceMeetingPage({
       if (!account) return;
 
       await refreshAndAddOnlyNewPastInstances(currentMeeting, account);
-
-      setIsUpdating(false);
     } catch {
       toast.error("Erro ao atualizar a reunião!");
-      setIsUpdating(false);
+    } finally {
+      setIsRefreshingNewMeetingData(false);
     }
   };
 
   const handleRefreshAllMeetingData = async () => {
-    setIsUpdating(true);
+    setIsRefreshingAllMeetingData(true);
 
     try {
       if (!currentMeeting) throw new Error("Meeting not found");
@@ -557,23 +564,12 @@ export default function ZoomRecurrenceMeetingPage({
       if (!account) return;
 
       await refreshAndUpdateMeeting(currentMeeting, account);
-
-      setIsUpdating(false);
     } catch {
       toast.error("Erro ao atualizar a reunião!");
-      setIsUpdating(false);
+    } finally {
+      setIsRefreshingAllMeetingData(false);
     }
   };
-
-  const handleOpenDialog = useMemo(
-    () => (instancieId: string) => {
-      const instancie = pastInstances.find((p) => p.id === instancieId);
-      if (!instancie) return toast.error("Instância não encontrada!");
-      setSelectedInstancie(instancie);
-      setIsDialogOpen(true);
-    },
-    [pastInstances]
-  );
 
   const handleRefreshInstanceData = useMemo(
     () => async (instanceId: string, uuid: string) => {
@@ -588,6 +584,16 @@ export default function ZoomRecurrenceMeetingPage({
       await refreshInstanceData(instanceId, uuid, account);
     },
     [accounts, currentMeeting.account_id, refreshInstanceData]
+  );
+
+  const handleOpenDialog = useMemo(
+    () => (instancieId: string) => {
+      const instancie = pastInstances.find((p) => p.id === instancieId);
+      if (!instancie) return toast.error("Instância não encontrada!");
+      setSelectedInstancie(instancie);
+      setIsDialogOpen(true);
+    },
+    [pastInstances]
   );
 
   const meetingOccurrences = useMemo(
@@ -663,12 +669,15 @@ export default function ZoomRecurrenceMeetingPage({
             </div>
             <ButtonGroup>
               <Button
-                disabled={isUpdating}
+                disabled={isRefreshingNewMeetingData}
                 onClick={handleRefreshNewMeetingData}
                 className="font-semibold cursor-pointer border"
               >
                 <RotateCw
-                  className={cn("size-5", isUpdating && "animate-spin")}
+                  className={cn(
+                    "size-5",
+                    isRefreshingNewMeetingData && "animate-spin"
+                  )}
                 />
                 Buscar novos dados
               </Button>
@@ -687,47 +696,46 @@ export default function ZoomRecurrenceMeetingPage({
                   className="[--radius:1rem]"
                   autoFocus={false}
                 >
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem asChild>
-                      <Button
-                        variant="default"
-                        disabled={isUpdating}
-                        onClick={handleRefreshAllMeetingData}
-                        className="font-semibold cursor-pointer h-max gap-4"
-                      >
-                        <RefreshCw
-                          className={cn("size-5", isUpdating && "animate-spin")}
-                        />
-                        <div className="flex flex-col items-start">
-                          <p>Atualizar todos os dados</p>
-
-                          <p className="text-xs font-normal">
-                            Levará cerca de{" "}
-                            <mark className="font-semibold bg-transparent">
-                              {(
-                                (currentMeetingPastInstances.length * 7300) /
-                                60000
-                              ).toFixed()}{" "}
-                              minutos
-                            </mark>
-                          </p>
-                        </div>
-                      </Button>
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem asChild>
-                      <DeleteConfirmationButton
-                        onConfirm={() => deleteMeeting(currentMeeting.id)}
-                        buttonText="Deletar Reunião"
-                        dialogTitle="Deletar Reunião"
-                        description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as instancias futuras e passadas associadas serão permanentemente removidas juntamente com suas presenças e entregas (polls) a elas vinculadas.`}
-                        confirmText="Deletar Reunião"
-                        buttonClassName="w-full cursor-pointer"
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="default"
+                      disabled={true || isRefreshingAllMeetingData}
+                      onClick={handleRefreshAllMeetingData}
+                      className="font-semibold cursor-pointer h-max gap-4"
+                    >
+                      <RefreshCw
+                        className={cn(
+                          "size-5",
+                          isRefreshingAllMeetingData && "animate-spin"
+                        )}
                       />
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
+                      <div className="flex flex-col items-start">
+                        <p>Atualizar todos os dados</p>
+
+                        <p className="text-xs font-normal">
+                          Levará cerca de{" "}
+                          <mark className="font-semibold bg-transparent">
+                            {(
+                              (currentMeetingPastInstances.length * 7300) /
+                              60000
+                            ).toFixed()}{" "}
+                            minutos
+                          </mark>
+                        </p>
+                      </div>
+                    </Button>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <DeleteConfirmationButton
+                      onConfirm={() => deleteMeeting(currentMeeting.id)}
+                      buttonText="Deletar Reunião"
+                      dialogTitle="Deletar Reunião"
+                      description={`Tem certeza que deseja deletar a reunião "${currentMeeting.topic}"? Esta ação não pode ser desfeita e todas as instancias futuras e passadas associadas serão permanentemente removidas juntamente com suas presenças e entregas (polls) a elas vinculadas.`}
+                      confirmText="Deletar Reunião"
+                      buttonClassName="w-full cursor-pointer"
+                    />
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </ButtonGroup>

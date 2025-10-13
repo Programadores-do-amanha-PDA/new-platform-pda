@@ -1,3 +1,13 @@
+import { ClassroomConfigClassTypesT } from "@/types";
+import {
+  ZoomClassT,
+  ZoomMeetingPastInstanceT,
+  ZoomMeetingT,
+} from "../../classroom-zoom/types";
+import {
+  useZoomMeetingPastInstanceStore,
+  useZoomMeetingStore,
+} from "../../classroom-zoom/stores";
 import {
   Select,
   SelectContent,
@@ -5,20 +15,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomConfigClassTypesT } from "@/types";
-import { ZoomClassT } from "../../classroom-zoom/types";
 
 const MeetingTypeSelector = ({
   options,
-  value,
-  handleValueChange,
+  meeting,
 }: {
   options: ClassroomConfigClassTypesT[];
-  value: ZoomClassT | undefined;
-  handleValueChange: (value: ZoomClassT) => void;
+  meeting:
+    | (ZoomMeetingPastInstanceT & {
+        meeting_type: "meeting" | "pastInstance";
+      })
+    | (ZoomMeetingT & {
+        meeting_type: "meeting" | "pastInstance";
+      });
 }) => {
+  const { updatePastInstanceById } = useZoomMeetingPastInstanceStore();
+  const { updateMeeting } = useZoomMeetingStore();
+
+  const handleValueChange = (id: ZoomClassT) => {
+    if (meeting.meeting_type === "meeting" && id) {
+      updateMeeting(meeting.id, { class_type: id });
+    } else if (meeting.meeting_type === "pastInstance" && id) {
+      updatePastInstanceById(meeting.id, { class_type: id });
+    }
+  };
+
   return (
-    <Select value={value} onValueChange={handleValueChange}>
+    <Select value={meeting.class_type} onValueChange={handleValueChange}>
       <SelectTrigger className="h-7! w-full">
         <SelectValue placeholder="Tipo de reunião" className="h-7!" />
       </SelectTrigger>
