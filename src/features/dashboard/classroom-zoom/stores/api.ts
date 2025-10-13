@@ -289,7 +289,7 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
       },
 
       getAllParticipantsByMeetingIdFromAPI: async (account, meetingId) => {
-        let loadingToast;
+        let loadingToastId;
         try {
           // Validate account data
           if (!validateZoomAccount(account))
@@ -316,7 +316,7 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
             encodeURIComponent(meetingId)
           );
 
-          loadingToast = toast.loading(
+          loadingToastId = toast.loading(
             "Obtendo os Participantes da Reunião..."
           );
 
@@ -326,11 +326,11 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
             ZOOM_ACCESS_TOKEN
           );
 
+          toast.dismiss(loadingToastId);
           if (!participants || !Array.isArray(participants)) {
             console.error("Invalid participants data:", participants);
             throw new Error("Invalid participants data from API");
           }
-          toast.dismiss(loadingToast);
 
           toast.success(
             "Os Participantes da Reunião foram obtidos com sucesso!"
@@ -341,12 +341,12 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
           toast.error("Falha ao obter os Participantes da Reunião.");
           return [];
         } finally {
-          if (loadingToast) toast.dismiss(loadingToast);
+          toast.dismiss(loadingToastId);
         }
       },
 
       getAllPollResultsByMeetingIdFromAPI: async (account, meetingId) => {
-        let loadingToast;
+        let loadingToastId;
         try {
           // Validate account data
           if (!validateZoomAccount(account))
@@ -373,7 +373,7 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
           );
 
           // Fetch poll results from Zoom API
-          loadingToast = toast.loading(
+          loadingToastId = toast.loading(
             "Obtendo as Respostas das Polls da Reunião..."
           );
 
@@ -381,10 +381,10 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
             encodedMeetingId,
             ZOOM_ACCESS_TOKEN
           );
+          toast.dismiss(loadingToastId);
           if (!pollResults || !Array.isArray(pollResults)) {
             throw new Error("Invalid poll results data from API");
           }
-          toast.dismiss(loadingToast);
 
           toast.success(
             "Respostas das Polls da Reunião foram obtidas com sucesso!"
@@ -401,7 +401,7 @@ export const useZoomAPIStore = create<ZoomAPIStateT & ZoomAPIActionsT>()(
           if (error instanceof Error) console.error(error);
           return [];
         } finally {
-          toast.dismiss(loadingToast);
+          toast.dismiss(loadingToastId);
         }
       },
 

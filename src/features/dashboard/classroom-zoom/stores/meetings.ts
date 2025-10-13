@@ -456,21 +456,8 @@ export const useZoomMeetingStore = create<
                 past_instances
               );
             }
-            // Update existing instances with fresh data
-            else if (instanciesUpdateMode === "existing") {
-              await currentState.updateExistingPastInstances(
-                meeting.id!,
-                account,
-                past_instances
-              );
-            }
-            // Process all instances (new and existing)
-            else if (instanciesUpdateMode === "all") {
-              await currentState.processNewPastInstances(
-                meeting,
-                account,
-                past_instances
-              );
+            // Update existing (and new fetched by API) instances with fresh data
+            else if (instanciesUpdateMode === "existing" || "all") {
               await currentState.updateExistingPastInstances(
                 meeting.id!,
                 account,
