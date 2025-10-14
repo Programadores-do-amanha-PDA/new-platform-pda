@@ -37,33 +37,7 @@ import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "../../classroom-zoom/types";
-
-// Function to calculate percentage based on the provided formula
-const calculatePollPercentage = (answers: string[]): number => {
-  if (answers.length === 0) return 0;
-
-  const concordoPlenamente = answers.filter(
-    (answer) => answer.toLowerCase() === "concordo plenamente"
-  ).length;
-  const concordo = answers.filter(
-    (answer) => answer.toLowerCase() === "concordo"
-  ).length;
-  const discordo = answers.filter(
-    (answer) => answer.toLowerCase() === "discordo"
-  ).length;
-  const discordoPlenamente = answers.filter(
-    (answer) => answer.toLowerCase() === "discordo plenamente"
-  ).length;
-
-  const result =
-    (concordoPlenamente +
-      concordo / 2 -
-      discordo / 3 -
-      discordoPlenamente / 4) /
-    answers.length;
-
-  return Math.max(0, Math.min(1, result)) * 100; // Convert to percentage and clamp between 0-100
-};
+import { calculatePollPercentage } from "../utils/question-percentage-calc";
 
 interface PollResultsTableProps {
   users: Partial<AuthUserWithProfileT>[];
@@ -195,15 +169,18 @@ export default function PollResultsTable({
           // Calculate percentages for each category
           const contentAnswers =
             meeting.poll_results
-              ?.map((poll) => poll.question_details[0]?.answer)
+              ?.map((poll) => poll.question_details[0]?.answer.toLowerCase())
               .filter(Boolean) || [];
+
+          console.log(calculatePollPercentage(contentAnswers));
+
           const facilitationAnswers =
             meeting.poll_results
-              ?.map((poll) => poll.question_details[1]?.answer)
+              ?.map((poll) => poll.question_details[1]?.answer.toLowerCase())
               .filter(Boolean) || [];
           const selfDevAnswers =
             meeting.poll_results
-              ?.map((poll) => poll.question_details[2]?.answer)
+              ?.map((poll) => poll.question_details[2]?.answer.toLowerCase())
               .filter(Boolean) || [];
 
           const contentPercentage = calculatePollPercentage(contentAnswers);

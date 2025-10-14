@@ -25,6 +25,7 @@ const pathLabels: { [key: string]: string } = {
   classrooms: "Todas as Turmas",
   overview: "Visão Geral",
   attendance: "Presenças",
+  kpi: "KPI",
   activities: "Atividades",
   projects: "Projetos",
   all_projects: "Todos os Projetos",

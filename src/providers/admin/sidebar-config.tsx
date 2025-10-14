@@ -11,7 +11,6 @@ import {
 import pathLabels from "@/utils/path-labels";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 
-
 export const generateSidebarConfig = (
   user: AuthUserWithProfileT,
   classrooms: ClassroomT[]
@@ -72,6 +71,10 @@ export const generateSidebarConfig = (
           {
             title: pathLabels["attendance"],
             url: `/dashboard/classrooms/${classroom.id}/attendance`,
+          },
+          {
+            title: pathLabels["kpi"],
+            url: `/dashboard/classrooms/${classroom.id}/kpi`,
           },
           {
             title: pathLabels["activities"],
