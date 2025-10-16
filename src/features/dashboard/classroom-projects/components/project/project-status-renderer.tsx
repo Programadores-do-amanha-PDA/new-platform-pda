@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 
 // Local imports
 import { ProjectStatusRendererPropsT } from "../../types";
+import { FileClock } from "lucide-react";
+import { formatDateRangePeriod } from "../../utils/date/format-date-range";
+import { Separator } from "@/components/ui/separator";
 
 /**
  * Renders the appropriate project status UI based on delivery status
@@ -17,19 +20,39 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
   deliveryStatus,
   projectTitle,
   onOpenDeliveryModal,
+  project,
 }) => {
   switch (deliveryStatus.status) {
     case "can-deliver":
       return (
-        <div className="flex flex-col items-end gap-4 rounded-xl">
-          <Button
-            onClick={onOpenDeliveryModal}
-            aria-label={`Entregar projeto ${projectTitle}`}
-            className="focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            Entregar projeto
-          </Button>
-        </div>
+        <>
+          <Separator />
+          <div className="w-full flex flex-col gap-2">
+            <p
+              className="text-sm font-semibold"
+              id={`delivery-period-${project.id}`}
+            >
+              Período de entrega:
+            </p>
+            <Badge
+              variant="outline"
+              className="text-xs gap-2 h-8"
+              aria-labelledby={`delivery-period-${project.id}`}
+            >
+              <FileClock aria-hidden="true" className="size-4!" />
+              {formatDateRangePeriod(project.schedule_date)}
+            </Badge>
+          </div>
+          <div className="flex flex-col items-end gap-4 rounded-xl">
+            <Button
+              onClick={onOpenDeliveryModal}
+              aria-label={`Entregar projeto ${projectTitle}`}
+              className="focus:ring-2 focus:ring-primary focus:ring-offset-2 font-bold"
+            >
+              Entregar projeto
+            </Button>
+          </div>
+        </>
       );
 
     case "future":
@@ -68,6 +91,80 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
           >
             Correção pendente
           </p>
+        </div>
+      );
+
+    case "can-recover":
+      return (
+        <>
+          <Separator />
+          <div className="w-full flex flex-col gap-1">
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
+              Período de recuperação:
+            </p>
+            <Badge
+              variant="outline"
+              className="text-xs bg-background border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400 gap-2 h-8"
+              aria-labelledby={`recovery-period-${project.id}`}
+            >
+              <FileClock aria-hidden="true" className="size-3!" />
+              {formatDateRangePeriod(project.recovery_schedule)}
+            </Badge>
+          </div>
+          <div className="flex flex-col items-start gap-4 p-4 rounded-xl border border-amber-400 dark:border-amber-800">
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-sm font-semibold text-amber-700 dark:text-amber-300"
+                role="status"
+                aria-live="polite"
+              >
+                Recuperação disponível
+              </p>
+              <Badge
+                variant="secondary"
+                className="w-fit"
+                aria-label={`Nota atual: ${
+                  deliveryStatus.correction?.final_note || "Não informada"
+                }`}
+              >
+                Nota atual: {deliveryStatus.correction?.final_note || "N/A"}
+              </Badge>
+            </div>
+            <Button
+              onClick={onOpenDeliveryModal}
+              variant="outline"
+              size="sm"
+              aria-label={`Entregar recuperação do projeto ${projectTitle}`}
+              className="cursor-pointer focus:ring-2 focus:ring-primary focus:ring-offset-2 border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-bold"
+            >
+              Realizar entrega de recuperação
+            </Button>
+          </div>
+        </>
+      );
+
+    case "recovery-delivered":
+      return (
+        <div className="flex flex-col items-start gap-4 dark:bg-blue-950/20 p-4 rounded-xl border border-amber-500 dark:border-amber-800">
+          <div className="flex flex-col gap-2">
+            <Badge
+              variant="secondary"
+              className="w-fit"
+              aria-label={`Nota anterior: ${
+                deliveryStatus.originalCorrection?.final_note || "Não informada"
+              }`}
+            >
+              Nota anterior:{" "}
+              {deliveryStatus.originalCorrection?.final_note || "N/A"}
+            </Badge>
+            <p
+              className="text-sm font-semibold text-amber-700 dark:text-amber-300"
+              role="status"
+              aria-live="polite"
+            >
+              Recuperação entregue
+            </p>
+          </div>
         </div>
       );
 

@@ -140,7 +140,7 @@ const ProjectDialog = ({
           )}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] w-max overflow-hidden">
+      <DialogContent className="sm:max-w-[600px] w-max max-h-[70vh] overflow-hidden overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {currentProject?.id ? "Editar projeto" : "Criar projeto"}
@@ -211,7 +211,9 @@ const ProjectDialog = ({
                     <FormControl>
                       <ProjectTypeSelect
                         value={field.value as ClassroomProjectTypeT | ""}
-                        onValueChange={(value: ClassroomProjectTypeT) => field.onChange(value)}
+                        onValueChange={(value: ClassroomProjectTypeT) =>
+                          field.onChange(value)
+                        }
                         error={!!fieldState.error}
                       />
                     </FormControl>
@@ -251,12 +253,69 @@ const ProjectDialog = ({
                     Período de entregas
                     <span className="text-destructive ml-1">*</span>
                   </FormLabel>
-                  <FormControl>
+                  <FormControl className="**:w-full">
                     <DateTimeRangePicker
                       value={field.value as DateRange | undefined}
                       onChange={field.onChange}
                       label=""
                       className={fieldState.error ? "border-destructive" : ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cut_off_grade"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">
+                    Nota de corte
+                    <span className="text-destructive ml-1">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="10"
+                      step="0.1"
+                      placeholder="6"
+                      className={
+                        fieldState.error
+                          ? "border-destructive focus-visible:ring-destructive"
+                          : ""
+                      }
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="recovery_schedule"
+              render={({ field, fieldState }) => (
+                <FormItem>
+                  <FormLabel className="font-semibold">
+                    Período de recuperação
+                  </FormLabel>
+                  <FormControl className="**:w-full">
+                    <DateTimeRangePicker
+                      value={field.value as DateRange | undefined}
+                      onChange={field.onChange}
+                      label=""
+                      className={
+                        fieldState.error
+                          ? "border-destructive max-w-full"
+                          : " max-w-full"
+                      }
                     />
                   </FormControl>
                   <FormMessage />

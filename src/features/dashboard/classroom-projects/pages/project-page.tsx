@@ -38,6 +38,7 @@ export default function ProjectPage() {
       />
     );
   }
+
   const classroomDeliveries = deliveries[classroom_id];
   const classroomCorrections = corrections[classroom_id];
   const classroomModules = configsByClassroom[classroom_id].modules || [];

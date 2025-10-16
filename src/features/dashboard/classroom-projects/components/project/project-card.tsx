@@ -4,13 +4,10 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { FileClock } from "lucide-react";
 import { DateRange } from "react-day-picker";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 // UI Components
-import { Badge } from "@/components/ui/badge";
+
 
 // Shared Components
 import PermissionGuard from "@/components/shared/permission-guard";
@@ -29,28 +26,14 @@ import {
   hasScheduleChanged,
   convertProjectScheduleToDateRange,
   generateProjectHref,
-  handleProjectError
+  handleProjectError,
 } from "../../utils";
-import {  } from "../../utils/error-handling";
 import { ProjectStatusRenderer } from "./project-status-renderer";
 import { ProjectAdminControls } from "./project-admin-controls";
-import { useProjectStore, } from "../../stores";
+import { useProjectStore } from "../../stores";
 import { useDeliveryStore } from "../../stores/deliveries";
 import { useCorrectionStore } from "../../stores/corrections";
 import ProjectDeliveryModal from "./project-delivery-modal";
-
-/**
- * Formats the delivery deadline (to date) with date and time
- * @param scheduleDate - The date range containing the delivery deadline
- * @returns Formatted delivery deadline string
- */
-const formatDeliveryDeadline = (
-  scheduleDate: DateRange | undefined
-): string => {
-  if (!scheduleDate?.to) return "Data não definida";
-
-  return format(scheduleDate.to, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
-};
 
 /**
  * ProjectCard component displays project information with role-based functionality.
@@ -124,6 +107,7 @@ const ProjectCard = ({
 
     return (
       <ProjectStatusRenderer
+        project={project}
         deliveryStatus={deliveryStatus}
         projectTitle={project.title}
         onOpenDeliveryModal={() => setIsDeliveryModalOpen(true)}
@@ -172,22 +156,6 @@ const ProjectCard = ({
               {classroomModules.find((module) => module.id === project.module)
                 ?.title || `Módulo ${project.module}`}
             </p>
-            <div className="w-full flex flex-col gap-2">
-              <p
-                className="text-sm font-semibold"
-                id={`delivery-period-${project.id}`}
-              >
-                Data final entrega:
-              </p>
-              <Badge
-                variant="outline"
-                className="text-sm bg-muted gap-2 h-9"
-                aria-labelledby={`delivery-period-${project.id}`}
-              >
-                <FileClock aria-hidden="true" className="size-4!" />
-                {formatDeliveryDeadline(scheduleDate)}
-              </Badge>
-            </div>
           </div>
           <div
             className="rounded-full bg-primary/50 p-1"

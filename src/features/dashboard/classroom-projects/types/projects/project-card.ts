@@ -63,4 +63,7 @@ export interface ProjectStatusRendererPropsT {
   projectTitle: string;
   /** Function to open the delivery modal */
   onOpenDeliveryModal: () => void;
+
+  /** Current project */
+  project: ClassroomProjectT;
 }

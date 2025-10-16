@@ -48,6 +48,27 @@ export const createProjectSchema = z
           message: "Período de entregas é obrigatório com datas válidas",
         }
       ),
+    cut_off_grade: z
+      .number()
+      .min(0, "Nota de corte deve ser maior ou igual a 0")
+      .max(10, "Nota de corte deve ser menor ou igual a 10"),
+    recovery_schedule: z
+      .object({
+        from: z.date().optional(),
+        to: z.date().optional(),
+      })
+      .optional()
+      .refine(
+        (data) => {
+          // If recovery_schedule is provided, both from and to must be present
+          if (!data) return true; // Optional field
+          if (!data.from || !data.to) return false;
+          return data.from <= data.to;
+        },
+        {
+          message: "Período de recuperação deve ter datas válidas",
+        }
+      ),
   })
   .refine(
     (data) => {
@@ -112,12 +133,18 @@ export const getDefaultFormValues = (
       defaultScheduleDate
     : defaultScheduleDate;
 
+  const recoverySchedule = currentProject?.recovery_schedule
+    ? convertScheduleDateToDateObjects(currentProject.recovery_schedule)
+    : undefined;
+
   return {
     title: currentProject?.title || "",
     module: currentProject?.module || "",
     project_type: currentProject?.project_type || "",
     rule_id: currentProject?.rule_id || "",
     schedule_date: scheduleDate,
+    cut_off_grade: currentProject?.cut_off_grade || 7,
+    recovery_schedule: recoverySchedule,
   };
 };
 
@@ -137,12 +164,18 @@ export const getResetFormValues = (
         getCurrentWeekRange()
       : getCurrentWeekRange();
 
+    const recoverySchedule = currentProject.recovery_schedule
+      ? convertScheduleDateToDateObjects(currentProject.recovery_schedule)
+      : undefined;
+
     return {
       title: currentProject.title,
       module: currentProject.module,
       project_type: currentProject.project_type,
       rule_id: currentProject.rule_id,
       schedule_date: scheduleDate,
+      cut_off_grade: currentProject.cut_off_grade,
+      recovery_schedule: recoverySchedule,
     };
   }
 
@@ -152,6 +185,8 @@ export const getResetFormValues = (
     project_type: "",
     rule_id: "",
     schedule_date: getCurrentWeekRange(),
+    cut_off_grade: 7,
+    recovery_schedule: undefined,
   };
 };
 
@@ -175,6 +210,16 @@ export const transformFormDataToProject = (
     };
   }
 
+  // Transform recovery_schedule to match expected type
+  let recovery_schedule: ClassroomProjectT["recovery_schedule"] = undefined;
+
+  if (formData.recovery_schedule?.from) {
+    recovery_schedule = {
+      from: formData.recovery_schedule.from,
+      to: formData.recovery_schedule.to,
+    };
+  }
+
   return {
     classroom_id: classroomId,
     title: formData.title,
@@ -182,6 +227,8 @@ export const transformFormDataToProject = (
     project_type: formData.project_type as ClassroomProjectTypeT,
     rule_id: formData.rule_id,
     schedule_date,
+    cut_off_grade: formData.cut_off_grade,
+    recovery_schedule,
   };
 };
 
@@ -205,13 +252,26 @@ export const hasProjectChanges = (
   const currentFromTime = currentScheduleDate?.from?.getTime();
   const currentToTime = currentScheduleDate?.to?.getTime();
 
+  // Compare recovery schedule dates
+  const formRecoveryFromTime = formData.recovery_schedule?.from?.getTime();
+  const formRecoveryToTime = formData.recovery_schedule?.to?.getTime();
+
+  const currentRecoverySchedule = convertScheduleDateToDateObjects(
+    currentProject.recovery_schedule
+  );
+  const currentRecoveryFromTime = currentRecoverySchedule?.from?.getTime();
+  const currentRecoveryToTime = currentRecoverySchedule?.to?.getTime();
+
   return (
     formData.title !== currentProject.title ||
     formData.module !== currentProject.module ||
     formData.project_type !== currentProject.project_type ||
     formData.rule_id !== currentProject.rule_id ||
+    formData.cut_off_grade !== currentProject.cut_off_grade ||
     formFromTime !== currentFromTime ||
-    formToTime !== currentToTime
+    formToTime !== currentToTime ||
+    formRecoveryFromTime !== currentRecoveryFromTime ||
+    formRecoveryToTime !== currentRecoveryToTime
   );
 };
 
@@ -243,6 +303,10 @@ export const createProjectUpdates = (
     updates.rule_id = formData.rule_id;
   }
 
+  if (formData.cut_off_grade !== currentProject.cut_off_grade) {
+    updates.cut_off_grade = formData.cut_off_grade;
+  }
+
   // Compare dates safely using timestamps - convert current project dates first
   const formFromTime = formData.schedule_date?.from?.getTime();
   const formToTime = formData.schedule_date?.to?.getTime();
@@ -262,6 +326,28 @@ export const createProjectUpdates = (
       };
     } else {
       updates.schedule_date = undefined;
+    }
+  }
+
+  // Compare recovery schedule dates
+  const formRecoveryFromTime = formData.recovery_schedule?.from?.getTime();
+  const formRecoveryToTime = formData.recovery_schedule?.to?.getTime();
+
+  const currentRecoverySchedule = convertScheduleDateToDateObjects(
+    currentProject.recovery_schedule
+  );
+  const currentRecoveryFromTime = currentRecoverySchedule?.from?.getTime();
+  const currentRecoveryToTime = currentRecoverySchedule?.to?.getTime();
+
+  if (formRecoveryFromTime !== currentRecoveryFromTime || formRecoveryToTime !== currentRecoveryToTime) {
+    // Transform recovery_schedule to match expected type
+    if (formData.recovery_schedule?.from) {
+      updates.recovery_schedule = {
+        from: formData.recovery_schedule.from,
+        to: formData.recovery_schedule.to,
+      };
+    } else {
+      updates.recovery_schedule = undefined;
     }
   }
 

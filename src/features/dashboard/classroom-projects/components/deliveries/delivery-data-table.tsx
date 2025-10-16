@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpDown, FilePen, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, FilePen, MoreHorizontal, Trash2 } from "lucide-react";
 
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import {
@@ -23,8 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -36,13 +34,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AuthUserWithProfileT } from "@/types";
+import { AuthUserWithProfileT, ProfileT } from "@/types";
 
 import { ClassroomProjectDeliveryT, ClassroomProjectTypeT } from "../../types";
+import { Badge } from "@/components/ui/badge";
+import { useDeliveryStore } from "../../stores/deliveries";
 
 const createColumns = (
   projectType: ClassroomProjectTypeT,
-  users: Partial<AuthUserWithProfileT>[]
+  users: Partial<AuthUserWithProfileT>[],
+  deleteDelivery: (deliveryId: string) => void
 ): ColumnDef<ClassroomProjectDeliveryT>[] => {
   const columns: ColumnDef<ClassroomProjectDeliveryT>[] = [
     {
@@ -77,86 +78,148 @@ const createColumns = (
 
   // Adicionar colunas específicas para mini projects
   if (projectType === "mini_project") {
-    columns.push(
-      {
-        accessorKey: "user_id",
-        header: ({ column }) => {
-          return (
-            <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-              <p>Entregue por</p>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === "asc")
-                }
-              >
-                <ArrowUpDown />
-              </Button>
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          const user = users.find(
-            (user) => user.id === row.getValue("user_id")
-          );
-          return (
-            <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
-              <span className="font-medium">
-                {user?.email || "Usuário não encontrado"}
-              </span>
-            </div>
-          );
-        },
+    columns.push({
+      accessorKey: "user_id",
+      header: ({ column }) => {
+        return (
+          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p>Entregue por</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
+        );
       },
-      {
-        accessorKey: "members",
-        header: ({ column }) => {
-          return (
-            <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
-              <p>Membros</p>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  column.toggleSorting(column.getIsSorted() === "asc")
-                }
-              >
-                <ArrowUpDown />
-              </Button>
-            </div>
-          );
-        },
-        cell: ({ row }) => {
-          const delivery = row.original;
-          let memberNames: string[] = [];
+      cell: ({ row }) => {
+        const delivery = row.original;
+        const user = users.find((user) => user.id === delivery.user_id);
+        return (
+          <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+            <span className="font-medium">
+              {user?.email || "Usuário não encontrado"}
+            </span>
+          </div>
+        );
+      },
+      accessorFn: (row) => {
+        // Permitir busca por nome e email do usuário
+        const user = users.find((user) => user.id === row.user_id);
+        if (user?.profile) {
+          const searchTerms = [
+            user.profile.full_name || "",
+            user.profile.email || "",
+            user.email || "",
+          ].filter((term) => term.length > 0);
+          return searchTerms.join(" ");
+        }
+        return "";
+      },
+    });
+  } else if (
+    projectType === "end_module_english_project" ||
+    projectType === "end_module_project"
+  ) {
+    columns.push({
+      accessorKey: "members",
+      header: ({ column }) => {
+        return (
+          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+            <p>Membros</p>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              <ArrowUpDown />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const delivery = row.original;
+        let memberNames: string[] = [];
+        let memberProfiles: ProfileT[] = [];
 
-          // Verificar se tem members_id (novos projetos)
-          if (delivery.members_id && Array.isArray(delivery.members_id)) {
-            memberNames = delivery.members_id
-              .map((memberId) => {
-                const user = users.find((user) => user.id === memberId);
-                return user?.email || memberId;
-              })
-              .filter(Boolean);
-          }
-          // Fallback para members (projetos antigos)
-          else if (delivery.members && Array.isArray(delivery.members)) {
-            memberNames = delivery.members;
-          }
+        // Verificar se tem members_id (novos projetos) - usar profiles
+        if (delivery.members_id && Array.isArray(delivery.members_id)) {
+          const user = users.find((user) => user.id === delivery.user_id);
 
-          return (
-            <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+          // Coletar profiles dos membros
+          memberProfiles = delivery.members_id
+            .map(
+              (memberId) => users.find((user) => user.id === memberId)?.profile
+            )
+            .filter((profile): profile is ProfileT => profile !== undefined);
+
+          // Adicionar o usuário principal se existir
+          if (user?.profile) {
+            memberProfiles.unshift(user.profile);
+          }
+        }
+        // Fallback para members (projetos antigos) - usar valores diretos
+        else if (delivery.members && Array.isArray(delivery.members)) {
+          memberNames = delivery.members; // Manter os valores originais de members
+        }
+
+        return (
+          <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+            {memberProfiles.length > 0 ? (
+              memberProfiles.map((profile, index) => (
+                <Badge key={index} variant="outline" className="mr-2">
+                  {profile.email || "Membro desconhecido"}
+                </Badge>
+              ))
+            ) : (
               <span className="font-medium">
                 {memberNames.length > 0
                   ? memberNames.join(", ")
                   : "Sem membros"}
               </span>
-            </div>
-          );
-        },
-      }
-    );
+            )}
+          </div>
+        );
+      },
+      accessorFn: (row) => {
+        if (row.members_id && Array.isArray(row.members_id)) {
+          // Para novos projetos com members_id, incluir tanto nome quanto email para busca
+          const memberSearchTerms: string[] = [];
+
+          // Adicionar o usuário principal (user_id)
+          const mainUser = users.find((user) => user.id === row.user_id);
+          if (mainUser?.profile) {
+            memberSearchTerms.push(
+              mainUser.profile.full_name || "",
+              mainUser.profile.email || ""
+            );
+          }
+
+          // Adicionar os membros adicionais (members_id)
+          row.members_id.forEach((memberId) => {
+            const user = users.find((user) => user.id === memberId);
+            if (user?.profile) {
+              memberSearchTerms.push(
+                user.profile.full_name || "",
+                user.profile.email || ""
+              );
+            }
+          });
+
+          return memberSearchTerms.filter((term) => term.length > 0).join(" ");
+        } else if (row.members && Array.isArray(row.members)) {
+          // Para projetos antigos com members, manter os valores originais
+          return row.members.join(" ");
+        }
+        return "";
+      },
+    });
   }
 
   // Adicionar colunas comuns
@@ -251,14 +314,12 @@ const createColumns = (
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-semibold">
-                  Ações
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(delivery.id)}
+                  onClick={() => deleteDelivery(delivery.id)}
+                  variant="destructive"
                 >
-                  Copiar Id da Entrega
+                  <Trash2 />
+                  Deletar Entrega
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -291,8 +352,18 @@ export function DeliveryDataTable({
   const [rowSelection, setRowSelection] = React.useState({});
 
   const { users } = useUsersStore();
+  const { deleteDelivery } = useDeliveryStore();
+  const classroomUsers = users.filter((user) =>
+    user.profile?.classrooms?.some(
+      (classroom) => classroom.classroom_id === classroomId
+    )
+  );
+
   const columns = React.useMemo(
-    () => createColumns(projectType, users),
+    () =>
+      createColumns(projectType, classroomUsers, (deliveryId) =>
+        deleteDelivery(deliveryId, classroomId)
+      ),
     [projectType, users]
   );
 
@@ -323,15 +394,24 @@ export function DeliveryDataTable({
     },
   });
 
+  const filterColumnId = projectType === "mini_project" ? "user_id" : "members";
+
   return (
     <div className="w-full h-full flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Input
           placeholder="Procurando por alguém?"
-          value={(table.getColumn("members")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("members")?.setFilterValue(event.target.value)
+          value={
+            (table.getColumn(filterColumnId)?.getFilterValue() as string) ?? ""
           }
+          onChange={(event) => {
+            console.log("Filter change:", {
+              filterColumnId,
+              value: event.target.value,
+              columnExists: !!table.getColumn(filterColumnId),
+            });
+            table.getColumn(filterColumnId)?.setFilterValue(event.target.value);
+          }}
           className="max-w-sm"
         />
         <Button asChild>

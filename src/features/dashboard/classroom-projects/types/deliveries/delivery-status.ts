@@ -6,10 +6,13 @@ export interface DeliveryStatusResultT {
   hasCorrection: boolean;
   delivery?: ClassroomProjectDeliveryT;
   correction?: ClassroomProjectCorrectionT;
+  originalCorrection?: ClassroomProjectCorrectionT; // For recovery cases, stores the original correction
   status:
     | "can-deliver"
     | "future"
     | "not-delivered"
     | "pending-correction"
-    | "corrected";
+    | "corrected"
+    | "can-recover"
+    | "recovery-delivered";
 }

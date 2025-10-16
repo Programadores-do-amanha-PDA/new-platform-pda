@@ -26,6 +26,8 @@ export interface ClassroomProjectT {
     | undefined;
   description?: string;
   rule_id: string;
+  cut_off_grade: number;
+  recovery_schedule: DateRange | undefined;
   created_at: string;
 }
 

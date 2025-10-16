@@ -21,8 +21,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ProfileT } from "@/types/auth/user";
+import { Label } from "@/components/ui/label";
 
 interface MemberSelectionComboboxProps {
+  label?: string;
   placeholder?: string;
   users: ProfileT[];
   selectedUserIds: string[];
@@ -33,6 +35,7 @@ interface MemberSelectionComboboxProps {
 
 export function MemberSelectionCombobox({
   placeholder = "Selecionar membros...",
+  label,
   users,
   selectedUserIds,
   currentUserId,
@@ -82,84 +85,88 @@ export function MemberSelectionCombobox({
   });
 
   return (
-    <div className={cn("space-y-4", className)}>
-      <Popover open={open} onOpenChange={setOpen} modal={true}>
-        <PopoverTrigger>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {selectedUsers.length === 0
-              ? placeholder
-              : `${selectedUsers.length} membro${
-                  selectedUsers.length > 1 ? "s" : ""
-                } selecionado${selectedUsers.length > 1 ? "s" : ""}`}
-            <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
-          <Command shouldFilter={false}>
-            <CommandInput
-              placeholder="Buscar por nome ou email..."
-              value={inputValue}
-              onValueChange={setInputValue}
-            />
-            <CommandList>
-              <CommandEmpty>
-                <div className="py-6 text-center text-sm text-muted-foreground">
-                  Nenhum membro encontrado
-                </div>
-              </CommandEmpty>
-              <CommandGroup>
-                {filteredUsers.map((user) => (
-                  <CommandItem
-                    key={user.id}
-                    value={user.id}
-                    onSelect={() => handleSelect(user.id)}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
-                    <Avatar className="h-8 w-8 relative">
-                      {selectedUserIds.includes(user.id) && (
-                        <div className="size-full flex items-center justify-center absolute z-10 bg-primary/70">
-                          <Check className="h-4 w-4 text-primary-foreground" />
-                        </div>
-                      )}
-                      <div></div>
-                      <AvatarImage src={user.avatar_url || undefined} />
-                      <AvatarFallback className="text-xs text-muted-foreground">
-                        {getInitials(user.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{user.full_name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {user.email}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
+    <div className={cn("w-full flex items-start gap4", className)}>
+      <div className="space-y-2 w-full">
+        {label && <Label className="text-sm font-medium">{label}</Label>}
+        <Popover open={open} onOpenChange={setOpen} modal={true}>
+          <PopoverTrigger>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-full justify-between"
+            >
+              {selectedUsers.length === 0
+                ? placeholder
+                : `${selectedUsers.length} membro${
+                    selectedUsers.length > 1 ? "s" : ""
+                  } selecionado${selectedUsers.length > 1 ? "s" : ""}`}
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-full p-0" align="start">
+            <Command shouldFilter={false}>
+              <CommandInput
+                placeholder="Buscar por nome ou email..."
+                value={inputValue}
+                onValueChange={setInputValue}
+              />
+              <CommandList>
+                <CommandEmpty>
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    Nenhum membro encontrado
+                  </div>
+                </CommandEmpty>
+                <CommandGroup>
+                  {filteredUsers.map((user) => (
+                    <CommandItem
+                      key={user.id}
+                      value={user.id}
+                      onSelect={() => handleSelect(user.id)}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <Avatar className="h-8 w-8 relative">
+                        {selectedUserIds.includes(user.id) && (
+                          <div className="size-full flex items-center justify-center absolute z-10 bg-primary/70">
+                            <Check className="h-4 w-4 text-primary-foreground" />
+                          </div>
+                        )}
+                        <div></div>
+                        <AvatarImage src={user.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs text-muted-foreground">
+                          {getInitials(user.full_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{user.full_name}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {user.email}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
 
       {/* Selected Members Display */}
       {selectedUsers.length > 0 && (
-        <div className="space-y-2">
+        <div className="flex flex-col space-y-2 w-full">
           <p className="text-sm font-medium">
-            Membros selecionados ({selectedUsers.length}):
+            ({selectedUsers.length}) Membros selecionados:
           </p>
           <div className="flex flex-wrap gap-2">
+            
             {selectedUsers.map((user) => (
               <Badge
                 key={user.id}
-                variant="secondary"
-                className="flex items-center gap-2 pr-1 pl-2 py-1"
+                variant="outline"
+                className="flex items-center gap-2 h-10 p-0!"
               >
-                <Avatar className="h-5 w-5">
+                <Avatar className="size-7 ml-2">
                   <AvatarImage src={user.avatar_url || undefined} />
                   <AvatarFallback className="text-xs text-muted-foreground">
                     {getInitials(user.full_name)}
@@ -169,10 +176,10 @@ export function MemberSelectionCombobox({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                  className="group h-full hover:bg-destructive/10 hover:text-destructive-foreground cursor-pointer rounded-l-none"
                   onClick={(e) => handleRemoveMember(user.id, e)}
                 >
-                  <X className="h-3 w-3" />
+                  <X className="size-4 stroke-2 stroke-destructive" />
                 </Button>
               </Badge>
             ))}
