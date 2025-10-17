@@ -2,6 +2,8 @@
 
 // Global imports
 import React from "react";
+import Link from "next/link";
+import { FileClock } from "lucide-react";
 
 // UI Components
 import { Button } from "@/components/ui/button";
@@ -9,19 +11,31 @@ import { Badge } from "@/components/ui/badge";
 
 // Local imports
 import { ProjectStatusRendererPropsT } from "../../types";
-import { FileClock } from "lucide-react";
-import { formatDateRangePeriod } from "../../utils/date/format-date-range";
 import { Separator } from "@/components/ui/separator";
+import { analyzeDeliveryStatus, formatDateRangePeriod} from "../../utils";
+import useAuth from "@/hooks/use-auth";
 
 /**
  * Renders the appropriate project status UI based on delivery status
  */
 export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
-  deliveryStatus,
-  projectTitle,
-  onOpenDeliveryModal,
   project,
+  classroomId,
+  classroomDeliveries,
+  classroomCorrections,
 }) => {
+  const PROJECTS_PAGES_PATH = `/dashboard/classrooms/${classroomId}/projects`;
+  const { user } = useAuth();
+
+  if (!user?.id || !classroomId) return null;
+
+  const deliveryStatus = analyzeDeliveryStatus(
+    project,
+    user.id,
+    classroomDeliveries,
+    classroomCorrections
+  );
+
   switch (deliveryStatus.status) {
     case "can-deliver":
       return (
@@ -44,12 +58,13 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
             </Badge>
           </div>
           <div className="flex flex-col items-end gap-4 rounded-xl">
-            <Button
-              onClick={onOpenDeliveryModal}
-              aria-label={`Entregar projeto ${projectTitle}`}
-              className="focus:ring-2 focus:ring-primary focus:ring-offset-2 font-bold"
-            >
-              Entregar projeto
+            <Button variant="link" asChild>
+              <Link
+                href={`${PROJECTS_PAGES_PATH}/${project.id}/delivery`}
+                aria-label={`Entregar projeto ${project.title}`}
+              >
+                Entregar projeto
+              </Link>
             </Button>
           </div>
         </>
@@ -97,7 +112,7 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
     case "can-recover":
       return (
         <>
-          <Separator />
+          <Separator orientation="vertical" />
           <div className="w-full flex flex-col gap-1">
             <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
               Período de recuperação:
@@ -131,13 +146,20 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
               </Badge>
             </div>
             <Button
-              onClick={onOpenDeliveryModal}
               variant="outline"
               size="sm"
-              aria-label={`Entregar recuperação do projeto ${projectTitle}`}
-              className="cursor-pointer focus:ring-2 focus:ring-primary focus:ring-offset-2 border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-bold"
+              aria-label={`Entregar recuperação do projeto ${project.title}`}
+              className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-bold"
+              asChild
             >
-              Realizar entrega de recuperação
+              <Button variant="link" asChild>
+                <Link
+                  href={`${PROJECTS_PAGES_PATH}/${project.id}/delivery`}
+                  aria-label={`Entregar projeto ${project.title}`}
+                >
+                  Realizar entrega de recuperação
+                </Link>
+              </Button>
             </Button>
           </div>
         </>
