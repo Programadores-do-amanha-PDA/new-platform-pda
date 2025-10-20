@@ -13,7 +13,7 @@ import { DeliveryListItem } from "../components/deliveries/delivery-list-item";
 import { ClassroomProjectDeliveryT, GroupedDelivery } from "../types";
 import ButtonGroupInput from "@/components/shared/button-group-input";
 import EmptyState from "@/components/shared/empty-states/empty-state";
-import { Mail, Wand, ChevronDown, Users, Clock } from "lucide-react";
+import { Mail, Wand, Users, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { getEmptyStateConfig } from "../utils/corrections/empty-states";
@@ -43,9 +43,9 @@ export default function ProjectDeliveriesCorrectionPage() {
     setIsSendDeliveryFeedbackEmailModalOpen,
   ] = useState<boolean>(false);
 
-  const deliveryListRef = useRef<HTMLUListElement>(null);
   const deliveryItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const groupListRef = useRef<HTMLUListElement>(null);
+  const groupListRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   const { users } = useUsersStore();
   const { projects } = useProjectStore();
@@ -128,8 +128,17 @@ export default function ProjectDeliveriesCorrectionPage() {
 
   // Entregas do grupo selecionado ou todas se nenhum grupo selecionado
   const displayedDeliveries = selectedGroup
-    ? selectedGroup.deliveries
-    : allProjectDeliveries || [];
+    ? selectedGroup.deliveries.sort((a, b) => {
+        const aTimestamp = new Date(a.created_at ?? 0).getTime();
+        const bTimestamp = new Date(b.created_at ?? 0).getTime();
+        return aTimestamp - bTimestamp;
+      })
+    : allProjectDeliveries.sort((a, b) => {
+        const aTimestamp = new Date(a.created_at ?? 0).getTime();
+        const bTimestamp = new Date(b.created_at ?? 0).getTime();
+        return aTimestamp - bTimestamp;
+      }) || [];
+
   const firstUncorrectedDelivery = displayedDeliveries?.find((delivery) => {
     const hasDeliveryCorrection = allProjectCorrections.some(
       (correction) => correction.delivery_id === delivery.id
@@ -144,8 +153,20 @@ export default function ProjectDeliveriesCorrectionPage() {
   );
 
   const handleSelectDelivery = (delivery: ClassroomProjectDeliveryT) => {
-    if (currentDelivery?.id === delivery.id) setCurrentDelivery(null);
-    else if (currentDelivery?.id !== delivery.id) setCurrentDelivery(delivery);
+    if (currentDelivery?.id === delivery.id) {
+      setCurrentDelivery(null);
+    } else if (currentDelivery?.id !== delivery.id) {
+      setCurrentDelivery(delivery);
+
+      // Find and select the group that contains this delivery
+      const deliveryGroup = groupedDeliveries.find((group) =>
+        group.deliveries.some((d) => d.id === delivery.id)
+      );
+
+      if (deliveryGroup && selectedGroup?.userId !== deliveryGroup.userId) {
+        setSelectedGroup(deliveryGroup);
+      }
+    }
   };
 
   const handleSelectGroup = (group: GroupedDelivery) => {
@@ -198,9 +219,23 @@ export default function ProjectDeliveriesCorrectionPage() {
     }
   };
 
+  // Scroll to selected group when selectedGroup changes
+  useEffect(() => {
+    if (selectedGroup && groupListRef.current) {
+      const selectedElement = groupListRefs.current.get(selectedGroup.userId);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [selectedGroup]);
+
   // Scroll to selected delivery when currentDelivery changes
   useEffect(() => {
-    if (currentDelivery && deliveryListRef.current) {
+    if (currentDelivery) {
       const selectedElement = deliveryItemRefs.current.get(currentDelivery.id);
       if (selectedElement) {
         selectedElement.scrollIntoView({
@@ -212,8 +247,16 @@ export default function ProjectDeliveriesCorrectionPage() {
     }
   }, [currentDelivery]);
 
-  const handleClose = () => {
+  const handleCloseCorrectionModal = () => {
     setCurrentDelivery(null);
+    setIsSendDeliveryFeedbackEmailModalOpen(false);
+    setSelectedGroup(null);
+  };
+
+    const handleUnselectGroup = () => {
+    setCurrentDelivery(null);
+    setIsSendDeliveryFeedbackEmailModalOpen(false);
+    setSelectedGroup(null);
   };
 
   if (!currentProject) {
@@ -230,7 +273,7 @@ export default function ProjectDeliveriesCorrectionPage() {
   return (
     <div className="w-full h-full flex flex-col gap-6 *:p-4 overflow-y-auto">
       <header className="w-full h-max flex flex-col gap-4">
-        <div className="flex flex-row justify-between">
+        <section className="flex flex-row justify-between">
           <h3 className="text-xl font-semibold">
             {currentProject.project_type === "mini_project"
               ? "Usuários"
@@ -251,8 +294,8 @@ export default function ProjectDeliveriesCorrectionPage() {
               variant: "outline",
             }}
           />
-        </div>
-        <div className="w-full flex flex-col">
+        </section>
+        <section className="w-full flex flex-col">
           {/* Lista de Grupos */}
           <ul
             ref={groupListRef}
@@ -268,15 +311,25 @@ export default function ProjectDeliveriesCorrectionPage() {
               )[0];
 
               return (
-                <li key={group.userId} className="flex-shrink-0">
+                <li
+                  key={group.userId}
+                  className="flex-shrink-0"
+                  ref={(el) => {
+                    if (el) {
+                      groupListRefs.current.set(group.userId, el);
+                    } else {
+                      groupListRefs.current.delete(group.userId);
+                    }
+                  }}
+                >
                   <div
                     className={cn(
-                      "min-w-xs max-w-xs p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors",
+                      "min-w-xs max-w-md p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors",
                       isGroupSelected && "border-2 border-primary bg-accent/25"
                     )}
                     onClick={() => handleSelectGroup(group)}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {currentProject.project_type === "mini_project" ? (
                           <>
@@ -339,22 +392,17 @@ export default function ProjectDeliveriesCorrectionPage() {
           {selectedGroup && (
             <div className="border-t pt-2">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-lg font-medium">Entregas</h4>
+                <h4 className="font-semibold">Entregas</h4>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedGroup(null)}
+                  size="icon"
+                  onClick={handleUnselectGroup}
                 >
-                  <ChevronDown className="size-4" />
-                  Ocultar
+                  <X className="size-4" />
                 </Button>
               </div>
               <ul className="w-full h-max pb-4 gap-2 flex overflow-x-auto">
                 {displayedDeliveries.map((delivery, deliveryIndex) => {
-                  const deliveryAuthor = classroomUsers.find(
-                    (user) => user.id === delivery.user_id
-                  )?.profile;
-
                   const deliveryCorrection = allProjectCorrections.find(
                     (correction) => correction.delivery_id === delivery.id
                   );
@@ -373,8 +421,6 @@ export default function ProjectDeliveriesCorrectionPage() {
                       <DeliveryListItem
                         delivery={delivery}
                         deliveryIndex={deliveryIndex}
-                        deliveryAuthor={deliveryAuthor}
-                        projectType={currentProject.project_type}
                         correction={deliveryCorrection}
                         isSelected={delivery.id === currentDelivery?.id}
                         onSelect={handleSelectDelivery}
@@ -385,14 +431,14 @@ export default function ProjectDeliveriesCorrectionPage() {
               </ul>
             </div>
           )}
-        </div>
+        </section>
       </header>
       {currentProject && currentDelivery ? (
         <ProjectCorrection
           classroomId={classroom_id}
           project={currentProject}
           selectedDelivery={currentDelivery}
-          handleClose={handleClose}
+          handleClose={handleCloseCorrectionModal}
         />
       ) : (
         <section className="w-full h-full flex flex-col items-center justify-center border-t">

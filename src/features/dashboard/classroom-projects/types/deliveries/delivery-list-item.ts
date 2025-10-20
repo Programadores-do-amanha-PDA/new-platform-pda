@@ -8,8 +8,6 @@ import {
 export interface DeliveryListItemProps {
   delivery: ClassroomProjectDeliveryT;
   deliveryIndex: number;
-  deliveryAuthor?: ProfileT;
-  projectType: ClassroomProjectTypeT;
   correction: ClassroomProjectCorrectionT | undefined;
   isSelected: boolean;
   onSelect: (delivery: ClassroomProjectDeliveryT) => void;
