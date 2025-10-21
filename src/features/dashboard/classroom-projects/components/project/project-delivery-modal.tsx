@@ -22,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { ClassroomProjectT } from "../../types";
+import { ClassroomProjectT, ClassroomProjectDeliveryT } from "../../types";
 import { ProfileT } from "@/types/auth/user";
 import useAuth from "@/hooks/use-auth";
 import { MemberSelectionCombobox } from "../deliveries/member-selection-combobox";
@@ -45,6 +45,7 @@ interface ProjectDeliveryModalProps {
   classroomId: string;
   isOpen: boolean;
   onClose: () => void;
+  currentDelivery?: ClassroomProjectDeliveryT;
 }
 
 const ProjectDeliveryModal = ({
@@ -52,9 +53,10 @@ const ProjectDeliveryModal = ({
   classroomId,
   isOpen,
   onClose,
+  currentDelivery,
 }: ProjectDeliveryModalProps) => {
   const { user } = useAuth();
-  const { createDelivery } = useDeliveryStore();
+  const { createDelivery, updateDelivery } = useDeliveryStore();
   const { users } = useUsersStore();
   const isMobile = useIsMobile();
 
@@ -64,7 +66,13 @@ const ProjectDeliveryModal = ({
 
   const [isProjectDelivered, setIsProjectDelivered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [classroomUsers, setClassroomUsers] = useState<ProfileT[]>([]);
+
+  const classroomUsers: ProfileT[] = users
+    .filter((u) =>
+      u.profile?.classrooms?.some((c) => c.classroom_id === classroomId)
+    )
+    .map((u) => u.profile!)
+    .filter(Boolean);
 
   // Form states
   const [squadSelected, setSquadSelected] = useState<string>("");
@@ -79,31 +87,33 @@ const ProjectDeliveryModal = ({
   const projectModule =
     classroomModules.find((module) => module.id === project.module)?.title ||
     `M${project.module}`;
+  const deliveryAuthor = currentDelivery?.id
+    ? classroomUsers.find((u) => u.id === currentDelivery.user_id)
+    : user?.profile;
+  console.log(deliveryAuthor);
 
-  // Filter users by classroom
-  useEffect(() => {
-    if (users.length > 0 && classroomId) {
-      const filteredUsers = users
-        .filter((u) =>
-          u.profile?.classrooms?.some((c) => c.classroom_id === classroomId)
-        )
-        .map((u) => u.profile!)
-        .filter(Boolean);
-      setClassroomUsers(filteredUsers);
-    }
-  }, [users, classroomId]);
-
-  // Reset form when modal opens
+  // Reset form when modal opens or populate with current delivery data
   useEffect(() => {
     if (isOpen) {
       setIsProjectDelivered(false);
-      setSquadSelected("");
-      setSelectedMemberIds([]);
-      setUrl("");
-      setLinks([]);
-      setObservation("");
+
+      if (currentDelivery) {
+        // Populate form with existing delivery data
+        setSquadSelected(""); // Squad selection is not stored in delivery
+        setSelectedMemberIds(currentDelivery.members_id || []);
+        setUrl("");
+        setLinks(currentDelivery.links.map((url) => ({ url })));
+        setObservation(currentDelivery.observation || "");
+      } else {
+        // Reset form for new delivery
+        setSquadSelected("");
+        setSelectedMemberIds([]);
+        setUrl("");
+        setLinks([]);
+        setObservation("");
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, currentDelivery]);
 
   const handleAddLink = (): void => {
     if (urlRegex.test(url)) {
@@ -130,10 +140,14 @@ const ProjectDeliveryModal = ({
   };
 
   const handleSubmitDelivery = async () => {
-    if (!project || !user?.profile) return;
+    if (!project || !deliveryAuthor) return;
 
     // Validations
-    if (project.project_type === "end_module_project" && !squadSelected) {
+    if (
+      project.project_type === "end_module_project" &&
+      !squadSelected &&
+      !currentDelivery
+    ) {
       toast.error("Selecione sua Squad!");
       scrollToRef(squadRef);
       return;
@@ -160,20 +174,40 @@ const ProjectDeliveryModal = ({
     try {
       const deliveryData = {
         project_id: project.id,
-        user_id: user.profile.id,
+        user_id: deliveryAuthor.id,
         members_id: selectedMemberIds,
         links: links.map((l) => l.url),
         observation: observation.trim(),
         classroom_id: classroomId,
       };
 
-      const success = await createDelivery(deliveryData, classroomId);
+      let success = false;
+
+      if (currentDelivery) {
+        // Update existing delivery
+        success = await updateDelivery(
+          currentDelivery.id,
+          deliveryData,
+          classroomId
+        );
+      } else {
+        // Create new delivery
+        success = await createDelivery(deliveryData, classroomId);
+      }
+
       if (success) {
         setIsProjectDelivered(true);
       }
     } catch (error) {
-      console.error("Error creating delivery:", error);
-      toast.error("Erro ao criar entrega. Tente novamente.");
+      console.error(
+        `Error ${currentDelivery ? "updating" : "creating"} delivery:`,
+        error
+      );
+      toast.error(
+        `Erro ao ${
+          currentDelivery ? "atualizar" : "criar"
+        } entrega. Tente novamente.`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -197,7 +231,13 @@ const ProjectDeliveryModal = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-green-700!">
               <CheckCircle className="h-6 w-6 text-green-700!" />
-              {isEnglishProject
+              {currentDelivery
+                ? isEnglishProject
+                  ? `${projectModule} Final Project updated successfully!`
+                  : `Entrega do ${
+                      projectTypesLabels[project.project_type].label
+                    } do ${projectModule} atualizada com sucesso!`
+                : isEnglishProject
                 ? `${projectModule} Final Project Delivery was successful!`
                 : `Entrega do ${
                     projectTypesLabels[project.project_type].label
@@ -236,7 +276,13 @@ const ProjectDeliveryModal = ({
       >
         <DialogHeader>
           <DialogTitle>
-            {isEnglishProject
+            {currentDelivery
+              ? isEnglishProject
+                ? `Edit ${project.module} Final Project Delivery`
+                : `Editar Entrega do ${
+                    projectTypesLabels[project.project_type].label
+                  } do ${projectModule}`
+              : isEnglishProject
               ? `${project.module} Final Project Delivery`
               : `Entrega do ${
                   projectTypesLabels[project.project_type].label
@@ -265,27 +311,31 @@ const ProjectDeliveryModal = ({
               </p>
             )}
 
-            <Alert variant="destructive" className="mt-2">
-              <AlertCircleIcon />
-              <AlertTitle className="font-semibold">
-                {isEnglishProject
-                  ? "EACH SQUAD MUST DELIVER THE PROJECT ONLY ONCE."
-                  : isMiniProject
-                  ? "A entrega deve ser feita de forma unitária"
-                  : "Somente um integrante da Squad deve realizar a entrega"}
-              </AlertTitle>
-              {isMiniProject && (
-                <AlertDescription>
-                  <p>Por favor antes de entregar revise as seguintes regras:</p>
-                  <ul className="list-inside list-disc text-sm">
-                    <li>
-                      Seu projeto só é considerado entregue se a sua Parceria
-                      PdA também entregar o dele/a.
-                    </li>
-                  </ul>
-                </AlertDescription>
-              )}
-            </Alert>
+            {!currentDelivery && (
+              <Alert variant="destructive" className="mt-2">
+                <AlertCircleIcon />
+                <AlertTitle className="font-semibold">
+                  {isEnglishProject
+                    ? "EACH SQUAD MUST DELIVER THE PROJECT ONLY ONCE."
+                    : isMiniProject
+                    ? "A entrega deve ser feita de forma unitária"
+                    : "Somente um integrante da Squad deve realizar a entrega"}
+                </AlertTitle>
+                {isMiniProject && (
+                  <AlertDescription>
+                    <p>
+                      Por favor antes de entregar revise as seguintes regras:
+                    </p>
+                    <ul className="list-inside list-disc text-sm">
+                      <li>
+                        Seu projeto só é considerado entregue se a sua Parceria
+                        PdA também entregar o dele/a.
+                      </li>
+                    </ul>
+                  </AlertDescription>
+                )}
+              </Alert>
+            )}
           </div>
 
           {/* Members Section */}
@@ -303,9 +353,9 @@ const ProjectDeliveryModal = ({
                 <div className="p-4 border border-primary rounded-xl">
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={user?.profile.avatar_url || ""} />
+                      <AvatarImage src={deliveryAuthor?.avatar_url || ""} />
                       <AvatarFallback>
-                        {user?.profile?.full_name
+                        {deliveryAuthor?.full_name
                           ?.split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -315,10 +365,10 @@ const ProjectDeliveryModal = ({
 
                     <div>
                       <p className="text-sm font-bold">
-                        {user?.profile?.full_name}
+                        {deliveryAuthor?.full_name}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {user?.profile?.email}
+                        {deliveryAuthor?.email}
                       </p>
                     </div>
                   </div>
@@ -352,9 +402,9 @@ const ProjectDeliveryModal = ({
                 <div className="p-4 border border-primary rounded-xl">
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      <AvatarImage src={user?.profile.avatar_url || ""} />
+                      <AvatarImage src={deliveryAuthor?.avatar_url || ""} />
                       <AvatarFallback>
-                        {user?.profile?.full_name
+                        {deliveryAuthor?.full_name
                           ?.split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -364,10 +414,10 @@ const ProjectDeliveryModal = ({
 
                     <div>
                       <p className="text-sm font-bold">
-                        {user?.profile?.full_name}
+                        {deliveryAuthor?.full_name}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {user?.profile?.email}
+                        {deliveryAuthor?.email}
                       </p>
                     </div>
                   </div>
@@ -380,7 +430,7 @@ const ProjectDeliveryModal = ({
                     placeholder="Selecione seus/as parceiros/as..."
                     users={classroomUsers}
                     selectedUserIds={selectedMemberIds}
-                    currentUserId={user?.profile?.id || ""}
+                    currentUserId={deliveryAuthor?.id || ""}
                     onChange={setSelectedMemberIds}
                   />
                 </div>
@@ -468,7 +518,11 @@ const ProjectDeliveryModal = ({
           <section className="mt-4">
             <div className="space-y-4">
               <p className="font-medium">
-                {isEnglishProject
+                {currentDelivery
+                  ? isEnglishProject
+                    ? "Please, check all fields before updating your project!"
+                    : "Verifique todos os campos antes de atualizar seu projeto!"
+                  : isEnglishProject
                   ? "Please, check all fields before submitting your project!"
                   : "Verifique todos os campos antes de entregar seu projeto!"}
               </p>
@@ -480,9 +534,17 @@ const ProjectDeliveryModal = ({
               >
                 {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {isLoading
-                  ? isEnglishProject
+                  ? currentDelivery
+                    ? isEnglishProject
+                      ? "Updating..."
+                      : "Atualizando..."
+                    : isEnglishProject
                     ? "Submitting..."
                     : "Entregando..."
+                  : currentDelivery
+                  ? isEnglishProject
+                    ? "Update"
+                    : "Atualizar Entrega"
                   : isEnglishProject
                   ? "Submit"
                   : "Entregar Projeto"}

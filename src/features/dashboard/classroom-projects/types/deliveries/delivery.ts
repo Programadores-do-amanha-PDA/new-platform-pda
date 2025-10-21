@@ -9,10 +9,10 @@ export interface ClassroomProjectDeliveryT {
   members_id: string[];
   links: string[];
   observation: string;
-  created_at: string;
   lastCorrection?: string | null;
+  created_at: string;
+  updated_at: string | null;
 }
-
 
 /**
  * Represents a grouped delivery with associated user and squad information

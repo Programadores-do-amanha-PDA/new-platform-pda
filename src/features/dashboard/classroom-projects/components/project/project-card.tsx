@@ -3,6 +3,7 @@
 // Global imports
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 
 // Shared Components
 import PermissionGuard from "@/components/shared/permission-guard";
@@ -10,12 +11,20 @@ import RoleGuard from "@/components/shared/role-guard";
 import { DynamicLucideIcon } from "@/components/shared/icons/dynamic-lucide-icon";
 
 // Local imports
-import { ProjectCardPropsT } from "../../types";
-import { projectTypesLabels, generateProjectHref } from "../../utils";
+import { ClassroomProjectDeliveryT, ProjectCardPropsT } from "../../types";
+import {
+  projectTypesLabels,
+  generateProjectHref,
+  formatDateRangePeriod,
+  isProjectActive,
+} from "../../utils";
 import { ProjectAdminControls } from "./project-admin-controls";
 import { useDeliveryStore } from "../../stores/deliveries";
 import { useCorrectionStore } from "../../stores/corrections";
 import { Item, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { ProjectStatusRenderer } from "./project-status-renderer";
+import { Label } from "@/components/ui/label";
+import ProjectDeliveryModal from "./project-delivery-modal";
 
 /**
  * ProjectCard component displays project information with role-based functionality.
@@ -35,9 +44,26 @@ const ProjectCard = ({
   const path = usePathname();
   const { deliveries } = useDeliveryStore();
   const { corrections } = useCorrectionStore();
+  const [currentDelivery, setCurrentDelivery] =
+    useState<ClassroomProjectDeliveryT | null>(null);
+  const [isOpenDeliveryModal, setIsOpenDeliveryModal] = useState(false);
 
   const classroomDeliveries = deliveries[classroomId];
   const classroomCorrections = corrections[classroomId];
+
+  const isCurrentProjectActive = isProjectActive(project);
+
+  const handleOpenCorrectionModal = (
+    delivery: ClassroomProjectDeliveryT | null
+  ) => {
+    setCurrentDelivery(delivery);
+    setIsOpenDeliveryModal(true);
+  };
+
+  const handleCloseCorrectionModal = () => {
+    setCurrentDelivery(null);
+    setIsOpenDeliveryModal(false);
+  };
 
   return (
     <Item
@@ -86,20 +112,45 @@ const ProjectCard = ({
           </Link>
         </PermissionGuard>
       </ItemContent>
-      <RoleGuard roles={["admin", "class_manager", "employer", "teacher"]}>
-        <PermissionGuard
-          permissions={[
-            "classroom_projects.update_all",
-            "classroom_projects.update_self",
-          ]}
-        >
-          <ProjectAdminControls
-            project={project}
-            classroomDeliveries={classroomDeliveries}
-            classroomCorrections={classroomCorrections}
-          />
-        </PermissionGuard>
+      {isCurrentProjectActive && (
+        <div className="flex flex-col items-start px-4 py-1.5 rounded-md">
+          <Label htmlFor={`date-picker-${project.id}`} className="text-xs">
+            Período de entrega:
+          </Label>
+          <p className="font-semibold text-primary-foreground">
+            {formatDateRangePeriod(project.schedule_date)}
+          </p>
+        </div>
+      )}
+      <PermissionGuard
+        permissions={[
+          "classroom_projects.update_all",
+          "classroom_projects.update_self",
+        ]}
+      >
+        <ProjectAdminControls
+          project={project}
+          classroomDeliveries={classroomDeliveries}
+          classroomCorrections={classroomCorrections}
+        />
+      </PermissionGuard>
+      <RoleGuard roles={["student"]}>
+        <ProjectStatusRenderer
+          classroomCorrections={classroomCorrections}
+          classroomDeliveries={classroomDeliveries}
+          classroomId={classroomId}
+          project={project}
+          onOpenDeliveryModal={handleOpenCorrectionModal}
+        />
       </RoleGuard>
+
+      <ProjectDeliveryModal
+        project={project}
+        classroomId={classroomId}
+        isOpen={isOpenDeliveryModal}
+        onClose={handleCloseCorrectionModal}
+        currentDelivery={currentDelivery!}
+      />
     </Item>
   );
 };

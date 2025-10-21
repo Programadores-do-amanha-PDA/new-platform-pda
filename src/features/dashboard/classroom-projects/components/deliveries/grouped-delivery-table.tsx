@@ -9,6 +9,7 @@ import {
   MoreHorizontal,
   Trash2,
   Users,
+  Edit,
 } from "lucide-react";
 
 import { useUsersStore } from "@/stores/modules/users/users-store";
@@ -44,6 +45,8 @@ import {
   groupDeliveriesByIndividual,
   groupDeliveriesBySquad,
 } from "../../utils/deliveries/delivery-grouping";
+import ProjectDeliveryModal from "../project/project-delivery-modal";
+import { useProjectStore } from "../../stores";
 
 export function GroupedDeliveryTable({
   deliveries,
@@ -62,9 +65,13 @@ export function GroupedDeliveryTable({
     new Set()
   );
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [editingDelivery, setEditingDelivery] =
+    React.useState<ClassroomProjectDeliveryT | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   const { users } = useUsersStore();
   const { deleteDelivery } = useDeliveryStore();
+  const { projects } = useProjectStore();
 
   const classroomUsers = users.filter((user) =>
     user.profile?.classrooms?.some(
@@ -139,6 +146,18 @@ export function GroupedDeliveryTable({
       timeStyle: "short",
     }).format(new Date(dateString));
   };
+
+  const handleEditDelivery = (delivery: ClassroomProjectDeliveryT) => {
+    setEditingDelivery(delivery);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingDelivery(null);
+  };
+
+  const currentProject = projects.find((project) => project.id === projectId);
 
   const getLatestCorrection = (
     deliveryId: string
@@ -256,7 +275,6 @@ export function GroupedDeliveryTable({
                             <div className="font-medium">
                               {group.user?.profile?.full_name ||
                                 "Nome não disponível"}
-                              A
                             </div>
                             <div className="text-sm text-muted-foreground">
                               {group.user?.profile?.email ||
@@ -481,6 +499,14 @@ export function GroupedDeliveryTable({
                                         <DropdownMenuContent align="end">
                                           <DropdownMenuItem
                                             onClick={() =>
+                                              handleEditDelivery(delivery)
+                                            }
+                                          >
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Editar Entrega
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={() =>
                                               deleteDelivery(
                                                 delivery.id,
                                                 classroomId
@@ -522,6 +548,17 @@ export function GroupedDeliveryTable({
         </span>
         <span>Total de {deliveries.length} entregas</span>
       </div>
+
+      {/* Edit Delivery Modal */}
+      {currentProject && (
+        <ProjectDeliveryModal
+          project={currentProject}
+          classroomId={classroomId}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          currentDelivery={editingDelivery || undefined}
+        />
+      )}
     </div>
   );
 }

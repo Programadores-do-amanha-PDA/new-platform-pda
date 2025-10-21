@@ -53,4 +53,5 @@ export interface ProjectStatusRendererPropsT {
   classroomId: string;
   classroomDeliveries: ClassroomProjectDeliveryT[];
   classroomCorrections: ClassroomProjectCorrectionT[];
+  onOpenDeliveryModal?: (delivery: ClassroomProjectDeliveryT | null) => void;
 }

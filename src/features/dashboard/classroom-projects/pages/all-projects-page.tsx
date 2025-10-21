@@ -44,7 +44,7 @@ const AllProjectsPage = () => {
   );
 
   return (
-    <main className="w-full h-max py-6 px-4 flex flex-col gap-6 overflow-hidden">
+    <main className="w-full h-max py-6 px-4 flex flex-col gap-6 overflow-y-auto">
       <header className="w-full flex items-center justify-between gap-4">
         <ButtonGroupInput
           buttonGroupProps={{
@@ -64,7 +64,7 @@ const AllProjectsPage = () => {
 
       <Accordion
         type="multiple"
-        className="w-full h-full space-y-4"
+        className="w-full space-y-4"
         defaultValue={[
           classroomConfigModules.length > 0
             ? getCurrentModule(classroomConfigModules)

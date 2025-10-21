@@ -4,13 +4,11 @@
 import React from "react";
 
 // UI Components
-import { Label } from "@/components/ui/label";
+import { ItemActions } from "@/components/ui/item";
 
 // Local imports
 import { getProjectStatistics } from "../../utils/deliveries/delivery-status";
-import { ItemActions } from "@/components/ui/item";
 import { ProjectAdminControlsPropsT } from "../../types";
-import { isProjectActive } from "../../utils";
 
 /**
  * Renders admin controls for project management
@@ -20,22 +18,6 @@ export const ProjectAdminControls: React.FC<ProjectAdminControlsPropsT> = ({
   classroomDeliveries,
   classroomCorrections,
 }) => {
-  const isActive = isProjectActive(project);
-
-  if (isActive) {
-    return (
-      <ItemActions className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
-        <Label htmlFor={`date-picker-${project.id}`} className="font-semibold">
-          Período de entrega:
-        </Label>
-        {/* <DateIntervalPicker
-              date={scheduleDate}
-              setDate={onScheduleDateChange}
-              aria-describedby={`date-picker-help-${project.id}`}
-            /> */}
-      </ItemActions>
-    );
-  }
 
   // Show statistics for inactive projects
   const stats = getProjectStatistics(
@@ -59,7 +41,7 @@ export const ProjectAdminControls: React.FC<ProjectAdminControlsPropsT> = ({
         <div className="text-xs text-secondary">Correções</div>
         <div className="font-bold text-primary">{stats.totalCorrections}</div>
       </div>
-      {/* TODO Add an edit and delete options */}  
+      {/* TODO Add an edit and delete options */}
       {/* <Button variant="ghost" size="icon-lg" onClick={() => {}}>
         <EllipsisVertical className="size-5 stroke-2" />
       </Button> */}
