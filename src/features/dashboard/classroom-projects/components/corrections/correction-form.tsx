@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
 import { useUsersStore } from "@/stores/modules/users/users-store";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import {
   Item,
   ItemContent,
@@ -87,9 +86,7 @@ const CorrectionForm = ({
   const { users } = useUsersStore();
   const { corrections, createCorrection, updateCorrection } =
     useCorrectionStore();
-  const { configsByClassroom } = useClassroomConfigStore();
 
-  const classroomConfig = configsByClassroom[classroomId];
   const classroomCorrections = corrections[classroomId];
   const classroomUsers = users.filter((user) =>
     user?.profile?.classrooms
@@ -156,22 +153,8 @@ const CorrectionForm = ({
   const rulesSelected = form.watch("rulesSelected");
   const finalNote = form.watch("finalNote");
 
-  const projectRulesId = (() => {
-    const moduleExtracted =
-      classroomConfig.modules
-        .find((module) => module.id === project?.module)
-        ?.title.replace(/[^0-9]/g, "") || project.module;
-    if (project?.project_type === "mini_project") {
-      return `MP${moduleExtracted}`;
-    } else if (project?.project_type === "end_module_project") {
-      return `P${moduleExtracted}`;
-    } else {
-      return `PI${moduleExtracted}`;
-    }
-  })();
-
   const projectRuleID =
-    PROJECTS_RULES[projectRulesId] ||
+    PROJECTS_RULES[project.rule_id] ||
     ({} as Record<string, Record<string, string>>);
   const rulesLabels = Object.keys(projectRuleID);
 
@@ -487,7 +470,7 @@ const CorrectionForm = ({
             <CorrectionRuleSelector
               rulesSelected={rulesSelected}
               handleSetRulesSelected={handleSetRulesSelected}
-              projectRulesId={projectRulesId}
+              projectRulesId={project.rule_id}
               rulesLabels={rulesLabels}
             />
 

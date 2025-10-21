@@ -128,12 +128,12 @@ export default function ProjectDeliveriesCorrectionPage() {
 
   // Entregas do grupo selecionado ou todas se nenhum grupo selecionado
   const displayedDeliveries = selectedGroup
-    ? selectedGroup.deliveries.sort((a, b) => {
+    ? selectedGroup?.deliveries?.sort((a, b) => {
         const aTimestamp = new Date(a.created_at ?? 0).getTime();
         const bTimestamp = new Date(b.created_at ?? 0).getTime();
         return aTimestamp - bTimestamp;
       })
-    : allProjectDeliveries.sort((a, b) => {
+    : allProjectDeliveries?.sort((a, b) => {
         const aTimestamp = new Date(a.created_at ?? 0).getTime();
         const bTimestamp = new Date(b.created_at ?? 0).getTime();
         return aTimestamp - bTimestamp;
