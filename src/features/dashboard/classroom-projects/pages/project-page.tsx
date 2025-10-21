@@ -6,7 +6,7 @@ import { NotFoundState } from "@/components/shared/empty-states/not-found-state"
 import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
 // local imports
-import { DeliveryDataTable } from "../components/deliveries/delivery-data-table";
+import { GroupedDeliveryTable } from "../components/deliveries/grouped-delivery-table";
 import ProjectDialog from "../components/project/project-dialog";
 import { ClassroomProjectT } from "../types";
 import { projectTypesLabels } from "../utils/projects/project-type-labels";
@@ -116,7 +116,7 @@ export default function ProjectPage() {
       </header>
 
       <div className="w-full h-full flex overflow-hidden">
-        <DeliveryDataTable
+        <GroupedDeliveryTable
           deliveries={projectDeliveriesWithLastCorrection.sort(
             (a, b) =>
               new Date(a.created_at || 0).getTime() -
@@ -125,6 +125,7 @@ export default function ProjectPage() {
           projectType={currentProject.project_type}
           classroomId={classroom_id}
           projectId={currentProject.id}
+          corrections={projectCorrections}
         />
       </div>
     </div>

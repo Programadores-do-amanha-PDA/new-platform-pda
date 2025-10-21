@@ -1,6 +1,5 @@
-import { ClassroomConfigT } from "@/types";
 import { ClassroomProjectT } from "./project";
-import { DeliveryStatusResultT } from "..";
+import { ClassroomProjectCorrectionT, ClassroomProjectDeliveryT } from "..";
 
 /**
  * Props interface for the ProjectCard component
@@ -12,8 +11,6 @@ export interface ProjectCardPropsT {
   expansive: boolean;
   /** The classroom ID for delivery modal */
   classroomId: string;
-
-  classroomConfig?: ClassroomConfigT;
 }
 
 /**
@@ -32,14 +29,9 @@ export interface ProjectStatusPropsT {
  * Props interface for project admin controls
  */
 export interface ProjectAdminControlsPropsT {
-  /** The project to manage */
   project: ClassroomProjectT;
-  /** Whether the project is currently active */
-  isActive: boolean;
-  /** Loading state for update operations */
-  loading: boolean;
-  /** Function to handle project updates */
-  onUpdateProject: () => Promise<void>;
+  classroomDeliveries: ClassroomProjectDeliveryT[];
+  classroomCorrections: ClassroomProjectCorrectionT[];
 }
 
 /**
@@ -57,13 +49,9 @@ export type ProjectCardVariantT =
   | "expired";
 
 export interface ProjectStatusRendererPropsT {
-  /** The delivery status analysis result */
-  deliveryStatus: DeliveryStatusResultT;
-  /** The project title for accessibility labels */
-  projectTitle: string;
-  /** Function to open the delivery modal */
-  onOpenDeliveryModal: () => void;
-
-  /** Current project */
   project: ClassroomProjectT;
+  classroomId: string;
+  classroomDeliveries: ClassroomProjectDeliveryT[];
+  classroomCorrections: ClassroomProjectCorrectionT[];
+  onOpenDeliveryModal?: (delivery: ClassroomProjectDeliveryT | null) => void;
 }

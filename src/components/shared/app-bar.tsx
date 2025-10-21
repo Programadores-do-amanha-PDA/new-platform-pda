@@ -54,7 +54,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
     : breadcrumbItems[breadcrumbItems.length - 1]?.label;
 
   return (
-    <div className="flex w-full h-max flex-col gap-1 sticky top-0 left-0 z-50 border-b overflow-hidden !rounded-t-lg">
+    <div className="flex flex-col items-start justify-between w-full max-h-28 min-h-[100px] gap-1 sticky top-0 left-0 z-50 border-b overflow-hidden !rounded-t-lg">
       <div className="flex gap-4 items-center px-4 py-2">
         <SidebarTrigger className="w-max border size-10 flex items-center justify-center rounded-lg cursor-pointer" />
 
@@ -68,7 +68,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
           </h1>
         </div>
       </div>
-      <div className="flex w-full h-12 px-4 py-2 border-t">
+      <div className="flex items-center w-full h-12 px-4 py-2 border-t">
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbItems.map((item, index) => (

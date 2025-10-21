@@ -364,7 +364,7 @@ export function DeliveryDataTable({
       createColumns(projectType, classroomUsers, (deliveryId) =>
         deleteDelivery(deliveryId, classroomId)
       ),
-    [projectType, users]
+    [projectType, users, classroomId, classroomUsers]
   );
 
   const table = useReactTable({

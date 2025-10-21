@@ -18,16 +18,11 @@ import { DeliveryListItemProps } from "../../types/deliveries/delivery-list-item
 export function DeliveryListItem({
   delivery,
   deliveryIndex,
-  deliveryAuthor,
-  projectType,
   correction,
   isSelected,
   onSelect,
 }: DeliveryListItemProps) {
-  const displayName =
-    projectType === "mini_project"
-      ? deliveryAuthor?.full_name || "Autor desconhecido"
-      : `Squad ${deliveryIndex + 1}`;
+  const cardTitle = `Entrega ${deliveryIndex + 1}`;
 
   const formattedDate = formatDate(delivery.created_at, "dd/MM/yy", {
     locale: ptBR,
@@ -47,7 +42,7 @@ export function DeliveryListItem({
       onClick={() => onSelect(delivery)}
     >
       <ItemContent className="truncate">
-        <ItemTitle className="truncate font-semibold">{displayName}</ItemTitle>
+        <ItemTitle className="truncate font-semibold">{cardTitle}</ItemTitle>
         <ItemDescription className="text-xs font-semibold">
           {formattedDate}
         </ItemDescription>

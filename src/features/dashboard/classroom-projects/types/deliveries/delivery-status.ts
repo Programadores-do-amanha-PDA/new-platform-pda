@@ -11,8 +11,10 @@ export interface DeliveryStatusResultT {
     | "can-deliver"
     | "future"
     | "not-delivered"
+    | "delivered-editable"
     | "pending-correction"
     | "corrected"
     | "can-recover"
-    | "recovery-delivered";
+    | "recovery-delivered"
+    | "recovery-delivered-editable";
 }

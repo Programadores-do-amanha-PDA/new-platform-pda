@@ -180,6 +180,17 @@ export const analyzeDeliveryStatus = (
 
   // If user has a recovery delivery, prioritize that status
   if (recoveryDelivery) {
+    // Check if recovery delivery can still be edited (no correction yet and still within recovery period)
+    if (!recoveryCorrection && isRecoveryAvailable(project, originalCorrection)) {
+      return {
+        hasDelivery: true,
+        hasCorrection: false,
+        delivery: recoveryDelivery,
+        originalCorrection: originalCorrection, // Include original correction for "previous grade"
+        status: "recovery-delivered-editable",
+      };
+    }
+
     return {
       hasDelivery: true,
       hasCorrection: !!recoveryCorrection,
@@ -194,6 +205,17 @@ export const analyzeDeliveryStatus = (
   if (originalDelivery) {
     // No correction yet
     if (!originalCorrection) {
+      // Check if delivery was made within the project schedule and project is still active
+      // This allows editing the delivery while still within the delivery period
+      if (projectStatus === "active") {
+        return {
+          hasDelivery: true,
+          hasCorrection: false,
+          delivery: originalDelivery,
+          status: "delivered-editable",
+        };
+      }
+      
       return {
         hasDelivery: true,
         hasCorrection: false,

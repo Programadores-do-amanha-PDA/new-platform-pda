@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { NotFoundState } from "@/components/shared/empty-states/not-found-state";
@@ -10,14 +10,22 @@ import { useDeliveryStore } from "../stores/deliveries";
 import { useProjectStore } from "../stores";
 import ProjectCorrection from "../components/corrections/correction-form";
 import { DeliveryListItem } from "../components/deliveries/delivery-list-item";
-import { ClassroomProjectDeliveryT } from "../types";
+import { ClassroomProjectDeliveryT, GroupedDelivery } from "../types";
 import ButtonGroupInput from "@/components/shared/button-group-input";
 import EmptyState from "@/components/shared/empty-states/empty-state";
-import { Mail, Wand } from "lucide-react";
+import { Mail, Wand, Users, Clock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { getEmptyStateConfig } from "../utils/corrections/empty-states";
 import SendDeliveriesFeedbackEmailModal from "../components/corrections/send-delivery-modal";
+import {
+  groupDeliveriesByIndividual,
+  groupDeliveriesBySquad,
+} from "../utils/deliveries/delivery-grouping";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getFirstLastInitials } from "@/utils/get-first-last-initials";
+import RenderSquadMembers from "../components/deliveries/render-squad-members";
 
 export default function ProjectDeliveriesCorrectionPage() {
   const { classroom_id, project_id } = useParams<{
@@ -27,13 +35,17 @@ export default function ProjectDeliveriesCorrectionPage() {
   const [searchDelivery, setSearchDelivery] = useState<string>("");
   const [currentDelivery, setCurrentDelivery] =
     useState<ClassroomProjectDeliveryT | null>();
+  const [selectedGroup, setSelectedGroup] = useState<GroupedDelivery | null>(
+    null
+  );
   const [
     isSendDeliveryFeedbackEmailModalOpen,
     setIsSendDeliveryFeedbackEmailModalOpen,
   ] = useState<boolean>(false);
 
-  const deliveryListRef = useRef<HTMLUListElement>(null);
   const deliveryItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const groupListRef = useRef<HTMLUListElement>(null);
+  const groupListRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   const { users } = useUsersStore();
   const { projects } = useProjectStore();
@@ -59,28 +71,75 @@ export default function ProjectDeliveriesCorrectionPage() {
   const allProjectCorrections = classroomCorrections?.filter(
     (correction) => correction.project_id === project_id
   );
-  const filteredDeliveries = useCallback(
-    () =>
-      allProjectDeliveries?.filter((delivery) => {
-        const deliveryAuthor = classroomUsers?.find(
-          (user) => user.id === delivery.user_id
-        )?.profile;
 
-        return (
-          deliveryAuthor?.full_name
-            .toLowerCase()
-            .includes(searchDelivery.toLowerCase()) ||
-          deliveryAuthor?.email
-            .toLowerCase()
-            .includes(searchDelivery.toLowerCase()) ||
-          deliveryAuthor?.classrooms?.some((c) =>
-            c.short_id.toLowerCase().includes(searchDelivery.toLowerCase())
-          )
-        );
-      }),
-    [allProjectDeliveries, classroomUsers, searchDelivery]
-  );
-  const firstUncorrectedDelivery = allProjectDeliveries?.find((delivery) => {
+  // Agrupar entregas baseado no tipo de projeto
+  const groupedDeliveries = useMemo(() => {
+    if (!allProjectDeliveries || !currentProject) return [];
+
+    let grouped;
+    if (currentProject.project_type === "mini_project") {
+      grouped = groupDeliveriesByIndividual(
+        allProjectDeliveries,
+        classroomUsers
+      );
+    } else if (
+      currentProject.project_type === "end_module_project" ||
+      currentProject.project_type === "end_module_english_project"
+    ) {
+      grouped = groupDeliveriesBySquad(allProjectDeliveries, classroomUsers);
+    }
+    return grouped || [];
+  }, [allProjectDeliveries, classroomUsers, currentProject]);
+
+  // Filtrar grupos baseado na busca
+  const filteredGroups = useMemo(() => {
+    if (!searchDelivery) return groupedDeliveries;
+
+    return groupedDeliveries.filter((group) => {
+      const user = group.user;
+      const searchLower = searchDelivery.toLowerCase();
+
+      // Buscar por nome, email do usuário principal
+      const userMatches =
+        user?.profile?.full_name?.toLowerCase().includes(searchLower) ||
+        user?.profile?.email?.toLowerCase().includes(searchLower) ||
+        user?.email?.toLowerCase().includes(searchLower);
+
+      // Para projetos finais, buscar também pelos membros da squad
+      if (
+        currentProject?.project_type === "end_module_project" ||
+        currentProject?.project_type === "end_module_english_project"
+      ) {
+        const squadMatches = group.squadMembers?.some((memberId) => {
+          const member = classroomUsers.find((u) => u.id === memberId);
+          return (
+            member?.profile?.full_name?.toLowerCase().includes(searchLower) ||
+            member?.profile?.email?.toLowerCase().includes(searchLower) ||
+            member?.email?.toLowerCase().includes(searchLower)
+          );
+        });
+
+        return userMatches || squadMatches;
+      }
+
+      return userMatches;
+    });
+  }, [groupedDeliveries, searchDelivery, currentProject, classroomUsers]);
+
+  // Entregas do grupo selecionado ou todas se nenhum grupo selecionado
+  const displayedDeliveries = selectedGroup
+    ? selectedGroup?.deliveries?.sort((a, b) => {
+        const aTimestamp = new Date(a.created_at ?? 0).getTime();
+        const bTimestamp = new Date(b.created_at ?? 0).getTime();
+        return aTimestamp - bTimestamp;
+      })
+    : allProjectDeliveries?.sort((a, b) => {
+        const aTimestamp = new Date(a.created_at ?? 0).getTime();
+        const bTimestamp = new Date(b.created_at ?? 0).getTime();
+        return aTimestamp - bTimestamp;
+      }) || [];
+
+  const firstUncorrectedDelivery = displayedDeliveries?.find((delivery) => {
     const hasDeliveryCorrection = allProjectCorrections.some(
       (correction) => correction.delivery_id === delivery.id
     );
@@ -94,17 +153,89 @@ export default function ProjectDeliveriesCorrectionPage() {
   );
 
   const handleSelectDelivery = (delivery: ClassroomProjectDeliveryT) => {
-    if (currentDelivery?.id === delivery.id) setCurrentDelivery(null);
-    else if (currentDelivery?.id !== delivery.id) setCurrentDelivery(delivery);
+    if (currentDelivery?.id === delivery.id) {
+      setCurrentDelivery(null);
+    } else if (currentDelivery?.id !== delivery.id) {
+      setCurrentDelivery(delivery);
+
+      // Find and select the group that contains this delivery
+      const deliveryGroup = groupedDeliveries.find((group) =>
+        group.deliveries.some((d) => d.id === delivery.id)
+      );
+
+      if (deliveryGroup && selectedGroup?.userId !== deliveryGroup.userId) {
+        setSelectedGroup(deliveryGroup);
+      }
+    }
   };
+
+  const handleSelectGroup = (group: GroupedDelivery) => {
+    if (selectedGroup?.userId === group.userId) {
+      setSelectedGroup(null);
+      setCurrentDelivery(null);
+    } else {
+      setSelectedGroup(group);
+      setCurrentDelivery(null);
+    }
+  };
+
   const handleOpenSendDeliveryFeedbackEmailModal = () => {
     setCurrentDelivery(null);
     setIsSendDeliveryFeedbackEmailModalOpen(true);
   };
 
+  // Função para obter o status geral de um grupo
+  const getGroupStatus = (group: GroupedDelivery) => {
+    const groupCorrections = group.deliveries
+      .map((delivery) =>
+        allProjectCorrections.find(
+          (correction) => correction.delivery_id === delivery.id
+        )
+      )
+      .filter(Boolean);
+
+    if (groupCorrections.length === 0) return "pending";
+    if (groupCorrections.length === group.deliveries.length) {
+      return groupCorrections.every(
+        (correction) => correction?.has_feedback_sent
+      )
+        ? "sent"
+        : "corrected";
+    }
+    return "partial";
+  };
+
+  // Função para renderizar ícone de status
+  const renderStatusIcon = (status: string) => {
+    switch (status) {
+      case "sent":
+        return <Mail className="size-4 stroke-blue-600 stroke-2" />;
+      case "corrected":
+        return <Wand className="size-4 stroke-green-600 stroke-2" />;
+      case "partial":
+        return <Clock className="size-4 stroke-amber-400 stroke-2" />;
+      default:
+        return <Clock className="size-4 stroke-amber-400 stroke-2" />;
+    }
+  };
+
+  // Scroll to selected group when selectedGroup changes
+  useEffect(() => {
+    if (selectedGroup && groupListRef.current) {
+      const selectedElement = groupListRefs.current.get(selectedGroup.userId);
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [selectedGroup]);
+
   // Scroll to selected delivery when currentDelivery changes
   useEffect(() => {
-    if (currentDelivery && deliveryListRef.current) {
+    if (currentDelivery) {
       const selectedElement = deliveryItemRefs.current.get(currentDelivery.id);
       if (selectedElement) {
         selectedElement.scrollIntoView({
@@ -116,8 +247,16 @@ export default function ProjectDeliveriesCorrectionPage() {
     }
   }, [currentDelivery]);
 
-  const handleClose = () => {
+  const handleCloseCorrectionModal = () => {
     setCurrentDelivery(null);
+    setIsSendDeliveryFeedbackEmailModalOpen(false);
+    setSelectedGroup(null);
+  };
+
+    const handleUnselectGroup = () => {
+    setCurrentDelivery(null);
+    setIsSendDeliveryFeedbackEmailModalOpen(false);
+    setSelectedGroup(null);
   };
 
   if (!currentProject) {
@@ -134,8 +273,12 @@ export default function ProjectDeliveriesCorrectionPage() {
   return (
     <div className="w-full h-full flex flex-col gap-6 *:p-4 overflow-y-auto">
       <header className="w-full h-max flex flex-col gap-4">
-        <div className="flex flex-row justify-between">
-          <h3 className="text-xl font-semibold">Entregas</h3>
+        <section className="flex flex-row justify-between">
+          <h3 className="text-xl font-semibold">
+            {currentProject.project_type === "mini_project"
+              ? "Usuários"
+              : "Squads"}
+          </h3>
 
           <ButtonGroupInput
             inputProps={{
@@ -151,50 +294,151 @@ export default function ProjectDeliveriesCorrectionPage() {
               variant: "outline",
             }}
           />
-        </div>
-        <ul
-          ref={deliveryListRef}
-          className="w-full h-max pb-4 gap-2 flex overflow-y-auto"
-        >
-          {filteredDeliveries().map((delivery, deliveryIndex) => {
-            const deliveryAuthor = classroomUsers.find(
-              (user) => user.id === delivery.user_id
-            )?.profile;
+        </section>
+        <section className="w-full flex flex-col">
+          {/* Lista de Grupos */}
+          <ul
+            ref={groupListRef}
+            className="w-full h-max pb-4 gap-2 flex overflow-x-auto"
+          >
+            {filteredGroups.map((group, groupIndex) => {
+              const isGroupSelected = selectedGroup?.userId === group.userId;
+              const groupStatus = getGroupStatus(group);
+              const latestDelivery = group.deliveries.sort(
+                (a, b) =>
+                  new Date(b.created_at).getTime() -
+                  new Date(a.created_at).getTime()
+              )[0];
 
-            const deliveryCorrection = allProjectCorrections.find(
-              (correction) => correction.delivery_id === delivery.id
-            );
-            return (
-              <li
-                key={delivery.id}
-                ref={(el) => {
-                  if (el) {
-                    deliveryItemRefs.current.set(delivery.id, el);
-                  } else {
-                    deliveryItemRefs.current.delete(delivery.id);
-                  }
-                }}
-              >
-                <DeliveryListItem
-                  delivery={delivery}
-                  deliveryIndex={deliveryIndex}
-                  deliveryAuthor={deliveryAuthor}
-                  projectType={currentProject.project_type}
-                  correction={deliveryCorrection}
-                  isSelected={delivery.id === currentDelivery?.id}
-                  onSelect={handleSelectDelivery}
-                />
-              </li>
-            );
-          })}
-        </ul>
+              return (
+                <li
+                  key={group.userId}
+                  className="flex-shrink-0"
+                  ref={(el) => {
+                    if (el) {
+                      groupListRefs.current.set(group.userId, el);
+                    } else {
+                      groupListRefs.current.delete(group.userId);
+                    }
+                  }}
+                >
+                  <div
+                    className={cn(
+                      "min-w-xs max-w-md p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors",
+                      isGroupSelected && "border-2 border-primary bg-accent/25"
+                    )}
+                    onClick={() => handleSelectGroup(group)}
+                  >
+                    <div className="flex items-center gap-2 justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {currentProject.project_type === "mini_project" ? (
+                          <>
+                            <Avatar className="size-8">
+                              <AvatarImage
+                                src={group.user?.profile?.avatar_url || ""}
+                              />
+                              <AvatarFallback className="text-xs">
+                                {getFirstLastInitials(
+                                  group.user?.profile?.full_name || ""
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col">
+                              <span className="font-medium text-sm truncate">
+                                {group.user?.profile?.full_name ||
+                                  "Nome não disponível"}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <Users className="size-5" />
+                            <span className="font-medium text-sm">
+                              Squad {groupIndex + 1}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      {renderStatusIcon(groupStatus)}
+                    </div>
+
+                    {currentProject.project_type !== "mini_project" &&
+                      group.squadMembers && (
+                        <div className="mb-2">
+                          <RenderSquadMembers
+                            classroomUsers={classroomUsers}
+                            squadMembers={group.squadMembers}
+                          />
+                        </div>
+                      )}
+
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>{group.deliveries.length} entregas</span>
+                      {latestDelivery && (
+                        <span>
+                          {new Intl.DateTimeFormat("pt-BR", {
+                            dateStyle: "short",
+                          }).format(new Date(latestDelivery.created_at))}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          {/* Lista de Entregas do Grupo Selecionado */}
+          {selectedGroup && (
+            <div className="border-t pt-2">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold">Entregas</h4>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleUnselectGroup}
+                >
+                  <X className="size-4" />
+                </Button>
+              </div>
+              <ul className="w-full h-max pb-4 gap-2 flex overflow-x-auto">
+                {displayedDeliveries.map((delivery, deliveryIndex) => {
+                  const deliveryCorrection = allProjectCorrections.find(
+                    (correction) => correction.delivery_id === delivery.id
+                  );
+
+                  return (
+                    <li
+                      key={delivery.id}
+                      ref={(el) => {
+                        if (el) {
+                          deliveryItemRefs.current.set(delivery.id, el);
+                        } else {
+                          deliveryItemRefs.current.delete(delivery.id);
+                        }
+                      }}
+                    >
+                      <DeliveryListItem
+                        delivery={delivery}
+                        deliveryIndex={deliveryIndex}
+                        correction={deliveryCorrection}
+                        isSelected={delivery.id === currentDelivery?.id}
+                        onSelect={handleSelectDelivery}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
+        </section>
       </header>
       {currentProject && currentDelivery ? (
         <ProjectCorrection
           classroomId={classroom_id}
           project={currentProject}
           selectedDelivery={currentDelivery}
-          handleClose={handleClose}
+          handleClose={handleCloseCorrectionModal}
         />
       ) : (
         <section className="w-full h-full flex flex-col items-center justify-center border-t">

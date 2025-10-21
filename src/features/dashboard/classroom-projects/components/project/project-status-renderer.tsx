@@ -2,57 +2,82 @@
 
 // Global imports
 import React from "react";
+import useAuth from "@/hooks/use-auth";
 
 // UI Components
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ItemActions } from "@/components/ui/item";
 
 // Local imports
 import { ProjectStatusRendererPropsT } from "../../types";
-import { FileClock } from "lucide-react";
-import { formatDateRangePeriod } from "../../utils/date/format-date-range";
-import { Separator } from "@/components/ui/separator";
+import { analyzeDeliveryStatus } from "../../utils";
 
 /**
  * Renders the appropriate project status UI based on delivery status
  */
 export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
-  deliveryStatus,
-  projectTitle,
-  onOpenDeliveryModal,
   project,
+  classroomId,
+  classroomDeliveries,
+  classroomCorrections,
+  onOpenDeliveryModal,
 }) => {
+  const { user } = useAuth();
+
+  if (!user?.id || !classroomId) return null;
+
+  const deliveryStatus = analyzeDeliveryStatus(
+    project,
+    user.id,
+    classroomDeliveries,
+    classroomCorrections
+  );
+
   switch (deliveryStatus.status) {
     case "can-deliver":
       return (
-        <>
-          <Separator />
-          <div className="w-full flex flex-col gap-2">
-            <p
-              className="text-sm font-semibold"
-              id={`delivery-period-${project.id}`}
-            >
-              Período de entrega:
-            </p>
-            <Badge
-              variant="outline"
-              className="text-xs gap-2 h-8"
-              aria-labelledby={`delivery-period-${project.id}`}
-            >
-              <FileClock aria-hidden="true" className="size-4!" />
-              {formatDateRangePeriod(project.schedule_date)}
-            </Badge>
-          </div>
+        <ItemActions className="flex">
           <div className="flex flex-col items-end gap-4 rounded-xl">
             <Button
-              onClick={onOpenDeliveryModal}
-              aria-label={`Entregar projeto ${projectTitle}`}
-              className="focus:ring-2 focus:ring-primary focus:ring-offset-2 font-bold"
+              variant="default"
+              onClick={() => onOpenDeliveryModal?.(null)}
+              aria-label={`Entregar projeto ${project.title}`}
+              className="font-semibold"
             >
               Entregar projeto
             </Button>
           </div>
-        </>
+        </ItemActions>
+      );
+
+    case "delivered-editable":
+      return (
+        <div className="flex flex-col items-start gap-4 bg-blue-50 dark:bg-blue-950/20 p-4 rounded-xl border border-blue-200 dark:border-blue-800">
+          <div className="flex flex-col gap-2">
+            <p
+              className="text-sm font-semibold text-blue-700 dark:text-blue-300"
+              role="status"
+              aria-live="polite"
+            >
+              Projeto entregue
+            </p>
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              Você ainda pode editar sua entrega enquanto estiver no prazo
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onOpenDeliveryModal?.(deliveryStatus.delivery || null)
+            }
+            aria-label={`Editar entrega do projeto ${project.title}`}
+            className="border-blue-300 text-blue-700 hover:bg-blue-100 dark:border-blue-700 dark:text-blue-300 dark:hover:bg-blue-950/30 font-semibold"
+          >
+            Editar entrega
+          </Button>
+        </div>
       );
 
     case "future":
@@ -96,51 +121,65 @@ export const ProjectStatusRenderer: React.FC<ProjectStatusRendererPropsT> = ({
 
     case "can-recover":
       return (
-        <>
-          <Separator />
-          <div className="w-full flex flex-col gap-1">
-            <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">
-              Período de recuperação:
+        <div className="flex flex-col items-start gap-4 p-4 rounded-xl border border-amber-400 dark:border-amber-800">
+          <div className="flex flex-col gap-2">
+            <p
+              className="text-sm font-semibold text-amber-700 dark:text-amber-300"
+              role="status"
+              aria-live="polite"
+            >
+              Recuperação disponível
             </p>
             <Badge
-              variant="outline"
-              className="text-xs bg-background border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400 gap-2 h-8"
-              aria-labelledby={`recovery-period-${project.id}`}
+              variant="secondary"
+              className="w-fit"
+              aria-label={`Nota atual: ${
+                deliveryStatus.correction?.final_note || "Não informada"
+              }`}
             >
-              <FileClock aria-hidden="true" className="size-3!" />
-              {formatDateRangePeriod(project.recovery_schedule)}
+              Nota atual: {deliveryStatus.correction?.final_note || "N/A"}
             </Badge>
           </div>
-          <div className="flex flex-col items-start gap-4 p-4 rounded-xl border border-amber-400 dark:border-amber-800">
-            <div className="flex flex-col gap-2">
-              <p
-                className="text-sm font-semibold text-amber-700 dark:text-amber-300"
-                role="status"
-                aria-live="polite"
-              >
-                Recuperação disponível
-              </p>
-              <Badge
-                variant="secondary"
-                className="w-fit"
-                aria-label={`Nota atual: ${
-                  deliveryStatus.correction?.final_note || "Não informada"
-                }`}
-              >
-                Nota atual: {deliveryStatus.correction?.final_note || "N/A"}
-              </Badge>
-            </div>
-            <Button
-              onClick={onOpenDeliveryModal}
-              variant="outline"
-              size="sm"
-              aria-label={`Entregar recuperação do projeto ${projectTitle}`}
-              className="cursor-pointer focus:ring-2 focus:ring-primary focus:ring-offset-2 border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-bold"
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onOpenDeliveryModal?.(null)}
+            aria-label={`Entregar recuperação do projeto ${project.title}`}
+            className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-bold"
+          >
+            Realizar entrega de recuperação
+          </Button>
+        </div>
+      );
+
+    case "recovery-delivered-editable":
+      return (
+        <div className="flex flex-col items-start gap-4 bg-amber-50 dark:bg-amber-950/20 p-4 rounded-xl border border-amber-200 dark:border-amber-800">
+          <div className="flex flex-col gap-2">
+            <p
+              className="text-sm font-semibold text-amber-700 dark:text-amber-300"
+              role="status"
+              aria-live="polite"
             >
-              Realizar entrega de recuperação
-            </Button>
+              Recuperação entregue
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              Você ainda pode editar sua entrega de recuperação enquanto estiver
+              no prazo
+            </p>
           </div>
-        </>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              onOpenDeliveryModal?.(deliveryStatus.delivery || null)
+            }
+            aria-label={`Editar entrega de recuperação do projeto ${project.title}`}
+            className="border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-950/30 font-semibold"
+          >
+            Editar entrega de recuperação
+          </Button>
+        </div>
       );
 
     case "recovery-delivered":
