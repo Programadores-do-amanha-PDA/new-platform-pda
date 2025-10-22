@@ -47,10 +47,12 @@ export const getAllDeliveriesByClassroomId = async (
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("classroom_project_deliveries")
-      .select(`
+      .select(
+        `
         *,
         classroom_projects!inner(classroom_id)
-      `)
+      `
+      )
       .eq("classroom_projects.classroom_id", classroomId)
       .order("created_at", { ascending: false });
 
@@ -87,9 +89,10 @@ export const updateClassroomProjectDeliveryById = async (
 ): Promise<ClassroomProjectDeliveryT | null> => {
   try {
     const supabase = await createClient();
+
     const { data, error } = await supabase
       .from("classroom_project_deliveries")
-      .update({ ...deliveryData })
+      .update({ ...deliveryData, updated_at: new Date().toISOString() })
       .eq("id", id)
       .select()
       .single();
