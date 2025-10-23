@@ -1,9 +1,14 @@
 "use client";
+
+// Global imports
 import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { toast } from "sonner";
+import { ColorLike } from "color";
+import { Eye, EyeOff, Percent, Slash } from "lucide-react";
+
+// UI Components
 import {
   Dialog,
   DialogContent,
@@ -21,12 +26,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
-import Color, { ColorLike } from "color";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Percent, Slash } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -35,126 +35,90 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
+
+// Local imports
+import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { cn } from "@/lib/utils";
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
 import pathLabels from "@/utils/path-labels";
+import {
+  UserModeFormDialogPropsT,
+} from "../../types";
+import {
+  UserModeFormSchema,
+  UserModeFormSchemaT,
+} from "../../utils/user-mode-validation";
+import {
+  processColorValue,
+  getDefaultUserModeFormValues,
+  createUserModeFromFormData,
+  updateUserModesArray,
+} from "../../utils/user-mode-form-utils";
 
-const UserModeFormSchema = z.object({
-  title: z.string().min(1, "Título é obrigatório"),
-  key: z.string().min(1, "Identificador é obrigatório"),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hex válido"),
-  featuresRules: z.array(
-    z.object({
-      id: z.string().min(1, "ID é obrigatório"),
-      isVisible: z.boolean(),
-      aggregateInMetric: z.boolean(),
-    })
-  ),
-});
-
-type UserModeFormData = z.infer<typeof UserModeFormSchema>;
-
-interface UserModeFormDialogProps {
-  configId: string;
-  currentUserMode?: ClassroomConfigUserMode | null;
-  trigger?: React.ReactNode;
-  onClose?: () => void;
-}
-
+/**
+ * UserModeFormDialog component for creating and editing user modes
+ * Follows clean architecture principles with separated concerns
+ */
 const UserModeFormDialog = ({
   configId,
   currentUserMode,
   trigger,
   onClose,
-}: UserModeFormDialogProps) => {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+}: UserModeFormDialogPropsT): JSX.Element => {
+  const [open, setOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const isEditing = !!currentUserMode;
 
   const { updateConfigById, configsByClassroom } = useClassroomConfigStore();
 
-  const form = useForm<UserModeFormData>({
+  const form = useForm<UserModeFormSchemaT>({
     resolver: zodResolver(UserModeFormSchema),
-    defaultValues: {
-      title: "",
-      key: "",
-      color: "#3bf6a8",
-      featuresRules: ADMIN_CLASSROOM_PAGES_KEYS.map((feature) => ({
-        id: feature,
-        isVisible: true,
-        aggregateInMetric: true,
-      })),
-    },
+    defaultValues: getDefaultUserModeFormValues(),
+    mode: "onChange", // Enable real-time validation
   });
 
   useEffect(() => {
     if (currentUserMode) {
       setOpen(true);
-
-      // Merge existing rules with available features to ensure all features are present
-      const mergedFeaturesRules = ADMIN_CLASSROOM_PAGES_KEYS?.map((feature) => {
-        const existingRule = currentUserMode?.featuresRules?.find(
-          (rule) => rule.id === feature
-        );
-        return (
-          existingRule || {
-            id: feature,
-            isVisible: true,
-            aggregateInMetric: true,
-          }
-        );
-      });
-
-      form.reset({
-        title: currentUserMode.title,
-        key: currentUserMode.key,
-        color: currentUserMode.color,
-        featuresRules: mergedFeaturesRules,
-      });
+      const formValues = getDefaultUserModeFormValues(currentUserMode);
+      form.reset(formValues);
     }
   }, [currentUserMode, form]);
 
-  const handleOpenChange = (open: boolean) => {
-    if (open) {
+  /**
+   * Handles dialog open/close state changes and form reset
+   * @param isOpen - Whether the dialog should be open
+   */
+  const handleOpenChange = (isOpen: boolean): void => {
+    if (isOpen) {
       setOpen(true);
-    } else if (!open) {
+    } else {
       setOpen(false);
       onClose?.();
-      form.reset();
+      form.reset(getDefaultUserModeFormValues());
     }
   };
 
+  /**
+   * Handles color value changes with proper validation
+   * @param colorValue - Color value from color picker
+   */
   const handleColorChange = useCallback(
-    (colorValue: ColorLike) => {
-      try {
-        // Handle different color formats that might come from ColorPicker
-        let hex: string;
-
-        if (Array.isArray(colorValue)) {
-          // If it's an RGBA array
-          const [r, g, b, a] = colorValue;
-          const color = Color.rgb(r, g, b, a || 1);
-          hex = color.hex();
-        } else if (typeof colorValue === "string") {
-          // If it's already a string (hex, rgb, etc.)
-          hex = Color(colorValue).hex();
-        } else if (colorValue && typeof colorValue === "object") {
-          // If it's an object with color properties
-          hex = Color(colorValue).hex();
-        } else {
-          return; // Invalid color format
-        }
-
-        // Update the form field
-        form.setValue("color", hex);
-      } catch (error) {
-        console.error("Error processing color:", error);
+    (colorValue: ColorLike): void => {
+      const processedColor = processColorValue(colorValue);
+      if (processedColor) {
+        form.setValue("color", processedColor);
       }
     },
     [form]
   );
 
-  const onSubmit = async (data: UserModeFormData) => {
+  /**
+   * Handles form submission for both create and edit modes
+   * @param data - Validated form data
+   */
+  const onSubmit = async (data: UserModeFormSchemaT): Promise<void> => {
     setLoading(true);
 
     try {
@@ -164,38 +128,16 @@ const UserModeFormDialog = ({
 
       if (!currentConfig) {
         toast.error("Configuração não encontrada!");
-        setLoading(false);
         return;
       }
 
-      const newUserMode: ClassroomConfigUserMode = {
-        id: currentUserMode?.id || crypto.randomUUID(),
-        title: data.title.trim(),
-        key: data.key.trim(),
-        color: data.color,
-        featuresRules: data.featuresRules.map((rule) => ({
-          id: rule.id,
-          isVisible: rule.isVisible,
-          aggregateInMetric: rule.aggregateInMetric,
-        })),
-        created_at: currentUserMode?.created_at || new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-
-      // Get current userModes array
+      const newUserMode = createUserModeFromFormData(data, currentUserMode);
       const currentUserModes = currentConfig.user_modes || [];
-
-      let updatedUserModes: ClassroomConfigUserMode[];
-
-      if (isEditing && currentUserMode) {
-        // Update existing user mode
-        updatedUserModes = currentUserModes.map((userMode) =>
-          userMode.id === currentUserMode.id ? newUserMode : userMode
-        );
-      } else {
-        // Add new user mode
-        updatedUserModes = [...currentUserModes, newUserMode];
-      }
+      const updatedUserModes = updateUserModesArray(
+        currentUserModes,
+        newUserMode,
+        isEditing
+      );
 
       const success = await updateConfigById(configId, {
         user_modes: updatedUserModes,
@@ -281,24 +223,37 @@ const UserModeFormDialog = ({
               />
             </div>
 
-            <div className="w-full h-max overflow-hidden border rounded-md">
+            <div 
+              className="w-full h-max overflow-hidden border rounded-md"
+              role="region"
+              aria-label="Configurações de funcionalidades do modo de usuário"
+            >
               <Table className="w-full h-max p-0! border-0!">
                 <TableHeader className="p-0! border-0!">
                   <TableRow className="p-0! border-0!">
-                    <TableHead className="p-0! border-0!">
-                      <p className="w-full h-10 flex justify-start items-center text-sm font-bold border-b-2 border-r px-2">
+                    <TableHead 
+                      className="p-0! border-0!"
+                      scope="col"
+                    >
+                      <div className="w-full h-10 flex justify-start items-center text-sm font-bold border-b-2 border-r px-2">
                         Funcionalidade
-                      </p>
+                      </div>
                     </TableHead>
-                    <TableHead className="w-[100px] text-center p-0! border-0!">
-                      <p className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 border-r px-2">
+                    <TableHead 
+                      className="w-[100px] text-center p-0! border-0!"
+                      scope="col"
+                    >
+                      <div className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 border-r px-2">
                         Visibilidade
-                      </p>
+                      </div>
                     </TableHead>
-                    <TableHead className="w-[100px] text-center p-0! border-0!">
-                      <p className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 px-2">
+                    <TableHead 
+                      className="w-[100px] text-center p-0! border-0!"
+                      scope="col"
+                    >
+                      <div className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 px-2">
                         Métricas
-                      </p>
+                      </div>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -309,15 +264,18 @@ const UserModeFormDialog = ({
 
                     return (
                       <TableRow key={feature} className="p-0! border-0!">
-                        <TableCell className="p-0! border-0!">
-                          <p
+                        <TableCell 
+                          className="p-0! border-0!"
+                          scope="row"
+                        >
+                          <div
                             className={cn(
                               "w-full h-8 flex justify-start items-center text-sm border-r px-2",
                               !isLastItem && "border-b"
                             )}
                           >
                             {pathLabels[feature]}
-                          </p>
+                          </div>
                         </TableCell>
 
                         <TableCell className="p-0! border-0!">
@@ -332,6 +290,7 @@ const UserModeFormDialog = ({
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
                                     className="hidden"
+                                    aria-describedby={`${feature}-visibility-description`}
                                   />
                                 </FormControl>
                                 <FormLabel
@@ -340,13 +299,26 @@ const UserModeFormDialog = ({
                                     "cursor-pointer w-full h-8 flex justify-center items-center text-sm border-r px-2",
                                     !isLastItem && "border-b"
                                   )}
+                                  aria-label={`${field.value ? 'Ocultar' : 'Mostrar'} ${pathLabels[feature]}`}
                                 >
                                   {field.value ? (
-                                    <Eye className="size-5 text-green-600" />
+                                    <Eye 
+                                      className="size-5 text-green-600" 
+                                      aria-hidden="true"
+                                    />
                                   ) : (
-                                    <EyeOff className="size-5 text-gray-400" />
+                                    <EyeOff 
+                                      className="size-5 text-gray-400" 
+                                      aria-hidden="true"
+                                    />
                                   )}
                                 </FormLabel>
+                                <div 
+                                  id={`${feature}-visibility-description`} 
+                                  className="sr-only"
+                                >
+                                  {field.value ? 'Funcionalidade visível' : 'Funcionalidade oculta'}
+                                </div>
                               </FormItem>
                             )}
                           />
@@ -363,6 +335,7 @@ const UserModeFormDialog = ({
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
                                     className="hidden"
+                                    aria-describedby={`${feature}-metric-description`}
                                   />
                                 </FormControl>
 
@@ -372,13 +345,26 @@ const UserModeFormDialog = ({
                                     "cursor-pointer w-full h-8 flex justify-center items-center text-sm px-2",
                                     !isLastItem && "border-b"
                                   )}
+                                  aria-label={`${field.value ? 'Incluir' : 'Excluir'} ${pathLabels[feature]} das métricas`}
                                 >
                                   {field.value ? (
-                                    <Percent className="size-5 text-blue-600" />
+                                    <Percent 
+                                      className="size-5 text-blue-600" 
+                                      aria-hidden="true"
+                                    />
                                   ) : (
-                                    <Slash className="size-5 text-gray-400" />
+                                    <Slash 
+                                      className="size-5 text-gray-400" 
+                                      aria-hidden="true"
+                                    />
                                   )}
                                 </FormLabel>
+                                <div 
+                                  id={`${feature}-metric-description`} 
+                                  className="sr-only"
+                                >
+                                  {field.value ? 'Incluído nas métricas' : 'Excluído das métricas'}
+                                </div>
                               </FormItem>
                             )}
                           />
