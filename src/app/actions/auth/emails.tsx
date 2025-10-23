@@ -4,12 +4,15 @@ import { createClient, createClientAdmin } from "@/lib/supabase/server";
 export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
   try {
     const supabase = await createClient();
-    const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_PATH;
+    const PLATFORM_BASE_URL = process.env.PLATFORM_PATH;
 
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
+    // For PKCE flow, redirect to callback page which will handle the code exchange
+    const redirectUrl = `${PLATFORM_BASE_URL}/reset-password`;
+
     const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
-      redirectTo: PLATFORM_BASE_URL,
+      redirectTo: redirectUrl,
     });
 
     if (error) throw error;
@@ -29,7 +32,7 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
       type: "signup",
       email: email,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_PATH,
+        emailRedirectTo: process.env.PLATFORM_PATH,
       },
     });
     if (error) throw error;
@@ -43,7 +46,7 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
 export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
   try {
     const supabase = await createClientAdmin();
-    const PLATFORM_BASE_URL = process.env.NEXT_PUBLIC_PLATFORM_PATH;
+    const PLATFORM_BASE_URL = process.env.PLATFORM_PATH;
 
     if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
 
@@ -101,7 +104,7 @@ export const sendEmailVerificationToMultipleUsers = async (emails: string[]) => 
           type: "signup",
           email: email,
           options: {
-            emailRedirectTo: process.env.NEXT_PUBLIC_PLATFORM_PATH,
+            emailRedirectTo: process.env.PLATFORM_PATH,
           },
         });
 

@@ -1,7 +1,9 @@
-import { supabase } from "@/lib/supabase/client";
+import createClient from "@/lib/supabase/client";
 
 export const getAuthUser = async (jwt: string) => {
   try {
+    const supabase = await createClient();
+
     const {
       data: { user },
     } = await supabase.auth.getUser(jwt);
@@ -16,6 +18,7 @@ export const getAuthUser = async (jwt: string) => {
 
 export const getSession = async () => {
   try {
+    const supabase = await createClient();
     const { data, error } = await supabase.auth.getSession();
     if (error) throw error;
 
@@ -24,12 +27,4 @@ export const getSession = async () => {
     console.error("Error fetching session:", error);
     return false;
   }
-};
-
-export const onAuthStateChange = (
-  updateAuthState: (session: { access_token: string } | null) => Promise<void>
-) => {
-  return supabase.auth.onAuthStateChange(async (e, session) => {
-    await updateAuthState(session);
-  });
 };

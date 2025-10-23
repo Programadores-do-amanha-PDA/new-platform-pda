@@ -2,141 +2,140 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { setSession } from "@/app/actions";
 import useAuth from "@/hooks/use-auth";
+import { getAuthParamsFromUrl, useOtpHandler } from "./process-pkce-flow";
 
 /**
- * Hook to handle authentication confirmation and password reset flows
+ * Authentication Confirmation Hook
  *
- * This hook processes URL parameters (both in hash and query strings) to handle:
- * - Authentication callbacks (signup, magiclink, password reset)
- * - Token expiration checks
- * - OTP (One-Time Password) validation
- * - Password reset redirection
+ * Processes OAuth callback parameters from URL to authenticate users and handle password reset flows.
+ * This hook serves as the entry point for authentication callbacks, extracting tokens and types
+ * from URL parameters and delegating to specialized OTP verification handlers.
  *
- * After processing parameters, it cleans the URL by removing authentication tokens and codes
+ * ## Responsibilities
+ * - Extracts authentication parameters from URL hash and query strings
+ * - Handles OAuth errors and token expiration
+ * - Delegates OTP verification processing to specialized functions
+ * - Maintains URL cleanliness by removing sensitive parameters after processing
  *
- * Key Parameters Handled:
- * - access_token: Supabase authentication token
- * - refresh_token: Supabase refresh token
- * - code: Password reset code (for recovery flow)
- * - type: Authentication flow type (signup, recovery, etc)
- * - expires_at: Token expiration timestamp
- * - error_code: Error code from authentication provider
+ * ## Security Features
+ * - Automatic URL parameter cleaning to prevent token leakage
+ * - Comprehensive error handling with user feedback
+ * - Support for both hash-based and query string parameters
+ * - Time-delayed redirects on authentication failures
  *
- * Authentication Flows:
- * 1. Password Reset (Recovery):
- *    - Stores reset code in localStorage
- *    - Redirects to /reset-password page
- * 2. Signup:
- *    - Sets user session
- *    - Updates auth state
- *    - Redirects to /dashboard
- * 3. Other flows (Magiclink, etc):
- *    - Sets user session without redirection
+ * ## Supported Authentication Flows
+ * - **Signup**: New user registration
+ * - **Magic Link**: Passwordless authentication
+ * - **Password Reset**: Account recovery flows
+ * - **Invite**: Team invitation acceptance
  *
- * Error Handling:
- * - token_expired: Notifies about expired tokens
- * - otp_expired: Notifies about expired verification codes
+ * @example
+ * ```typescript
+ * // Use in root layout or authentication pages
+ * function AuthCallbackPage() {
+ *   useAuthConfirmation();
+ *   return <AuthLoadingSpinner />;
+ * }
+ * ```
+ *
+ * @see {@link useOtpHandler} for OTP verification implementation details
+ * @see {@link getAuthParamsFromUrl} for URL parameter extraction
  */
-export default function useAuthConfirmation() {
+export default function useAuthConfirmation(): void {
   const router = useRouter();
   const { updateAuthState } = useAuth();
+  const { processOtpFlow, handleOAuthErrors } = useOtpHandler();
 
   useEffect(() => {
-    // Skip execution in SSR
+    // Early return during server-side rendering
     if (typeof window === "undefined") return;
 
     /**
-     * Main authentication processing function
-     * This is now simplified since PKCE flow is handled by the callback page
+     * Processes authentication parameters extracted from URL
+     *
+     * This function orchestrates the authentication flow by:
+     * 1. Extracting parameters from URL
+     * 2. Handling OAuth errors
+     * 3. Processing OTP verification when token_hash is present
+     *
+     * @returns Promise that resolves when authentication processing completes
      */
-    const processAuthParams = async () => {
-      // Extract authentication parameters from URL
-      const hash = window.location.hash.substring(1);
-      const search = window.location.search.substring(1);
-      const paramsString = hash || search;
-      if (!paramsString) return;
+    const processAuthParams = async (): Promise<void> => {
+      const { tokenHash, type, error, errorDescription, expiresAt } =
+        getAuthParamsFromUrl();
 
-      const params = new URLSearchParams(paramsString);
-      const accessToken = params.get("access_token");
-      const refreshToken = params.get("refresh_token");
-      const authType = params.get("type");
-      const expiresAt = params.get("expires_at");
-      const errorCode = params.get("error_code");
-      const code = params.get("code");
+      // Exit early if no relevant authentication parameters found
+      if (!tokenHash && !error) return;
 
-      // Clean authentication parameters from URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      // Handle OAuth provider errors before attempting authentication
+      const hasOAuthError = handleOAuthErrors(
+        createSearchParamsWithAuthData(error, errorDescription, expiresAt)
+      );
 
-      // Handle expired tokens
-      if (expiresAt && new Date(parseInt(expiresAt) * 1000) < new Date()) {
-        toast.error("Token expirado! Tente realizar o login novamente.");
-        return;
-      }
+      if (hasOAuthError) return;
 
-      // Handle expired OTP codes
-      if (errorCode === "otp_expired") {
-        toast.error(
-          "Código de verificação expirado. Por favor, solicite um novo."
-        );
-        return;
-      }
-
-      // If there's a code parameter, redirect to callback page for PKCE handling
-      if (code) {
-        const callbackUrl = `/auth/callback?code=${code}${authType ? `&type=${authType}` : ''}`;
-        router.push(callbackUrl);
-        return;
-      }
-
-      /**
-       * Helper function to authenticate user (for legacy flows)
-       * @param {string} accessToken - Supabase access token
-       * @param {string} refreshToken - Supabase refresh token
-       * @param {Function} [onSuccess] - Optional callback on successful authentication
-       */
-      const handleAuthentication = async (
-        accessToken: string,
-        refreshToken: string,
-        onSuccess?: () => void
-      ) => {
-        try {
-          const session = await setSession(accessToken, refreshToken);
-
-          // Validate session
-          if (!session) {
-            toast.error("Token inválido! Tente realizar o login novamente.");
-            return;
-          }
-
-          // Update global auth state
-          updateAuthState(session);
-
-          // Execute success callback if provided
-          onSuccess?.();
-        } catch (error) {
-          console.error("Erro ao confirmar autenticação:", error);
-          toast.error("Erro ao processar autenticação. Tente novamente.");
-        }
-      };
-
-      // Handle legacy token-based authentication (for backwards compatibility)
-      if (accessToken && refreshToken && authType === "signup" && expiresAt) {
-        await handleAuthentication(accessToken, refreshToken, () => {
-          toast.success("Login feito com sucesso!");
-          router.push("/dashboard");
-        });
-        return;
-      }
-
-      // Handle other legacy authentication types
-      if (accessToken && refreshToken && authType && authType !== "signup") {
-        await handleAuthentication(accessToken, refreshToken);
+      // Process OTP verification flow when token_hash is present
+      if (tokenHash) {
+        await handleOtpAuthentication(tokenHash, type);
       }
     };
 
+    /**
+     * Creates URLSearchParams object with authentication error data
+     *
+     * @param error - OAuth error code from provider
+     * @param errorDescription - Human-readable error description
+     * @param expiresAt - Token expiration timestamp
+     * @returns URLSearchParams containing authentication error data
+     */
+    const createSearchParamsWithAuthData = (
+      error: string | null,
+      errorDescription: string | null,
+      expiresAt: string | null
+    ): URLSearchParams => {
+      const params = new URLSearchParams();
+
+      if (error) params.set("error", error);
+      if (errorDescription) params.set("error_description", errorDescription);
+      if (expiresAt) params.set("expires_at", expiresAt);
+
+      return params;
+    };
+
+    /**
+     * Handles OTP authentication flow with error recovery
+     *
+     * @param tokenHash - Token hash from email/SMS verification
+     * @param type - Type of authentication flow (signup, recovery, etc.)
+     */
+    const handleOtpAuthentication = async (
+      tokenHash: string,
+      type: string | null
+    ): Promise<void> => {
+      await processOtpFlow({
+        tokenHash,
+        type,
+        router,
+        updateAuthState,
+        onError: handleAuthenticationError,
+      });
+    };
+
+    /**
+     * Handles authentication errors with user feedback and recovery
+     *
+     * @param error - Error encountered during authentication
+     */
+    const handleAuthenticationError = (error: Error): void => {
+      console.error("Authentication flow failed:", error);
+
+      // Redirect to login page after brief delay to allow user to read error message
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
+    };
+
     processAuthParams();
-  }, [router, updateAuthState]);
+  }, [router, updateAuthState, processOtpFlow, handleOAuthErrors]);
 }

@@ -28,11 +28,7 @@ import Image from "next/image";
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email é obrigatório")
-    .email("Email deve ter um formato válido")
-    .toLowerCase(),
+  email: z.email("Email deve ter um formato válido").toLowerCase(),
   password: z
     .string()
     .min(1, "Senha é obrigatória")

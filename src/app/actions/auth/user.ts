@@ -1,5 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
+import { type EmailOtpType } from "@supabase/supabase-js";
 
 type UserAuthLogin = {
   email: string;
@@ -93,16 +94,31 @@ export const signOut = async () => {
   }
 };
 
-export const exchangeAuthCode = async (code: string) => {
+export async function handlePasswordRecovery(tokenHash: string, type: string) {
+  const supabase = await createClient();
+
   try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.verifyOtp({
+      type: type as EmailOtpType,
+      token_hash: tokenHash,
+    });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Erro no verifyOtp:", error);
+      return { error: error.message, success: false };
+    }
 
-    return data;
+    if (!data.session) {
+      return { error: "Sessão não criada", success: false };
+    }
+
+    return {
+      success: true,
+      session: data.session,
+      user: data.session.user,
+    };
   } catch (error) {
-    console.error("Exchange auth code error:", error);
-    return null;
+    console.error("Erro no handlePasswordRecovery:", error);
+    return { error: "Erro interno do servidor", success: false };
   }
-};
+}
