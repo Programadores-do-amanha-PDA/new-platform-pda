@@ -1,6 +1,6 @@
 "use client";
 import Color from "color";
-import { Edit, Ellipsis, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Edit, Ellipsis, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -59,22 +59,9 @@ const UserModeCard = ({ configId, userMode, onEdit }: UserModeCardProps) => {
               color: Color(userMode.color).isDark() ? "#fff" : "#000",
             }}
           >
-            <p className="font-semibold text-xs!">({userMode.key})</p>
+            <p className="font-semibold text-xs!">{userMode.key}</p>
           </Badge>
           <h3 className="truncate text-sm font-semibold">{userMode.title}</h3>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          {userMode.must_be_present ? (
-            <div className="flex items-center gap-1">
-              <CheckCircle className="size-3 text-green-600" />
-              <span>Contabiliza presença</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1">
-              <XCircle className="size-3 text-red-600" />
-              <span>Não contabiliza presença</span>
-            </div>
-          )}
         </div>
       </div>
 

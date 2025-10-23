@@ -26,12 +26,30 @@ import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import Color, { ColorLike } from "color";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Eye, EyeOff, Percent, Slash } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
+import pathLabels from "@/utils/path-labels";
 
 const UserModeFormSchema = z.object({
   title: z.string().min(1, "Título é obrigatório"),
   key: z.string().min(1, "Identificador é obrigatório"),
   color: z.string().regex(/^#[0-9A-F]{6}$/i, "Cor deve ser um hex válido"),
-  mustBePresent: z.boolean(),
+  featuresRules: z.array(
+    z.object({
+      id: z.string().min(1, "ID é obrigatório"),
+      isVisible: z.boolean(),
+      aggregateInMetric: z.boolean(),
+    })
+  ),
 });
 
 type UserModeFormData = z.infer<typeof UserModeFormSchema>;
@@ -61,26 +79,49 @@ const UserModeFormDialog = ({
       title: "",
       key: "",
       color: "#3bf6a8",
-      mustBePresent: true,
+      featuresRules: ADMIN_CLASSROOM_PAGES_KEYS.map((feature) => ({
+        id: feature,
+        isVisible: true,
+        aggregateInMetric: true,
+      })),
     },
   });
 
   useEffect(() => {
     if (currentUserMode) {
       setOpen(true);
+
+      // Merge existing rules with available features to ensure all features are present
+      const mergedFeaturesRules = ADMIN_CLASSROOM_PAGES_KEYS?.map((feature) => {
+        const existingRule = currentUserMode?.featuresRules?.find(
+          (rule) => rule.id === feature
+        );
+        return (
+          existingRule || {
+            id: feature,
+            isVisible: true,
+            aggregateInMetric: true,
+          }
+        );
+      });
+
       form.reset({
         title: currentUserMode.title,
         key: currentUserMode.key,
         color: currentUserMode.color,
-        mustBePresent: currentUserMode.must_be_present,
+        featuresRules: mergedFeaturesRules,
       });
     }
   }, [currentUserMode, form]);
 
-  const handleClose = () => {
-    setOpen(false);
-    form.reset();
-    onClose?.();
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setOpen(true);
+    } else if (!open) {
+      setOpen(false);
+      onClose?.();
+      form.reset();
+    }
   };
 
   const handleColorChange = useCallback(
@@ -117,7 +158,7 @@ const UserModeFormDialog = ({
     setLoading(true);
 
     try {
-      const currentConfig = Object.values(configsByClassroom).find(
+      const currentConfig = Object.values(configsByClassroom)?.find(
         (config) => config.id === configId
       );
 
@@ -132,7 +173,11 @@ const UserModeFormDialog = ({
         title: data.title.trim(),
         key: data.key.trim(),
         color: data.color,
-        must_be_present: data.mustBePresent,
+        featuresRules: data.featuresRules.map((rule) => ({
+          id: rule.id,
+          isVisible: rule.isVisible,
+          aggregateInMetric: rule.aggregateInMetric,
+        })),
         created_at: currentUserMode?.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
@@ -157,7 +202,7 @@ const UserModeFormDialog = ({
       });
 
       if (success) {
-        handleClose();
+        handleOpenChange(false);
         toast.success(
           isEditing
             ? "Modo de usuário atualizado com sucesso!"
@@ -175,7 +220,7 @@ const UserModeFormDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
       <DialogContent className="sm:max-w-[425px]">
@@ -236,30 +281,121 @@ const UserModeFormDialog = ({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="mustBePresent"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                  <FormControl>
-                    <Checkbox
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                  <div className="space-y-1 leading-none">
-                    <FormLabel>Deve contabilizar presença?</FormLabel>
-                    <p className="text-sm text-muted-foreground">
-                      Marque se este modo de usuário deve fazer parte da
-                      contagem de presença
-                    </p>
-                  </div>
-                </FormItem>
-              )}
-            />
+            <div className="w-full h-max overflow-hidden border rounded-md">
+              <Table className="w-full h-max p-0! border-0!">
+                <TableHeader className="p-0! border-0!">
+                  <TableRow className="p-0! border-0!">
+                    <TableHead className="p-0! border-0!">
+                      <p className="w-full h-10 flex justify-start items-center text-sm font-bold border-b-2 border-r px-2">
+                        Funcionalidade
+                      </p>
+                    </TableHead>
+                    <TableHead className="w-[100px] text-center p-0! border-0!">
+                      <p className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 border-r px-2">
+                        Visibilidade
+                      </p>
+                    </TableHead>
+                    <TableHead className="w-[100px] text-center p-0! border-0!">
+                      <p className="w-full h-10 flex justify-center items-center text-sm font-bold border-b-2 px-2">
+                        Métricas
+                      </p>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {ADMIN_CLASSROOM_PAGES_KEYS.map((feature, index) => {
+                    const isLastItem =
+                      index === ADMIN_CLASSROOM_PAGES_KEYS.length - 1;
+
+                    return (
+                      <TableRow key={feature} className="p-0! border-0!">
+                        <TableCell className="p-0! border-0!">
+                          <p
+                            className={cn(
+                              "w-full h-8 flex justify-start items-center text-sm border-r px-2",
+                              !isLastItem && "border-b"
+                            )}
+                          >
+                            {pathLabels[feature]}
+                          </p>
+                        </TableCell>
+
+                        <TableCell className="p-0! border-0!">
+                          <FormField
+                            control={form.control}
+                            name={`featuresRules.${index}.isVisible`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Checkbox
+                                    id={`${feature}-is-visible`}
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="hidden"
+                                  />
+                                </FormControl>
+                                <FormLabel
+                                  htmlFor={`${feature}-is-visible`}
+                                  className={cn(
+                                    "cursor-pointer w-full h-8 flex justify-center items-center text-sm border-r px-2",
+                                    !isLastItem && "border-b"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    <Eye className="size-5 text-green-600" />
+                                  ) : (
+                                    <EyeOff className="size-5 text-gray-400" />
+                                  )}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="p-0! border-0!">
+                          <FormField
+                            control={form.control}
+                            name={`featuresRules.${index}.aggregateInMetric`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Checkbox
+                                    id={`${feature}-aggregate-in-metric`}
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                    className="hidden"
+                                  />
+                                </FormControl>
+
+                                <FormLabel
+                                  htmlFor={`${feature}-aggregate-in-metric`}
+                                  className={cn(
+                                    "cursor-pointer w-full h-8 flex justify-center items-center text-sm px-2",
+                                    !isLastItem && "border-b"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    <Percent className="size-5 text-blue-600" />
+                                  ) : (
+                                    <Slash className="size-5 text-gray-400" />
+                                  )}
+                                </FormLabel>
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={handleClose}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+              >
                 Cancelar
               </Button>
               <Button type="submit" disabled={loading}>
