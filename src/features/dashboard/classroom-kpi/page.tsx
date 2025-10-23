@@ -8,7 +8,7 @@ import {
   ZoomMeetingT,
   ZoomMeetingPastInstanceT,
 } from "../classroom-zoom/types";
-import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
 import {
   useZoomMeetingStore,
   useZoomMeetingPastInstanceStore,
@@ -26,12 +26,14 @@ export default function PollResultsPage() {
     return <div>Turma não encontrada.</div>;
   }
 
-  const userModes = configsByClassroom[classroom_id]?.user_modes || [];
+  const classroomConfigUserModes =
+    configsByClassroom[classroom_id]?.user_modes || [];
 
-  const classroomUsers = filterClassroomStudents(
+  const allVisibleUsers = filterVisibilityClassroomStudents(
     users,
     classroom_id,
-    userModes
+    classroomConfigUserModes,
+    "activities"
   );
 
   // Get past instances directly from the store and add meeting info
@@ -66,7 +68,7 @@ export default function PollResultsPage() {
   return (
     <div className="w-full h-full p-4">
       <PollResultsTable
-        users={classroomUsers}
+        allVisibleUsers={allVisibleUsers}
         meetings={
           allPastsMeetings as (
             | (ZoomMeetingPastInstanceT & {

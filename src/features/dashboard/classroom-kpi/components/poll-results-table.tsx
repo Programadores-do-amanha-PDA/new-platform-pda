@@ -40,7 +40,7 @@ import {
 import { calculatePollPercentage } from "../utils/question-percentage-calc";
 
 interface PollResultsTableProps {
-  users: Partial<AuthUserWithProfileT>[];
+  allVisibleUsers: Partial<AuthUserWithProfileT>[];
   meetings: (
     | (ZoomMeetingPastInstanceT & { meeting_type: "meeting" | "pastInstance" })
     | (ZoomMeetingT & { meeting_type: "meeting" | "pastInstance" })
@@ -120,7 +120,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
 ];
 
 export default function PollResultsTable({
-  users,
+  allVisibleUsers,
   meetings,
   classroomId,
 }: PollResultsTableProps) {
@@ -336,7 +336,7 @@ export default function PollResultsTable({
   }, [meetingColumns]);
 
   const table = useReactTable({
-    data: users,
+    data: allVisibleUsers,
     columns: allColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -353,7 +353,7 @@ export default function PollResultsTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: users?.length || 1000,
+        pageSize: allVisibleUsers?.length || 1000,
       },
     },
   });
