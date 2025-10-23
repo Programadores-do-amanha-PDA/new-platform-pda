@@ -8,7 +8,8 @@ import {
   ZoomMeetingT,
   ZoomMeetingPastInstanceT,
 } from "../classroom-zoom/types";
-import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
+import { filterMetricClassroomStudents } from "../utils/filter-metric-classroom-students";
 import {
   useZoomMeetingStore,
   useZoomMeetingPastInstanceStore,
@@ -28,10 +29,18 @@ export default function AttendancePage() {
 
   const userModes = configsByClassroom[classroom_id]?.user_modes || [];
 
-  const classroomUsers = filterClassroomStudents(
+  const allVisibleUsers = filterVisibilityClassroomStudents(
     users,
     classroom_id,
-    userModes
+    userModes,
+    "attendance"
+  );
+
+  const allAggregateInMetricUsers = filterMetricClassroomStudents(
+    users,
+    classroom_id,
+    userModes,
+    "attendance"
   );
 
   // Get past instances directly from the store and add meeting info
@@ -66,7 +75,8 @@ export default function AttendancePage() {
   return (
     <div className="w-full h-full p-4">
       <AttendanceTable
-        users={classroomUsers}
+        allVisibleUsers={allVisibleUsers}
+        allAggregateInMetricUsers={allAggregateInMetricUsers}
         meetings={
           allPastsMeetings as (
             | (ZoomMeetingPastInstanceT & {

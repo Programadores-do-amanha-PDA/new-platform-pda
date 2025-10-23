@@ -42,7 +42,8 @@ import {
 import { calculateClassPresence } from "../utils/class-presence";
 
 interface AttendanceTableProps {
-  users: Partial<AuthUserWithProfileT>[];
+  allVisibleUsers: Partial<AuthUserWithProfileT>[];
+  allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
   meetings: (
     | (ZoomMeetingPastInstanceT & { meeting_type: "meeting" | "pastInstance" })
     | (ZoomMeetingT & { meeting_type: "meeting" | "pastInstance" })
@@ -122,7 +123,8 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
 ];
 
 export default function AttendanceTable({
-  users,
+  allVisibleUsers,
+  allAggregateInMetricUsers,
   meetings,
   classroomId,
 }: AttendanceTableProps) {
@@ -206,19 +208,25 @@ export default function AttendanceTable({
               />
             </div>
             <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-              <p>{calculateClassPresence(meeting, users)}%</p>
+              <p>{calculateClassPresence(meeting, allAggregateInMetricUsers)}%</p>
             </div>
           </div>
         ),
         cell: ({ row }) => {
+          const userEmail = row.original.email;
+          const shouldAggregateInMetric = allAggregateInMetricUsers.some(
+            (user) => user.email === userEmail
+          );
+
           const currentClassType = classroomClassTypes.find(
             (classType) => classType.id === meeting.class_type
           );
           const userAttendance = calculateUserAttendance(
             meeting,
-            row.original.email || "",
+            userEmail || "",
             currentClassType!,
-            classroomJustifications
+            classroomJustifications,
+            shouldAggregateInMetric
           );
 
           return (
@@ -241,19 +249,21 @@ export default function AttendanceTable({
                     userAttendance?.limit?.key}
                 </p>
 
-                {userAttendance.minutesAttended > 0 && (
+                {userAttendance.minutesAttended > 0 && 
+                 userAttendance?.limit?.key !== "--" && (
                   <p className="text-sm text-muted-foreground">
                     {userAttendance.minutesAttended}M
                   </p>
                 )}
               </div>
-              {row.original.email &&
+              {userEmail &&
+                userAttendance?.limit?.key !== "--" &&
                 (userAttendance?.justification ||
                   userAttendance?.limit?.allow_justification) && (
                   <AttendanceJustificationDropdown
                     key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
                     currentMeeting={meeting}
-                    currentUserEmail={row.original.email}
+                    currentUserEmail={userEmail}
                     type={meeting.meeting_type}
                   />
                 )}
@@ -265,7 +275,7 @@ export default function AttendanceTable({
       classroomClassTypes,
       classroomJustifications,
       displayedMeetings,
-      users,
+      allAggregateInMetricUsers,
     ]);
 
   // Combine user columns with meeting columns
@@ -274,7 +284,7 @@ export default function AttendanceTable({
   }, [meetingColumns]);
 
   const table = useReactTable({
-    data: users,
+    data: allVisibleUsers,
     columns: allColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -291,7 +301,7 @@ export default function AttendanceTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: users?.length || 1000,
+        pageSize: allVisibleUsers?.length || 1000,
       },
     },
   });
