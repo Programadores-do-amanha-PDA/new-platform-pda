@@ -25,11 +25,13 @@ export interface AttendanceResult {
  * - Available justifications (if user provided one)
  * - Class type configuration and limits
  * - Default fallback rules when configuration is missing
+ * - Whether user should be aggregated in metrics
  * 
  * @param meeting - The Zoom meeting or past instance to analyze
  * @param userEmail - Email of the user to calculate attendance for
  * @param currentClassType - Current class type configuration (optional)
  * @param availableJustifications - Array of available justifications (optional)
+ * @param shouldAggregateInMetric - Whether this user should be counted in metrics (default: true)
  * @returns Attendance result with status, minutes, and applied rules
  * 
  * @example
@@ -38,23 +40,26 @@ export interface AttendanceResult {
  *   zoomMeeting,
  *   'student@email.com',
  *   programmingClassType,
- *   availableJustifications
+ *   availableJustifications,
+ *   false // User not counted in metrics
  * );
  * 
  * console.log(result.minutesAttended); // 45
- * console.log(result.limit?.key); // 'PP'
+ * console.log(result.limit?.key); // '--' (if not in metrics and no presence)
  * ```
  * 
  * @remarks
  * - Justifications take precedence over participation time
  * - Uses default rules when class type configuration is missing
  * - Handles both ZoomMeetingT and ZoomMeetingPastInstanceT
+ * - Returns "--" limit for users not in metrics without presence/justification
  */
 export function calculateUserAttendance(
   meeting: ZoomMeetingT | ZoomMeetingPastInstanceT,
   userEmail: string,
   currentClassType?: ClassroomConfigClassTypesT,
-  availableJustifications?: ClassroomConfigJustificationT[]
+  availableJustifications?: ClassroomConfigJustificationT[],
+  shouldAggregateInMetric: boolean = true
 ): AttendanceResult {
   // Check if user has provided a justification for this meeting
   const userJustification = meeting.justifications?.find(
@@ -101,6 +106,15 @@ export function calculateUserAttendance(
   // Use default limits if class type is not specified or configured
   if (!meeting.class_type || !currentClassType) {
     const defaultLimit = getDefaultLimit(totalMinutesAttended);
+    
+    // Check if user shouldn't be in metrics and doesn't have presence
+    if (!shouldAggregateInMetric && !defaultLimit.is_presence) {
+      return {
+        minutesAttended: totalMinutesAttended,
+        limit: getNotInMetricLimit(),
+      };
+    }
+    
     return {
       minutesAttended: totalMinutesAttended,
       limit: defaultLimit,
@@ -112,6 +126,14 @@ export function calculateUserAttendance(
     totalMinutesAttended,
     currentClassType.limits
   );
+
+  // Check if user shouldn't be in metrics and doesn't have presence
+  if (!shouldAggregateInMetric && bestLimit && !bestLimit.is_presence) {
+    return {
+      minutesAttended: totalMinutesAttended,
+      limit: getNotInMetricLimit(),
+    };
+  }
 
   return {
     minutesAttended: totalMinutesAttended,
@@ -131,6 +153,23 @@ function getDefaultJustification(): ClassroomConfigJustificationT {
     title: "Falta Justificada",
     color: "#0066cc",
     is_presence: true,
+  };
+}
+
+/**
+ * Provides a special limit for users not counted in metrics
+ * 
+ * @returns Not in metric limit configuration
+ */
+function getNotInMetricLimit(): ClassroomConfigClassTypesLimitT {
+  return {
+    id: "not-in-metric",
+    min: 0,
+    key: "--",
+    title: "Não contabilizado na métrica",
+    color: "#6b7280", // muted color
+    allow_justification: false,
+    is_presence: false,
   };
 }
 

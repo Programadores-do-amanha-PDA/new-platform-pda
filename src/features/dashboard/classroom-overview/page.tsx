@@ -21,7 +21,7 @@ import {
 import { useProjectStore } from "../classroom-projects/stores";
 import { useDeliveryStore } from "../classroom-projects/stores/deliveries";
 import { useCorrectionStore } from "../classroom-projects/stores/corrections";
-import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
 import { filterDataByDateRange } from "../utils/filter-data-by-date-range";
 import {
   useZoomMeetingStore,
@@ -53,6 +53,10 @@ export default function ClassroomAttendancePage() {
   const { meetings } = useZoomMeetingStore();
 
   const currentConfig = configsByClassroom[classroom_id];
+  const currentConfigUserModes = useMemo(
+    () => currentConfig?.user_modes || [],
+    [currentConfig]
+  );
   const modules = useMemo(
     () => currentConfig?.modules || [],
     [currentConfig?.modules]
@@ -68,9 +72,12 @@ export default function ClassroomAttendancePage() {
 
   useEffect(() => {
     // filter users by classroom id & by must be present on user mode
-    const classroomStudents = filterClassroomStudents(users, classroom_id, [
-      ...(currentConfig?.user_modes || []),
-    ]);
+    const classroomStudents = filterVisibilityClassroomStudents(
+      users,
+      classroom_id,
+      currentConfigUserModes,
+      "overview"
+    );
 
     // Filtrar dados por intervalo de datas se selecionado
     const filteredPastInstances = dateRange
