@@ -3,8 +3,9 @@ import { useParams } from "next/navigation";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import ActivitiesTable from "./components/activities-table";
-import { filterClassroomStudents } from "../utils/filter-classroom-students";
+import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { filterMetricClassroomStudents } from "../utils/filter-metric-classroom-students";
 
 export default function ClassroomActivitiesPage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();
@@ -13,15 +14,24 @@ export default function ClassroomActivitiesPage() {
   const { configsByClassroom } = useClassroomConfigStore();
   const { activities } = useClassroomActivityStore();
   const currentClassroomConfig = configsByClassroom[classroom_id];
+  const classroomConfigUserModes = currentClassroomConfig?.user_modes || [];
 
   if (!classroom_id) {
     return <div>Turma não encontrada.</div>;
   }
 
-  const classroomUsers = filterClassroomStudents(
+  const allVisibleUsers = filterVisibilityClassroomStudents(
     users,
     classroom_id,
-    currentClassroomConfig.user_modes
+    classroomConfigUserModes,
+    "activities"
+  );
+
+  const allAggregateInMetricUsers = filterMetricClassroomStudents(
+    users,
+    classroom_id,
+    classroomConfigUserModes,
+    "activities"
   );
 
   const sortedActivities = activities
@@ -34,7 +44,8 @@ export default function ClassroomActivitiesPage() {
   return (
     <div className="w-full h-full p-6">
       <ActivitiesTable
-        users={classroomUsers}
+        allVisibleUsers={allVisibleUsers}
+        allAggregateInMetricUsers={allAggregateInMetricUsers}
         activities={sortedActivities}
         classroomId={classroom_id}
       />

@@ -12,13 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  ArrowDown,
-  ArrowUp,
-  ArrowUpDown,
-  MoreHorizontal,
-  Trash2,
-} from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 import { isWithinInterval } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
@@ -39,100 +33,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import ActivityTypeSelector from "./activity-type-selector";
 import { ActivityJustificationDropdown } from "./activity-justification-dropdown";
 import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
-import { AuthUserWithProfileT, ProfileT, ClassroomActivityT } from "@/types";
-import { ParticipationStatusOptions } from "../utils/participation-status-options";
+import { AuthUserWithProfileT } from "@/types";
 import { calculateActivityDelivery } from "../utils/activity-delivery-calculator";
+import { calculateUserActivityParticipation } from "@/utils/activity-calculator";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-
-interface ActivitiesTableProps {
-  users: Partial<AuthUserWithProfileT>[];
-  activities: ClassroomActivityT[];
-  classroomId: string;
-}
-
-export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
-  {
-    accessorKey: "profile",
-    header: ({ column }) => {
-      const sortState = column.getIsSorted();
-      return (
-        <div className="w-full h-[133.5px] flex justify-between items-center border-r border-b px-2">
-          <p className="text-left font-semibold">Usuário</p>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
-          >
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary-foreground" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary-foreground" />
-            ) : (
-              <ArrowUpDown />
-            )}
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="w-full h-[57px] flex flex-row gap-2 justify-start items-center px-2 border-r border-b bg-background group-hover/row:bg-muted/50!">
-        <Avatar>
-          <AvatarFallback>
-            {row
-              .getValue<ProfileT>("profile")
-              .full_name.split(" ")
-              .filter((_, i) => i < 2)
-              .map((word) => word[0].toUpperCase())
-              .join("") || "U"}
-          </AvatarFallback>
-          <AvatarImage
-            src={row.getValue<ProfileT>("profile").avatar_url || ""}
-          />
-        </Avatar>
-        <div className="w-full flex flex-col justify-center lowercase truncate">
-          <p className="text-sm font-bold capitalize">
-            {row.getValue<ProfileT>("profile").full_name}
-          </p>
-          <p>{row.getValue<ProfileT>("profile").email}</p>
-        </div>
-      </div>
-    ),
-    sortingFn: (rowA, rowB) => {
-      const nameA = rowA.original?.profile?.full_name?.toLowerCase() || "";
-      const nameB = rowB.original?.profile?.full_name?.toLowerCase() || "";
-      return nameA?.localeCompare(nameB);
-    },
-    filterFn: (row, id, filterValue) => {
-      const profile = row.getValue(id) as ProfileT;
-      const searchTerm = filterValue.toLowerCase();
-
-      return (
-        profile.full_name.toLowerCase().includes(searchTerm) ||
-        profile.email.toLowerCase().includes(searchTerm)
-      );
-    },
-  },
-];
+import { ActivitiesTablePropsT } from "../types";
+import { usersColumns } from "./activities-table-columns";
 
 export default function ActivitiesTable({
-  users,
+  allVisibleUsers,
+  allAggregateInMetricUsers,
   activities,
   classroomId,
-}: ActivitiesTableProps) {
+}: ActivitiesTablePropsT) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [dateRange, setDateRange] = useState<DateRange | null>(null);
@@ -205,40 +124,36 @@ export default function ActivitiesTable({
               />
             </div>
             <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-              <p>{calculateActivityDelivery(activity, users)}%</p>
+              <p>
+                {calculateActivityDelivery(activity, allAggregateInMetricUsers)}
+                %
+              </p>
             </div>
           </div>
         ),
         cell: ({ row }) => {
           const userEmail = row.original.email;
-          const hasParticipated = activity.participants_email?.includes(
-            userEmail || ""
-          );
-          const hasJustification = activity.justifications?.some(
-            (j) => j.user_email === userEmail
+          const shouldAggregateInMetric = allAggregateInMetricUsers.some(
+            (user) => user.email === userEmail
           );
 
-          let status: "E" | "F" | "PJ" = "F";
-          if (hasParticipated) {
-            status = "E";
-          } else if (hasJustification) {
-            status = "PJ";
-          }
+          const participationResult = calculateUserActivityParticipation(
+            activity,
+            userEmail || "",
+            shouldAggregateInMetric
+          );
 
           return (
             <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r border-border">
               <div className="flex flex-col">
                 <p
-                  className={cn(
-                    "font-semibold",
-                    ParticipationStatusOptions[status].color
-                  )}
-                  title={ParticipationStatusOptions[status].label}
+                  className={cn("font-semibold", participationResult.color)}
+                  title={participationResult.label}
                 >
-                  {status}
+                  {participationResult.status}
                 </p>
               </div>
-              {userEmail && (
+              {participationResult.allowJustification && userEmail && (
                 <ActivityJustificationDropdown
                   key={`ActivityJustificationDropdown-${activity.id}-${index}`}
                   currentActivity={activity}
@@ -249,7 +164,12 @@ export default function ActivitiesTable({
           );
         },
       }));
-    }, [displayedActivities, updateActivityById, deleteActivity, users]);
+    }, [
+      displayedActivities,
+      updateActivityById,
+      deleteActivity,
+      allAggregateInMetricUsers,
+    ]);
 
   // Combine user columns with activity columns
   const allColumns = useMemo(() => {
@@ -257,7 +177,7 @@ export default function ActivitiesTable({
   }, [activityColumns]);
 
   const table = useReactTable({
-    data: users,
+    data: allVisibleUsers,
     columns: allColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -274,7 +194,7 @@ export default function ActivitiesTable({
     initialState: {
       pagination: {
         pageIndex: 0,
-        pageSize: users?.length || 1000,
+        pageSize: allVisibleUsers?.length || 1000,
       },
     },
   });
