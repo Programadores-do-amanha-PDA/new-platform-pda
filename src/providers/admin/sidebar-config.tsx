@@ -11,6 +11,16 @@ import {
 import pathLabels from "@/utils/path-labels";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 
+export const ADMIN_CLASSROOM_PAGES_KEYS = [
+  "overview",
+  "attendance",
+  "kpi",
+  "activities",
+  "projects",
+  "coodesh",
+  "zoom",
+];
+
 export const generateSidebarConfig = (
   user: AuthUserWithProfileT,
   classrooms: ClassroomT[]
@@ -63,36 +73,11 @@ export const generateSidebarConfig = (
         url: `/dashboard/classrooms/${classroom.id}`,
         icon: classroom.icon,
         isActive: false,
-        items: [
-          {
-            title: pathLabels["overview"],
-            url: `/dashboard/classrooms/${classroom.id}/overview`,
-          },
-          {
-            title: pathLabels["attendance"],
-            url: `/dashboard/classrooms/${classroom.id}/attendance`,
-          },
-          {
-            title: pathLabels["kpi"],
-            url: `/dashboard/classrooms/${classroom.id}/kpi`,
-          },
-          {
-            title: pathLabels["activities"],
-            url: `/dashboard/classrooms/${classroom.id}/activities`,
-          },
-          {
-            title: pathLabels["projects"],
-            url: `/dashboard/classrooms/${classroom.id}/projects`,
-          },
-          {
-            title: pathLabels["coodesh"],
-            url: `/dashboard/classrooms/${classroom.id}/coodesh`,
-          },
-          {
-            title: pathLabels["zoom"],
-            url: `/dashboard/classrooms/${classroom.id}/zoom`,
-          },
-        ],
+        items: ADMIN_CLASSROOM_PAGES_KEYS.map((key) => ({
+          ref: key,
+          title: pathLabels[key],
+          url: `/dashboard/classrooms/${classroom.id}/${key}`,
+        })),
       })),
     projects: [],
   };
