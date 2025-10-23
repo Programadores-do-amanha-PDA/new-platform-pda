@@ -45,7 +45,11 @@ export interface ClassroomConfigUserMode {
   title: string;
   key: string;
   color: string;
-  must_be_present: boolean;
+  featuresRules: Array<{
+    id: string;
+    isVisible: boolean;
+    aggregateInMetric: boolean;
+  }>;
   created_at?: string;
   updated_at?: string;
 }

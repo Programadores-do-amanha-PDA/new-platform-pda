@@ -41,6 +41,10 @@ export type ClassroomOverviewData = {
     title: string;
     key: string;
     color: string;
-    must_be_present: boolean;
+    featuresRules: Array<{
+      id: string;
+      isVisible: boolean;
+      aggregateInMetric: boolean;
+    }>;
   }>;
 };

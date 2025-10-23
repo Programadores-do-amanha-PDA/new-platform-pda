@@ -1,3 +1,4 @@
+import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
 import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
 
 /**
@@ -14,7 +15,7 @@ import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
  *
  * @example
  * ```typescript
- * const activeStudents = filterClassroomStudents(
+ * const activeStudents = filterVisibilityClassroomStudents(
  *   allUsers,
  *   'classroom-123',
  *   userModesConfig
@@ -25,16 +26,23 @@ import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
  * This function is useful for attendance systems, classroom management,
  * and scenarios where certain user modes require physical/online presence
  */
-export function filterClassroomStudents(
+export function filterVisibilityClassroomStudents(
   users: Partial<AuthUserWithProfileT>[],
   classroomId: string,
-  userModes: ClassroomConfigUserMode[]
+  userModes: ClassroomConfigUserMode[],
+  ruleId: (typeof ADMIN_CLASSROOM_PAGES_KEYS)[number]
 ): AuthUserWithProfileT[] {
   // Pre-compute a Set of mode IDs that require user presence
   // Using Set for O(1) lookup performance during filtering
-  const mustBePresentModeIds = new Set(
+  const mustBeVisibleModeIds = new Set(
     userModes
-      .filter((mode) => mode.must_be_present) // Only include modes with.must_be_present flag set to true
+      .filter((mode) => {
+        // Check if the feature rule is configured to be visible
+        const modeRules = mode.featuresRules?.find(
+          (rule) => rule.id === ruleId
+        );
+        return modeRules?.isVisible ?? false;
+      })
       .map((mode) => mode.id) // Extract only the ID for efficient lookup
   );
 
@@ -47,8 +55,8 @@ export function filterClassroomStudents(
         (classroom) =>
           // User must belong to the specified classroom
           classroom.classroom_id === classroomId &&
-          // User's classroom mode should not exist and be in the.must_be_present set
-          (classroom.mode === null || mustBePresentModeIds.has(classroom.mode))
+          // User's classroom mode should not exist and be in the presence-required set
+          (classroom.mode === null || mustBeVisibleModeIds.has(classroom.mode))
       )
     )
   ) as AuthUserWithProfileT[];
