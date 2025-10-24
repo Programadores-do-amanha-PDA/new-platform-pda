@@ -1,49 +1,52 @@
+"use client";
+
+// Global imports
 import { Camera, Trash } from "lucide-react";
-
 import { ChangeEvent, useState } from "react";
-
-import ProfileAvatarCropper from "./profile-avatar-cropper";
 import { Area, Point } from "react-easy-crop";
-import {
-  deleteUserAvatar,
-  updateUserAvatar,
-  uploadUserAvatar,
-} from "@/app/actions/profile-avatar";
 import { toast } from "sonner";
-import { AuthUserWithProfileT } from "@/types/auth";
+
+// UI Components
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
+// Local imports
+import { ProfileAvatarCropper } from "./";
+import { ProfileAvatarPickerPropsT } from "../types";
+import { getCroppedImageBlob, fileToBase64 } from "../utils";
+import {
+  deleteUserAvatar,
+  updateUserAvatar,
+  uploadUserAvatar,
+} from "@/app/actions/profile-avatar";
+
 export const ProfileAvatarPicker = ({
   user,
   onUpdateUser,
-}: {
-  user: AuthUserWithProfileT;
-  onUpdateUser: () => void;
-}) => {
+}: ProfileAvatarPickerPropsT): React.JSX.Element => {
   const [newProfileImage, setNewProfileImage] = useState<string>("");
-  const [croppedProfileImage, setCroppedProfileImage] = useState<File | null>();
-
+  const [croppedProfileImage, setCroppedProfileImage] = useState<File | null>(
+    null
+  );
   const [isCropperOpen, setIsCropperOpen] = useState<boolean>(false);
   const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
-  const [scale, setScale] = useState(1);
-
+  const [scale, setScale] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleCloseCropper = () => {
+  const handleCloseCropper = (): void => {
     setIsCropperOpen(false);
     setCroppedProfileImage(null);
     setNewProfileImage("");
   };
 
-  const handleCreateProfileImage = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleCreateProfileImage = (e: ChangeEvent<HTMLInputElement>): void => {
     const imageFile = e.target.files?.[0];
 
     if (imageFile) {
       const reader = new FileReader();
-      reader.onload = (event) => {
+      reader.onload = (event): void => {
         const imageDataUrl = event.target?.result as string;
         setNewProfileImage(imageDataUrl);
         setIsCropperOpen(true);
@@ -53,108 +56,103 @@ export const ProfileAvatarPicker = ({
     }
   };
 
-  const createImage = (url: string): Promise<HTMLImageElement> =>
-    new Promise((resolve, reject) => {
-      const image = new Image();
-      image.addEventListener("load", () => resolve(image));
-      image.addEventListener("error", (error) => reject(error));
-      image.setAttribute("crossOrigin", "anonymous");
-      image.src = url;
-    });
-
-  async function getCroppedImg(imageSrc: string, pixelCrop: Area) {
-    const image = await createImage(imageSrc);
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
-
-    ctx?.drawImage(
-      image,
-      pixelCrop.x,
-      pixelCrop.y,
-      pixelCrop.width,
-      pixelCrop.height,
-      0,
-      0,
-      pixelCrop.width,
-      pixelCrop.height
-    );
-
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(blob);
-      }, "image/png");
-    });
-  }
-
-  const onCropComplete = async (_: Area, croppedAreaPixels: Area) => {
-    const blob = await getCroppedImg(newProfileImage, croppedAreaPixels);
-    if (blob instanceof Blob) {
-      const file = new File([blob], "cropped-image.png", { type: "image/png" });
-      setCroppedProfileImage(file);
+  const onCropComplete = async (
+    _: Area,
+    croppedAreaPixels: Area
+  ): Promise<void> => {
+    try {
+      const blob = await getCroppedImageBlob(
+        newProfileImage,
+        croppedAreaPixels
+      );
+      if (blob instanceof Blob) {
+        const file = new File([blob], "cropped-image.png", {
+          type: "image/png",
+        });
+        setCroppedProfileImage(file);
+      }
+    } catch (error) {
+      console.error("Error cropping image:", error);
+      toast.error("Erro ao processar a imagem. Tente novamente.");
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleUploadAvatar = async () => {
+  const handleUploadAvatar = async (): Promise<void> => {
     setLoading(true);
     try {
       if (!croppedProfileImage || !user.id) {
-        throw new Error("cropped profile image and user id is required");
+        throw new Error("Imagem cortada e ID do usuário são obrigatórios");
       }
+
+      const base64Image = await fileToBase64(croppedProfileImage);
+
       if (user.profile?.avatar_url) {
-        const base64Image = await fileToBase64(croppedProfileImage);
         await updateUserAvatar(user.id, base64Image);
-
-        onUpdateUser();
         toast.success("Imagem de perfil atualizada com sucesso!");
-      } else if (!user.profile?.avatar_url) {
-        const base64Image = await fileToBase64(croppedProfileImage);
+      } else {
         await uploadUserAvatar(user.id, base64Image);
-
-        onUpdateUser();
         toast.success("Imagem de perfil adicionada com sucesso!");
       }
+
+      onUpdateUser();
     } catch (error) {
-      console.error("Error uploading avatar", error);
-      toast.error(
-        "Erro ao realizar ao salvar a imagem. Tente novamente mais tarde!"
-      );
+      console.error("Error uploading avatar:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao salvar a imagem. Tente novamente mais tarde!";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
       handleCloseCropper();
     }
   };
 
-  const handleDeleteAvatar = async () => {
+  const handleDeleteAvatar = async (): Promise<void> => {
     setLoading(true);
     try {
       if (!user.id) {
-        throw new Error("user id is required");
+        throw new Error("ID do usuário é obrigatório");
       }
-      await deleteUserAvatar(user.id);
+
+      const success = await deleteUserAvatar(user.id);
+
+      if (!success) {
+        throw new Error("Falha ao remover a imagem");
+      }
 
       onUpdateUser();
       toast.success("Imagem de perfil removida com sucesso!");
     } catch (error) {
-      console.error("Error deleting avatar", error);
-      toast.error(
-        "Erro ao realizar ao remover a imagem. Tente novamente mais tarde!"
-      );
+      console.error("Error deleting avatar:", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Erro ao remover a imagem. Tente novamente mais tarde!";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent): void => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      document.getElementById("profile_image")?.click();
+    }
+  };
+
+  const userInitials =
+    user.profile?.full_name
+      ?.split(" ")
+      .slice(0, 3)
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "U";
+
+  const avatarAltText = `${
+    user.profile?.full_name || "Usuário"
+  } - foto de perfil`;
 
   return (
     <>
@@ -165,35 +163,50 @@ export const ProfileAvatarPicker = ({
           type="file"
           accept="image/*"
           className="hidden"
+          aria-label="Selecionar imagem de perfil"
         />
 
-        <Avatar className="size-28">
-          <AvatarImage src={user.profile?.avatar_url || ""} alt="" />
-          <AvatarFallback>
-            {user.profile?.full_name
-              ?.split(" ")
-              .slice(0, 3)
-              .map((n) => n[0])
-              .join("")
-              .toUpperCase()}
+        <Avatar className="size-28" role="img" aria-label="Foto de perfil">
+          <AvatarImage
+            src={user.profile?.avatar_url || ""}
+            alt={avatarAltText}
+          />
+          <AvatarFallback aria-label="Iniciais do usuário">
+            {userInitials}
           </AvatarFallback>
         </Avatar>
+
         <div className="flex flex-col gap-4">
           <Label
             htmlFor="profile_image"
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-9 px-4 py-2 cursor-pointer"
+            role="button"
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            aria-label={
+              user.profile?.avatar_url
+                ? "Editar foto de perfil"
+                : "Adicionar foto de perfil"
+            }
           >
             <Camera className="size-5! stroke-2! stroke-primary-foreground" />
             {user.profile?.avatar_url ? "Editar" : "Adicionar"}
           </Label>
+
           {user.profile?.avatar_url && (
-            <Button variant="destructive" onClick={handleDeleteAvatar}>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAvatar}
+              disabled={loading}
+              aria-label="Deletar foto de perfil"
+            >
               <Trash className="size-5! stroke-2!" />
               Deletar
             </Button>
           )}
         </div>
       </div>
+
       <ProfileAvatarCropper
         isOpen={isCropperOpen}
         onClose={handleCloseCropper}
