@@ -1,14 +1,15 @@
 "use client";
+
+// Global imports
 import React, { useState } from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft, Mail } from "lucide-react";
-
-import useAuth from "@/hooks/use-auth";
-
+import { Loader2, ArrowLeft, Mail, Clock } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
+
+// UI components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,38 +20,57 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import Image from "next/image";
-import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-const requestResetPasswordSchema = z.object({
-  email: z
-    .string()
-    .email("Forneça um e-mail válido")
-    .min(1, "O e-mail é obrigatório"),
-});
+// Hooks
+import useAuth from "@/hooks/use-auth";
 
-type RequestResetPasswordFormData = z.infer<typeof requestResetPasswordSchema>;
+// Local imports
+import { resetPasswordSchema } from "../utils";
+import { ResetPasswordFormDataT } from "../types";
+import { useCooldownManager } from "../utils/cooldown-manager";
+
+// Assets
+import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 export const RequestResetPasswordForm = () => {
   const { handleRequestResetPassword } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const form = useForm<RequestResetPasswordFormData>({
-    resolver: zodResolver(requestResetPasswordSchema),
+  const form = useForm<ResetPasswordFormDataT>({
+    resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: "",
     },
     mode: "onChange",
   });
 
-  const onSubmit = async (values: RequestResetPasswordFormData) => {
+  const currentEmail = form.watch("email");
+
+  const {
+    cooldown,
+    lastSentEmail,
+    isEmailChanged,
+    canResend,
+    startCooldown,
+    formatTime,
+  } = useCooldownManager(
+    {
+      duration: 120,
+      storageKey: "reset_password_cooldown",
+      emailStorageKey: "pending_reset_email",
+    },
+    currentEmail
+  );
+
+  const onSubmit = async (values: ResetPasswordFormDataT) => {
     try {
       setIsSubmitting(true);
 
       const success = await handleRequestResetPassword(values.email);
       if (success) {
+        startCooldown(values.email);
         toast.success("Solicitação enviada com sucesso!");
         setIsSuccess(true);
       } else {
@@ -69,9 +89,9 @@ export const RequestResetPasswordForm = () => {
     }
   };
 
-  const handleResend = () => {
-    if (form.getValues().email) {
-      onSubmit(form.getValues());
+  const handleResend = async () => {
+    if (form.getValues().email && canResend) {
+      await onSubmit(form.getValues());
     }
   };
 
@@ -125,9 +145,18 @@ export const RequestResetPasswordForm = () => {
                 )}
               />
 
+              {isEmailChanged && cooldown > 0 && (
+                <Alert>
+                  <AlertDescription className="text-sm">
+                    Você alterou o e-mail. Pode reenviar imediatamente para o
+                    novo endereço.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !canResend}
                 className="w-full font-semibold mt-2 cursor-pointer"
                 size="lg"
               >
@@ -136,6 +165,11 @@ export const RequestResetPasswordForm = () => {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Enviando...
                   </>
+                ) : !canResend ? (
+                  <>
+                    <Clock className="mr-2 h-4 w-4" />
+                    Aguarde {formatTime(cooldown)}
+                  </>
                 ) : (
                   <>
                     <Mail className="mr-2 h-4 w-4" />
@@ -143,6 +177,20 @@ export const RequestResetPasswordForm = () => {
                   </>
                 )}
               </Button>
+
+              {lastSentEmail && cooldown > 0 && !isEmailChanged && (
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground">
+                    E-mail enviado para{" "}
+                    <span className="font-medium text-foreground">
+                      {lastSentEmail}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Você pode reenviar em {formatTime(cooldown)}
+                  </p>
+                </div>
+              )}
             </form>
           </Form>
         </div>
@@ -170,10 +218,18 @@ export const RequestResetPasswordForm = () => {
             </Button>
             <Button
               onClick={handleResend}
+              disabled={!canResend}
               variant="link"
-              className="!text-blue-600 cursor-pointer hover:outline"
+              className="!text-blue-600 cursor-pointer hover:outline disabled:opacity-50"
             >
-              Reenviar instruções
+              {!canResend ? (
+                <>
+                  <Clock className="mr-2 h-4 w-4" />
+                  Aguarde {formatTime(cooldown)}
+                </>
+              ) : (
+                "Reenviar instruções"
+              )}
             </Button>
           </div>
         </div>

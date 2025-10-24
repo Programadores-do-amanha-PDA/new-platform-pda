@@ -1,15 +1,18 @@
 "use client";
+
+// Global imports
 import React from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, AlertCircleIcon, ArrowLeft, Lock } from "lucide-react";
-
-import useAuth from "@/hooks/use-auth";
-
 import Image from "next/image";
 import Link from "next/link";
+
+// Hooks
+import useAuth from "@/hooks/use-auth";
+
+// UI components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,31 +25,19 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+
+// Local Imports
+import { NewPasswordFormDataT } from "../types";
+import { newPasswordSchema } from "../utils";
+
+// Assets
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
-
-const resetPasswordSchema = z
-  .object({
-    password: z
-      .string()
-      .min(8, "A senha deve ter pelo menos 8 caracteres")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
-        "A senha deve conter pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial"
-      ),
-    confirmPassword: z.string().min(1, "Confirme sua nova senha"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "As senhas não coincidem",
-    path: ["confirmPassword"],
-  });
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 
 export const ResetPasswordForm = () => {
   const { handleUpdateUser, user } = useAuth();
 
-  const form = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+  const form = useForm<NewPasswordFormDataT>({
+    resolver: zodResolver(newPasswordSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
@@ -60,7 +51,7 @@ export const ResetPasswordForm = () => {
     setError,
   } = form;
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const onSubmit = async (data: NewPasswordFormDataT) => {
     try {
       if (!user) throw new Error("user is null");
 

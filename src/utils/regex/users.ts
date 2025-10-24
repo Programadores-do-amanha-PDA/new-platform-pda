@@ -3,3 +3,5 @@ export const emailRegex =
 
 export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
+
+export const fullNameRegex = /^[a-zA-Z]{4,}(?: [a-zA-Z]+){0,2}$/;

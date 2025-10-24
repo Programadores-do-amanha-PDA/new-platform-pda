@@ -1,16 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { z } from "zod";
+
+// Eslint Rules
+/* eslint-disable react-hooks/exhaustive-deps */
+
+// Global imports
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Clock, AlertCircleIcon, ArrowLeft } from "lucide-react";
-
-import useAuth from "@/hooks/use-auth";
-
 import Image from "next/image";
 import Link from "next/link";
+
+// Hooks
+import useAuth from "@/hooks/use-auth";
+
+// UI components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,30 +28,20 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 
+// Local Imports
+import { resendConfirmationSchema } from "../utils";
+import { ResendConfirmationFormDataT } from "../types";
+import { useCooldownManager } from "../utils/cooldown-manager";
+
+// Assets
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
-
-const resendConfirmationSchema = z.object({
-  email: z
-    .string()
-    .min(1, "Email é obrigatório")
-    .email("Email deve ter um formato válido")
-    .toLowerCase(),
-});
-
-type ResendConfirmationFormData = z.infer<typeof resendConfirmationSchema>;
-
-const INITIAL_COOLDOWN = 120;
-const STORAGE_KEY = "resend_confirmation_cooldown";
 
 export const ResendConfirmationForm = () => {
   const searchParams = useSearchParams();
   const { handleResendAnEmailSignupConfirmation } = useAuth();
-  const [cooldown, setCooldown] = useState(0);
-  const [lastSentEmail, setLastSentEmail] = useState<string>("");
 
-  const form = useForm<ResendConfirmationFormData>({
+  const form = useForm<ResendConfirmationFormDataT>({
     resolver: zodResolver(resendConfirmationSchema),
     defaultValues: {
       email: "",
@@ -62,6 +58,22 @@ export const ResendConfirmationForm = () => {
   } = form;
 
   const currentEmail = watch("email");
+
+  const {
+    cooldown,
+    lastSentEmail,
+    isEmailChanged,
+    canResend,
+    startCooldown,
+    formatTime,
+  } = useCooldownManager(
+    {
+      duration: 120,
+      storageKey: "resend_confirmation_cooldown",
+      emailStorageKey: "pending_confirmation_email",
+    },
+    currentEmail
+  );
 
   useEffect(() => {
     const getInitialEmail = () => {
@@ -91,76 +103,19 @@ export const ResendConfirmationForm = () => {
 
       if (email) {
         setValue("email", email);
-        setLastSentEmail(email);
       }
     };
 
     getInitialEmail();
-  }, [searchParams, setValue]);
+  }, []);
 
-  useEffect(() => {
-    const loadCooldown = () => {
-      if (typeof window === "undefined") return;
-
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          const { endTime, email } = JSON.parse(stored);
-          const remaining = Math.max(
-            0,
-            Math.floor((endTime - Date.now()) / 1000)
-          );
-
-          if (remaining > 0 && email === currentEmail) {
-            setCooldown(remaining);
-          } else {
-            localStorage.removeItem(STORAGE_KEY);
-          }
-        } catch {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      }
-    };
-
-    loadCooldown();
-  }, [currentEmail]);
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-
-    const timer = setInterval(() => {
-      setCooldown((prev) => {
-        const newValue = prev - 1;
-
-        if (newValue <= 0) {
-          localStorage.removeItem(STORAGE_KEY);
-          return 0;
-        }
-        return newValue;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [cooldown]);
-
-  const startCooldown = (email: string) => {
-    const endTime = Date.now() + INITIAL_COOLDOWN * 1000;
-    setCooldown(INITIAL_COOLDOWN);
-
-    if (typeof window !== "undefined") {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ endTime, email }));
-      localStorage.setItem("pending_confirmation_email", email);
-    }
-  };
-
-  const onSubmit = async (data: ResendConfirmationFormData) => {
+  const onSubmit = async (data: ResendConfirmationFormDataT) => {
     try {
       if (!data.email) throw new Error("Email is not provided");
 
       const isResent = await handleResendAnEmailSignupConfirmation(data.email);
 
       if (isResent) {
-        setLastSentEmail(data.email);
         startCooldown(data.email);
         toast.success("Email de confirmação enviado com sucesso!");
       } else {
@@ -180,15 +135,6 @@ export const ResendConfirmationForm = () => {
       });
     }
   };
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const isEmailChanged = currentEmail !== lastSentEmail;
-  const canResend = cooldown === 0 || isEmailChanged;
 
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
@@ -238,7 +184,7 @@ export const ResendConfirmationForm = () => {
             />
 
             {isEmailChanged && cooldown > 0 && (
-              <Alert>
+              <Alert variant="default">
                 <AlertDescription className="text-sm">
                   Você alterou o email. Pode reenviar imediatamente para o novo
                   endereço.
@@ -289,7 +235,6 @@ export const ResendConfirmationForm = () => {
             )}
           </form>
         </Form>
-        <Separator />
         <div className="text-sm text-muted-foreground">
           <p className="font-medium text-foreground mb-2">
             Não recebeu o email?

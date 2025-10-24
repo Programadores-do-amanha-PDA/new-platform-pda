@@ -1,41 +1,29 @@
+"Use client";
+
+// Global import
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { jwtDecode } from "jwt-decode";
-import { getAuthUser, getSession } from "@/app/actions/auth";
-import { getProfileById } from "@/app/actions/profiles";
-import { getAvatarUrlById } from "@/app/actions/profile-avatar";
-import { getPermissionsByRole } from "@/app/actions/role-permissions";
-import { AuthUserWithProfileT, JwtPayloadT, ProfileT, RolesT, PermissionT } from "@/types";
 
-interface AuthState {
-  user: AuthUserWithProfileT | null;
-  userRole: RolesT | null;
-  permissions: PermissionT[];
-  loading: boolean;
-}
+// Actions
+import {
+  getProfileById,
+  getAuthUser,
+  getSession,
+  getPermissionsByRole,
+} from "@/app/actions";
 
-interface AuthActions {
-  setUser: (user: AuthUserWithProfileT | null) => void;
-  setUserRole: (role: RolesT | null) => void;
-  setPermissions: (permissions: PermissionT[]) => void;
-  getUserProfile: (jwt: string) => Promise<void>;
-  fetchUserPermissions: (role: RolesT) => Promise<void>;
-  updateAuthState: (session: { access_token: string } | null) => Promise<void>;
-  fetchSession: () => Promise<void>;
-  hasPermission: (permission: string) => boolean;
-  hasAnyPermission: (permissions: string[]) => boolean;
-  hasAllPermissions: (permissions: string[]) => boolean;
-  reset: () => void;
-}
+// Types
+import { JwtPayloadT, ProfileT, AuthActionsT, AuthStateT } from "@/types";
 
-const initialState: AuthState = {
+const initialState: AuthStateT = {
   user: null,
   userRole: null,
   permissions: [],
   loading: true,
 };
 
-export const useAuthStore = create<AuthState & AuthActions>()(
+export const useAuthStore = create<AuthStateT & AuthActionsT>()(
   devtools(
     (set, get) => ({
       ...initialState,
@@ -57,15 +45,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       getUserProfile: async (jwt) => {
         try {
           const user = await getAuthUser(jwt);
-          if (!user) {
+          if (!user?.id) {
             set({ user: null, loading: false });
             return;
           }
+          console.log("user", user);
 
-          const [userProfile, useravatar_url] = await Promise.all([
-            getProfileById(user.id),
-            getAvatarUrlById(user.id),
-          ]);
+          const [userProfile] = await Promise.all([getProfileById(user.id)]);
+
+          console.log("userProfile", userProfile);
 
           if (userProfile) {
             set({
@@ -73,7 +61,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 ...user,
                 profile: {
                   ...(userProfile as ProfileT),
-                  avatar_url: useravatar_url,
                 },
               },
               loading: false,
@@ -105,11 +92,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           }
 
           set({ userRole: jwt.user_role });
-          
+
           // Fetch user profile and permissions in parallel
           await Promise.all([
             get().getUserProfile(session.access_token),
-            get().fetchUserPermissions(jwt.user_role)
+            get().fetchUserPermissions(jwt.user_role),
           ]);
         } catch {
           set({ ...initialState, loading: false });
@@ -134,12 +121,16 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       hasAnyPermission: (permissions) => {
         const { permissions: userPermissions } = get();
-        return permissions.some(permission => userPermissions.includes(permission));
+        return permissions.some((permission) =>
+          userPermissions.includes(permission)
+        );
       },
 
       hasAllPermissions: (permissions) => {
         const { permissions: userPermissions } = get();
-        return permissions.every(permission => userPermissions.includes(permission));
+        return permissions.every((permission) =>
+          userPermissions.includes(permission)
+        );
       },
 
       reset: () => {

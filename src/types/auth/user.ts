@@ -21,7 +21,7 @@ export interface ProfileT {
 
 export type AuthUserWithProfileT = AuthUser & { profile: ProfileT };
 
-export type UserAuthLogin = {
+export type UserAuthLoginT = {
   password: string;
   email: string;
   nonce: string;

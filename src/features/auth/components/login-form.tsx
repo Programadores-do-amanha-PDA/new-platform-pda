@@ -1,17 +1,21 @@
 "use client";
 
-import { z } from "zod";
+// Global imports
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
+// Hooks
 import useAuth from "@/hooks/use-auth";
 
+// Actions
 import { signInWithPassword } from "@/app/actions";
 
-import Link from "next/link";
+// UI components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,35 +26,19 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Session } from "@supabase/supabase-js";
-import Image from "next/image";
 
+// Local imports
+import { LoginFormDataT, LoginResponseT } from "../types";
+import { loginSchema } from "../utils";
+
+// Assets
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
-
-const loginSchema = z.object({
-  email: z.email("Email deve ter um formato válido").toLowerCase(),
-  password: z
-    .string()
-    .min(1, "Senha é obrigatória")
-    .min(6, "Senha deve ter pelo menos 6 caracteres"),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
-
-interface LoginResponse {
-  error: boolean;
-  confirmation?: boolean;
-  data?: {
-    session: Session;
-  };
-  message?: string;
-}
 
 export const LoginForm = () => {
   const router = useRouter();
   const { updateAuthState } = useAuth();
 
-  const form = useForm<LoginFormData>({
+  const form = useForm<LoginFormDataT>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
@@ -65,9 +53,9 @@ export const LoginForm = () => {
     setError,
   } = form;
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormDataT) => {
     try {
-      const response: LoginResponse = await signInWithPassword(data);
+      const response: LoginResponseT = await signInWithPassword(data);
 
       if (response.error && response.confirmation) {
         toast.error("Confirme seu email para continuar.");

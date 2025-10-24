@@ -21,9 +21,8 @@ export const loginSchema = z.object({
  */
 export const resetPasswordSchema = z.object({
   email: z
-    .string()
-    .min(1, "Email é obrigatório")
     .email("Email deve ter um formato válido")
+    .min(1, "Email é obrigatório")
     .toLowerCase(),
 });
 
@@ -32,9 +31,8 @@ export const resetPasswordSchema = z.object({
  */
 export const resendConfirmationSchema = z.object({
   email: z
-    .string()
-    .min(1, "Email é obrigatório")
     .email("Email deve ter um formato válido")
+    .min(1, "Email é obrigatório")
     .toLowerCase(),
 });
 

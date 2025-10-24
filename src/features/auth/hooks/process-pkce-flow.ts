@@ -1,8 +1,13 @@
-import { toast } from "sonner";
-import { setSession } from "@/app/actions";
-import { Session, type EmailOtpType } from "@supabase/supabase-js";
+// GLobal imports
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import createClient from "@/lib/supabase/client";
+import { Session, type EmailOtpType } from "@supabase/supabase-js";
+import { toast } from "sonner";
+
+// Actions
+import { setSession, verifyOtp } from "@/app/actions";
+
+// Libs
+import { OtpFlowParamsT, OtpFlowResultT } from "../types";
 
 /**
  * Handles OTP (One-Time Password) authentication flow
@@ -25,27 +30,6 @@ import createClient from "@/lib/supabase/client";
  * }, []);
  * ```
  */
-export interface OtpFlowParams {
-  /** Token hash from email/SMS verification */
-  tokenHash: string;
-  /** Type of authentication flow */
-  type: string | null;
-  /** Next.js router instance for navigation */
-  router: AppRouterInstance;
-  /** Auth state update function from useAuth hook */
-  updateAuthState: (session: Session) => void;
-  /** Optional callback for successful authentication */
-  onSuccess?: (session: Session, type: string | null) => void;
-  /** Optional callback for authentication errors */
-  onError?: (error: Error) => void;
-}
-
-export interface OtpFlowResult {
-  success: boolean;
-  session?: Session;
-  redirectPath?: string;
-  error?: Error;
-}
 
 /**
  * Processes OTP authentication flow by verifying token hash
@@ -67,13 +51,12 @@ export interface OtpFlowResult {
  * @returns Promise with the flow result
  */
 export async function processOtpFlow(
-  params: OtpFlowParams
-): Promise<OtpFlowResult> {
+  params: OtpFlowParamsT
+): Promise<OtpFlowResultT> {
   const { tokenHash, type, router, updateAuthState, onSuccess, onError } =
     params;
 
   try {
-
     // Validate required token_hash parameter
     if (!tokenHash) {
       throw new Error("Token hash is missing");
@@ -133,37 +116,33 @@ export async function processOtpFlow(
  */
 async function verifyOtpToken(tokenHash: string, type: string | null) {
   try {
-    // Initialize Supabase client
-    const supabase = createClient();
-
     // Verify OTP token using Supabase's built-in method
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.verifyOtp({
-      type: type as EmailOtpType,
-      token_hash: tokenHash,
-    });
+    const result = await verifyOtp(
+      tokenHash,
+      type as EmailOtpType
+    );
 
-    if (error) {
-      throw new Error(`Token verification failed: ${error.message}`);
+    if (result.error) {
+      const errorMessage =
+        result.error instanceof Error ? result.error.message : String(result.error);
+      throw new Error(`Token verification failed: ${errorMessage}`);
     }
 
-    if (!session) {
-      throw new Error("No session returned from token verification");
+    if (!result.session || !result.user) {
+      throw new Error("No session or user returned from token verification");
     }
 
     // Set session in server-side for middleware and server components
-    const serverSession = await setSession(
-      session.access_token,
-      session.refresh_token
+    const serverSessionResult = await setSession(
+      result.session.access_token,
+      result.session.refresh_token
     );
 
-    if (!serverSession) {
+    if (serverSessionResult.error || !serverSessionResult.session) {
       throw new Error("Failed to establish server session");
     }
 
-    return serverSession;
+    return serverSessionResult.session;
   } catch (error) {
     console.error("Token verification error:", error);
     throw error;
