@@ -1,6 +1,10 @@
 "use client";
+
+//  GLobal imports
 import { useEffect } from "react";
 import { redirect } from "next/navigation";
+
+// Hooks
 import useAuth from "@/hooks/use-auth";
 
 export default function RootPage() {
