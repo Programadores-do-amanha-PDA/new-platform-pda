@@ -44,7 +44,7 @@ import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
 import pathLabels from "@/utils/path-labels";
 import {
   UserModeFormDialogPropsT,
-} from "../../types";
+} from "../../types/user-mode";
 import {
   UserModeFormSchema,
   UserModeFormSchemaT,

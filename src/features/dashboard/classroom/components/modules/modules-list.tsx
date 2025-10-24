@@ -1,17 +1,28 @@
 "use client";
-import React, { useState } from "react";
+
+// Global imports
+import React, { useState, useCallback } from "react";
 import { Plus } from "lucide-react";
+
+// UI Components
 import { Button } from "@/components/ui/button";
+
+// Local imports
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
 import { ClassroomConfigModulesT } from "@/types/classroom-configs";
+import { ModulesListPropsT } from "../../types";
+import { 
+  isModulesListEmpty, 
+  getModulesCountDescription 
+} from "../../utils";
 import ModuleCard from "./module-card";
 import ModuleFormDialog from "./module-form-dialog";
 
-interface ModulesListProps {
-  classroomId: string;
-}
-
-const ModulesList = ({ classroomId }: ModulesListProps) => {
+/**
+ * ModulesList component displays and manages classroom modules
+ * Provides functionality to create, edit, and view modules in a classroom
+ */
+const ModulesList = ({ classroomId }: ModulesListPropsT): JSX.Element => {
   const [currentModule, setCurrentModule] =
     useState<ClassroomConfigModulesT | null>(null);
 
@@ -19,37 +30,59 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
 
   const currentConfig = configsByClassroom[classroomId];
   const modules = currentConfig?.modules || [];
+  const isEmpty = isModulesListEmpty(modules);
+  const modulesCountDescription = getModulesCountDescription(modules);
 
-  const handleEditModule = (module: ClassroomConfigModulesT) => {
+  /**
+   * Handles module editing by setting the current module for the dialog
+   * @param module - Module to edit
+   */
+  const handleEditModule = useCallback((module: ClassroomConfigModulesT): void => {
     setCurrentModule(module);
-  };
+  }, []);
 
-  const handleCloseDialog = () => {
+  /**
+   * Handles dialog close by clearing the current module
+   */
+  const handleCloseDialog = useCallback((): void => {
     setCurrentModule(null);
-  };
+  }, []);
 
   return (
-    <div className="w-full max-w-[400px] h-max max-h-96 flex flex-col border rounded-lg overflow-hidden">
+    <div 
+      className="w-full max-w-[400px] h-max max-h-96 flex flex-col border rounded-lg overflow-hidden"
+      role="region"
+      aria-label="Lista de módulos da turma"
+    >
       <header className="w-full flex items-center justify-between border-b-2 p-3 bg-muted">
-        <h2 className="font-bold">Módulos da Turma</h2>
+        <h2 className="font-bold" id="modules-heading">
+          Módulos da Turma
+        </h2>
 
-        {modules.length > 0 && currentConfig && (
+        {!isEmpty && currentConfig && (
           <ModuleFormDialog
             configId={currentConfig.id}
             trigger={
-              <Button size="icon">
-                <Plus className="size-4" />
+              <Button 
+                size="icon"
+                aria-label="Adicionar novo módulo"
+              >
+                <Plus className="size-4" aria-hidden="true" />
               </Button>
             }
           />
         )}
       </header>
 
-      {modules.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center">
+      {isEmpty ? (
+        <div 
+          className="flex-1 flex items-center justify-center"
+          role="status"
+          aria-live="polite"
+        >
           <div className="text-center py-4 space-y-6">
             <div>
-              <h3 className="font-semibold">Nenhum módulo encontrado</h3>
+              <h3 className="font-semibold">{modulesCountDescription}</h3>
               <p className="text-sm text-muted-foreground">
                 Comece criando o primeiro módulo da turma
               </p>
@@ -58,8 +91,8 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
               <ModuleFormDialog
                 configId={currentConfig.id}
                 trigger={
-                  <Button>
-                    <Plus className="size-4 mr-2" />
+                  <Button aria-describedby="modules-heading">
+                    <Plus className="size-4 mr-2" aria-hidden="true" />
                     Criar Primeiro Módulo
                   </Button>
                 }
@@ -69,7 +102,11 @@ const ModulesList = ({ classroomId }: ModulesListProps) => {
         </div>
       ) : (
         <div className="flex-1 overflow-auto">
-          <ul className="w-full grid grid-flow-row *:hover:bg-zinc-50 *:p-3 *:not-first:border-t">
+          <ul 
+            className="w-full grid grid-flow-row *:hover:bg-zinc-50 *:p-3 *:not-first:border-t"
+            role="list"
+            aria-labelledby="modules-heading"
+          >
             {modules.map((module) => (
               <ModuleCard
                 key={module.id}
