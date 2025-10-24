@@ -1,13 +1,14 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
-import { type EmailOtpType } from "@supabase/supabase-js";
 
-type UserAuthLogin = {
+// Libs
+import { createClient } from "@/lib/supabase/server";
+
+type UserAuthLoginTT = {
   email: string;
   password: string;
 };
 
-export async function signInWithPassword(userCredentials: UserAuthLogin) {
+export async function signInWithPassword(userCredentials: UserAuthLoginTT) {
   try {
     const supabase = await createClient();
 
@@ -70,11 +71,11 @@ export const setSession = async (
       access_token,
       refresh_token,
     });
-    if (error) throw error;
-    return session;
+    if (error) throw { error: error };
+    return { session: session };
   } catch (error) {
     console.error(error);
-    return false;
+    return { error: error };
   }
 };
 
@@ -93,32 +94,3 @@ export const signOut = async () => {
     return false;
   }
 };
-
-export async function handlePasswordRecovery(tokenHash: string, type: string) {
-  const supabase = await createClient();
-
-  try {
-    const { data, error } = await supabase.auth.verifyOtp({
-      type: type as EmailOtpType,
-      token_hash: tokenHash,
-    });
-
-    if (error) {
-      console.error("Erro no verifyOtp:", error);
-      return { error: error.message, success: false };
-    }
-
-    if (!data.session) {
-      return { error: "Sessão não criada", success: false };
-    }
-
-    return {
-      success: true,
-      session: data.session,
-      user: data.session.user,
-    };
-  } catch (error) {
-    console.error("Erro no handlePasswordRecovery:", error);
-    return { error: "Erro interno do servidor", success: false };
-  }
-}

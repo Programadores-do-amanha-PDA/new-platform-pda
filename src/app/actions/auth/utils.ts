@@ -12,7 +12,7 @@ export const getAuthUser = async (jwt: string) => {
     return user;
   } catch (error) {
     console.error("Error fetching auth user:", error);
-    return false;
+    return null;
   }
 };
 
