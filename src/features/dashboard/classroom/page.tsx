@@ -10,17 +10,13 @@ import { JustificationsList } from "./components/justifications";
 import { UserModesList } from "./components/user-modes";
 
 const ClassroomHomePage = () => {
-  const { classroom_id } = useParams();
+  const { classroom_id } = useParams<{ classroom_id: string }>();
   const { classrooms } = useClassroomStore();
 
-  const classroomId = Array.isArray(classroom_id)
-    ? classroom_id[0]
-    : classroom_id;
-
-  if (!classroomId) return null;
+  if (!classroom_id) return null;
 
   const currentClassroom = classrooms.find(
-    (classroom) => classroom.id === classroomId
+    (classroom) => classroom.id === classroom_id
   );
 
   return (
@@ -40,10 +36,10 @@ const ClassroomHomePage = () => {
         }
       >
         <div className="w-full flex flex-wrap gap-6 p-6">
-          <ModulesList classroomId={classroomId} />
-          <ClassTypesList classroomId={classroomId} />
-          <JustificationsList classroomId={classroomId} />
-          <UserModesList classroomId={classroomId} />
+          <ModulesList classroomId={classroom_id} />
+          <ClassTypesList classroomId={classroom_id} />
+          <JustificationsList classroomId={classroom_id} />
+          <UserModesList classroomId={classroom_id} />
         </div>
       </PermissionGuard>
     </div>

@@ -1,6 +1,6 @@
 import Color, { ColorLike } from "color";
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT } from "@/types";
 import { UserModeFormDataT } from "../types/user-mode";
 
 /**
@@ -40,7 +40,7 @@ export const processColorValue = (colorValue: ColorLike): string | null => {
  * @returns Default form values
  */
 export const getDefaultUserModeFormValues = (
-  currentUserMode?: ClassroomConfigUserMode | null
+  currentUserMode?: ClassroomConfigUserModeT | null
 ): UserModeFormDataT => {
   if (currentUserMode) {
     // Merge existing rules with available features to ensure all features are present
@@ -85,8 +85,8 @@ export const getDefaultUserModeFormValues = (
  */
 export const createUserModeFromFormData = (
   formData: UserModeFormDataT,
-  currentUserMode?: ClassroomConfigUserMode | null
-): ClassroomConfigUserMode => {
+  currentUserMode?: ClassroomConfigUserModeT | null
+): ClassroomConfigUserModeT => {
   return {
     id: currentUserMode?.id || crypto.randomUUID(),
     title: formData.title.trim(),
@@ -110,10 +110,10 @@ export const createUserModeFromFormData = (
  * @returns Updated user modes array
  */
 export const updateUserModesArray = (
-  currentUserModes: ClassroomConfigUserMode[],
-  newUserMode: ClassroomConfigUserMode,
+  currentUserModes: ClassroomConfigUserModeT[],
+  newUserMode: ClassroomConfigUserModeT,
   isEditing: boolean
-): ClassroomConfigUserMode[] => {
+): ClassroomConfigUserModeT[] => {
   if (isEditing) {
     return currentUserModes.map((userMode) =>
       userMode.id === newUserMode.id ? newUserMode : userMode

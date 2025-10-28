@@ -1,4 +1,4 @@
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT, UserModeFeatureRuleT } from "@/types";
 
 // User Mode Types
 export interface UserModeFormDataT {
@@ -8,15 +8,9 @@ export interface UserModeFormDataT {
   featuresRules: UserModeFeatureRuleT[];
 }
 
-export interface UserModeFeatureRuleT {
-  id: string;
-  isVisible: boolean;
-  aggregateInMetric: boolean;
-}
-
 export interface UserModeFormDialogPropsT {
   configId: string;
-  currentUserMode?: ClassroomConfigUserMode | null;
+  currentUserMode?: ClassroomConfigUserModeT | null;
   trigger?: React.ReactNode;
   onClose?: () => void;
 }
