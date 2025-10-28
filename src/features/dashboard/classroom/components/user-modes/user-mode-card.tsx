@@ -12,14 +12,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT } from "@/types/classroom-configs";
 import { useState } from "react";
 import { DeleteConfirmationDialog } from "@/components/shared/delete-components";
 
 interface UserModeCardProps {
   configId: string;
-  userMode: ClassroomConfigUserMode;
-  onEdit: (userMode: ClassroomConfigUserMode) => void;
+  userMode: ClassroomConfigUserModeT;
+  onEdit: (userMode: ClassroomConfigUserModeT) => void;
 }
 
 const UserModeCard = ({ configId, userMode, onEdit }: UserModeCardProps) => {
@@ -34,7 +34,7 @@ const UserModeCard = ({ configId, userMode, onEdit }: UserModeCardProps) => {
     if (!currentConfig) return;
 
     const updatedUserModes = currentConfig.user_modes.filter(
-      (u: ClassroomConfigUserMode) => u.id !== userMode.id
+      (u: ClassroomConfigUserModeT) => u.id !== userMode.id
     );
     await updateConfigById(configId, { user_modes: updatedUserModes });
   };

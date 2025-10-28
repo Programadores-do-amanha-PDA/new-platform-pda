@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT } from "@/types/classroom-configs";
 import { UserModeCard, UserModeFormDialog } from "./";
 
 interface UserModesListProps {
@@ -12,14 +12,14 @@ interface UserModesListProps {
 
 const UserModesList = ({ classroomId }: UserModesListProps) => {
   const [currentUserMode, setCurrentUserMode] =
-    useState<ClassroomConfigUserMode | null>(null);
+    useState<ClassroomConfigUserModeT | null>(null);
 
   const { configsByClassroom } = useClassroomConfigStore();
 
   const currentConfig = configsByClassroom[classroomId];
   const userModes = currentConfig?.user_modes || [];
 
-  const handleEditUserMode = (userMode: ClassroomConfigUserMode) => {
+  const handleEditUserMode = (userMode: ClassroomConfigUserModeT) => {
     setCurrentUserMode(userMode);
   };
 
