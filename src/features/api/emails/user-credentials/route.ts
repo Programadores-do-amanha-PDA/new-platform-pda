@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/errors/api-error";
 import { authenticateWithSupabase } from "@/app/api/middleware/supabase-auth";
 import { userCredentialsSchema } from "./utils/validations";
-import { logger } from "@/lib/logger";
+import { logInfo, logError } from "@/lib/logger";
 import { UserCredentialsEmailService } from "./utils/user-credentials-email-service";
 
 export async function POST(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     const user = await authenticateWithSupabase();
 
     // Log with user context
-    logger.info("Sending user credentials email", {
+    logInfo("Sending user credentials email", {
       userId: user.userId,
       email: user.email,
       role: user.role,
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     await UserCredentialsEmailService.sendUserCredentialsEmail(validatedData);
 
-    logger.info("Credentials email sent successfully", {
+    logInfo("Credentials email sent successfully", {
       userId: user.userId,
       recipient: validatedData.email,
     });
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       message: "Email sent successfully",
     });
   } catch (error) {
-    logger.error("Error sending credentials email", error);
+    logError("Error sending credentials email", error);
     return handleApiError(error);
   }
 }

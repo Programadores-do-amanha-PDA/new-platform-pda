@@ -51,7 +51,8 @@ export default function SendDeliveriesFeedbackEmailModal({
   const { users } = useUsersStore();
   const { updateCorrection } = useCorrectionStore();
   const { configsByClassroom } = useClassroomConfigStore();
-  const classroomModules = configsByClassroom[project.classroom_id].modules || [];
+  const classroomModules =
+    configsByClassroom[project.classroom_id].modules || [];
 
   const getDeliveryCorrection = (
     deliveryId: string
@@ -141,10 +142,6 @@ export default function SendDeliveriesFeedbackEmailModal({
   const allMembers = (): DeliveryMemberT[] =>
     getCorrectedDeliveries().flatMap((delivery: ClassroomProjectDeliveryT) => {
       // Use members_id (new structure) if available, otherwise fallback to members (old structure)
-      const memberEmailsOrIds =
-        delivery.members_id && delivery.members_id.length > 0
-          ? delivery.members_id
-          : delivery.members || [];
 
       if (project.project_type === "mini_project") {
         const author = users.find(
@@ -158,23 +155,35 @@ export default function SendDeliveriesFeedbackEmailModal({
           name: author?.full_name || author?.email?.split("@")[0] || "",
           deliveryData: deliveryData(delivery),
         };
+      } else if (
+        project.project_type === "end_module_english_project" ||
+        project.project_type === "end_module_project"
+      ) {
+        const memberEmailsOrIds =
+          delivery.members_id &&
+          delivery.members_id.length > 0 &&
+          delivery.user_id.length > 0
+            ? [delivery.user_id, ...delivery.members_id]
+            : delivery.members || [];
+
+        return memberEmailsOrIds.map((memberEmailOrId: string) => {
+          // Find user data by email
+          const userData = users.find(
+            (user) =>
+              user.email === memberEmailOrId || user.id === memberEmailOrId
+          );
+
+          return {
+            email: userData?.email || memberEmailOrId || "",
+            name: userData?.profile?.full_name || memberEmailOrId.split("@")[0],
+            avatar_url: userData?.profile?.avatar_url || undefined,
+            deliveryId: delivery.id,
+            deliveryData: deliveryData(delivery),
+          };
+        });
       }
 
-      return memberEmailsOrIds.map((memberEmailOrId: string) => {
-        // Find user data by email
-        const userData = users.find(
-          (user) =>
-            user.email === memberEmailOrId || user.id === memberEmailOrId
-        );
-
-        return {
-          email: userData?.email || memberEmailOrId || "",
-          name: userData?.profile?.full_name || memberEmailOrId.split("@")[0],
-          avatar_url: userData?.profile?.avatar_url || undefined,
-          deliveryId: delivery.id,
-          deliveryData: deliveryData(delivery),
-        };
-      });
+      return [];
     });
 
   const handleSelectAllDeliveries = () => {
@@ -246,9 +255,9 @@ export default function SendDeliveriesFeedbackEmailModal({
             project_type:
               projectTypesLabels[project.project_type]?.label ||
               project.project_type,
-            project_module: classroomModules.find(
-                (module) => module.id === project.module
-              )?.title || `M${project.module}`,
+            project_module:
+              classroomModules.find((module) => module.id === project.module)
+                ?.title || `M${project.module}`,
             teacher_name: deliveryMember.deliveryData.teacher_name ?? "",
             teacher_email: deliveryMember.deliveryData.teacher_email ?? "",
             to_name: deliveryMember.name.split(" ")[0],
