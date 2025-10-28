@@ -5,10 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomConfigUserMode } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT } from "@/types/classroom-configs";
 
 interface UserModeSelectorProps {
-  options: ClassroomConfigUserMode[];
+  options: ClassroomConfigUserModeT[];
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;

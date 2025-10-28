@@ -1,5 +1,5 @@
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
-import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
+import { AuthUserWithProfileT, ClassroomConfigUserModeT, UserModeFeatureRuleT } from "@/types";
 
 /**
  * Filters users by classroom ID and user mode presence requirement
@@ -29,7 +29,7 @@ import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
 export function filterVisibilityClassroomStudents(
   users: Partial<AuthUserWithProfileT>[],
   classroomId: string,
-  userModes: ClassroomConfigUserMode[],
+  userModes: ClassroomConfigUserModeT[],
   ruleId: (typeof ADMIN_CLASSROOM_PAGES_KEYS)[number]
 ): AuthUserWithProfileT[] {
   // Pre-compute a Set of mode IDs that require user presence
@@ -39,7 +39,7 @@ export function filterVisibilityClassroomStudents(
       .filter((mode) => {
         // Check if the feature rule is configured to be visible
         const modeRules = mode.featuresRules?.find(
-          (rule) => rule.id === ruleId
+          (rule: UserModeFeatureRuleT) => rule.id === ruleId
         );
         return modeRules?.isVisible ?? false;
       })

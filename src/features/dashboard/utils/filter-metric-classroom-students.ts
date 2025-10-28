@@ -1,5 +1,5 @@
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
-import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
+import { AuthUserWithProfileT, ClassroomConfigUserModeT, UserModeFeatureRuleT } from "@/types";
 
 /**
  * Filters users by classroom ID and user mode metric aggregation requirement
@@ -31,7 +31,7 @@ import { AuthUserWithProfileT, ClassroomConfigUserMode } from "@/types";
 export function filterMetricClassroomStudents(
   users: Partial<AuthUserWithProfileT>[],
   classroomId: string,
-  userModes: ClassroomConfigUserMode[],
+  userModes: ClassroomConfigUserModeT[],
   ruleId: (typeof ADMIN_CLASSROOM_PAGES_KEYS)[number]
 ): AuthUserWithProfileT[] {
   // Pre-compute a Set of mode IDs that should be aggregated in metrics
@@ -41,7 +41,7 @@ export function filterMetricClassroomStudents(
       .filter((mode) => {
         // Check if the feature rule is configured to aggregate in metrics
         const modeRules = mode.featuresRules?.find(
-          (rule) => rule.id === ruleId
+          (rule: UserModeFeatureRuleT) => rule.id === ruleId
         );
         return modeRules?.aggregateInMetric ?? false;
       })
