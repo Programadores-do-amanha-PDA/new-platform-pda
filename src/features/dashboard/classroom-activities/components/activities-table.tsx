@@ -42,7 +42,7 @@ import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
 import { AuthUserWithProfileT } from "@/types";
 import { calculateActivityDelivery } from "../utils/activity-delivery-calculator";
 import { calculateUserActivityParticipation } from "@/utils/activity-calculator";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { ActivitiesTablePropsT } from "../types";
 import { usersColumns } from "./activities-table-columns";
 

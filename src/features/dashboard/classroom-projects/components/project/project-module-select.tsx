@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 
 import { ProjectModuleSelectPropsT } from "../../types";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { getDefaultModules } from "../../utils/projects/default-modules";
 import { cn } from "@/lib/utils";
 

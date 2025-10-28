@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 
 import PollResultsTable from "./components/poll-results-table";

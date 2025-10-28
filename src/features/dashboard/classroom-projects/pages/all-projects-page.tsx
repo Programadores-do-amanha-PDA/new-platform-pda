@@ -5,7 +5,7 @@ import PermissionGuard from "@/components/shared/permission-guard";
 import ProjectCard from "../components/project/project-card";
 import ProjectDialog from "../components/project/project-dialog";
 import { useProjectStore } from "../stores";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import {
   Accordion,
   AccordionContent,

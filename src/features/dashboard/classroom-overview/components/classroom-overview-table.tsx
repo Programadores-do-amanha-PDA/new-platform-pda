@@ -1,7 +1,7 @@
 "use client";
 
 import { ClassroomOverviewData } from "@/types/classroom-overview";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
+import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 import { DataTable } from "./data-table";
 import { createColumns } from "./columns";
 

@@ -1,4 +1,14 @@
-import { ClassroomConfigClassTypesT } from "@/types";
+"use client";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
 import {
   ZoomClassT,
   ZoomMeetingPastInstanceT,
@@ -8,13 +18,6 @@ import {
   useZoomMeetingPastInstanceStore,
   useZoomMeetingStore,
 } from "../../classroom-zoom/stores";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const MeetingTypeSelector = ({
   options,

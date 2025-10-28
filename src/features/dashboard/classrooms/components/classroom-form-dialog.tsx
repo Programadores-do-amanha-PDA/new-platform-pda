@@ -111,7 +111,7 @@ const ClassroomFormDialog = ({
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button
           className="font-semibold"
           variant={currentClassroom ? "outline" : "default"}

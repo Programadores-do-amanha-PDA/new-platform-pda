@@ -31,7 +31,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDeliveryStore } from "../../stores/deliveries";
 import { projectTypesLabels } from "../../utils";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { urlRegex } from "../../utils/deliveries/regex";
 import { cn } from "@/lib/utils";

@@ -11,7 +11,7 @@ import useAuth from "@/hooks/use-auth";
 import PageLoader from "@/components/shared/page-loader";
 
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 
 import {
   useZoomMeetingStore,

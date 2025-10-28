@@ -4,7 +4,7 @@ import { useClassroomActivityStore } from "@/stores/modules/classrooms/activitie
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import ActivitiesTable from "./components/activities-table";
 import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { filterMetricClassroomStudents } from "../utils/filter-metric-classroom-students";
 
 export default function ClassroomActivitiesPage() {

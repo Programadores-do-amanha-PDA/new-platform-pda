@@ -10,7 +10,7 @@ import {
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
 import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { useCoodeshAssessmentStore } from "../classroom-coodesh/stores/assessments";
 import {
   calculatePresenceByType,
