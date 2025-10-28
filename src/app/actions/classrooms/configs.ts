@@ -1,6 +1,6 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassroomConfigT } from "@/types/classroom-configs";
+import { ClassroomConfigT } from "@/features/dashboard/classroom-configs/types";
 
 const getConfigByClassroomId = async (classroomId: string) => {
   try {
