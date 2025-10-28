@@ -1,5 +1,7 @@
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/admin/sidebar-config";
-import { AuthUserWithProfileT, ClassroomConfigUserModeT, UserModeFeatureRuleT } from "@/types";
+import { AuthUserWithProfileT} from "@/types";
+import { ClassroomConfigUserModeT, UserModeFeatureRuleT } from "../classroom-configs/types";
+
 
 /**
  * Filters users by classroom ID and user mode metric aggregation requirement

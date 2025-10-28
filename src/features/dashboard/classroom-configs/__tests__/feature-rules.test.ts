@@ -14,7 +14,7 @@ jest.mock('@/providers/admin/sidebar-config', () => ({
 }));
 
 import { ADMIN_CLASSROOM_PAGES_KEYS } from '@/providers/admin/sidebar-config';
-import { ClassroomConfigUserModeT, UserModeFeatureRuleT } from '@/types';
+import { ClassroomConfigUserModeT, UserModeFeatureRuleT } from '@/features/dashboard/classroom-configs/types';
 import { DEFAULT_FEATURE_EXCLUSIONS, getAllFeaturesRules } from '../utils';
 
 describe('Feature Rules Utilities', () => {

@@ -30,7 +30,7 @@ export interface ClassroomConfigClassTypesFormLimitT {
   isPresence: boolean;
 }
 
-export interface ClassroomConfigClassTypesFormData {
+export interface ClassroomConfigClassTypesFormDataT {
   title: string;
   limits: Array<ClassroomConfigClassTypesFormLimitT>;
 }

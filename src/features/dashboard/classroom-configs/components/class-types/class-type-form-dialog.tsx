@@ -23,14 +23,14 @@ import {
 } from "@/components/ui/form";
 import {
   ClassroomConfigClassTypesT,
-  ClassroomConfigClassTypesSchema,
-  ClassroomConfigClassTypesFormData,
+  ClassroomConfigClassTypesFormDataT,
 } from "../../types";
 import Color, { ColorLike } from "color";
 import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import { toast } from "sonner";
 import { useClassroomConfigStore } from "../../stores";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ClassroomConfigClassTypesSchema } from "../../utils";
 
 interface ClassTypeFormDialogProps {
   currentClassType?: ClassroomConfigClassTypesT | null;
@@ -53,7 +53,7 @@ const ClassTypeFormDialog = ({
 
   const isEditing = !!currentClassType;
 
-  const form = useForm<ClassroomConfigClassTypesFormData>({
+  const form = useForm<ClassroomConfigClassTypesFormDataT>({
     resolver: zodResolver(ClassroomConfigClassTypesSchema),
     defaultValues: {
       title: "",
@@ -208,7 +208,7 @@ const ClassTypeFormDialog = ({
     [form]
   );
 
-  const onSubmit = async (data: ClassroomConfigClassTypesFormData) => {
+  const onSubmit = async (data: ClassroomConfigClassTypesFormDataT) => {
     setIsSubmitting(true);
 
     try {
