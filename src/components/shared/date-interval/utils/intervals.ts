@@ -1,4 +1,4 @@
-import { ClassroomConfigModulesT } from "@/types";
+import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 import {
   endOfDay,
   endOfWeek,
