@@ -1,4 +1,4 @@
-import { ClassroomActivityT } from "@/types";
+import { ClassroomActivityT } from "../../classroom-activities/types";
 
 export function calculateGeneralPresence(
   studentEmail: string,

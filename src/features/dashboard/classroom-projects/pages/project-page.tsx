@@ -13,7 +13,7 @@ import { projectTypesLabels } from "../utils/projects/project-type-labels";
 import { useDeliveryStore } from "../stores/deliveries";
 import { useProjectStore } from "../stores";
 import { useCorrectionStore } from "../stores/corrections";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 
 export default function ProjectPage() {
   const { project_id, classroom_id } = useParams<{

@@ -2,7 +2,7 @@ import {
   ClassroomConfigClassTypesT,
   ClassroomConfigClassTypesLimitT,
   ClassroomConfigJustificationT,
-} from "@/types/classroom-configs";
+} from "@/features/dashboard/classroom-configs/types";
 import { ZoomMeetingT, ZoomMeetingPastInstanceT } from "@/features/dashboard/classroom-zoom/types";
 
 /**

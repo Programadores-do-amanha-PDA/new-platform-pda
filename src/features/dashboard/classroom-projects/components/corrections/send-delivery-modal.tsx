@@ -29,7 +29,7 @@ import {
   DeliveryMemberT,
 } from "../../types";
 import { PROJECTS_RULES_FEEDBACKS, projectTypesLabels } from "../../utils";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 
 export default function SendDeliveriesFeedbackEmailModal({
   open,

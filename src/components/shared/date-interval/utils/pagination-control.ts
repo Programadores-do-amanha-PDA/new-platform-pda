@@ -1,5 +1,5 @@
 import { DateRange } from "react-day-picker";
-import { ClassroomConfigModulesT } from "@/types/classroom-configs";
+import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 import {
   startOfWeek,
   endOfWeek,

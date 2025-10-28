@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomConfigUserModeT } from "@/types/classroom-configs";
+import { ClassroomConfigUserModeT } from "@/features/dashboard/classroom-configs/types";
 
 interface UserModeSelectorProps {
   options: ClassroomConfigUserModeT[];

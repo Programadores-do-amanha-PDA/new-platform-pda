@@ -10,8 +10,7 @@ import React, {
 import useAuth from "@/hooks/use-auth";
 import PageLoader from "@/components/shared/page-loader";
 
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 
 import {
   useZoomMeetingStore,
@@ -23,6 +22,7 @@ import { useDeliveryStore } from "@/features/dashboard/classroom-projects/stores
 import { useCorrectionStore } from "@/features/dashboard/classroom-projects/stores/corrections";
 import { useZoomAccountStore } from "@/features/dashboard/classroom-zoom/stores/accounts";
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
+import { useClassroomActivityStore } from "@/features/dashboard/classroom-activities/store";
 interface ClassroomDataLoaderContextType {
   isLoading: boolean;
   classroomId: string;

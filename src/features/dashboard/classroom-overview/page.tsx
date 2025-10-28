@@ -9,8 +9,7 @@ import {
 } from "@/types/classroom-overview";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { useCoodeshAssessmentStore } from "../classroom-coodesh/stores/assessments";
 import {
   calculatePresenceByType,
@@ -27,6 +26,7 @@ import {
   useZoomMeetingStore,
   useZoomMeetingPastInstanceStore,
 } from "../classroom-zoom/stores";
+import { useClassroomActivityStore } from "../classroom-activities/store";
 
 export default function ClassroomAttendancePage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();
@@ -211,17 +211,15 @@ export default function ClassroomAttendancePage() {
       id: project.id,
       name: project.title,
     }));
-
-    // Debug temporário - remover depois
-    if (filteredProjects.length > 0 && classroomDeliveries.length > 0) {
-      console.log("DEBUG: Projects found:", filteredProjects.length);
-      console.log("DEBUG: Deliveries found:", classroomDeliveries.length);
-      console.log("DEBUG: Corrections found:", classroomCorrections.length);
-      console.log("DEBUG: Sample student data:", studentsData[0]?.projects);
-    }
-
     // Preparar dados dos modos de usuário
-    const userModes = currentConfig?.user_modes || [];
+    const userModes = (currentConfig?.user_modes || []).map((userMode) => ({
+      ...userMode,
+      featuresRules: userMode.featuresRules.map((rule) => ({
+        ...rule,
+        isVisible: rule.isVisible ?? false,
+        aggregateInMetric: rule.aggregateInMetric ?? false,
+      })),
+    }));
 
     setData({
       students: studentsData,
@@ -242,6 +240,7 @@ export default function ClassroomAttendancePage() {
     projects,
     classroomDeliveries,
     classroomCorrections,
+    currentConfigUserModes,
   ]);
 
   const handleDateRangeChange = (newDateRange: { from: Date; to: Date }) => {

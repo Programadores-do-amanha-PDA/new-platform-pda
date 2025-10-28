@@ -1,4 +1,5 @@
-import { ClassroomActivityT, AuthUserWithProfileT } from "@/types";
+import { AuthUserWithProfileT } from "@/types";
+import { ClassroomActivityT } from "../types";
 
 /**
  * Calculates the percentage of students who participated in an activity
@@ -16,10 +17,10 @@ export function calculateActivityDelivery(
 
   const totalStudents = students.length;
   const participantsEmails = activity.participants_email || [];
-  
+
   // Count how many students participated
-  const participatingStudents = students.filter(student => 
-    student.email && participantsEmails.includes(student.email)
+  const participatingStudents = students.filter(
+    (student) => student.email && participantsEmails.includes(student.email)
   ).length;
 
   // Calculate percentage and round to nearest integer

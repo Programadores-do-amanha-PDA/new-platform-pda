@@ -1,11 +1,11 @@
 "use client";
 import { useParams } from "next/navigation";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { useUsersStore } from "@/stores/modules/users/users-store";
 import ActivitiesTable from "./components/activities-table";
 import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
-import { useClassroomConfigStore } from "@/stores/modules/classrooms/configs";
+import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { filterMetricClassroomStudents } from "../utils/filter-metric-classroom-students";
+import { useClassroomActivityStore } from "./store";
 
 export default function ClassroomActivitiesPage() {
   const { classroom_id } = useParams<{ classroom_id: string }>();
