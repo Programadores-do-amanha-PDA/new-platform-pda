@@ -1,4 +1,5 @@
-import { AuthUserWithProfileT, ClassroomActivityT } from "@/types";
+import { AuthUserWithProfileT } from "@/types";
+import { ClassroomActivityT } from "../types";
 
 export interface ActivitiesTablePropsT {
   allVisibleUsers: Partial<AuthUserWithProfileT>[];

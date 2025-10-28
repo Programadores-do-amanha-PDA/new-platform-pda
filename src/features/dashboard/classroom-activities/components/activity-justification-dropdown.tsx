@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader, Pen, Trash, UserCheck, UserX } from "lucide-react";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,7 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
-import { ClassroomActivityT } from "@/types";
+import { ClassroomActivityT } from "../types";
+import { useClassroomActivityStore } from "../store";
 
 export function ActivityJustificationDropdown({
   currentActivity,

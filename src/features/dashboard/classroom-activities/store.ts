@@ -8,8 +8,8 @@ import {
   updateActivityById,
   deleteActivityById,
 } from "@/app/actions/classrooms/activities/activity";
-import { ClassroomActivityT } from "@/types";
 import { toast } from "sonner";
+import { ClassroomActivityT } from "./types";
 
 interface ClassroomActivityState {
   activities: ClassroomActivityT[];

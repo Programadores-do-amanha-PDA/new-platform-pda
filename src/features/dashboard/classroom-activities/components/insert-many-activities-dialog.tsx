@@ -2,7 +2,6 @@ import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import { LoaderCircle, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import {
   Dialog,
   DialogClose,
@@ -27,8 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import ActivityTypeSelector from "./activity-type-selector";
 import { Switch } from "@/components/ui/switch";
-import { ActivityTClassT } from "@/types";
+import { ActivityTClassT } from "../types";
 import { emailRegex } from "@/utils/regex/users";
+import { useClassroomActivityStore } from "../store";
 
 interface StudentData {
   email: string;

@@ -27,7 +27,7 @@ import { ColumnVisibilityDropdown } from "./column-visibility-dropdown";
 import { getColumnGroups } from "./column-groups";
 import { ClassroomOverviewData } from "@/types/classroom-overview";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { ClassroomConfigModulesT } from "@/types";
+import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

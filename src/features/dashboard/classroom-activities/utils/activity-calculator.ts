@@ -1,4 +1,4 @@
-import { ClassroomActivityT } from "@/types";
+import { ClassroomActivityT } from "../types";
 
 /**
  * Represents the activity participation result for a user

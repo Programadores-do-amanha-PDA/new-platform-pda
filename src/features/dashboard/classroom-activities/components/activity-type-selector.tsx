@@ -6,7 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { activityTypes } from "../utils/activity-type-options";
-import { ActivityTClassT } from "@/types";
+import { ActivityTClassT } from "@/features/dashboard/classroom-activities/types";
 
 const ActivityTypeSelector = ({
   value,

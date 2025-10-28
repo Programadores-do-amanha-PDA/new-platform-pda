@@ -35,16 +35,16 @@ import {
 } from "@/components/ui/table";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 
-import { useClassroomActivityStore } from "@/stores/modules/classrooms/activities";
 import ActivityTypeSelector from "./activity-type-selector";
 import { ActivityJustificationDropdown } from "./activity-justification-dropdown";
 import InsertManyActivitiesDialog from "./insert-many-activities-dialog";
 import { AuthUserWithProfileT } from "@/types";
 import { calculateActivityDelivery } from "../utils/activity-delivery-calculator";
-import { calculateUserActivityParticipation } from "@/utils/activity-calculator";
 import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { ActivitiesTablePropsT } from "../types";
 import { usersColumns } from "./activities-table-columns";
+import { useClassroomActivityStore } from "../store";
+import { calculateUserActivityParticipation } from "../utils/activity-calculator";
 
 export default function ActivitiesTable({
   allVisibleUsers,
