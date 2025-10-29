@@ -34,12 +34,11 @@ import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
 import { AuthUserWithProfileT, ProfileT } from "@/types";
-import { calculateUserAttendance } from "@/utils/attendance-calculator";
+import { calculateClassPresence, calculateUserAttendance } from "../utils";
 import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "../../classroom-zoom/types";
-import { calculateClassPresence } from "../utils/class-presence";
 
 interface AttendanceTableProps {
   allVisibleUsers: Partial<AuthUserWithProfileT>[];

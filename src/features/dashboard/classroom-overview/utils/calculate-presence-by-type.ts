@@ -1,4 +1,4 @@
-import { calculateUserAttendance } from "@/utils/attendance-calculator";
+import { calculateUserAttendance } from "../../classroom-attendance/utils";
 import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
 
 export function calculatePresenceByType(
