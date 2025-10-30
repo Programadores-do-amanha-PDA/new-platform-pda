@@ -214,10 +214,10 @@ export default function ClassroomAttendancePage() {
     // Preparar dados dos modos de usuário
     const userModes = (currentConfig?.user_modes || []).map((userMode) => ({
       ...userMode,
-      featuresRules: userMode.featuresRules.map((rule) => ({
+      featuresRules: userMode?.featuresRules?.map((rule) => ({
         ...rule,
-        isVisible: rule.isVisible ?? false,
-        aggregateInMetric: rule.aggregateInMetric ?? false,
+        isVisible: rule.isVisible ?? true,
+        aggregateInMetric: rule.aggregateInMetric ?? true,
       })),
     }));
 
