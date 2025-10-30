@@ -12,10 +12,6 @@ import {
 } from "../types";
 
 /**
- * Types for attendance calculation and weekly presence tracking
- */
-
-/**
  * Default configuration for attendance calculations
  */
 const DEFAULT_OPTIONS: Required<AttendanceCalculationOptionsT> = {
@@ -214,7 +210,7 @@ function isUserPresentInMeeting(
   userEmail: string,
   includeJustifications: boolean
 ): boolean {
-  const attendance = calculateUserAttendance(meeting, userEmail);
+  const attendance = calculateUserAttendance({ meeting, userEmail });
 
   if (includeJustifications && attendance.justification?.is_presence) {
     return true;
@@ -265,49 +261,6 @@ function calculateOverallPresence(
 }
 
 /**
- * Enhanced version with additional metrics and filtering options
- */
-export interface DetailedWeeklyPresenceResult
-  extends WeeklyClassPresenceResultT {
-  totalWeeks: number;
-  totalMeetings: number;
-  bestWeek?: { weekKey: string; percentage: number };
-  worstWeek?: { weekKey: string; percentage: number };
-}
-
-/**
- * Calculates detailed weekly presence with additional metrics
- */
-export function calculateDetailedWeeklyPresence(
-  meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
-  users: Partial<AuthUserWithProfileT>[],
-  options: AttendanceCalculationOptionsT = {}
-): DetailedWeeklyPresenceResult {
-  const baseResult = calculateWeeklyClassPresence(meetings, users, options);
-  const weeklyEntries = Object.entries(baseResult.weeklyPresence);
-
-  let bestWeek: { weekKey: string; percentage: number } | undefined;
-  let worstWeek: { weekKey: string; percentage: number } | undefined;
-
-  weeklyEntries.forEach(([weekKey, weekData]) => {
-    if (!bestWeek || weekData.presencePercentage > bestWeek.percentage) {
-      bestWeek = { weekKey, percentage: weekData.presencePercentage };
-    }
-    if (!worstWeek || weekData.presencePercentage < worstWeek.percentage) {
-      worstWeek = { weekKey, percentage: weekData.presencePercentage };
-    }
-  });
-
-  return {
-    ...baseResult,
-    totalWeeks: weeklyEntries.length,
-    totalMeetings: meetings.length,
-    bestWeek,
-    worstWeek,
-  };
-}
-
-/**
  * Calculates individual user's weekly presence
  *
  * Determines if a user was present in at least one meeting during the specified week
@@ -344,55 +297,3 @@ export function calculateUserWeeklyPresence(
     isUserPresentInMeeting(meeting, userEmail, includeJustifications)
   );
 }
-
-/**
- * Utility functions for common presence analysis patterns
- */
-export const presenceAnalysis = {
-  /**
-   * Finds weeks with presence below a threshold
-   */
-  findLowPresenceWeeks: (
-    presenceData: WeeklyClassPresenceResultT,
-    threshold: number = 70
-  ): Array<{ weekKey: string; data: WeeklyPresenceDataT }> => {
-    return Object.entries(presenceData.weeklyPresence)
-      .filter(([, weekData]) => weekData.presencePercentage < threshold)
-      .map(([weekKey, weekData]) => ({ weekKey, data: weekData }));
-  },
-
-  /**
-   * Gets user presence patterns across all weeks
-   */
-  getUserPresencePattern: (
-    userEmail: string,
-    presenceData: WeeklyClassPresenceResultT
-  ): Record<string, boolean> => {
-    const pattern: Record<string, boolean> = {};
-
-    Object.entries(presenceData.weeklyPresence).forEach(
-      ([weekKey, weekData]) => {
-        pattern[weekKey] = weekData.presentUsers.includes(userEmail);
-      }
-    );
-
-    return pattern;
-  },
-
-  /**
-   * Calculates user's overall presence percentage
-   */
-  getUserOverallPresence: (
-    userEmail: string,
-    presenceData: WeeklyClassPresenceResultT
-  ): number => {
-    const pattern = presenceAnalysis.getUserPresencePattern(
-      userEmail,
-      presenceData
-    );
-    const presentWeeks = Object.values(pattern).filter(Boolean).length;
-    const totalWeeks = Object.keys(pattern).length;
-
-    return totalWeeks > 0 ? Math.round((presentWeeks / totalWeeks) * 100) : 0;
-  },
-};

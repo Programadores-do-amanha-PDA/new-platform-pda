@@ -137,15 +137,18 @@ export default function AttendanceTable({
     if (configsByClassroom[classroomId]) return configsByClassroom[classroomId];
     else return null;
   }, [configsByClassroom, classroomId]);
+
   const classroomModules = useMemo(() => {
     if (currentConfig && currentConfig.modules) return currentConfig.modules;
     else return [];
   }, [currentConfig]);
+
   const classroomClassTypes = useMemo(() => {
     if (currentConfig && currentConfig.class_types.length > 0)
       return currentConfig.class_types;
     else return [];
   }, [currentConfig]);
+
   const classroomJustifications = useMemo(() => {
     if (currentConfig && currentConfig.justifications.length > 0)
       return currentConfig.justifications;
@@ -207,7 +210,9 @@ export default function AttendanceTable({
               />
             </div>
             <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-              <p>{calculateClassPresence(meeting, allAggregateInMetricUsers)}%</p>
+              <p>
+                {calculateClassPresence(meeting, allAggregateInMetricUsers)}%
+              </p>
             </div>
           </div>
         ),
@@ -220,13 +225,13 @@ export default function AttendanceTable({
           const currentClassType = classroomClassTypes.find(
             (classType) => classType.id === meeting.class_type
           );
-          const userAttendance = calculateUserAttendance(
+          const userAttendance = calculateUserAttendance({
             meeting,
-            userEmail || "",
-            currentClassType!,
-            classroomJustifications,
-            shouldAggregateInMetric
-          );
+            userEmail: userEmail || "",
+            currentClassType: currentClassType!,
+            availableJustifications: classroomJustifications,
+            shouldAggregateInMetric,
+          });
 
           return (
             <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
@@ -248,12 +253,12 @@ export default function AttendanceTable({
                     userAttendance?.limit?.key}
                 </p>
 
-                {userAttendance.minutesAttended > 0 && 
-                 userAttendance?.limit?.key !== "--" && (
-                  <p className="text-sm text-muted-foreground">
-                    {userAttendance.minutesAttended}M
-                  </p>
-                )}
+                {userAttendance.minutesAttended > 0 &&
+                  userAttendance?.limit?.key !== "--" && (
+                    <p className="text-sm text-muted-foreground">
+                      {userAttendance.minutesAttended}M
+                    </p>
+                  )}
               </div>
               {userEmail &&
                 userAttendance?.limit?.key !== "--" &&
