@@ -4,11 +4,14 @@ import {
   ZoomMeetingPastInstanceT,
   ZoomMeetingT,
 } from "../../classroom-zoom/types";
-import { calculateUserAttendance } from ".";
+import { calculateUserAttendance } from "./attendance-calculator";
+import { ClassroomConfigJustificationT } from "../../classroom-configs/types";
 import {
   AttendanceCalculationOptionsT,
   WeeklyClassPresenceResultT,
   WeeklyPresenceDataT,
+  AttendanceCalcResultT,
+  CalculateUserWeeklyAttendancePropsT,
 } from "../types";
 
 /**
@@ -160,6 +163,7 @@ function calculateWeeklyPresenceDataT(
       users,
       config
     );
+
     const presencePercentage = calculatePresencePercentage(
       presentUsers.size,
       users.length,
@@ -190,6 +194,7 @@ function calculatePresentUsersForWeek(
   users.forEach((user) => {
     if (!user.email) return;
 
+    // Check if user was present in ANY meeting during the week
     const wasPresent = weekMeetings.some((meeting) =>
       isUserPresentInMeeting(meeting, user.email!, config.includeJustifications)
     );
@@ -296,4 +301,86 @@ export function calculateUserWeeklyPresence(
   return meetings.some((meeting) =>
     isUserPresentInMeeting(meeting, userEmail, includeJustifications)
   );
+}
+
+/**
+ * Calculates user attendance for weekly meetings with justification logic
+ *
+ * For weekly meetings, if a user attends at least one meeting in the week,
+ * they get a "limit" status for the meeting they attended and justifications
+ * for the other meetings in the same week (if they didn't attend those).
+ *
+ * @param userEmail - User's email address
+ * @param currentMeeting - The specific meeting being evaluated
+ * @param weekMeetings - All meetings in the same week
+ * @param currentClassType - Class type configuration
+ * @param availableJustifications - Available justification options
+ * @param shouldAggregateInMetric - Whether user should be counted in metrics
+ * @returns Attendance calculation result with weekly logic applied
+ */
+export function calculateUserWeeklyAttendance({
+  userEmail,
+  currentMeeting,
+  weekMeetings,
+  currentClassType,
+  availableJustifications,
+  shouldAggregateInMetric = true,
+}: CalculateUserWeeklyAttendancePropsT): AttendanceCalcResultT {
+  // Check if user was present in any meeting during the week
+  const wasUserPresentInWeek = calculateUserWeeklyPresence(
+    userEmail,
+    weekMeetings,
+    true
+  );
+
+  // If user wasn't present in any meeting of the week, calculate normally
+  if (!wasUserPresentInWeek) {
+    return calculateUserAttendance({
+      meeting: currentMeeting,
+      userEmail,
+      currentClassType,
+      availableJustifications,
+      shouldAggregateInMetric,
+    });
+  }
+
+  // User was present in at least one meeting of the week
+  // Check if user was present in this specific meeting
+  const userAttendanceInCurrentMeeting = calculateUserAttendance({
+    meeting: currentMeeting,
+    userEmail,
+    currentClassType,
+    availableJustifications,
+    shouldAggregateInMetric,
+  });
+
+  // If user was present in this specific meeting, return the normal calculation
+  if (
+    userAttendanceInCurrentMeeting.justification?.is_presence ||
+    userAttendanceInCurrentMeeting.limit?.is_presence
+  ) {
+    return userAttendanceInCurrentMeeting;
+  }
+
+  // User was present in the week but not in this specific meeting
+  // Apply automatic justification for this meeting
+  const defaultWeeklyJustification = getDefaultWeeklyJustification();
+
+  return {
+    minutesAttended: 0,
+    justification: defaultWeeklyJustification,
+  };
+}
+
+/**
+ * Provides a default justification for weekly meetings when user attended other meetings in the week
+ */
+function getDefaultWeeklyJustification(): ClassroomConfigJustificationT {
+  return {
+    id: "weekly-justified",
+    key: "JS",
+    title: "Justificação Semanal",
+    color: "#0066cc",
+    is_presence: true,
+  };
 }

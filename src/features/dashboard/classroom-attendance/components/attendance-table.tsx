@@ -36,19 +36,10 @@ import { AttendanceJustificationDropdown } from "./attendance-justification-drop
 import { AuthUserWithProfileT, ProfileT } from "@/types";
 import { calculateClassPresence, calculateUserAttendance } from "../utils";
 import {
-  ZoomMeetingPastInstanceT,
-  ZoomMeetingT,
-} from "../../classroom-zoom/types";
-
-interface AttendanceTableProps {
-  allVisibleUsers: Partial<AuthUserWithProfileT>[];
-  allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-  meetings: (
-    | (ZoomMeetingPastInstanceT & { meeting_type: "meeting" | "pastInstance" })
-    | (ZoomMeetingT & { meeting_type: "meeting" | "pastInstance" })
-  )[];
-  classroomId: string;
-}
+  calculateWeeklyClassPresence,
+  calculateUserWeeklyAttendance,
+} from "../utils/weekly-attendance-calcs";
+import { AttendanceTableProps } from "../types";
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
   {
@@ -185,37 +176,71 @@ export default function AttendanceTable({
     useMemo(() => {
       return displayedMeetings.map((meeting, index) => ({
         id: `meeting-${meeting.id}-${index}`,
-        header: () => (
-          <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
-            <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
-              <p className="font-bold">
-                {new Date(meeting.start_time || 0).getTime() ===
-                new Date().getTime()
-                  ? "Hoje"
-                  : new Date(meeting.start_time || 0).toLocaleDateString(
-                      "pt-BR",
-                      {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "2-digit",
-                      }
-                    )}
-              </p>
+        header: () => {
+          const currentClassType = classroomClassTypes.find(
+            (classType) => classType.id === meeting.class_type
+          );
+
+          const allMeetingByClassType = displayedMeetings.filter(
+            (m) => m.class_type === currentClassType?.id
+          );
+
+          const meetingDate = new Date(meeting.start_time || 0);
+          const weekMeetings = allMeetingByClassType.filter((m) => {
+            const mDate = new Date(m.start_time || 0);
+            const startOfWeek = new Date(meetingDate);
+            startOfWeek.setDate(
+              meetingDate.getDate() - meetingDate.getDay() + 1
+            ); // Monday
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+
+            return mDate >= startOfWeek && mDate <= endOfWeek;
+          });
+
+          return (
+            <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
+              <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
+                <p className="font-bold">
+                  {new Date(meeting.start_time || 0).getTime() ===
+                  new Date().getTime()
+                    ? "Hoje"
+                    : new Date(meeting.start_time || 0).toLocaleDateString(
+                        "pt-BR",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "2-digit",
+                        }
+                      )}
+                </p>
+              </div>
+              <div className="w-[155px]! h-11 flex justify-center items-center p-2">
+                <MeetingTypeSelector
+                  key={`MeetingTypeSelector-${meeting.id}-${index}`}
+                  meeting={meeting}
+                  options={classroomClassTypes}
+                />
+              </div>
+              <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
+                <p>
+                  {currentClassType?.presence_calc_type === "byWeeklyMeetings"
+                    ? // For weekly calculation
+                      calculateWeeklyClassPresence(
+                        weekMeetings,
+                        allAggregateInMetricUsers
+                      ).overallPresence
+                    : // Default single meeting calculation
+                      calculateClassPresence(
+                        meeting,
+                        allAggregateInMetricUsers
+                      )}
+                  %
+                </p>
+              </div>
             </div>
-            <div className="w-[155px]! h-11 flex justify-center items-center p-2">
-              <MeetingTypeSelector
-                key={`MeetingTypeSelector-${meeting.id}-${index}`}
-                meeting={meeting}
-                options={classroomClassTypes}
-              />
-            </div>
-            <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-              <p>
-                {calculateClassPresence(meeting, allAggregateInMetricUsers)}%
-              </p>
-            </div>
-          </div>
-        ),
+          );
+        },
         cell: ({ row }) => {
           const userEmail = row.original.email;
           const shouldAggregateInMetric = allAggregateInMetricUsers.some(
@@ -225,13 +250,42 @@ export default function AttendanceTable({
           const currentClassType = classroomClassTypes.find(
             (classType) => classType.id === meeting.class_type
           );
-          const userAttendance = calculateUserAttendance({
-            meeting,
-            userEmail: userEmail || "",
-            currentClassType: currentClassType!,
-            availableJustifications: classroomJustifications,
-            shouldAggregateInMetric,
-          });
+
+          let userAttendance;
+
+          if (currentClassType?.presence_calc_type === "byWeeklyMeetings") {
+            // For weekly calculation, get all meetings from the same week
+            const meetingDate = new Date(meeting.start_time || 0);
+            const weekMeetings = displayedMeetings.filter((m) => {
+              const mDate = new Date(m.start_time || 0);
+              const startOfWeek = new Date(meetingDate);
+              startOfWeek.setDate(
+                meetingDate.getDate() - meetingDate.getDay() + 1
+              ); // Monday
+              const endOfWeek = new Date(startOfWeek);
+              endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+
+              return mDate >= startOfWeek && mDate <= endOfWeek;
+            });
+
+            userAttendance = calculateUserWeeklyAttendance({
+              userEmail: userEmail || "",
+              currentMeeting: meeting,
+              weekMeetings,
+              currentClassType,
+              availableJustifications: classroomJustifications,
+              shouldAggregateInMetric,
+            });
+          } else {
+            // Default single meeting calculation
+            userAttendance = calculateUserAttendance({
+              meeting,
+              userEmail: userEmail || "",
+              currentClassType: currentClassType!,
+              availableJustifications: classroomJustifications,
+              shouldAggregateInMetric,
+            });
+          }
 
           return (
             <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
