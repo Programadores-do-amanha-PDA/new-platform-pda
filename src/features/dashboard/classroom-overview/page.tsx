@@ -129,7 +129,9 @@ export default function ClassroomAttendancePage() {
         const attendancesIndicators = calculatePresenceByType(
           filteredPastInstances,
           filteredMeetings,
-          studentEmail
+          studentEmail,
+          currentConfig?.class_types,
+          classroomStudents
         );
 
         // Calcular scores dos testes Coodesh com dados filtrados
