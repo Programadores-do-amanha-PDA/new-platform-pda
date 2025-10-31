@@ -49,8 +49,11 @@ export const useAuthStore = create<AuthStateT & AuthActionsT>()(
             set({ user: null, loading: false });
             return;
           }
+          console.log("user", user);
 
           const [userProfile] = await Promise.all([getProfileById(user.id)]);
+
+          console.log("userProfile", userProfile);
 
           if (userProfile) {
             set({
