@@ -1,6 +1,5 @@
 import {
   calculateUserAttendance,
-  calculateUserWeeklyPresence,
 } from "../../classroom-attendance/utils";
 import {
   ZoomMeetingPastInstanceT,
@@ -8,6 +7,7 @@ import {
 } from "../../classroom-zoom/types";
 import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
 import { startOfWeek } from "date-fns";
+import { calculateUserWeeklyPresence } from "../../classroom-attendance/utils/weekly-attendance-calcs";
 
 export function calculatePresenceByType(
   zoomPastInstances: ZoomMeetingPastInstanceT[],
