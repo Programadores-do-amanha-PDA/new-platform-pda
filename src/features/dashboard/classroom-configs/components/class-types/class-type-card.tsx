@@ -50,25 +50,11 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
   return (
     <li className="w-full h-max flex justify-between gap-4 overflow-hidden">
       <div className="flex flex-col gap-1 flex-1">
-        <h3
-          className="flex gap-4 truncate text-sm font-semibold"
-          title={classType.title}
-        >
-          {classType.title}
+        <h3 className="truncate text-sm font-semibold" title={classType.title}>
+          {classType.title} 
         </h3>
         {classType.limits && classType.limits.length > 0 && (
           <div className="flex gap-1 flex-wrap">
-            {classType.presence_calc_type && (
-              <div className="flex gap-1 flex-wrap">
-                <Badge variant="outline" className="text-xs! font-semibold">
-                  {`Presença ${
-                    classType.presence_calc_type === "bySingleMeeting"
-                      ? "individual"
-                      : "semanal"
-                  }`}
-                </Badge>
-              </div>
-            )}
             {classType.limits.map((limit) => (
               <Badge
                 key={`class-type-limit-${limit.id}`}
@@ -79,9 +65,7 @@ const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
                   color: Color(limit.color).isDark() ? "#fff" : "#000",
                 }}
               >
-                <p className="font-semibold">
-                  ({limit.key}) {limit.title}:
-                </p>
+                <p className="font-semibold">({limit.key}) {limit.title}:</p>
                 {limit.min} - {limit.max ?? "∞"}
               </Badge>
             ))}

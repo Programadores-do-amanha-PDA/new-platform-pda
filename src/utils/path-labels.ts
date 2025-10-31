@@ -23,7 +23,6 @@ const pathLabels: { [key: string]: string } = {
   
   // Classrooms-modules
   classrooms: "Todas as Turmas",
-  configs: "Configurações",
   overview: "Visão Geral",
   attendance: "Presenças",
   kpi: "KPI",
