@@ -45,7 +45,7 @@ export default function AttendancePage() {
 
   // Get past instances directly from the store and add meeting info
   const pastsMeetings: ZoomMeetingPastInstanceT[] = pastInstances
-    ?.map((pastInstance) => ({
+    .map((pastInstance) => ({
       ...pastInstance,
       meeting_type: "pastInstance",
     }))
