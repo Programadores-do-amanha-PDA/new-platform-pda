@@ -162,7 +162,6 @@ function getNotInMetricLimit(): ClassroomConfigClassTypesLimitT {
     color: "#6b7280", // muted color
     allow_justification: false,
     is_presence: false,
-    presenceCalcType: "bySingleMeeting",
   };
 }
 
@@ -214,7 +213,6 @@ function getDefaultLimit(
       color: "#00ff00",
       allow_justification: false,
       is_presence: true,
-      presenceCalcType: "bySingleMeeting",
     };
   } else if (minutesAttended >= 30) {
     return {
@@ -226,7 +224,6 @@ function getDefaultLimit(
       color: "#ffff00",
       allow_justification: true,
       is_presence: false,
-      presenceCalcType: "bySingleMeeting",
     };
   } else {
     return {
@@ -238,7 +235,6 @@ function getDefaultLimit(
       color: "#ff0000",
       allow_justification: true,
       is_presence: false,
-      presenceCalcType: "bySingleMeeting",
     };
   }
 }

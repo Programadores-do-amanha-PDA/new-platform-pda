@@ -130,8 +130,7 @@ export default function ClassroomAttendancePage() {
           filteredPastInstances,
           filteredMeetings,
           studentEmail,
-          currentConfig?.class_types,
-          classroomStudents
+          currentConfig?.class_types
         );
 
         // Calcular scores dos testes Coodesh com dados filtrados
