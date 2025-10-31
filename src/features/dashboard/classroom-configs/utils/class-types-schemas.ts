@@ -16,4 +16,7 @@ export const ClassroomConfigClassTypesSchema = z.object({
   limits: z
     .array(ClassroomConfigClassTypesLimitSchema)
     .min(1, "Pelo menos um limite é obrigatório"),
+  presenceCalcType: z.enum(["bySingleMeeting", "byWeeklyMeetings"], {
+    message: "Tipo de cálculo de presença é obrigatório",
+  }),
 });

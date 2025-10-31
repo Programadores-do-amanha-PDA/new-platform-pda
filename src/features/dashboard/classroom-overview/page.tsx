@@ -129,7 +129,9 @@ export default function ClassroomAttendancePage() {
         const attendancesIndicators = calculatePresenceByType(
           filteredPastInstances,
           filteredMeetings,
-          studentEmail
+          studentEmail,
+          currentConfig?.class_types,
+          classroomStudents
         );
 
         // Calcular scores dos testes Coodesh com dados filtrados
@@ -214,10 +216,10 @@ export default function ClassroomAttendancePage() {
     // Preparar dados dos modos de usuário
     const userModes = (currentConfig?.user_modes || []).map((userMode) => ({
       ...userMode,
-      featuresRules: userMode.featuresRules.map((rule) => ({
+      featuresRules: userMode?.featuresRules?.map((rule) => ({
         ...rule,
-        isVisible: rule.isVisible ?? false,
-        aggregateInMetric: rule.aggregateInMetric ?? false,
+        isVisible: rule.isVisible ?? true,
+        aggregateInMetric: rule.aggregateInMetric ?? true,
       })),
     }));
 

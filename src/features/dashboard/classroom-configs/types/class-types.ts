@@ -15,6 +15,7 @@ export interface ClassroomConfigClassTypesT {
   id: string;
   title: string;
   limits: Array<ClassroomConfigClassTypesLimitT>;
+  presence_calc_type: "bySingleMeeting" | "byWeeklyMeetings";
   created_at?: string;
   updated_at?: string;
 }
@@ -33,4 +34,5 @@ export interface ClassroomConfigClassTypesFormLimitT {
 export interface ClassroomConfigClassTypesFormDataT {
   title: string;
   limits: Array<ClassroomConfigClassTypesFormLimitT>;
+  presenceCalcType: "bySingleMeeting" | "byWeeklyMeetings";
 }

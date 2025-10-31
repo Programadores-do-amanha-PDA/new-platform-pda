@@ -30,6 +30,7 @@ import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import { toast } from "sonner";
 import { useClassroomConfigStore } from "../../stores";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ClassroomConfigClassTypesSchema } from "../../utils";
 
 interface ClassTypeFormDialogProps {
@@ -57,6 +58,7 @@ const ClassTypeFormDialog = ({
     resolver: zodResolver(ClassroomConfigClassTypesSchema),
     defaultValues: {
       title: "",
+      presenceCalcType: "bySingleMeeting",
       limits: [
         {
           id: crypto.randomUUID(),
@@ -99,6 +101,7 @@ const ClassTypeFormDialog = ({
       setOpen(true);
       form.reset({
         title: currentClassType.title,
+        presenceCalcType: currentClassType.presence_calc_type,
         limits:
           currentClassType.limits?.map((limit) => ({
             id: limit.id,
@@ -108,7 +111,7 @@ const ClassTypeFormDialog = ({
             min: limit.min,
             max: limit.max,
             allowJustification: limit.allow_justification,
-            is_presence: limit.is_presence,
+            isPresence: limit.is_presence,
           })) || [],
       });
     }
@@ -125,6 +128,7 @@ const ClassTypeFormDialog = ({
       if (!currentClassType) {
         form.reset({
           title: "",
+          presenceCalcType: "bySingleMeeting",
           limits: [
             {
               id: crypto.randomUUID(),
@@ -233,6 +237,7 @@ const ClassTypeFormDialog = ({
           updatedClassTypes[index] = {
             ...currentClassType,
             title: data.title,
+            presence_calc_type: data.presenceCalcType,
             limits: data.limits.map((limit) => ({
               ...limit,
               is_presence: limit.isPresence,
@@ -246,6 +251,7 @@ const ClassTypeFormDialog = ({
         const newClassType: ClassroomConfigClassTypesT = {
           id: crypto.randomUUID(),
           title: data.title,
+          presence_calc_type: data.presenceCalcType,
           limits: data.limits.map((limit) => ({
             is_presence: limit.isPresence,
             allow_justification: limit.allowJustification,
@@ -308,6 +314,51 @@ const ClassTypeFormDialog = ({
                       placeholder="Digite o título do tipo de aula"
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="presenceCalcType"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="font-semibold">
+                    Tipo de cálculo de presença
+                  </FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="bySingleMeeting"
+                          id="presenceCalcType-single"
+                        />
+                        <Label
+                          htmlFor="presenceCalcType-single"
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          Por encontro individual
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="byWeeklyMeetings"
+                          id="presenceCalcType-weekly"
+                        />
+                        <Label
+                          htmlFor="presenceCalcType-weekly"
+                          className="text-sm font-normal cursor-pointer"
+                        >
+                          Por encontros semanais
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -500,6 +551,8 @@ const ClassTypeFormDialog = ({
                         )}
                       />
                     </div>
+
+
                   </li>
                 ))}
               </ul>
