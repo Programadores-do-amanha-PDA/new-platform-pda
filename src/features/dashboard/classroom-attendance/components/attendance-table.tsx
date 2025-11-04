@@ -15,8 +15,6 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -27,90 +25,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { AuthUserWithProfileT, ProfileT } from "@/types";
+import { AuthUserWithProfileT } from "@/types";
 import { calculateClassPresence, calculateUserAttendance } from "../utils";
 import {
   calculateWeeklyClassPresence,
   calculateUserWeeklyAttendance,
+  getMeetingsByWeek,
 } from "../utils/weekly-attendance-calcs";
 import { AttendanceTableProps } from "../types";
-
-export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
-  {
-    accessorKey: "profile",
-    header: ({ column }) => {
-      const sortState = column.getIsSorted();
-      return (
-        <div className="w-full h-[133.5px] flex justify-between items-center border-r border-b px-2">
-          <p className="text-left font-semibold">Usuário</p>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              if (!sortState) {
-                column.toggleSorting(false);
-              } else if (sortState === "asc") {
-                column.toggleSorting(true);
-              } else {
-                column.clearSorting();
-              }
-            }}
-          >
-            {sortState === "asc" ? (
-              <ArrowUp className="stroke-primary-foreground" />
-            ) : sortState === "desc" ? (
-              <ArrowDown className="stroke-primary-foreground" />
-            ) : (
-              <ArrowUpDown />
-            )}
-          </Button>
-        </div>
-      );
-    },
-    cell: ({ row }) => (
-      <div className="w-full h-[57px] flex flex-row gap-2 justify-start items-center px-2 border-r border-b bg-background group-hover/row:bg-muted/50!">
-        <Avatar>
-          <AvatarFallback>
-            {row
-              .getValue<ProfileT>("profile")
-              .full_name.split(" ")
-              .filter((_, i) => i < 2)
-              .map((word) => word[0].toUpperCase())
-              .join("") || "U"}
-          </AvatarFallback>
-          <AvatarImage
-            src={row.getValue<ProfileT>("profile").avatar_url || ""}
-          />
-        </Avatar>
-        <div className="w-full flex flex-col justify-center lowercase truncate">
-          <p className="text-sm font-bold capitalize">
-            {row.getValue<ProfileT>("profile").full_name}
-          </p>
-          <p>{row.getValue<ProfileT>("profile").email}</p>
-        </div>
-      </div>
-    ),
-    sortingFn: (rowA, rowB) => {
-      const nameA = rowA.original?.profile?.full_name?.toLowerCase() || "";
-      const nameB = rowB.original?.profile?.full_name?.toLowerCase() || "";
-      return nameA?.localeCompare(nameB);
-    },
-    filterFn: (row, id, filterValue) => {
-      const profile = row.getValue(id) as ProfileT;
-      const searchTerm = filterValue.toLowerCase();
-
-      return (
-        profile.full_name.toLowerCase().includes(searchTerm) ||
-        profile.email.toLowerCase().includes(searchTerm)
-      );
-    },
-  },
-];
+import { usersColumns } from "./attendance-table-users-columns";
 
 export default function AttendanceTable({
   allVisibleUsers,
@@ -181,22 +109,11 @@ export default function AttendanceTable({
             (classType) => classType.id === meeting.class_type
           );
 
-          const allMeetingByClassType = displayedMeetings.filter(
-            (m) => m.class_type === currentClassType?.id
+          const weekMeetings = getMeetingsByWeek(
+            meeting,
+            displayedMeetings,
+            classroomClassTypes
           );
-
-          const meetingDate = new Date(meeting.start_time || 0);
-          const weekMeetings = allMeetingByClassType.filter((m) => {
-            const mDate = new Date(m.start_time || 0);
-            const startOfWeek = new Date(meetingDate);
-            startOfWeek.setDate(
-              meetingDate.getDate() - meetingDate.getDay() + 1
-            ); // Monday
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-
-            return mDate >= startOfWeek && mDate <= endOfWeek;
-          });
 
           return (
             <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
@@ -225,13 +142,11 @@ export default function AttendanceTable({
               <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
                 <p>
                   {currentClassType?.presence_calc_type === "byWeeklyMeetings"
-                    ? // For weekly calculation
-                      calculateWeeklyClassPresence(
+                    ? calculateWeeklyClassPresence(
                         weekMeetings,
                         allAggregateInMetricUsers
                       ).overallPresence
-                    : // Default single meeting calculation
-                      calculateClassPresence(
+                    : calculateClassPresence(
                         meeting,
                         allAggregateInMetricUsers
                       )}
@@ -254,19 +169,11 @@ export default function AttendanceTable({
           let userAttendance;
 
           if (currentClassType?.presence_calc_type === "byWeeklyMeetings") {
-            // For weekly calculation, get all meetings from the same week
-            const meetingDate = new Date(meeting.start_time || 0);
-            const weekMeetings = displayedMeetings.filter((m) => {
-              const mDate = new Date(m.start_time || 0);
-              const startOfWeek = new Date(meetingDate);
-              startOfWeek.setDate(
-                meetingDate.getDate() - meetingDate.getDay() + 1
-              ); // Monday
-              const endOfWeek = new Date(startOfWeek);
-              endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-
-              return mDate >= startOfWeek && mDate <= endOfWeek;
-            });
+            const weekMeetings = getMeetingsByWeek(
+              meeting,
+              displayedMeetings,
+              classroomClassTypes
+            );
 
             userAttendance = calculateUserWeeklyAttendance({
               userEmail: userEmail || "",
