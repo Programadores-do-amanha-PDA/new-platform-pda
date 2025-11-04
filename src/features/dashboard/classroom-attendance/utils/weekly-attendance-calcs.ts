@@ -384,3 +384,58 @@ function getDefaultWeeklyJustification(): ClassroomConfigJustificationT {
     is_presence: true,
   };
 }
+
+/**
+ * Gets all meetings of the same class type that occur in the same week as the target meeting
+ *
+ * @param targetMeeting - The meeting to find weekly companions for
+ * @param allMeetings - All available meetings to filter from
+ * @param classTypes - Available class types to match against
+ * @returns Array of meetings from the same class type and week
+ *
+ * @example
+ * ```typescript
+ * const weekMeetings = getMeetingsByWeek(
+ *   currentMeeting,
+ *   displayedMeetings,
+ *   classroomClassTypes
+ * );
+ * ```
+ */
+export function getMeetingsByWeek<
+  T extends { class_type?: string | number; start_time?: string | number }
+>(
+  targetMeeting: T,
+  allMeetings: T[],
+  classTypes: Array<{ id: string | number }>
+): T[] {
+  // Find the class type for the target meeting
+  const currentClassType = classTypes.find(
+    (classType) => classType.id === targetMeeting.class_type
+  );
+
+  if (!currentClassType) {
+    return [];
+  }
+
+  // Filter meetings by the same class type
+  const allMeetingByClassType = allMeetings.filter(
+    (meeting) => meeting.class_type === currentClassType.id
+  );
+
+  // Get the target meeting date
+  const meetingDate = new Date(targetMeeting.start_time || 0);
+
+  // Calculate week boundaries (Monday to Sunday)
+  const startOfWeek = new Date(meetingDate);
+  startOfWeek.setDate(meetingDate.getDate() - meetingDate.getDay() + 1); // Monday
+
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+
+  // Filter meetings that fall within the same week
+  return allMeetingByClassType.filter((meeting) => {
+    const mDate = new Date(meeting.start_time || 0);
+    return mDate >= startOfWeek && mDate <= endOfWeek;
+  });
+}
