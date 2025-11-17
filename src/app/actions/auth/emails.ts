@@ -7,7 +7,7 @@ import {
 import { emailRegex } from "@/utils/regex/users";
 
 export const requestPasswordResetWithUserEmail = async (
-  userEmail: string
+  userEmail: string,
 ): Promise<boolean> => {
   try {
     if (!userEmail) throw new Error("User email not specified");
@@ -56,7 +56,7 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
 };
 
 export const sendPasswordResetToMultipleUsers = async (
-  emails: string[]
+  emails: string[],
 ): Promise<SendPasswordResetToMultipleUsersResultT> => {
   try {
     if (!emails || emails.length === 0) {
@@ -111,7 +111,7 @@ export const sendPasswordResetToMultipleUsers = async (
 };
 
 export const sendEmailVerificationToMultipleUsers = async (
-  emails: string[]
+  emails: string[],
 ): Promise<SendEmailVerificationToMultipleUsersResultT> => {
   try {
     if (!emails || emails.length === 0) {
