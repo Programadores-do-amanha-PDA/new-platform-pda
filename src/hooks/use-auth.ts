@@ -1,17 +1,13 @@
 "use client";
 
-// Global import
 import { useRouter } from "next/navigation";
 
-// Actions
 import {
-  signOut,
   updateAuthUser,
   requestPasswordResetWithUserEmail,
   resendAnEmailSignupConfirmation,
+  signOut,
 } from "@/app/actions";
-
-// Stores
 import { useAuthStore } from "@/stores/shared/auth-store";
 
 export default function useAuth() {
