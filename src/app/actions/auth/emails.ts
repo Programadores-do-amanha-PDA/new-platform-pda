@@ -1,12 +1,21 @@
 "use server";
 import { createClient, createClientAdmin } from "@/lib/supabase/server";
+import {
+  SendEmailVerificationToMultipleUsersResultT,
+  SendPasswordResetToMultipleUsersResultT,
+} from "@/types";
+import { emailRegex } from "@/utils/regex/users";
 
-export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
+export const requestPasswordResetWithUserEmail = async (
+  userEmail: string
+): Promise<boolean> => {
   try {
-    const supabase = await createClient();
-    const PLATFORM_BASE_URL = process.env.PLATFORM_BASE_URL;
+    if (!userEmail) throw new Error("User email not specified");
 
-    if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
+    const PLATFORM_BASE_URL = process.env.PLATFORM_BASE_URL;
+    if (!PLATFORM_BASE_URL) throw new Error("Platform base URL not specified");
+
+    const supabase = await createClient();
 
     // For PKCE flow, redirect to callback page which will handle the code exchange
     const redirectUrl = `${PLATFORM_BASE_URL}/reset-password`;
@@ -15,7 +24,7 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
       redirectTo: redirectUrl,
     });
 
-    if (error) throw error;
+    if (error) throw new Error(error.message);
 
     return true;
   } catch (error) {
@@ -26,6 +35,8 @@ export const requestPasswordResetWithUserEmail = async (userEmail: string) => {
 
 export const resendAnEmailSignupConfirmation = async (email: string) => {
   try {
+    if (!email) throw new Error("Email not specified");
+
     const supabase = await createClient();
 
     const { error } = await supabase.auth.resend({
@@ -35,7 +46,8 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
         emailRedirectTo: process.env.PLATFORM_BASE_URL,
       },
     });
-    if (error) throw error;
+    if (error) throw new Error(error.message);
+
     return true;
   } catch (error) {
     console.error(error);
@@ -43,25 +55,33 @@ export const resendAnEmailSignupConfirmation = async (email: string) => {
   }
 };
 
-export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
+export const sendPasswordResetToMultipleUsers = async (
+  emails: string[]
+): Promise<SendPasswordResetToMultipleUsersResultT> => {
   try {
-    const supabase = await createClientAdmin();
+    if (!emails || emails.length === 0) {
+      throw new Error("Emails not specified");
+    }
+
     const PLATFORM_BASE_URL = process.env.PLATFORM_BASE_URL;
+    if (!PLATFORM_BASE_URL) throw new Error("Platform base URL not specified");
 
-    if (!PLATFORM_BASE_URL) throw "Platform base URL not specified";
+    const successful: string[] = [];
+    const failed: string[] = [];
 
-    let successful = 0;
-    let failed = 0;
+    const supabase = await createClientAdmin();
 
     // Execute sequentially to avoid potential Supabase rate limiting or context issues
     for (const email of emails) {
+      if (!email || !emailRegex.test(email)) throw new Error("Invalid email");
+
       try {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: PLATFORM_BASE_URL,
         });
 
         if (error) throw error;
-        successful++;
+        successful.push(email);
 
         // Add small delay between requests to prevent rate limiting
         if (emails.length > 1) {
@@ -69,7 +89,7 @@ export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
         }
       } catch (error) {
         console.error(`Error sending password reset to ${email}:`, error);
-        failed++;
+        failed.push(email);
       }
     }
 
@@ -92,26 +112,35 @@ export const sendPasswordResetToMultipleUsers = async (emails: string[]) => {
 
 export const sendEmailVerificationToMultipleUsers = async (
   emails: string[]
-) => {
+): Promise<SendEmailVerificationToMultipleUsersResultT> => {
   try {
+    if (!emails || emails.length === 0) {
+      throw new Error("Emails not specified");
+    }
+
+    const PLATFORM_BASE_URL = process.env.PLATFORM_BASE_URL;
+    if (!PLATFORM_BASE_URL) throw new Error("Platform base URL not specified");
+
     const supabase = await createClientAdmin();
 
-    let successful = 0;
-    let failed = 0;
+    const successful: string[] = [];
+    const failed: string[] = [];
 
     // Execute sequentially to avoid potential Supabase rate limiting or context issues
     for (const email of emails) {
       try {
+        if (!email || !emailRegex.test(email)) throw new Error("Invalid email");
+
         const { error } = await supabase.auth.resend({
           type: "signup",
           email: email,
           options: {
-            emailRedirectTo: process.env.PLATFORM_BASE_URL,
+            emailRedirectTo: PLATFORM_BASE_URL,
           },
         });
 
         if (error) throw error;
-        successful++;
+        successful.push(email);
 
         // Add small delay between requests to prevent rate limiting
         if (emails.length > 1) {
@@ -119,7 +148,7 @@ export const sendEmailVerificationToMultipleUsers = async (
         }
       } catch (error) {
         console.error(`Error sending email verification to ${email}:`, error);
-        failed++;
+        failed.push(email);
       }
     }
 
