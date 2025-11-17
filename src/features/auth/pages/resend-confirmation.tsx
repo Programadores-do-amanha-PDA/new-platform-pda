@@ -1,15 +1,8 @@
 "use client";
 
-// Global imports
 import Image from "next/image";
-
-// Shared Components
 import BinaryGrid from "@/components/shared/binary-grid";
-
-// Local imports
 import { ResendConfirmationForm } from "../components";
-
-// Assets
 import womanArt from "/public/assets/images/login/woman-login-art.png";
 
 export default function ResendConfirmationPage() {

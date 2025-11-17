@@ -1,12 +1,7 @@
-// GLobal imports
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { Session, type EmailOtpType } from "@supabase/supabase-js";
 import { toast } from "sonner";
-
-// Actions
 import { setSession, verifyOtp } from "@/app/actions";
-
-// Libs
 import { OtpFlowParamsT, OtpFlowResultT } from "../types";
 
 /**
@@ -51,7 +46,7 @@ import { OtpFlowParamsT, OtpFlowResultT } from "../types";
  * @returns Promise with the flow result
  */
 export async function processOtpFlow(
-  params: OtpFlowParamsT
+  params: OtpFlowParamsT,
 ): Promise<OtpFlowResultT> {
   const { tokenHash, type, router, updateAuthState, onSuccess, onError } =
     params;
@@ -117,14 +112,13 @@ export async function processOtpFlow(
 async function verifyOtpToken(tokenHash: string, type: string | null) {
   try {
     // Verify OTP token using Supabase's built-in method
-    const result = await verifyOtp(
-      tokenHash,
-      type as EmailOtpType
-    );
+    const result = await verifyOtp(tokenHash, type as EmailOtpType);
 
     if (result.error) {
       const errorMessage =
-        result.error instanceof Error ? result.error.message : String(result.error);
+        result.error instanceof Error
+          ? result.error.message
+          : String(result.error);
       throw new Error(`Token verification failed: ${errorMessage}`);
     }
 
@@ -135,7 +129,7 @@ async function verifyOtpToken(tokenHash: string, type: string | null) {
     // Set session in server-side for middleware and server components
     const serverSessionResult = await setSession(
       result.session.access_token,
-      result.session.refresh_token
+      result.session.refresh_token,
     );
 
     if (serverSessionResult.error || !serverSessionResult.session) {
@@ -160,7 +154,7 @@ async function verifyOtpToken(tokenHash: string, type: string | null) {
 async function handlePostAuthentication(
   type: string | null,
   session: Session,
-  router: AppRouterInstance
+  router: AppRouterInstance,
 ): Promise<string> {
   const redirectPath = getRedirectPath(type, session);
 

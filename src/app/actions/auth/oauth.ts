@@ -1,44 +1,31 @@
 import createClient from "@/lib/supabase/client";
-import { EmailOtpType, Session, User, AuthError } from "@supabase/supabase-js";
-
-type VerifyOtpSuccess = {
-  session: Session;
-  user: User;
-  error?: never;
-};
-
-type VerifyOtpError = {
-  session?: never;
-  user?: never;
-  error: AuthError | Error;
-};
-
-type VerifyOtpResults = VerifyOtpSuccess | VerifyOtpError;
+import { EmailOtpType } from "@supabase/supabase-js";
+import { VerifyOtpResults } from "@/types";
 
 export const verifyOtp = async (
   tokenHash: string,
-  type: string
+  type: string,
 ): Promise<VerifyOtpResults> => {
-  const supabase = await createClient();
-
   try {
+    if (!tokenHash) throw new Error("Token hash not provided");
+    if (!type) throw new Error("Type not provided");
+
+    const supabase = await createClient();
+
     const { data, error } = await supabase.auth.verifyOtp({
       type: type as EmailOtpType,
       token_hash: tokenHash,
     });
 
-    if (error) {
-      console.error("Erro no verifyOtp:", error);
-      return { error: error };
-    }
+    console.log(data);
 
-    if (!data.session) {
-      return { error: new Error("Sessão não criada") };
-    }
+    if (error) throw new Error(error.message);
+
+    if (!data.session) throw new Error("Session not created");
 
     return {
       session: data.session,
-      user: data.session.user,
+      user: data.user || data.session.user,
     };
   } catch (error) {
     console.error("Erro no handlePasswordRecovery:", error);
