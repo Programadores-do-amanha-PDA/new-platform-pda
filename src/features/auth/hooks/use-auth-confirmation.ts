@@ -137,5 +137,6 @@ export default function useAuthConfirmation(): void {
     };
 
     processAuthParams();
-  }, [router, updateAuthState, processOtpFlow, handleOAuthErrors]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
