@@ -19,7 +19,13 @@ const logger = winston.createLogger({
     ),
     defaultMeta: { service: "pda-platform" },
     transports: isProduction
-        ? [
+        ? // TODO Add a more robust solution for integration with a third-party registration service
+          [
+              new winston.transports.Console({
+                  stderrLevels: ["error"],
+              }),
+          ]
+        : [
               new winston.transports.Console({
                   format: combine(colorize(), timestamp({ format: "HH:mm:ss" }), consoleFormat),
               }),
@@ -35,12 +41,6 @@ const logger = winston.createLogger({
                   level: "error",
                   maxsize: 5242880, // 5MB
                   maxFiles: 5,
-              }),
-          ]
-        : // TODO Add a more robust solution for integration with a third-party registration service
-          [
-              new winston.transports.Console({
-                  stderrLevels: ["error"],
               }),
           ],
 });
