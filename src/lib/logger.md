@@ -8,10 +8,10 @@ The PDA Platform uses Winston for structured logging across all API routes and s
 
 - **Multiple log levels**: debug, info, warn, error, http
 - **Structured JSON logging** for production
-- **Console output** for development with colors
-- **File rotation** with size limits (5MB per file, 5 files max)
+- **Console output** with timestamps and colors (production)
+- **File rotation** with size limits (5MB per file, 5 files max) in production
 - **Error stack traces** automatically captured
-- **Request context** logging with user information
+- **Service metadata** included automatically
 
 ## Log Levels
 
@@ -33,8 +33,8 @@ import { logInfo, logError, logWarn, logDebug, logHttp } from "@/lib/logger";
 
 ```typescript
 logInfo("User authenticated successfully", {
-  userId: "123",
-  email: "user@example.com",
+    userId: "123",
+    email: "user@example.com",
 });
 logError("Database connection failed", error, { operation: "user-fetch" });
 logWarn("Rate limit approaching", { requests: 95, limit: 100 });
@@ -44,43 +44,54 @@ logWarn("Rate limit approaching", { requests: 95, limit: 100 });
 
 ```typescript
 export async function POST(request: NextRequest) {
-  try {
-    logInfo("API request received", {
-      endpoint: "/api/users",
-      method: "POST",
-      userAgent: request.headers.get("user-agent"),
-    });
+    try {
+        logInfo("API request received", {
+            endpoint: "/api/users",
+            method: "POST",
+            userAgent: request.headers.get("user-agent"),
+        });
 
-    // ... your logic
+        // ... your logic
 
-    logInfo("API request completed successfully");
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    logError("API request failed", error, { endpoint: "/api/users" });
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+        logInfo("API request completed successfully");
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        logError("API request failed", error, { endpoint: "/api/users" });
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
 }
 ```
 
-## Log Files
+## Log Files (Production Only)
 
-- `logs/app.log` - All application logs
-- `logs/error.log` - Error logs only
+- `logs/app.log` - All application logs in JSON format
+- `logs/error.log` - Error logs only in JSON format
 
 ## Environment Configuration
 
-- **Development**: Logs to console with colors + files
-- **Production**: Logs to files only (JSON format)
-- **Log level**: `debug` in development, `info` in production
+- **Development**:
+    - Log level: `debug`
+    - Output: Console only (simple format)
+    - Errors printed to stderr
+- **Production**:
+    - Log level: `info`
+    - Output: Console (colored) + File transport (JSON)
+    - Includes timestamps, service metadata, and stack traces
+    - File rotation enabled
 
 ## Best Practices
 
 1. Always include relevant context in log metadata
-2. Use appropriate log levels
+2. Use appropriate log levels (prefer `info` for normal operations)
 3. Don't log sensitive information (passwords, tokens)
-4. Include user context when available
-5. Log both success and failure cases
-6. Use structured data for better searchability
+4. Use structured data for better searchability
+5. Include complete error objects in `logError` calls
+6. Utilize the `debug` level for verbose development logging
+
+## Default Metadata
+
+All logs include automatic service metadata:
+
+```json
+{ "service": "pda-platform" }
+```
