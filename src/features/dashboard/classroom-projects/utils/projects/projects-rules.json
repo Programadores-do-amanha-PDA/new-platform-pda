@@ -50,5 +50,81 @@
             "Quase lá": "Repositório não foi utilizado ou possui um histórico de commits que não reflete um trabalho em equipe (ex: um único commit por uma única pessoa).",
             "Não entregue": "Não há como avaliar"
         }
+    },
+    "MP2": {
+        "Funcionalidade (API CRUD)": {
+            "Maravilhoso": "Todas as funcionalidades funcionam perfeitamente; Todos os endpoints operam perfeitamente, utilizando os códigos de status HTTP corretos (200, 201, 204, 404) e lidando com casos extremos (ex: buscar um ID inexistente)",
+            "Tudo OK": "Todas as funcionalidades obrigatórias implementadas; Todos os endpoints do CRUD (GET, POST, PUT, DELETE) estão implementados e funcionais; A API manipula os dados conforme o esperado",
+            "Quase lá": "A API não executa; A API inicia, mas os endpoints (GET, POST, PUT, DELETE) não estão funcionais, estão incompletos ou não foram implementados",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Arquitetura (MVC)": {
+            "Maravilhoso": "A arquitetura é exemplar; A separação de responsabilidades (Rotas, Controladores, Models) é clara, e a estrutura de pastas é intuitiva e profissional",
+            "Tudo OK": "O projeto segue o padrão MVC; As Rotas (express.Router) estão separadas da lógica de negócio, que reside nos arquivos de Controladores",
+            "Quase lá": "A lógica está concentrada em um único arquivo, sem separação de responsabilidades; Não segue o padrão MVC (Rotas e Controladores separados)",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Persistência de Dados (Sequelize)": {
+            "Maravilhoso": "A implementação do Sequelize é avançada; Models e Migrations estão perfeitos, e os controladores usam os métodos do ORM de forma eficiente (podendo incluir relacionamentos ou métodos avançados)",
+            "Tudo OK": "A API está conectada a um banco de dados usando Sequelize; O Model e a Migration para as tarefas foram criados, e os controladores usam os métodos do ORM",
+            "Quase lá": "A persistência de dados não foi implementada com o Sequelize (ex: usa um array em memória) ou não há conexão com o banco de dados",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Boas Práticas (Middleware e .env)": {
+            "Maravilhoso": "O uso de boas práticas é notável; O .env está perfeitamente configurado e o projeto utiliza múltiplos middlewares customizados (ex: para logs, validações)",
+            "Tudo OK": "O projeto utiliza corretamente um arquivo .env para dados sensíveis; Implementa middlewares essenciais (ex: express.json() ou um logger simples)",
+            "Quase lá": "Informações sensíveis (como dados do banco) estão expostas no código; Não faz uso de variáveis de ambiente (.env); Não implementa middlewares",
+            "Não entregue": "Não há como avaliar"
+        }
+    },
+    "P2": {
+        "Problematização & Tema": {
+            "Maravilhoso": "Além de resolver o problema central, o Desafio Extra (ex: contador de cliques, extrato financeiro, filtro de status) foi implementado e funciona corretamente",
+            "Tudo OK": "A API resolve o problema central do tema sorteado (ex: Encurta links, registra finanças); As entidades e relacionamentos principais (1:N) estão funcionais",
+            "Quase lá": "A API não resolve o problema central do tema sorteado; As entidades básicas (Usuario + principal) não foram implementadas;",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Arquitetura & Código (JS)": {
+            "Maravilhoso": "Arquitetura limpa, segue alguns princípios do SOLID (ex: Responsabilidade Única); O código é 'limpo' (clean code), reutilizável e com tratamento de erros (try/catch) bem aplicado",
+            "Tudo OK": "O código segue a arquitetura MVC + Camada de Serviço; As responsabilidades estão bem separadas em pastas (controllers, services, routes, models)",
+            "Quase lá": "O código está desorganizado (ex: tudo em um arquivo); A lógica de negócio está misturada diretamente nos controladores (sem camada de serviço)",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Banco de Dados & ORM (Sequelize)": {
+            "Maravilhoso": "Uso avançado do Sequelize; Implementa Soft Delete (deletedAt) onde aplicável; Os seeders (opcional) são usados para popular o banco; Funções de agregação (se aplicável ao tema) são usadas",
+            "Tudo OK": "O Sequelize é usado para todas as operações de CRUD; O relacionamento principal (ex: Usuario 1:N Transacao) está funcional; O projeto contém as migrations para criar as tabelas",
+            "Quase lá": "Não utiliza um ORM (Sequelize) ou o utiliza de forma incorreta (ex: SQL puro); Os relacionamentos 1:N não foram implementados ou não funcionam; As migrations não foram usadas",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Autenticação & Autorização (JWT)": {
+            "Maravilhoso": "Além do 'Tudo OK', implementa Autorização (usuário só pode editar/deletar seus próprios recursos); Se o tema exigir, implementa roles (ex: 'ADMIN' vs 'USER')",
+            "Tudo OK": "Register usa bcrypt para gerar o hash da senha; Login valida as credenciais e retorna um Token JWT válido; Um middleware de autenticação protege as rotas privadas",
+            "Quase lá": "Rotas de register/login estão ausentes ou não funcionam; (Grave) Senhas estão salvas em texto puro; As rotas que deveriam ser protegidas estão públicas",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Validação & Tratamento de Erros": {
+            "Maravilhoso": "Validação robusta (body, params, query); As mensagens de erro são claras, em português e úteis para o usuário (ex: 'Campo 'email' é obrigatório e deve ser um email válido');",
+            "Tudo OK": "Usa Zod (ou similar) para validar o body das rotas POST e PUT; Implementa um middleware de tratamento de erros centralizado (a API não 'quebra')",
+            "Quase lá": "A API 'quebra' (crash) com dados inválidos (ex: email sem @); Não há validação dos dados de entrada (body); Não há tratamento de erros centralizado",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Documentação (Swagger)": {
+            "Maravilhoso": "A documentação é 100% completa; Descreve claramente quais rotas são protegidas e como usar o Bearer Token (inclui o 'cadeado' de autenticação)",
+            "Tudo OK": "O Swagger está implementado e documenta todos os endpoints criados; Os schemas (DTOs) de entrada e saída estão definidos",
+            "Quase lá": "O projeto não possui documentação com Swagger, ou ela está inacessível",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Deploy (Hospedagem)": {
+            "Maravilhoso": "O deploy está 100% funcional; O banco de dados (ex: Postgres) também está na nuvem; As variáveis de ambiente (.env) estão configuradas corretamente na plataforma",
+            "Tudo OK": "A API está deployada no Render (ou similar) e todos os endpoints funcionam no ambiente de produção (não apenas localmente)",
+            "Quase lá": "O projeto não está deployado ou o link fornecido não funciona (ex: crash do Heroku/Render)",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Apresentação & README.md": {
+            "Maravilhoso": "Apresentação clara e domínio técnico; A SQUAD explica as dificuldades e decisões de arquitetura; O README.md é completo: inclui o link do deploy, o link do Swagger e instruções locais detalhadas",
+            "Tudo OK": "A SQUAD apresenta o projeto, demonstra as rotas principais (usando Insomnia/Postman ou o próprio Swagger) e explica a arquitetura; O README.md explica como rodar o projeto localmente",
+            "Quase lá": "A SQUAD não consegue explicar o que foi feito; O README.md está vazio ou é o padrão do create-react-app",
+            "Não entregue": "Não há como avaliar"
+        }
     }
 }
