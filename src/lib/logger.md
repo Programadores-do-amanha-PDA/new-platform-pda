@@ -7,9 +7,9 @@ The PDA Platform uses Winston for structured logging across all API routes and s
 ## Features
 
 - **Multiple log levels**: debug, info, warn, error, http
-- **Structured JSON logging** for production
-- **Console output** with timestamps and colors (production)
-- **File rotation** with size limits (5MB per file, 5 files max) in production
+- **Structured JSON logging** for file outputs
+- **Console output** with timestamps and colors (development)
+- **File rotation** with size limits (5MB per file, 5 files max) in development
 - **Error stack traces** automatically captured
 - **Service metadata** included automatically
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 }
 ```
 
-## Log Files (Production Only)
+## Log Files (Development Only)
 
 - `logs/app.log` - All application logs in JSON format
 - `logs/error.log` - Error logs only in JSON format
@@ -70,14 +70,15 @@ export async function POST(request: NextRequest) {
 ## Environment Configuration
 
 - **Development**:
-    - Log level: `debug`
-    - Output: Console only (simple format)
-    - Errors printed to stderr
+  - Log level: `debug`
+  - Output: Console (colored with timestamps) + File transport (JSON)
+  - Includes timestamps, service metadata, and stack traces
+  - File rotation enabled (5MB per file, 5 files max)
 - **Production**:
-    - Log level: `info`
-    - Output: Console (colored) + File transport (JSON)
-    - Includes timestamps, service metadata, and stack traces
-    - File rotation enabled
+  - Log level: `info`
+  - Output: Console only (JSON format)
+  - Errors printed to stderr
+  - No file transport (ready for third-party logging service integration)
 
 ## Best Practices
 
