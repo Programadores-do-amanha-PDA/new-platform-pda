@@ -5,25 +5,18 @@ import { isWithinInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
 import Color from "color";
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
+    ColumnDef,
+    ColumnFiltersState,
+    SortingState,
+    flexRender,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    useReactTable,
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 import { cn } from "@/lib/utils";
 import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
@@ -33,332 +26,271 @@ import { AttendanceJustificationDropdown } from "./attendance-justification-drop
 import { AuthUserWithProfileT } from "@/types";
 import { calculateClassPresence, calculateUserAttendance } from "../utils";
 import {
-  calculateWeeklyClassPresence,
-  calculateUserWeeklyAttendance,
-  getMeetingsByWeek,
+    calculateWeeklyClassPresence,
+    calculateUserWeeklyAttendance,
+    getMeetingsByWeek,
 } from "../utils/weekly-attendance-calcs";
 import { AttendanceTableProps } from "../types";
 import { usersColumns } from "./attendance-table-users-columns";
 
 export default function AttendanceTable({
-  allVisibleUsers,
-  allAggregateInMetricUsers,
-  meetings,
-  classroomId,
+    allVisibleUsers,
+    allAggregateInMetricUsers,
+    meetings,
+    classroomId,
 }: AttendanceTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [dateRange, setDateRange] = useState<DateRange | null>(null);
+    const [sorting, setSorting] = useState<SortingState>([]);
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+    const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-  const { configsByClassroom } = useClassroomConfigStore();
+    const { configsByClassroom } = useClassroomConfigStore();
 
-  const currentConfig = useMemo(() => {
-    if (configsByClassroom[classroomId]) return configsByClassroom[classroomId];
-    else return null;
-  }, [configsByClassroom, classroomId]);
+    const currentConfig = useMemo(() => {
+        if (configsByClassroom[classroomId]) return configsByClassroom[classroomId];
+        else return null;
+    }, [configsByClassroom, classroomId]);
 
-  const classroomModules = useMemo(() => {
-    if (currentConfig && currentConfig.modules) return currentConfig.modules;
-    else return [];
-  }, [currentConfig]);
+    const classroomModules = useMemo(() => {
+        if (currentConfig && currentConfig.modules) return currentConfig.modules;
+        else return [];
+    }, [currentConfig]);
 
-  const classroomClassTypes = useMemo(() => {
-    if (currentConfig && currentConfig.class_types.length > 0)
-      return currentConfig.class_types;
-    else return [];
-  }, [currentConfig]);
+    const classroomClassTypes = useMemo(() => {
+        if (currentConfig && currentConfig.class_types.length > 0) return currentConfig.class_types;
+        else return [];
+    }, [currentConfig]);
 
-  const classroomJustifications = useMemo(() => {
-    if (currentConfig && currentConfig.justifications.length > 0)
-      return currentConfig.justifications;
-    else return [];
-  }, [currentConfig]);
+    const classroomJustifications = useMemo(() => {
+        if (currentConfig && currentConfig.justifications.length > 0) return currentConfig.justifications;
+        else return [];
+    }, [currentConfig]);
 
-  const displayedMeetings = useMemo(() => {
-    if (!dateRange || !dateRange.from || !dateRange.to) return meetings;
+    const displayedMeetings = useMemo(() => {
+        if (!dateRange || !dateRange.from || !dateRange.to) return meetings;
 
-    return meetings.filter((meeting) => {
-      const meetingDate = new Date(meeting.start_time || 0);
-      return isWithinInterval(meetingDate, {
-        start: dateRange.from!,
-        end: dateRange.to!,
-      });
-    });
-  }, [meetings, dateRange]);
+        return meetings.filter((meeting) => {
+            const meetingDate = new Date(meeting.start_time || 0);
+            return isWithinInterval(meetingDate, {
+                start: dateRange.from!,
+                end: dateRange.to!,
+            });
+        });
+    }, [meetings, dateRange]);
 
-  const handleDateRangeChange = useCallback((newDateRange: DateRange) => {
-    setDateRange(newDateRange);
-  }, []);
+    const handleDateRangeChange = useCallback((newDateRange: DateRange) => {
+        setDateRange(newDateRange);
+    }, []);
 
-  const backgroundColor = (color: string | null | undefined) => {
-    try {
-      if (!color) throw "color null";
-      return Color(color).hex();
-    } catch {
-      return "#f3f4f6";
-    }
-  };
+    const backgroundColor = (color: string | null | undefined) => {
+        try {
+            if (!color) throw "color null";
+            return Color(color).hex();
+        } catch {
+            return "#f3f4f6";
+        }
+    };
 
-  // Create dynamic columns for meetings
-  const meetingColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] =
-    useMemo(() => {
-      return displayedMeetings.map((meeting, index) => ({
-        id: `meeting-${meeting.id}-${index}`,
-        header: () => {
-          const currentClassType = classroomClassTypes.find(
-            (classType) => classType.id === meeting.class_type
-          );
+    // Create dynamic columns for meetings
+    const meetingColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = useMemo(() => {
+        return displayedMeetings.map((meeting, index) => ({
+            id: `meeting-${meeting.id}-${index}`,
+            header: () => {
+                const currentClassType = classroomClassTypes.find((classType) => classType.id === meeting.class_type);
 
-          const weekMeetings = getMeetingsByWeek(
-            meeting,
-            displayedMeetings,
-            classroomClassTypes
-          );
+                const weekMeetings = getMeetingsByWeek(meeting, displayedMeetings, classroomClassTypes);
 
-          return (
-            <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
-              <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
-                <p className="font-bold">
-                  {new Date(meeting.start_time || 0).getTime() ===
-                  new Date().getTime()
-                    ? "Hoje"
-                    : new Date(meeting.start_time || 0).toLocaleDateString(
-                        "pt-BR",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "2-digit",
-                        }
-                      )}
-                </p>
-              </div>
-              <div className="w-[155px]! h-11 flex justify-center items-center p-2">
-                <MeetingTypeSelector
-                  key={`MeetingTypeSelector-${meeting.id}-${index}`}
-                  meeting={meeting}
-                  options={classroomClassTypes}
-                />
-              </div>
-              <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-                <p>
-                  {currentClassType?.presence_calc_type === "byWeeklyMeetings"
-                    ? calculateWeeklyClassPresence(
+                return (
+                    <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
+                        <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
+                            <p className="font-bold">
+                                {new Date(meeting.start_time || 0).getTime() === new Date().getTime()
+                                    ? "Hoje"
+                                    : new Date(meeting.start_time || 0).toLocaleDateString("pt-BR", {
+                                          day: "2-digit",
+                                          month: "2-digit",
+                                          year: "2-digit",
+                                      })}
+                            </p>
+                        </div>
+                        <div className="w-[155px]! h-11 flex justify-center items-center p-2">
+                            <MeetingTypeSelector
+                                key={`MeetingTypeSelector-${meeting.id}-${index}`}
+                                meeting={meeting}
+                                options={classroomClassTypes}
+                            />
+                        </div>
+                        <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
+                            <p>
+                                {currentClassType?.presence_calc_type === "byWeeklyMeetings"
+                                    ? calculateWeeklyClassPresence(weekMeetings, allAggregateInMetricUsers).overallPresence
+                                    : calculateClassPresence(meeting, allAggregateInMetricUsers)}
+                                %
+                            </p>
+                        </div>
+                    </div>
+                );
+            },
+            cell: ({ row }) => {
+                const userEmail = row.original.email;
+                const shouldAggregateInMetric = allAggregateInMetricUsers.some((user) => user.email === userEmail);
+
+                const currentClassType = classroomClassTypes.find((classType) => classType.id === meeting.class_type);
+
+                let userAttendance;
+
+                if (currentClassType?.presence_calc_type === "byWeeklyMeetings") {
+                    const weekMeetings = getMeetingsByWeek(meeting, displayedMeetings, classroomClassTypes);
+
+                    userAttendance = calculateUserWeeklyAttendance({
+                        userEmail: userEmail || "",
+                        currentMeeting: meeting,
                         weekMeetings,
-                        allAggregateInMetricUsers
-                      ).overallPresence
-                    : calculateClassPresence(
+                        currentClassType,
+                        availableJustifications: classroomJustifications,
+                        shouldAggregateInMetric,
+                    });
+                } else {
+                    // Default single meeting calculation
+                    userAttendance = calculateUserAttendance({
                         meeting,
-                        allAggregateInMetricUsers
-                      )}
-                  %
-                </p>
-              </div>
-            </div>
-          );
+                        userEmail: userEmail || "",
+                        currentClassType: currentClassType!,
+                        availableJustifications: classroomJustifications,
+                        shouldAggregateInMetric,
+                    });
+                }
+
+                return (
+                    <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
+                        <div className="flex flex-col">
+                            <p
+                                className="font-semibold"
+                                style={{
+                                    color: backgroundColor(
+                                        userAttendance?.justification?.color || userAttendance?.limit?.color,
+                                    ),
+                                }}
+                                title={userAttendance?.justification?.title || userAttendance?.limit?.title}
+                            >
+                                {userAttendance?.justification?.key || userAttendance?.limit?.key}
+                            </p>
+
+                            {userAttendance.minutesAttended > 0 && userAttendance?.limit?.key !== "--" && (
+                                <p className="text-sm text-muted-foreground">{userAttendance.minutesAttended}M</p>
+                            )}
+                        </div>
+                        {userEmail &&
+                            userAttendance?.limit?.key !== "--" &&
+                            (userAttendance?.justification || userAttendance?.limit?.allow_justification) && (
+                                <AttendanceJustificationDropdown
+                                    key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+                                    currentMeeting={meeting}
+                                    currentUserEmail={userEmail}
+                                    type={meeting.meeting_type}
+                                />
+                            )}
+                    </div>
+                );
+            },
+        }));
+    }, [classroomClassTypes, classroomJustifications, displayedMeetings, allAggregateInMetricUsers]);
+
+    // Combine user columns with meeting columns
+    const allColumns = useMemo(() => {
+        return [...usersColumns, ...meetingColumns];
+    }, [meetingColumns]);
+
+    const table = useReactTable({
+        data: allVisibleUsers,
+        columns: allColumns,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        state: {
+            sorting,
+            columnFilters,
         },
-        cell: ({ row }) => {
-          const userEmail = row.original.email;
-          const shouldAggregateInMetric = allAggregateInMetricUsers.some(
-            (user) => user.email === userEmail
-          );
-
-          const currentClassType = classroomClassTypes.find(
-            (classType) => classType.id === meeting.class_type
-          );
-
-          let userAttendance;
-
-          if (currentClassType?.presence_calc_type === "byWeeklyMeetings") {
-            const weekMeetings = getMeetingsByWeek(
-              meeting,
-              displayedMeetings,
-              classroomClassTypes
-            );
-
-            userAttendance = calculateUserWeeklyAttendance({
-              userEmail: userEmail || "",
-              currentMeeting: meeting,
-              weekMeetings,
-              currentClassType,
-              availableJustifications: classroomJustifications,
-              shouldAggregateInMetric,
-            });
-          } else {
-            // Default single meeting calculation
-            userAttendance = calculateUserAttendance({
-              meeting,
-              userEmail: userEmail || "",
-              currentClassType: currentClassType!,
-              availableJustifications: classroomJustifications,
-              shouldAggregateInMetric,
-            });
-          }
-
-          return (
-            <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
-              <div className="flex flex-col">
-                <p
-                  className="font-semibold"
-                  style={{
-                    color: backgroundColor(
-                      userAttendance?.justification?.color ||
-                        userAttendance?.limit?.color
-                    ),
-                  }}
-                  title={
-                    userAttendance?.justification?.title ||
-                    userAttendance?.limit?.title
-                  }
-                >
-                  {userAttendance?.justification?.key ||
-                    userAttendance?.limit?.key}
-                </p>
-
-                {userAttendance.minutesAttended > 0 &&
-                  userAttendance?.limit?.key !== "--" && (
-                    <p className="text-sm text-muted-foreground">
-                      {userAttendance.minutesAttended}M
-                    </p>
-                  )}
-              </div>
-              {userEmail &&
-                userAttendance?.limit?.key !== "--" &&
-                (userAttendance?.justification ||
-                  userAttendance?.limit?.allow_justification) && (
-                  <AttendanceJustificationDropdown
-                    key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
-                    currentMeeting={meeting}
-                    currentUserEmail={userEmail}
-                    type={meeting.meeting_type}
-                  />
-                )}
-            </div>
-          );
+        manualPagination: false,
+        autoResetPageIndex: false,
+        initialState: {
+            pagination: {
+                pageIndex: 0,
+                pageSize: allVisibleUsers?.length || 1000,
+            },
         },
-      }));
-    }, [
-      classroomClassTypes,
-      classroomJustifications,
-      displayedMeetings,
-      allAggregateInMetricUsers,
-    ]);
+    });
 
-  // Combine user columns with meeting columns
-  const allColumns = useMemo(() => {
-    return [...usersColumns, ...meetingColumns];
-  }, [meetingColumns]);
+    return (
+        <div className="w-full h-full flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <Input
+                    placeholder="Procurando por alguém?"
+                    value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
+                    onChange={(event) => table.getColumn("profile")?.setFilterValue(event.target.value)}
+                    className="max-w-sm"
+                />
+                <DateIntervalPaginationControl onDateRangeChange={handleDateRangeChange} modules={classroomModules} />
+            </div>
 
-  const table = useReactTable({
-    data: allVisibleUsers,
-    columns: allColumns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnFilters,
-    },
-    manualPagination: false,
-    autoResetPageIndex: false,
-    initialState: {
-      pagination: {
-        pageIndex: 0,
-        pageSize: allVisibleUsers?.length || 1000,
-      },
-    },
-  });
+            <div className="rounded-md border flex w-full h-full overflow-y-auto">
+                <Table className="w-max">
+                    <TableHeader className="bg-sidebar border-0! sticky top-0 left-0 right-0 z-20 overflow-hidden">
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id} className="max-w-[155px]! border-0! !p-0 h-max">
+                                {headerGroup.headers.map((header) => {
+                                    const isUserColumn = header.id === "profile";
+                                    return (
+                                        <TableHead
+                                            key={header.id}
+                                            className={cn(
+                                                "w-full h-max !p-0 !m-0 !border-0",
+                                                isUserColumn && "sticky left-0 bg-sidebar z-10",
+                                            )}
+                                        >
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(header.column.columnDef.header, header.getContext())}
+                                        </TableHead>
+                                    );
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow
+                                    key={row.id}
+                                    data-state={row.getIsSelected() && "selected"}
+                                    className="group/row max-w-[155px]! w-full border-0!"
+                                >
+                                    {row.getVisibleCells().map((cell) => {
+                                        const isUserColumn = cell.column.id === "profile";
 
-  return (
-    <div className="w-full h-full flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="Procurando por alguém?"
-          value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("profile")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        <DateIntervalPaginationControl
-          onDateRangeChange={handleDateRangeChange}
-          modules={classroomModules}
-        />
-      </div>
-
-      <div className="rounded-md border flex w-full h-full overflow-y-auto">
-        <Table className="w-max">
-          <TableHeader className="bg-sidebar border-0! sticky top-0 left-0 right-0 z-20 overflow-hidden">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow
-                key={headerGroup.id}
-                className="max-w-[155px]! border-0! !p-0 h-max"
-              >
-                {headerGroup.headers.map((header) => {
-                  const isUserColumn = header.id === "profile";
-                  return (
-                    <TableHead
-                      key={header.id}
-                      className={cn(
-                        "w-full h-max !p-0 !m-0 !border-0",
-                        isUserColumn && "sticky left-0 bg-sidebar z-10"
-                      )}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="group/row max-w-[155px]! w-full border-0!"
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const isUserColumn = cell.column.id === "profile";
-
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          "w-max p-0 h-full border-0!",
-                          isUserColumn && "sticky left-0"
+                                        return (
+                                            <TableCell
+                                                key={cell.id}
+                                                className={cn("w-max p-0 h-full border-0!", isUserColumn && "sticky left-0")}
+                                            >
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={allColumns.length} className="h-24 text-center">
+                                    Sem resultados.
+                                </TableCell>
+                            </TableRow>
                         )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={allColumns.length}
-                  className="h-24 text-center"
-                >
-                  Sem resultados.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
-  );
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    );
 }
