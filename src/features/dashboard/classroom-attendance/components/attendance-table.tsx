@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { isWithinInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
 import Color from "color";
+
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -17,21 +18,18 @@ import {
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { cn } from "@/lib/utils";
 import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
+import { cn } from "@/lib/utils";
+import { AuthUserWithProfileT } from "@/types";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { AuthUserWithProfileT } from "@/types";
-import { calculateClassPresence, calculateUserAttendance } from "../utils";
-import {
-    calculateWeeklyClassPresence,
-    calculateUserWeeklyAttendance,
-    getMeetingsByWeek,
-} from "../utils/weekly-attendance-calcs";
-import { AttendanceTableProps } from "../types";
 import { usersColumns } from "./attendance-table-users-columns";
+import { calculateClassPresence, calculateUserAttendance } from "../utils";
+import { calculateUserWeeklyAttendance, getMeetingsByWeek } from "../utils/weekly-attendance-calcs";
+import { AttendanceTableProps } from "../types";
 
 export default function AttendanceTable({
     allVisibleUsers,
