@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { isWithinInterval } from "date-fns";
 import { DateRange } from "react-day-picker";
 import Color from "color";
+
 import {
     ColumnDef,
     ColumnFiltersState,
@@ -17,21 +18,18 @@ import {
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { cn } from "@/lib/utils";
 import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
+import { cn } from "@/lib/utils";
+import { AuthUserWithProfileT } from "@/types";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
-import { AuthUserWithProfileT } from "@/types";
-import { calculateClassPresence, calculateUserAttendance } from "../utils";
-import {
-    calculateWeeklyClassPresence,
-    calculateUserWeeklyAttendance,
-    getMeetingsByWeek,
-} from "../utils/weekly-attendance-calcs";
-import { AttendanceTableProps } from "../types";
 import { usersColumns } from "./attendance-table-users-columns";
+import { calculateClassPresence, calculateUserAttendance } from "../utils";
+import { calculateUserWeeklyAttendance, getMeetingsByWeek } from "../utils/weekly-attendance-calcs";
+import { AttendanceTableProps } from "../types";
 
 export default function AttendanceTable({
     allVisibleUsers,
@@ -95,10 +93,6 @@ export default function AttendanceTable({
         return displayedMeetings.map((meeting, index) => ({
             id: `meeting-${meeting.id}-${index}`,
             header: () => {
-                const currentClassType = classroomClassTypes.find((classType) => classType.id === meeting.class_type);
-
-                const weekMeetings = getMeetingsByWeek(meeting, displayedMeetings, classroomClassTypes);
-
                 return (
                     <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
                         <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
@@ -120,12 +114,7 @@ export default function AttendanceTable({
                             />
                         </div>
                         <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
-                            <p>
-                                {currentClassType?.presence_calc_type === "byWeeklyMeetings"
-                                    ? calculateWeeklyClassPresence(weekMeetings, allAggregateInMetricUsers).overallPresence
-                                    : calculateClassPresence(meeting, allAggregateInMetricUsers)}
-                                %
-                            </p>
+                            <p>{calculateClassPresence(meeting, allAggregateInMetricUsers)}%</p>
                         </div>
                     </div>
                 );
