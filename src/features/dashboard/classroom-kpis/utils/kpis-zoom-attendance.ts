@@ -1,12 +1,16 @@
-import { eachMonthOfInterval, eachWeekOfInterval, isSameWeek, lastDayOfMonth, startOfMonth } from "date-fns";
+import { eachMonthOfInterval, eachWeekOfInterval, isSameMonth, isSameWeek, lastDayOfMonth, startOfMonth } from "date-fns";
 
 import { calculateClassPresence } from "../../classroom-attendance/utils/attendance-calculator";
 import { calculateWeeklyClassPresence } from "../../classroom-attendance/utils/weekly-attendance-calcs";
 import {
     AttendanceAccumulatorT,
-    GetAllWeeklyMeetingsGroupedByMonthProps,
+    GetAttendanceByWeeklyMeetingsGroupedByMonthProps,
+    GetAttendanceByWeeklyMeetingsGroupedByMonthResults,
     GetAttendanceAccumulatorProps,
 } from "../types/zoom-attendance.types";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ module: "KPIs-zoom-attendance" });
 
 export const getAttendanceAccumulator = ({
     meetings,
@@ -40,23 +44,98 @@ export const getAttendanceAccumulator = ({
     );
 };
 
-export const getAllWeeklyMeetingsGroupedByMonth = ({ allMeetings }: GetAllWeeklyMeetingsGroupedByMonthProps) =>
-    eachMonthOfInterval({
-        start: new Date(allMeetings[0].start_time!),
-        end: new Date(allMeetings[allMeetings.length - 1].start_time!),
-    }).map((month) => {
-        const weeksInMonth = eachWeekOfInterval({
-            start: startOfMonth(month),
-            end: lastDayOfMonth(month),
+export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
+    allMeetings,
+    allAggregateInMetricUsers,
+    classroomClassTypes,
+}: GetAttendanceByWeeklyMeetingsGroupedByMonthProps): GetAttendanceByWeeklyMeetingsGroupedByMonthResults[] => {
+    try {
+        if (!allMeetings.length || !allAggregateInMetricUsers.length || !classroomClassTypes.length)
+            throw new Error("all params is required");
+
+        const firstMeetingByStartTime = allMeetings.sort(
+            (a, b) => new Date(a.start_time!).getTime() - new Date(b.start_time!).getTime(),
+        )[0];
+        const lastMeetingByStartTime = allMeetings.sort(
+            (a, b) => new Date(b.start_time!).getTime() - new Date(a.start_time!).getTime(),
+        )[0];
+
+        if (!firstMeetingByStartTime.start_time || !lastMeetingByStartTime.start_time)
+            throw new Error("No first or last meeting found");
+
+        const months = eachMonthOfInterval({
+            start: new Date(firstMeetingByStartTime.start_time),
+            end: new Date(lastMeetingByStartTime.start_time),
         });
 
-        const weeklyMeetings = weeksInMonth.map((week) => {
-            const meetings = allMeetings.filter((meeting) => {
-                const meetingDate = new Date(meeting.start_time!);
-                return isSameWeek(meetingDate, month);
-            });
+        if (!months.length) throw new Error("No months of interval");
 
-            return { week, meetings: meetings };
+        const attendanceByWeeklyMeetingsGroupedByMonth = months.map((month) => {
+            try {
+                if (!month) throw new Error("No month found");
+
+                const monthMeetings = allMeetings.filter((meeting) => {
+                    const meetingDate = new Date(meeting.start_time!);
+                    return isSameMonth(meetingDate, month);
+                });
+
+                if (!monthMeetings.length) throw new Error("No meetings found");
+
+                const monthMeetingsAttendance = getAttendanceAccumulator({
+                    meetings: monthMeetings,
+                    allAggregateInMetricUsers,
+                    classroomClassTypes,
+                });
+
+                const weeksInMonth = eachWeekOfInterval({
+                    start: startOfMonth(month),
+                    end: lastDayOfMonth(month),
+                });
+
+                if (!weeksInMonth.length) throw new Error("No weeks found");
+
+                const weeklyMeetings = weeksInMonth.map((week) => {
+                    const meetings = allMeetings.filter((meeting) => {
+                        const meetingDate = new Date(meeting.start_time!);
+                        return isSameWeek(meetingDate, month);
+                    });
+
+                    return { week, meetings: meetings };
+                });
+
+                if (!weeklyMeetings.length) throw new Error("No weekly meetings found");
+
+                const weeklyMeetingsAttendance = weeklyMeetings.map((wm) => {
+                    return {
+                        date: wm.week,
+                        attendance: getAttendanceAccumulator({
+                            meetings: wm.meetings,
+                            allAggregateInMetricUsers,
+                            classroomClassTypes,
+                        }),
+                    };
+                });
+
+                if (!weeklyMeetingsAttendance.length) throw new Error("No weekly meetings attendance found");
+
+                return {
+                    month: { date: month, attendance: monthMeetingsAttendance },
+                    weeks: weeklyMeetingsAttendance,
+                } as GetAttendanceByWeeklyMeetingsGroupedByMonthResults;
+            } catch (error) {
+                log.error({ err: error }, "Error in getAttendanceByWeeklyMeetingsGroupedByMonth");
+                return null as unknown as GetAttendanceByWeeklyMeetingsGroupedByMonthResults;
+            }
         });
-        return { month, weeklyMeetings };
-    });
+
+        if (!attendanceByWeeklyMeetingsGroupedByMonth.length)
+            return [] as unknown as GetAttendanceByWeeklyMeetingsGroupedByMonthResults[];
+
+        return attendanceByWeeklyMeetingsGroupedByMonth.filter(
+            (month) => month !== null,
+        ) as GetAttendanceByWeeklyMeetingsGroupedByMonthResults[];
+    } catch (error) {
+        log.error({ err: error }, "Error in getAttendanceByWeeklyMeetingsGroupedByMonth");
+        return [] as unknown as GetAttendanceByWeeklyMeetingsGroupedByMonthResults[];
+    }
+};

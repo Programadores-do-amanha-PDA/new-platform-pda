@@ -21,6 +21,13 @@ export interface GetAttendanceAccumulatorProps {
     classroomClassTypes: ClassroomConfigClassTypesT[];
 }
 
-export interface GetAllWeeklyMeetingsGroupedByMonthProps {
+export interface GetAttendanceByWeeklyMeetingsGroupedByMonthProps {
     allMeetings: AttendanceAllPastMeetingT[];
+    allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
+    classroomClassTypes: ClassroomConfigClassTypesT[];
+}
+
+export interface GetAttendanceByWeeklyMeetingsGroupedByMonthResults {
+    month: { date: Date; attendance: AttendanceAccumulatorT };
+    weeks: { date: Date; attendance: AttendanceAccumulatorT }[];
 }

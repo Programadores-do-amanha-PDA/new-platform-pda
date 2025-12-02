@@ -1,61 +1,135 @@
 "use client";
 
+import { useMemo } from "react";
+import { GetAttendanceByWeeklyMeetingsGroupedByMonthResults, GetMeetingsByTypeColumnsP } from "../types/zoom-attendance.types";
+import { getAttendanceByWeeklyMeetingsGroupedByMonth } from "../utils/kpis-zoom-attendance";
+import { logger } from "@/lib/logger";
 import { ColumnDef } from "@tanstack/react-table";
-import { GetMeetingsByTypeColumnsP } from "../types/zoom-attendance.types";
-import { getAllWeeklyMeetingsGroupedByMonth, getAttendanceAccumulator } from "../utils/kpis-zoom-attendance";
+import { DefaultTableHeader } from "@/components/shared/custom-data-table/default-table-header-cell";
+
+const log = logger.child({ name: "KPIs.zoom-attendance-columns" });
 
 export const ZoomAttendanceColumns = ({
     meetingsByType,
-    // allAggregateInMetricUsers,
+    allAggregateInMetricUsers,
     classroomClassTypes,
 }: GetMeetingsByTypeColumnsP) => {
-    const allMeetings = Object.entries(meetingsByType).map(([key, value]) => {
-        const currentClassType = classroomClassTypes.find((classType) => classType.id === key);
-        const allTypeMeetings = value.sort((a, b) => new Date(a.start_time!).getTime() - new Date(b.start_time!).getTime());
-        const allWeeklyMeetingsGroupedByMonth = getAllWeeklyMeetingsGroupedByMonth({ allMeetings: allTypeMeetings });
-        if (!currentClassType || !allTypeMeetings.length || !allWeeklyMeetingsGroupedByMonth.length) return;
+    const attendancesByTypesGroupedByMonth = useMemo(() => {
+        const allMeetings = Object.entries(meetingsByType).filter(([key, value]) => {
+            try {
+                const allClassTypesId = classroomClassTypes.flatMap((classType) => classType.id);
+                if (!allClassTypesId.length) throw new Error("no class types found");
 
-        const columns: ColumnDef = [
-            {
-                accessorKey: "",
-                header: "Status",
-            },
-        ];
+                return value.length > 0 || allClassTypesId.includes(key);
+            } catch (error) {
+                log.error({ err: error }, "Error in attendances:");
+                return [];
+            }
+        });
 
-        return columns;
-    });
+        if (!allMeetings.length) return;
 
-    // meetingsByTypeKeys.map((key) => {
-    //     const meetings = meetingsByType[key];
-    //     const meetingsCount = meetings.length;
-    //     const currentClassType = classroomClassTypes.find((classType) => classType.id === key);
+        const result = allMeetings.map(([key, value]) => {
+            try {
+                if (!value.length || !key) return;
 
-    //     if (currentClassType === undefined) return;
+                const currentClassType = classroomClassTypes.find((classType) => classType.id === key);
+                if (!currentClassType) return;
 
-    //     // Usa reduce para somar as porcentagens de presença de cada meeting
-    //     const attendanceData = getAttendanceAccumulator({
-    //         meetings,
-    //         allAggregateInMetricUsers,
-    //         classroomClassTypes,
-    //     });
+                const attendanceByWeeklyMeetingsGroupedByMonth = getAttendanceByWeeklyMeetingsGroupedByMonth({
+                    allMeetings: value,
+                    allAggregateInMetricUsers,
+                    classroomClassTypes,
+                });
+                if (!attendanceByWeeklyMeetingsGroupedByMonth.length) throw new Error("no weekly meetings found");
 
-    //     // Calcula a porcentagem final (média das porcentagens)
-    //     const finalAttendancePercentage =
-    //         attendanceData.count > 0 ? Math.round(attendanceData.totalPresencePercentage / attendanceData.count) : 0;
+                return { classType: currentClassType, attendances: attendanceByWeeklyMeetingsGroupedByMonth };
+            } catch (error) {
+                log.error({ err: error }, "Error on attendances");
+                return null;
+            }
+        });
 
-    //     return { title: currentClassType.title, totalMeetings: meetingsCount, totalAttendance: finalAttendancePercentage };
-    // });
+        return (
+            result.filter((item) => item !== null || item !== undefined) ||
+            ([] as GetAttendanceByWeeklyMeetingsGroupedByMonthResults[])
+        );
+    }, [meetingsByType, allAggregateInMetricUsers, classroomClassTypes]);
 
-    // return allWeeklyMeetingsGroupedByMonth.map(({ month, weeklyMeetings }) => {
-    //     const columns: ColumnDef<>[] = [
-    //         {
-    //             accessorKey: "status",
-    //             header: "Status",
+    log.debug({ attendancesByTypesGroupedByMonth }, "attendances");
+
+    // const attendancesByTypesGroupedByMonthColumns: ColumnDef<>[] = useMemo(() => {
+    //     return attendancesByTypesGroupedByMonth?.map((attendance, index) => ({
+    //         id: `kpi-${attendance?.classType.id}`,
+    //         header: () => {
+    //             return (
+    //           <DefaultTableHeader>
+
+    //           </DefaultTableHeader>
+    //             );
     //         },
-    //     ];
+    //         cell: ({ row }) => {
+    //             const userEmail = row.original.email;
+    //             const shouldAggregateInMetric = allAggregateInMetricUsers.some((user) => user.email === userEmail);
 
-    //     return columns;
-    // });
+    //             const currentClassType = classroomClassTypes.find((classType) => classType.id === meeting.class_type);
 
-    return <></>;
+    //             let userAttendance;
+
+    //             if (currentClassType?.presence_calc_type === "byWeeklyMeetings") {
+    //                 const weekMeetings = getMeetingsByWeek(meeting, displayedMeetings, classroomClassTypes);
+
+    //                 userAttendance = calculateUserWeeklyAttendance({
+    //                     userEmail: userEmail || "",
+    //                     currentMeeting: meeting,
+    //                     weekMeetings,
+    //                     currentClassType,
+    //                     availableJustifications: classroomJustifications,
+    //                     shouldAggregateInMetric,
+    //                 });
+    //             } else {
+    //                 // Default single meeting calculation
+    //                 userAttendance = calculateUserAttendance({
+    //                     meeting,
+    //                     userEmail: userEmail || "",
+    //                     currentClassType: currentClassType!,
+    //                     availableJustifications: classroomJustifications,
+    //                     shouldAggregateInMetric,
+    //                 });
+    //             }
+
+    //             return (
+    //                 <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
+    //                     <div className="flex flex-col">
+    //                         <p
+    //                             className="font-semibold"
+    //                             style={{
+    //                                 color: backgroundColor(
+    //                                     userAttendance?.justification?.color || userAttendance?.limit?.color,
+    //                                 ),
+    //                             }}
+    //                             title={userAttendance?.justification?.title || userAttendance?.limit?.title}
+    //                         >
+    //                             {userAttendance?.justification?.key || userAttendance?.limit?.key}
+    //                         </p>
+
+    //                         {userAttendance.minutesAttended > 0 && userAttendance?.limit?.key !== "--" && (
+    //                             <p className="text-sm text-muted-foreground">{userAttendance.minutesAttended}M</p>
+    //                         )}
+    //                     </div>
+    //                     {userEmail &&
+    //                         userAttendance?.limit?.key !== "--" &&
+    //                         (userAttendance?.justification || userAttendance?.limit?.allow_justification) && (
+    //                             <AttendanceJustificationDropdown
+    //                                 key={`AttendanceJustificationDropdown-${meeting.id}-${index}`}
+    //                                 currentMeeting={meeting}
+    //                                 currentUserEmail={userEmail}
+    //                                 type={meeting.meeting_type}
+    //                             />
+    //                         )}
+    //                 </div>
+    //             );
+    //         },
+    //     }));
+    // }, []);
 };
