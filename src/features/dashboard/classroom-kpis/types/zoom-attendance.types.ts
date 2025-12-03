@@ -31,3 +31,8 @@ export interface GetAttendanceByWeeklyMeetingsGroupedByMonthResults {
     month: { date: Date; attendance: AttendanceAccumulatorT };
     weeks: { date: Date; attendance: AttendanceAccumulatorT }[];
 }
+
+export interface AttendancesByTypesGroupedByMonthTypes {
+    classType: ClassroomConfigClassTypesT | null | undefined;
+    attendances: GetAttendanceByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
+}
