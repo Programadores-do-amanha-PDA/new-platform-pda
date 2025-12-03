@@ -66,7 +66,7 @@ export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
         const months = eachMonthOfInterval({
             start: new Date(firstMeetingByStartTime.start_time),
             end: new Date(lastMeetingByStartTime.start_time),
-        });
+        }).sort((a, b) => b.getTime() - a.getTime());
 
         if (!months.length) throw new Error("No months of interval");
 
@@ -77,7 +77,7 @@ export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
                 const monthMeetings = allMeetings.filter((meeting) => {
                     const meetingDate = new Date(meeting.start_time!);
                     return isSameMonth(meetingDate, month);
-                });
+                })
 
                 if (!monthMeetings.length) throw new Error("No meetings found");
 
@@ -90,7 +90,7 @@ export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
                 const weeksInMonth = eachWeekOfInterval({
                     start: startOfMonth(month),
                     end: lastDayOfMonth(month),
-                });
+                }).sort((a, b) => b.getTime() - a.getTime());
 
                 if (!weeksInMonth.length) throw new Error("No weeks found");
 
