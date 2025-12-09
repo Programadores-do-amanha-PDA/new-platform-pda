@@ -4,7 +4,7 @@ import { ApiError } from "@/lib/errors/api-error";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 
-const log = logger.child({ name: "middleware.supabase-auth" });
+const log = logger.child({ module: "middleware.supabase-auth" });
 
 export const authenticateWithSupabase = async () => {
     try {

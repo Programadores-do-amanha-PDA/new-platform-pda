@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 
-const log = logger.child({ name: "route.auth.callback" });
+const log = logger.child({ module: "route.auth.callback" });
 
 /**
  * API Route for handling authentication callbacks

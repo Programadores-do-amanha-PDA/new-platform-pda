@@ -28,7 +28,7 @@ The PDA Platform uses Pino for fast, structured logging across all API routes an
 ```typescript
 import { logger } from "@/lib/logger";
 
-const log =  logger.child({ name: "folder.file" });
+const log =  logger.child({ module: "folder.file" });
 ```
 
 ### Basic logging
