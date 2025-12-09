@@ -1,5 +1,5 @@
 import { AuthUserWithProfileT } from "@/types";
-import { AttendanceAllPastMeetingT, MeetingAttendanceT } from "../../classroom-attendance/types";
+import { MeetingAttendanceT } from "../../classroom-attendance/types";
 import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
 
 export type AttendanceAccumulatorT = {
@@ -13,26 +13,35 @@ export interface GetMeetingsByTypeColumnsP {
     classroomClassTypes: ClassroomConfigClassTypesT[];
 }
 
-export type meetingsByClassTypeT = Record<string, AttendanceAllPastMeetingT>;
+export type meetingsByClassTypeT = Record<string, MeetingAttendanceT>;
 
 export interface GetAttendanceAccumulatorProps {
-    meetings: AttendanceAllPastMeetingT[];
+    meetings: MeetingAttendanceT[];
     allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
     classroomClassTypes: ClassroomConfigClassTypesT[];
 }
 
 export interface GetAttendanceByWeeklyMeetingsGroupedByMonthProps {
-    allMeetings: AttendanceAllPastMeetingT[];
+    allMeetings: MeetingAttendanceT[];
     allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
     classroomClassTypes: ClassroomConfigClassTypesT[];
 }
 
 export interface GetAttendanceByWeeklyMeetingsGroupedByMonthResults {
-    month: { date: Date; attendance: AttendanceAccumulatorT };
-    weeks: { date: Date; attendance: AttendanceAccumulatorT }[];
+    month: { date: Date; attendance: AttendanceAccumulatorT | null };
+    weeks: { date: Date; attendance: AttendanceAccumulatorT | null }[];
 }
 
 export interface AttendancesByTypesGroupedByMonthTypes {
     classType: ClassroomConfigClassTypesT | null | undefined;
     attendances: GetAttendanceByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
+}
+
+export interface GetMonthsAndWeeksInMonthByMeetingsProps {
+    meetings: MeetingAttendanceT[];
+}
+
+export interface GetMonthsAndWeeksInMonthByMeetingsResult {
+    month: Date;
+    weeks: Date[];
 }

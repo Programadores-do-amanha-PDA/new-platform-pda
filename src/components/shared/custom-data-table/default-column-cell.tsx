@@ -15,12 +15,12 @@ export const DefaultRowCell = ({
 }: DefaultColumnCellProps) => {
     return (
         <div
-            className={
-                (cn("w-full h-full flex justify-center items-center p-2  min-w-[120px]"),
+            className={cn(
+                "w-full min-h-12 h-12 flex items-center p-2",
                 isLastElementOnVertical ? "border-b-0" : "border-b",
                 isLastElementOnHorizontal ? "border-r-0" : "border-r",
-                className)
-            }
+                className,
+            )}
         >
             <span className="font-medium">{children}</span>
         </div>
