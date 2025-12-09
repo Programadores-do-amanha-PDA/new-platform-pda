@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader, Pen, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../classroom-zoom/stores";
 import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
@@ -24,10 +24,6 @@ export function AttendanceJustificationDropdown({
   currentUserEmail: string;
   type: "meeting" | "pastInstance";
 }) {
-  const [justification, setJustification] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
-
   const { updateMeeting } = useZoomMeetingStore();
   const { updatePastInstanceById } = useZoomMeetingPastInstanceStore();
 
@@ -35,11 +31,11 @@ export function AttendanceJustificationDropdown({
     (j) => j.user_email === currentUserEmail
   );
 
-  useEffect(() => {
-    if (currentJustification) {
-      setJustification(currentJustification.message || "");
-    }
-  }, [currentMeeting, currentJustification]);
+  const [justification, setJustification] = useState<string>(
+    currentJustification?.message || ""
+  );
+  const [loading, setLoading] = useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   const handleAddJustification = async () => {
     setLoading(true);
