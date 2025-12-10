@@ -14,9 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 
 import { useZoomAttendanceColumns } from "./zoom-attendance-columns";
 import { MeetingAttendanceT, PastInstancieAttendanceT } from "../../../classroom-attendance/types";
-import { AttendancesByTypesGroupedByMonthTypes } from "../../types/zoom-attendance.types";
 import { filterMetricClassroomStudents } from "../../../utils/filter-metric-classroom-students";
-import { getAttendanceByWeeklyMeetingsGroupedByMonth } from "../../utils/kpis-zoom-attendance";
+import { AttendancesByTypesGroupedByMonthTypes } from "../../types";
+import { getAttendanceByWeeklyMeetingsGroupedByMonth } from "../../utils";
 
 const log = logger.child({ module: "ZoomAttendanceTable" });
 
@@ -116,9 +116,7 @@ export const KPIsZoomAttendanceTable = ({ classroomId }: { classroomId: string }
         return result.filter((item) => item !== null || item !== undefined) || ([] as AttendancesByTypesGroupedByMonthTypes[]);
     }, [meetingsByType, allAggregateInMetricUsers, classroomClassTypes]);
 
-    log.debug({ attendancesByTypesGroupedByMonth }, "attendances");
-
-    const columns = useZoomAttendanceColumns({ meetingsByType, allAggregateInMetricUsers, classroomClassTypes });
+    const columns = useZoomAttendanceColumns({ meetingsByType });
 
     const table = useReactTable({
         data: attendancesByTypesGroupedByMonth,
@@ -127,7 +125,7 @@ export const KPIsZoomAttendanceTable = ({ classroomId }: { classroomId: string }
     });
 
     return (
-        <div className="w-full h-full overflow-hidden rounded-md border">
+        <div className="w-full h-full  overflow-hidden rounded-md border">
             <Table className="w-full h-full">
                 <TableHeader className="p-0! m-0! border-none!">
                     {table.getHeaderGroups().map((headerGroup) => (

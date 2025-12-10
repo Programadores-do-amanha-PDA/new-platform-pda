@@ -1,14 +1,6 @@
-import { GetMonthsAndWeeksInMonthByMeetingsResult } from "./../types/zoom-attendance.types";
-import {
-    eachMonthOfInterval,
-    eachWeekOfInterval,
-    format,
-    isSameMonth,
-    isSameWeek,
-    lastDayOfMonth,
-    startOfMonth,
-} from "date-fns";
+import { isSameMonth, isSameWeek } from "date-fns";
 
+import { logger } from "@/lib/logger";
 import { calculateClassPresence } from "../../classroom-attendance/utils/attendance-calculator";
 import { calculateWeeklyClassPresence } from "../../classroom-attendance/utils/weekly-attendance-calcs";
 import {
@@ -16,10 +8,8 @@ import {
     GetAttendanceByWeeklyMeetingsGroupedByMonthProps,
     GetAttendanceByWeeklyMeetingsGroupedByMonthResults,
     GetAttendanceAccumulatorProps,
-    GetMonthsAndWeeksInMonthByMeetingsProps,
-} from "../types/zoom-attendance.types";
-import { logger } from "@/lib/logger";
-import { ptBR } from "date-fns/locale";
+} from "../types";
+import { getMonthsAndWeeksInMonthByMeetings } from ".";
 
 const log = logger.child({ module: "KPIs-zoom-attendance" });
 
@@ -48,16 +38,19 @@ export const getAttendanceAccumulator = ({
             if (meetingClassType.presence_calc_type === "byWeeklyMeetings") {
                 // Filtra apenas as reuniões do mesmo tipo de classe
                 const weeklyMeetingsOfSameType = meetings.filter((m) => m.class_type === meeting.class_type);
-                
+
                 // Cria uma chave única para evitar processar o mesmo grupo de reuniões semanais múltiplas vezes
                 const weeklyKey = `${meeting.class_type}`;
-                
+
                 if (processedWeeklyMeetings.has(weeklyKey)) {
                     return accumulator;
                 }
-                
+
                 processedWeeklyMeetings.add(weeklyKey);
-                presencePercentage = calculateWeeklyClassPresence(weeklyMeetingsOfSameType, allAggregateInMetricUsers).overallPresence;
+                presencePercentage = calculateWeeklyClassPresence(
+                    weeklyMeetingsOfSameType,
+                    allAggregateInMetricUsers,
+                ).overallPresence;
             } else if (meetingClassType.presence_calc_type === "bySingleMeeting") {
                 presencePercentage = calculateClassPresence(meeting, allAggregateInMetricUsers);
             } else {
@@ -79,49 +72,6 @@ export const getAttendanceAccumulator = ({
         totalPresencePercentage: averagePresencePercentage,
         count: result.count,
     };
-};
-
-export const getMonthsAndWeeksInMonthByMeetings = ({
-    meetings,
-}: GetMonthsAndWeeksInMonthByMeetingsProps): GetMonthsAndWeeksInMonthByMeetingsResult[] => {
-    try {
-        if (!meetings.length) throw new Error("No meetings found");
-        const firstMeetingByStartTime = meetings.sort(
-            (a, b) => new Date(a.start_time!).getTime() - new Date(b.start_time!).getTime(),
-        )[0];
-        const lastMeetingByStartTime = meetings.sort(
-            (a, b) => new Date(b.start_time!).getTime() - new Date(a.start_time!).getTime(),
-        )[0];
-        if (!firstMeetingByStartTime.start_time || !lastMeetingByStartTime.start_time)
-            throw new Error("No first or last meeting found");
-
-        const months = eachMonthOfInterval({
-            start: new Date(firstMeetingByStartTime.start_time),
-            end: new Date(lastMeetingByStartTime.start_time),
-        }).sort((a, b) => b.getTime() - a.getTime());
-
-        if (!months.length) throw new Error("No months found");
-
-        const monthWithWeeks = months.map((month) => {
-            const weeksInMonth = eachWeekOfInterval({
-                start: startOfMonth(month),
-                end: lastDayOfMonth(month),
-            }).sort((a, b) => b.getTime() - a.getTime());
-
-            return { month, weeks: weeksInMonth || [] };
-        });
-
-        if (!monthWithWeeks.length) throw new Error("No weeks found");
-
-        return monthWithWeeks;
-    } catch (error) {
-        if (error instanceof Error) {
-            log.error(error.message);
-        } else {
-            log.info(error);
-        }
-        return [];
-    }
 };
 
 export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
@@ -176,12 +126,15 @@ export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
 
                 // Calcula a média mensal apenas das semanas que tiveram reuniões
                 const weeksWithMeetings = weeklyMeetingsAttendance.filter((w) => w.attendance !== null);
-                const monthAttendance = weeksWithMeetings.length > 0
-                    ? {
-                        totalPresencePercentage: weeksWithMeetings.reduce((sum, w) => sum + (w.attendance?.totalPresencePercentage || 0), 0) / weeksWithMeetings.length,
-                        count: weeksWithMeetings.reduce((sum, w) => sum + (w.attendance?.count || 0), 0),
-                    }
-                    : null;
+                const monthAttendance =
+                    weeksWithMeetings.length > 0
+                        ? {
+                              totalPresencePercentage:
+                                  weeksWithMeetings.reduce((sum, w) => sum + (w.attendance?.totalPresencePercentage || 0), 0) /
+                                  weeksWithMeetings.length,
+                              count: weeksWithMeetings.reduce((sum, w) => sum + (w.attendance?.count || 0), 0),
+                          }
+                        : null;
 
                 return {
                     month: { date: month, attendance: monthAttendance },
@@ -202,27 +155,5 @@ export const getAttendanceByWeeklyMeetingsGroupedByMonth = ({
     } catch (error) {
         log.error({ err: error }, "Error in getAttendanceByWeeklyMeetingsGroupedByMonth");
         return [] as unknown as GetAttendanceByWeeklyMeetingsGroupedByMonthResults[];
-    }
-};
-
-export const extractMonthNameAndYearByDate = (date: Date): string => {
-    try {
-        if (!date) return "";
-        return format(date, "MM/yyyy", {
-            locale: ptBR,
-        });
-    } catch (error) {
-        log.error({ err: error }, "Error in extractMonthNameAndYearByDate");
-        return "";
-    }
-};
-
-export const extractFirstDayOfWeekByDate = (date: Date): string => {
-    try {
-        if (!date) return "";
-        return format(date, "dd");
-    } catch (error) {
-        log.error({ err: error }, "Error in extractFirstDayOfWeekByDate");
-        return "";
     }
 };

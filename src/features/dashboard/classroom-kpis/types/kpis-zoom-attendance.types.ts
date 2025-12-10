@@ -9,8 +9,6 @@ export type AttendanceAccumulatorT = {
 
 export interface GetMeetingsByTypeColumnsP {
     meetingsByType: Record<string, MeetingAttendanceT[]>;
-    allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-    classroomClassTypes: ClassroomConfigClassTypesT[];
 }
 
 export type meetingsByClassTypeT = Record<string, MeetingAttendanceT>;

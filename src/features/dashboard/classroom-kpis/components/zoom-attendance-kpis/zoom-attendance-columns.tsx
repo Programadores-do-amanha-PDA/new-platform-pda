@@ -1,16 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { AttendancesByTypesGroupedByMonthTypes, GetMeetingsByTypeColumnsP } from "../../types/zoom-attendance.types";
-import {
-    extractFirstDayOfWeekByDate,
-    extractMonthNameAndYearByDate,
-    getMonthsAndWeeksInMonthByMeetings,
-} from "../../utils/kpis-zoom-attendance";
 import { ColumnDef } from "@tanstack/react-table";
-import { DefaultTableHeader } from "@/components/shared/custom-data-table/default-table-header-cell";
-import { DefaultRowCell } from "@/components/shared/custom-data-table/default-column-cell";
-import { TableHeaderItemWithCustomItem } from "@/components/shared/custom-data-table/custom-table-header-cell";
+import {
+    DefaultTableColumnCell,
+    DefaultTableHeaderCell,
+    TableHeaderItemWithCustomItem,
+} from "@/components/shared/custom-data-table";
+import { AttendancesByTypesGroupedByMonthTypes, GetMeetingsByTypeColumnsP } from "../../types";
+import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../utils";
 
 export const useZoomAttendanceColumns = ({ meetingsByType }: GetMeetingsByTypeColumnsP) => {
     const monthsWithWeeksByMeetings = useMemo(() => {
@@ -25,15 +23,15 @@ export const useZoomAttendanceColumns = ({ meetingsByType }: GetMeetingsByTypeCo
                 accessorKey: "title",
                 header: ({ column }) => {
                     return (
-                        <DefaultTableHeader column={column} className="max-h-24! h-24! border-r-2">
+                        <DefaultTableHeaderCell column={column} className="max-h-24! h-24! border-r-2">
                             Indices
-                        </DefaultTableHeader>
+                        </DefaultTableHeaderCell>
                     );
                 },
                 cell: ({ row }) => (
-                    <DefaultRowCell className="**:capitalize! **:font-medium! border-r-2">
+                    <DefaultTableColumnCell className="**:capitalize! **:font-medium! border-r-2">
                         % {row.original.classType?.title}
-                    </DefaultRowCell>
+                    </DefaultTableColumnCell>
                 ),
                 sortingFn: (rowA, rowB) => {
                     const titleA = rowA.original.classType?.title.toLowerCase() || "";
@@ -59,16 +57,16 @@ export const useZoomAttendanceColumns = ({ meetingsByType }: GetMeetingsByTypeCo
                                             {extractMonthNameAndYearByDate(month)}
                                         </TableHeaderItemWithCustomItem>
                                         <div className="w-full h-max max-h-12 flex flex-row justify-between items-center *:last:border-r-0!">
-                                            <DefaultTableHeader className="border-r size-12 items-center justify-center">
+                                            <DefaultTableHeaderCell className="border-r size-12 items-center justify-center">
                                                 M
-                                            </DefaultTableHeader>
+                                            </DefaultTableHeaderCell>
                                             {weeks.map((week) => (
-                                                <DefaultTableHeader
+                                                <DefaultTableHeaderCell
                                                     className="border-r size-12 flex items-center justify-center"
                                                     key={`kpi-attendance-by-${week.getTime()}`}
                                                 >
                                                     {extractFirstDayOfWeekByDate(week)}
-                                                </DefaultTableHeader>
+                                                </DefaultTableHeaderCell>
                                             ))}
                                         </div>
                                     </div>
@@ -91,18 +89,18 @@ export const useZoomAttendanceColumns = ({ meetingsByType }: GetMeetingsByTypeCo
                                         key={`kpi-attendance-cell-${month.getTime()}`}
                                         className="w-max h-max flex flex-row justify-between items-center border-r-2 *:last:border-r-0!"
                                     >
-                                        <DefaultRowCell className="border-r size-12">
+                                        <DefaultTableColumnCell className="border-r size-12">
                                             {monthAttendance?.month.attendance !== null &&
                                             monthAttendance?.month.attendance !== undefined
                                                 ? `${monthAttendance.month.attendance.totalPresencePercentage.toFixed(0)}%`
                                                 : "-"}
-                                        </DefaultRowCell>
+                                        </DefaultTableColumnCell>
                                         {weeks.map((week) => {
                                             const weekAttendance = monthAttendance?.weeks.find(
                                                 (w) => w.date.getTime() === week.getTime(),
                                             );
                                             return (
-                                                <DefaultRowCell
+                                                <DefaultTableColumnCell
                                                     className="border-r size-12"
                                                     key={`kpi-attendance-cell-week-${week.getTime()}`}
                                                 >
@@ -110,7 +108,7 @@ export const useZoomAttendanceColumns = ({ meetingsByType }: GetMeetingsByTypeCo
                                                     weekAttendance?.attendance !== undefined
                                                         ? `${weekAttendance.attendance.totalPresencePercentage.toFixed(0)}%`
                                                         : "-"}
-                                                </DefaultRowCell>
+                                                </DefaultTableColumnCell>
                                             );
                                         })}
                                     </div>
