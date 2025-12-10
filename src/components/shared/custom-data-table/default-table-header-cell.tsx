@@ -3,13 +3,13 @@ import { cn } from "@/lib/utils";
 import { Column } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-type DefaultTableHeaderProps<TData> = {
+type DefaultTableHeaderCellProps<TData> = {
     children: React.ReactNode;
     column?: Column<TData, unknown>;
     className?: string;
 };
 
-export const DefaultTableHeader = <TData,>({ children, column, className }: DefaultTableHeaderProps<TData>) => {
+export const DefaultTableHeaderCell = <TData,>({ children, column, className }: DefaultTableHeaderCellProps<TData>) => {
     const sortState = column?.getIsSorted();
     return (
         <div className={cn("w-full min-h-12 max-h-12 flex justify-between items-center border-r border-b px-2", className)}>

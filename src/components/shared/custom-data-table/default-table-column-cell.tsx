@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils";
 
-export type DefaultColumnCellProps = {
+export type DefaultTableColumnCellProps = {
     children: React.ReactNode;
     isLastElementOnVertical?: boolean;
     isLastElementOnHorizontal?: boolean;
     className?: string;
 };
 
-export const DefaultRowCell = ({
+export const DefaultTableColumnCell = ({
     children,
     isLastElementOnVertical,
     isLastElementOnHorizontal,
     className,
-}: DefaultColumnCellProps) => {
+}: DefaultTableColumnCellProps) => {
     return (
         <div
             className={cn(
