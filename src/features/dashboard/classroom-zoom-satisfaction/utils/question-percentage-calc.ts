@@ -72,7 +72,6 @@ export const calculatePollPercentage = (answers: string[]): number => {
   }
 
   const answerCounts = countPollAnswers(answers);
-  console.log(answerCounts);
   const weightedScore = calculateWeightedScore(answerCounts, answers.length);
   const normalizedPercentage = normalizePercentage(weightedScore);
 
