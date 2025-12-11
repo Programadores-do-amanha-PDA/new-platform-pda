@@ -1,22 +1,43 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
+import { ChevronsLeftRight } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 import {
     DefaultTableColumnCell,
     DefaultTableHeaderCell,
     TableHeaderItemWithCustomItem,
 } from "@/components/shared/custom-data-table";
-
 import { GetMeetingsByTypeColumnsP, ISatisfactionByTypesGroupedByMonthType } from "../../types";
 import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../utils";
 
-export const useZoomSatisfactionColumns = ({ meetingsByType }: GetMeetingsByTypeColumnsP) => {
+export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: GetMeetingsByTypeColumnsP) => {
+    const LOCAL_STORAGE_KEY = "zoom-satisfaction-columns";
     const monthsWithWeeksByMeetings = useMemo(() => {
         const meetings = Object.values(meetingsByType).flat();
         if (!meetings.length) return [];
         return getMonthsAndWeeksInMonthByMeetings({ meetings });
     }, [meetingsByType]);
+
+    const [rowsMinimized, setRowsMinimized] = useState<string[]>(() => {
+        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    });
+
+    useEffect(() => {
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(rowsMinimized));
+    }, [rowsMinimized]);
+
+    const handleSetMonthsMinimized = (rowId: string) => {
+        setRowsMinimized((prev) => {
+            if (prev.includes(rowId)) {
+                return prev.filter((id) => id !== rowId);
+            }
+            return [...prev, rowId];
+        });
+    };
 
     return useMemo(() => {
         const classTypeColumns: ColumnDef<ISatisfactionByTypesGroupedByMonthType>[] = [
@@ -24,16 +45,26 @@ export const useZoomSatisfactionColumns = ({ meetingsByType }: GetMeetingsByType
                 accessorKey: "title",
                 header: ({ column }) => {
                     return (
-                        <DefaultTableHeaderCell column={column} className="max-h-24! h-24! border-r-2">
-                            Indices
+                        <DefaultTableHeaderCell
+                            column={column}
+                            className="bg-sidebar border-r-2 border-b-2 w-full min-w-60! h-24! max-h-24!"
+                        >
+                            Aulas
                         </DefaultTableHeaderCell>
                     );
                 },
-                cell: ({ row }) => (
-                    <DefaultTableColumnCell className="**:capitalize! **:font-medium! border-r-2 h-[64px]">
-                        % {row.original.classType?.title}
-                    </DefaultTableColumnCell>
-                ),
+                cell: ({ row }) => {
+                    const isLastClassType = meetingsTypes.length - 1 === row.index;
+
+                    return (
+                        <DefaultTableColumnCell
+                            className="border-r-2 min-w-60! h-full min-h-[65px]! max-h-[65px] **:font-medium! **:capitalize!"
+                            isLastElementOnVertical={isLastClassType}
+                        >
+                            % {row.original.classType?.title}
+                        </DefaultTableColumnCell>
+                    );
+                },
                 sortingFn: (rowA, rowB) => {
                     const titleA = rowA.original.classType?.title.toLowerCase() || "";
                     const titleB = rowB.original.classType?.title?.toLowerCase() || "";
@@ -47,28 +78,52 @@ export const useZoomSatisfactionColumns = ({ meetingsByType }: GetMeetingsByType
                 accessorKey: "satisfaction",
                 header: () => {
                     return (
-                        <div className="w-max h-max max-h-24 flex flex-row justify-between items-center border-b">
+                        <div className="top-0 z-10 sticky flex flex-row justify-between items-center bg-sidebar border-b-2 w-max h-max max-h-24">
                             {monthsWithWeeksByMeetings.map(({ month, weeks }) => {
+                                const isLastMonth = month.getTime() === monthsWithWeeksByMeetings.at(-1)!.month.getTime();
+                                const isCurrentMonthMinimized = rowsMinimized.includes(month.toISOString());
+                                const handleMinimizeCurrentMonth = () => {
+                                    handleSetMonthsMinimized(month.toISOString());
+                                };
+
                                 return (
                                     <div
-                                        key={`kpi-attendance-by-${month.getTime()}`}
-                                        className="w-max h-max max-h-24 flex flex-col justify-between items-center border-r-2"
+                                        key={`kpi-satisfaction-by-${month.getTime()}`}
+                                        className={cn(
+                                            "flex flex-col justify-between items-center border-r-2 w-max h-max max-h-24",
+                                            isCurrentMonthMinimized && "min-w-[140px]! max-w-[160px]! w-[160px]",
+                                            isLastMonth && "border-r-0!",
+                                        )}
                                     >
-                                        <TableHeaderItemWithCustomItem className="capitalize font-semibold border-r-0">
+                                        <TableHeaderItemWithCustomItem
+                                            className={cn(
+                                                "gap-4 border-r-0 font-semibold capitalize",
+                                                isCurrentMonthMinimized && "min-w-[140px]! max-w-[160px]! w-full",
+                                            )}
+                                            customIcon={<ChevronsLeftRight />}
+                                            handleIconClick={handleMinimizeCurrentMonth}
+                                        >
                                             {extractMonthNameAndYearByDate(month)}
                                         </TableHeaderItemWithCustomItem>
-                                        <div className="w-full h-max max-h-12 flex flex-row justify-between items-center *:last:border-r-0!">
-                                            <DefaultTableHeaderCell className="border-r-2 h-[64px] w-40 items-center justify-center">
-                                                M
+                                        <div className="flex flex-row justify-between items-center *:last:border-r-0! w-full h-max max-h-12">
+                                            <DefaultTableHeaderCell
+                                                className={cn(
+                                                    "justify-center items-center px-2! border-r w-40 h-12",
+                                                    isCurrentMonthMinimized && "w-full",
+                                                )}
+                                            >
+                                                {isCurrentMonthMinimized ? "Mensal" : "M"}
                                             </DefaultTableHeaderCell>
-                                            {weeks.map((week) => (
-                                                <DefaultTableHeaderCell
-                                                    className="border-r h-[64px] w-40 flex items-center justify-center"
-                                                    key={`kpi-attendance-by-${week.getTime()}`}
-                                                >
-                                                    {extractFirstDayOfWeekByDate(week)}
-                                                </DefaultTableHeaderCell>
-                                            ))}
+                                            {!isCurrentMonthMinimized &&
+                                                weeks &&
+                                                weeks.map((week) => (
+                                                    <DefaultTableHeaderCell
+                                                        className="flex justify-center items-center border-r border-dashed w-40 h-12"
+                                                        key={`kpi-satisfaction-by-${week.getTime()}`}
+                                                    >
+                                                        {extractFirstDayOfWeekByDate(week)}
+                                                    </DefaultTableHeaderCell>
+                                                ))}
                                         </div>
                                     </div>
                                 );
@@ -80,138 +135,159 @@ export const useZoomSatisfactionColumns = ({ meetingsByType }: GetMeetingsByType
                     const satisfactions = row.original.satisfaction;
                     if (!satisfactions) return null;
 
+                    const isLastClassType = meetingsTypes.length - 1 === row.index;
+
                     return (
-                        <div className="w-max h-[64px] flex flex-row justify-between items-center">
+                        <div className="flex flex-row justify-between items-center border-0 w-max h-full max-h-[65px]">
                             {monthsWithWeeksByMeetings.map(({ month, weeks }) => {
                                 const monthSatisfaction = satisfactions.find(
                                     (sat) => sat.month.date.getTime() === month.getTime(),
                                 );
+                                const isCurrentMonthMinimized = rowsMinimized.includes(month.toISOString());
 
                                 return (
                                     <div
-                                        key={`kpi-attendance-cell-${month.getTime()}`}
-                                        className="w-max h-max flex flex-row justify-center items-center border-r-2"
+                                        key={`kpi-satisfaction-cell-${month.getTime()}`}
+                                        className={cn(
+                                            "flex flex-row justify-between items-center border-r-2 border-b w-max h-max",
+                                            isCurrentMonthMinimized && "min-w-[140px]! max-w-[160px]! w-[160px]",
+                                            isLastClassType && "border-b-0!",
+                                        )}
                                     >
-                                        <div className="border-r-2 h-[64px] w-40 p-0! border-b flex flex-col items-center justify-center">
-                                            {monthSatisfaction?.month.satisfaction ? (
-                                                <>
-                                                    {/* General Percentage Row */}
-                                                    <div className="w-full h-8 flex justify-center items-center border-b">
-                                                        <p className="text-sm font-bold">
-                                                            {monthSatisfaction.month.satisfaction.totalSatisfaction?.toFixed(
-                                                                1,
-                                                            ) || 0}
-                                                            %
-                                                        </p>
-                                                    </div>
-                                                    {/* Poll Categories Sub-headers */}
-
-                                                    {/* Individual Percentages Row */}
-                                                    <div className="w-full h-8 flex">
-                                                        <div
-                                                            className="flex-1 w-full h-8 flex justify-center items-center border-r px-1"
-                                                            title="Conteúdo"
-                                                        >
-                                                            <p className="text-xs font-bold text-blue-600">
-                                                                {monthSatisfaction.month.satisfaction.indicators?.totalContent?.toFixed(
-                                                                    1,
-                                                                ) || 0}
-                                                                %
-                                                            </p>
-                                                        </div>
-                                                        <div
-                                                            className="flex-1 w-full h-8 flex justify-center items-center border-r px-1"
-                                                            title="Facilitação"
-                                                        >
-                                                            <p className="text-xs font-bold text-purple-600">
-                                                                {monthSatisfaction.month.satisfaction.indicators?.totalFacilitation?.toFixed(
-                                                                    1,
-                                                                ) || 0}
-                                                                %
-                                                            </p>
-                                                        </div>
-                                                        <div
-                                                            className="flex-1 h-8 flex justify-center items-center px-1"
-                                                            title="Auto-desenvolvimento"
-                                                        >
-                                                            <p className="text-xs font-bold text-orange-600 text-center">
-                                                                {monthSatisfaction.month.satisfaction.indicators?.totalSelfDev?.toFixed(
-                                                                    1,
-                                                                ) || 0}
-                                                                %
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </>
-                                            ) : (
-                                                <p>-</p>
+                                        <div
+                                            className={cn(
+                                                "justify-center p-0! border-r w-40 h-16",
+                                                isCurrentMonthMinimized && "min-w-[140px]! max-w-[160px]! w-[160px] border-r-0",
+                                                isLastClassType && "border-r-0!",
                                             )}
-                                        </div>
-                                        {weeks.map((week) => {
-                                            const weekSatisfaction = monthSatisfaction?.weeks.find(
-                                                (w) => w.date.getTime() === week.getTime(),
-                                            );
-                                            return (
-                                                <div
-                                                    className="border-r h-[64px] w-40 p-0! border-b flex flex-col items-center justify-center"
-                                                    key={`kpi-attendance-cell-week-${week.getTime()}`}
-                                                >
-                                                    {weekSatisfaction?.satisfaction ? (
-                                                        <>
-                                                            {/* General Percentage Row */}
-                                                            <div className="w-full h-8 flex justify-center items-center border-b">
-                                                                <p className="text-sm font-bold">
-                                                                    {weekSatisfaction.satisfaction.totalSatisfaction?.toFixed(
+                                        >
+                                            <div className="flex flex-col justify-center items-center w-full h-full">
+                                                {monthSatisfaction?.month.satisfaction ? (
+                                                    <>
+                                                        {/* General Percentage Row */}
+                                                        <div className="flex justify-center items-center border-b w-full h-8">
+                                                            <p className="font-bold text-sm">
+                                                                {monthSatisfaction.month.satisfaction.totalSatisfaction?.toFixed(
+                                                                    1,
+                                                                ) || 0}
+                                                                %
+                                                            </p>
+                                                        </div>
+                                                        {/* Individual Percentages Row */}
+                                                        <div className="flex w-full h-8">
+                                                            <div
+                                                                className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
+                                                                title="Conteúdo"
+                                                            >
+                                                                <p className="font-bold text-blue-600 text-xs">
+                                                                    {monthSatisfaction.month.satisfaction.indicators?.totalContent?.toFixed(
                                                                         1,
                                                                     ) || 0}
                                                                     %
                                                                 </p>
                                                             </div>
-                                                            {/* Poll Categories Sub-headers */}
-
-                                                            {/* Individual Percentages Row */}
-                                                            <div className="w-full h-8 flex">
-                                                                <div
-                                                                    className="flex-1 w-full h-8 flex justify-center items-center border-r px-1"
-                                                                    title="Conteúdo"
-                                                                >
-                                                                    <p className="text-xs font-bold text-blue-600">
-                                                                        {weekSatisfaction.satisfaction.indicators?.totalContent?.toFixed(
-                                                                            1,
-                                                                        ) || 0}
-                                                                        %
-                                                                    </p>
-                                                                </div>
-                                                                <div
-                                                                    className="flex-1 w-full h-8 flex justify-center items-center border-r px-1"
-                                                                    title="Facilitação"
-                                                                >
-                                                                    <p className="text-xs font-bold text-purple-600">
-                                                                        {weekSatisfaction.satisfaction.indicators?.totalFacilitation?.toFixed(
-                                                                            1,
-                                                                        ) || 0}
-                                                                        %
-                                                                    </p>
-                                                                </div>
-                                                                <div
-                                                                    className="flex-1 h-8 flex justify-center items-center px-1"
-                                                                    title="Auto-desenvolvimento"
-                                                                >
-                                                                    <p className="text-xs font-bold text-orange-600 text-center">
-                                                                        {weekSatisfaction.satisfaction.indicators?.totalSelfDev?.toFixed(
-                                                                            1,
-                                                                        ) || 0}
-                                                                        %
-                                                                    </p>
-                                                                </div>
+                                                            <div
+                                                                className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
+                                                                title="Facilitação"
+                                                            >
+                                                                <p className="font-bold text-purple-600 text-xs">
+                                                                    {monthSatisfaction.month.satisfaction.indicators?.totalFacilitation?.toFixed(
+                                                                        1,
+                                                                    ) || 0}
+                                                                    %
+                                                                </p>
                                                             </div>
-                                                        </>
-                                                    ) : (
-                                                        <p>-</p>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
+                                                            <div
+                                                                className="flex flex-1 justify-center items-center px-1 h-8"
+                                                                title="Auto-desenvolvimento"
+                                                            >
+                                                                <p className="font-bold text-orange-600 text-xs text-center">
+                                                                    {monthSatisfaction.month.satisfaction.indicators?.totalSelfDev?.toFixed(
+                                                                        1,
+                                                                    ) || 0}
+                                                                    %
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <p>-</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {!isCurrentMonthMinimized &&
+                                            weeks &&
+                                            weeks.map((week, weekIndex) => {
+                                                const weekSatisfaction = monthSatisfaction?.weeks.find(
+                                                    (w) => w.date.getTime() === week.getTime(),
+                                                );
+                                                const isLastWeek = weeks.length - 1 === weekIndex;
+
+                                                return (
+                                                    <div key={`kpi-satisfaction-cell-week-${week.getTime()}`}>
+                                                        <div
+                                                            className={cn(
+                                                                "border-r border-dashed w-40 h-16",
+                                                                isLastWeek && "border-r-0!",
+                                                            )}
+                                                        >
+                                                            <div className="flex flex-col justify-center items-center w-full h-full">
+                                                                {weekSatisfaction?.satisfaction ? (
+                                                                    <>
+                                                                        {/* General Percentage Row */}
+                                                                        <div className="flex justify-center items-center border-b w-full h-8">
+                                                                            <p className="font-bold text-sm">
+                                                                                {weekSatisfaction.satisfaction.totalSatisfaction?.toFixed(
+                                                                                    1,
+                                                                                ) || 0}
+                                                                                %
+                                                                            </p>
+                                                                        </div>
+                                                                        {/* Individual Percentages Row */}
+                                                                        <div className="flex w-full h-8">
+                                                                            <div
+                                                                                className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
+                                                                                title="Conteúdo"
+                                                                            >
+                                                                                <p className="font-bold text-blue-600 text-xs">
+                                                                                    {weekSatisfaction.satisfaction.indicators?.totalContent?.toFixed(
+                                                                                        1,
+                                                                                    ) || 0}
+                                                                                    %
+                                                                                </p>
+                                                                            </div>
+                                                                            <div
+                                                                                className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
+                                                                                title="Facilitação"
+                                                                            >
+                                                                                <p className="font-bold text-purple-600 text-xs">
+                                                                                    {weekSatisfaction.satisfaction.indicators?.totalFacilitation?.toFixed(
+                                                                                        1,
+                                                                                    ) || 0}
+                                                                                    %
+                                                                                </p>
+                                                                            </div>
+                                                                            <div
+                                                                                className="flex flex-1 justify-center items-center px-1 h-8"
+                                                                                title="Auto-desenvolvimento"
+                                                                            >
+                                                                                <p className="font-bold text-orange-600 text-xs text-center">
+                                                                                    {weekSatisfaction.satisfaction.indicators?.totalSelfDev?.toFixed(
+                                                                                        1,
+                                                                                    ) || 0}
+                                                                                    %
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    </>
+                                                                ) : (
+                                                                    <p>-</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                     </div>
                                 );
                             })}
@@ -222,5 +298,5 @@ export const useZoomSatisfactionColumns = ({ meetingsByType }: GetMeetingsByType
         ];
 
         return [...classTypeColumns, ...satisfactionColumnsByMonth];
-    }, [monthsWithWeeksByMeetings]);
+    }, [monthsWithWeeksByMeetings, meetingsTypes, rowsMinimized]);
 };

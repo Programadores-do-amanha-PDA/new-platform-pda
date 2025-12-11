@@ -106,7 +106,7 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
         return result.filter((item) => item !== null || item !== undefined) || ([] as ISatisfactionByTypesGroupedByMonthType[]);
     }, [meetingsByType, classroomClassTypes]);
 
-    const columns = useZoomSatisfactionColumns({ meetingsByType });
+    const columns = useZoomSatisfactionColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
 
     const table = useReactTable({
         data: satisfactionByTypesGroupedByMonth,
@@ -115,14 +115,14 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
     });
 
     return (
-        <div className="w-full h-full  overflow-hidden rounded-md border">
-            <Table className="w-full h-full">
-                <TableHeader className="p-0! m-0! border-none!">
+        <div className="p-0! border rounded-md w-max max-w-full h-max max-h-full overflow-hidden">
+            <Table className="p-0! w-full h-full">
+                <TableHeader className="m-0! p-0! border-none!">
                     {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="p-0! m-0! border-none!">
+                        <TableRow key={headerGroup.id} className="m-0! p-0! border-none!">
                             {headerGroup.headers.map((header) => {
                                 return (
-                                    <TableHead key={header.id} className="p-0! m-0! border-none!">
+                                    <TableHead key={header.id} className="m-0! p-0! border-none!">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(header.column.columnDef.header, header.getContext())}
@@ -132,16 +132,16 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
                         </TableRow>
                     ))}
                 </TableHeader>
-                <TableBody className="h-full w-full p-0! m-0! border-none!">
+                <TableBody className="m-0! p-0! border-none! w-full h-full">
                     {table.getRowModel().rows?.length ? (
                         table.getRowModel().rows.map((row) => (
                             <TableRow
                                 key={row.id}
                                 data-state={row.getIsSelected() && "selected"}
-                                className="p-0! m-0! border-none!"
+                                className="m-0! p-0! border-none!"
                             >
                                 {row.getVisibleCells().map((cell) => (
-                                    <TableCell key={cell.id} className="p-0! m-0! border-none!">
+                                    <TableCell key={cell.id} className="m-0! p-0! border-none!">
                                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                     </TableCell>
                                 ))}
@@ -150,7 +150,7 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
                     ) : (
                         <TableRow>
                             <TableCell colSpan={columns.length} className="h-24 text-center">
-                                Sem resultados
+                                No results.
                             </TableCell>
                         </TableRow>
                     )}
