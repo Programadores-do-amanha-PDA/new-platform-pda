@@ -179,7 +179,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                 className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
                                                                 title="Conteúdo"
                                                             >
-                                                                <p className="font-bold text-blue-600 text-xs">
+                                                                <p className="text-blue-600 text-xs">
                                                                     {monthSatisfaction.month.satisfaction.indicators?.totalContent?.toFixed(
                                                                         1,
                                                                     ) || 0}
@@ -190,7 +190,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                 className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
                                                                 title="Facilitação"
                                                             >
-                                                                <p className="font-bold text-purple-600 text-xs">
+                                                                <p className="text-purple-600 text-xs">
                                                                     {monthSatisfaction.month.satisfaction.indicators?.totalFacilitation?.toFixed(
                                                                         1,
                                                                     ) || 0}
@@ -201,7 +201,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                 className="flex flex-1 justify-center items-center px-1 h-8"
                                                                 title="Auto-desenvolvimento"
                                                             >
-                                                                <p className="font-bold text-orange-600 text-xs text-center">
+                                                                <p className="text-orange-600 text-xs text-center">
                                                                     {monthSatisfaction.month.satisfaction.indicators?.totalSelfDev?.toFixed(
                                                                         1,
                                                                     ) || 0}
@@ -236,7 +236,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                     <>
                                                                         {/* General Percentage Row */}
                                                                         <div className="flex justify-center items-center border-b w-full h-8">
-                                                                            <p className="font-bold text-sm">
+                                                                            <p className="font-bold text-xs">
                                                                                 {weekSatisfaction.satisfaction.totalSatisfaction?.toFixed(
                                                                                     1,
                                                                                 ) || 0}
@@ -249,7 +249,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                                 className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
                                                                                 title="Conteúdo"
                                                                             >
-                                                                                <p className="font-bold text-blue-600 text-xs">
+                                                                                <p className="text-blue-600 text-xs">
                                                                                     {weekSatisfaction.satisfaction.indicators?.totalContent?.toFixed(
                                                                                         1,
                                                                                     ) || 0}
@@ -260,7 +260,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                                 className="flex flex-1 justify-center items-center px-1 border-r w-full h-8"
                                                                                 title="Facilitação"
                                                                             >
-                                                                                <p className="font-bold text-purple-600 text-xs">
+                                                                                <p className="text-purple-600 text-xs">
                                                                                     {weekSatisfaction.satisfaction.indicators?.totalFacilitation?.toFixed(
                                                                                         1,
                                                                                     ) || 0}
@@ -271,7 +271,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                                                 className="flex flex-1 justify-center items-center px-1 h-8"
                                                                                 title="Auto-desenvolvimento"
                                                                             >
-                                                                                <p className="font-bold text-orange-600 text-xs text-center">
+                                                                                <p className="text-orange-600 text-xs text-center">
                                                                                     {weekSatisfaction.satisfaction.indicators?.totalSelfDev?.toFixed(
                                                                                         1,
                                                                                     ) || 0}
