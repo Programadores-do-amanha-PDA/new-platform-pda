@@ -166,7 +166,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
                                                     <>
                                                         {/* General Percentage Row */}
                                                         <div className="flex justify-center items-center border-b w-full h-8">
-                                                            <p className="font-bold text-sm">
+                                                            <p className="font-bold text-xs">
                                                                 {monthSatisfaction.month.satisfaction.totalSatisfaction?.toFixed(
                                                                     1,
                                                                 ) || 0}
