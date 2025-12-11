@@ -9,6 +9,7 @@ export type AttendanceAccumulatorT = {
 
 export interface GetMeetingsByTypeColumnsP {
     meetingsByType: Record<string, MeetingAttendanceT[]>;
+    meetingsTypes:  ClassroomConfigClassTypesT[];
 }
 
 export type meetingsByClassTypeT = Record<string, MeetingAttendanceT>;
