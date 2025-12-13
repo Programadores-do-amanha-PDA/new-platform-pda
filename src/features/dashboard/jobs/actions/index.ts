@@ -1,3 +1,3 @@
-export * from "./job_applications";
+export * from "./job-applications.actions";
 export * from "./jobs_search";
 export * from "./job";

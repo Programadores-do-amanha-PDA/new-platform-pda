@@ -12,4 +12,3 @@ export * from "./user-classroom";
 
 // Subdirectory actions
 export * from "./classrooms";
-export * from "./jobs";
