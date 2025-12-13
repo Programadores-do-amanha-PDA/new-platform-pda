@@ -7,7 +7,7 @@ import {
   insertUserClassroom,
   deleteUserClassroom,
   updateUserClassroomMode,
-} from "@/app/actions/user-classroom";
+} from "@/actions/user-classroom";
 
 interface UserClassroomsState {
   users: Partial<AuthUserWithProfileT>[];

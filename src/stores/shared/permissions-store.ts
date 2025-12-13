@@ -6,7 +6,7 @@ import {
   insertRolePermission, 
   deleteRolePermission, 
   deleteAllPermissionsForRole 
-} from "@/app/actions/role-permissions";
+} from "@/actions/role-permissions";
 import { RolesT, RolePermissionT, PermissionT } from "@/types";
 
 interface PermissionsAdminState {

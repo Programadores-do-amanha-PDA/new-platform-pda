@@ -1,186 +1,168 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
-import { AuthUser } from "@supabase/supabase-js";
+
+import { getAllUsers, getManyAvatarUrlsByIds, createUser, getProfileById, updateUser, deleteUser } from "@/actions";
 import {
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "@/app/actions/auth_admin";
-import { getManyavatar_urlsByIds } from "@/app/actions/profile-avatar";
-import { getProfileById } from "@/app/actions/profiles";
-import { AuthUserWithProfileT, ProfileT, RolesT } from "@/types/auth";
+    AuthUserWithProfileT,
+    CreateNewUserProps,
+    DeleteUserStoreProps,
+    GetAllUsersWithProfilesProps,
+    IUsersActions,
+    IUsersState,
+    ProfileT,
+    SetUsersProps,
+    UpdateUserStoreProps,
+} from "@/types";
 
-interface UsersState {
-  users: Partial<AuthUserWithProfileT>[];
-  loading: boolean;
-}
-
-interface UsersActions {
-  setUsers: (users: Partial<AuthUserWithProfileT>[]) => void;
-  getAllUsersWithProfiles: (role?: RolesT) => Promise<boolean>;
-  createNewUser: (
-    userData: Partial<AuthUser & { password: string }>
-  ) => Promise<string | false>;
-  updateUser: (
-    userID: string | undefined,
-    updates: Partial<AuthUser & { password: string }>
-  ) => Promise<boolean>;
-  deleteUser: (userId: string | undefined) => Promise<boolean>;
-  reset: () => void;
-}
-
-const initialState: UsersState = {
-  users: [],
-  loading: false,
+const initialState: IUsersState = {
+    users: [],
+    loading: false,
 };
 
-export const useUsersStore = create<UsersState & UsersActions>()(
-  devtools(
-    (set) => ({
-      ...initialState,
+export const useUsersStore = create<IUsersState & IUsersActions>()(
+    devtools(
+        (set) => ({
+            ...initialState,
 
-      setUsers: (users) => set({ users }),
-
-      getAllUsersWithProfiles: async (role?: RolesT) => {
-        try {
-          set({ loading: true });
-          const users = await getAllUsers(role);
-          if (!users) throw "no users response";
-
-          const usersAvatars = await getManyavatar_urlsByIds(
-            users.map((user) => user.id)
-          );
-          const usersWithAvatars = users.map((user) => ({
-            ...user,
-            profile: {
-              ...user.profile,
-              avatar_url:
-                usersAvatars?.find(
-                  (avatar) => avatar.path === `${user.id}/avatar.png`
-                )?.signedUrl ?? null,
+            setUsers: ({ users }: SetUsersProps) => {
+                if (!users) {
+                    console.error("Invalid users data");
+                    return;
+                }
+                set({ users });
             },
-          }));
 
-          set({ users: usersWithAvatars });
-          return true;
-        } catch (error) {
-          console.error(error);
-          return false;
-        } finally {
-          set({ loading: false });
-        }
-      },
+            getAllUsersWithProfiles: async (props?: GetAllUsersWithProfilesProps) => {
+                set({ loading: true });
 
-      createNewUser: async (
-        userData: Partial<AuthUser & { password: string }>
-      ) => {
-        try {
-          if (
-            !userData.email ||
-            !userData.password ||
-            !userData.user_metadata ||
-            !userData.user_metadata.full_name ||
-            !userData.user_metadata.user_email
-          ) {
-            throw new Error("invalid user data");
-          }
+                try {
+                    const role = props?.role;
+                    const users = await getAllUsers({ role });
+                    if (!users) throw new Error("Failed to fetch users");
 
-          const userResponse = await createUser(userData);
-          if (!userResponse) throw new Error("no user response");
+                    const usersAvatars = await getManyAvatarUrlsByIds(users.map((user) => user.id));
+                    const usersWithAvatars = users.map((user) => ({
+                        ...user,
+                        profile: {
+                            ...user.profile,
+                            avatar_url:
+                                usersAvatars?.find((avatar) => avatar.path === `${user.id}/avatar.png`)?.signedUrl ?? null,
+                        },
+                    }));
 
-          const userProfileResponse = await getProfileById(userResponse.id);
-          if (!userProfileResponse) throw new Error("no user profile response");
-
-          const userWithProfile: Partial<AuthUserWithProfileT> = {
-            ...userResponse,
-            profile: {
-              ...userProfileResponse,
-              classrooms: userProfileResponse.classrooms || [],
+                    set({ users: usersWithAvatars });
+                    return true;
+                } catch (error) {
+                    console.error("Error fetching users with profiles:", error);
+                    toast.error("Erro ao buscar usuários. Tente novamente mais tarde!");
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
             },
-          };
 
-          set((state) => ({
-            users: [...state.users, userWithProfile],
-          }));
-          toast.success("Novo usuário criado com sucesso!");
-          return userResponse.id;
-        } catch (error) {
-          toast.error("Erro ao criar novo usuário!");
-          console.error(error);
-          return false;
-        }
-      },
+            createNewUser: async ({ userData }: CreateNewUserProps) => {
+                try {
+                    if (!userData) throw new Error("Invalid user data");
+                    if (
+                        !userData.email ||
+                        !userData.password ||
+                        !userData.user_metadata ||
+                        !userData.user_metadata.full_name ||
+                        !userData.user_metadata.user_email
+                    ) {
+                        throw new Error("Missing required user data fields");
+                    }
 
-      updateUser: async (
-        userID: string | undefined,
-        updates: Partial<AuthUser & { password: string }>
-      ) => {
-        try {
-          if (!userID || !updates) {
-            throw new Error("id and updates fields are required");
-          }
+                    const userResponse = await createUser({ userData });
+                    if (!userResponse) throw new Error("Failed to create user");
 
-          const userUpdatedResponse = await updateUser(userID, updates);
-          if (!userUpdatedResponse) throw new Error("no update user response");
+                    const userProfileResponse = await getProfileById({ id: userResponse.id });
+                    if (!userProfileResponse) throw new Error("Failed to fetch user profile");
 
-          set((state) => ({
-            users: state.users.map((currentUser) => {
-              if (currentUser.id === userID) {
-                const userUpdatedData: AuthUserWithProfileT = {
-                  ...currentUser,
-                  ...userUpdatedResponse,
-                  profile: {
-                    ...(currentUser.profile as ProfileT),
-                    email: userUpdatedResponse.user_metadata
-                      .user_email as string,
-                    full_name: userUpdatedResponse.user_metadata
-                      .full_name as string,
-                  },
-                  user_metadata: {
-                    ...currentUser.user_metadata,
-                    ...userUpdatedResponse.user_metadata,
-                  },
-                };
+                    const userWithProfile: Partial<AuthUserWithProfileT> = {
+                        ...userResponse,
+                        profile: {
+                            ...userProfileResponse,
+                            classrooms: userProfileResponse.classrooms || [],
+                        },
+                    };
 
-                return userUpdatedData;
-              }
-              return currentUser;
-            }),
-          }));
-          toast.success("Usuário atualizado com sucesso!");
-          return true;
-        } catch (error) {
-          console.error(error);
-          toast.error("Erro ao atualizar o usuário!");
-          return false;
-        }
-      },
+                    set((state) => ({
+                        users: [...state.users, userWithProfile],
+                    }));
+                    toast.success("Novo usuário criado com sucesso!");
+                    return userResponse.id;
+                } catch (error) {
+                    console.error("Error creating new user:", error);
+                    toast.error("Erro ao criar novo usuário!");
+                    return false;
+                }
+            },
 
-      deleteUser: async (userId: string | undefined) => {
-        try {
-          if (!userId) throw new Error("user id is required to delete");
+            updateUser: async ({ userID, updates }: UpdateUserStoreProps) => {
+                try {
+                    if (!userID) throw new Error("Invalid user ID");
+                    if (!updates) throw new Error("Invalid update data");
 
-          const response = await deleteUser(userId);
-          if (!response) throw new Error("no delete user response");
+                    const userUpdatedResponse = await updateUser({ userId: userID, updates });
+                    if (!userUpdatedResponse) throw new Error("Failed to update user");
 
-          set((state) => ({
-            users: state.users.filter((user) => user.id !== userId),
-          }));
-          toast.success("Usuário deletado com sucesso!");
-          return true;
-        } catch (error) {
-          console.error(error);
-          toast.error("Erro ao deletar usuário. tente novamente mais tarde!");
-          return false;
-        }
-      },
+                    set((state) => ({
+                        users: state.users.map((currentUser) => {
+                            if (currentUser.id === userID) {
+                                const userUpdatedData: AuthUserWithProfileT = {
+                                    ...currentUser,
+                                    ...userUpdatedResponse,
+                                    profile: {
+                                        ...(currentUser.profile as ProfileT),
+                                        email: userUpdatedResponse.user_metadata.user_email as string,
+                                        full_name: userUpdatedResponse.user_metadata.full_name as string,
+                                    },
+                                    user_metadata: {
+                                        ...currentUser.user_metadata,
+                                        ...userUpdatedResponse.user_metadata,
+                                    },
+                                };
 
-      reset: () => {
-        set(initialState);
-      },
-    }),
-    { name: "UsersStore" }
-  )
+                                return userUpdatedData;
+                            }
+                            return currentUser;
+                        }),
+                    }));
+                    toast.success("Usuário atualizado com sucesso!");
+                    return true;
+                } catch (error) {
+                    console.error("Error updating user:", error);
+                    toast.error("Erro ao atualizar o usuário!");
+                    return false;
+                }
+            },
+
+            deleteUser: async ({ userId }: DeleteUserStoreProps) => {
+                try {
+                    if (!userId) throw new Error("Invalid user ID");
+
+                    const response = await deleteUser({ userId });
+                    if (!response) throw new Error("Failed to delete user");
+
+                    set((state) => ({
+                        users: state.users.filter((user) => user.id !== userId),
+                    }));
+                    toast.success("Usuário deletado com sucesso!");
+                    return true;
+                } catch (error) {
+                    console.error("Error deleting user:", error);
+                    toast.error("Erro ao deletar usuário. Tente novamente mais tarde!");
+                    return false;
+                }
+            },
+
+            reset: () => {
+                set(initialState);
+            },
+        }),
+        { name: "UsersStore" },
+    ),
 );

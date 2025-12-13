@@ -8,7 +8,7 @@ import {
   getUserResumeByUserId,
   updateUserResumeById,
   deleteUserResumeById,
-} from "@/app/actions/resume";
+} from "@/actions/resume";
 import { AuthUserWithProfileT } from "@/types/auth";
 
 interface ResumeState {

@@ -1,4 +1,4 @@
-import { JobT } from "@/types/jobs";
+import { JobT } from "@/features/dashboard/jobs/types";
 import { ResumeT } from "@/types/resume";
 
 export const areaMatch = (student: ResumeT, job: JobT) => {
