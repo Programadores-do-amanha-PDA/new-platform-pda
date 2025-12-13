@@ -7,7 +7,7 @@ import {
   requestPasswordResetWithUserEmail,
   resendAnEmailSignupConfirmation,
   signOut,
-} from "@/app/actions";
+} from "@/actions";
 import { useAuthStore } from "@/stores/shared/auth-store";
 
 export default function useAuth() {

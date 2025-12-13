@@ -8,7 +8,7 @@ import {
   getAllCorrectionsByClassroomId,
   updateClassroomProjectCorrectionById,
   deleteCorrectionById,
-} from "@/app/actions/classrooms/projects/corrections";
+} from "@/actions/classrooms/projects/corrections";
 import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
 
 interface CorrectionState {

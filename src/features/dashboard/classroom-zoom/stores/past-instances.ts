@@ -12,7 +12,7 @@ import {
   updatePastInstanceById,
   updatePastInstanceByUuid,
   deletePastInstanceById,
-} from "@/app/actions/classrooms/zoom/past-instances";
+} from "@/actions/classrooms/zoom/past-instances";
 
 import { useZoomAPIStore } from "./";
 import {

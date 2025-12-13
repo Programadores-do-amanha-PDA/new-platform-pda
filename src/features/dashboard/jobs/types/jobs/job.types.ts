@@ -1,4 +1,4 @@
-import { IJobApplicationType } from ".";
+import { IJobApplication } from "..";
 
 export interface JobT {
     id: string;
@@ -20,4 +20,4 @@ export interface JobDetailsT {
     languages: string[];
 }
 
-export type JobWithApplicationsT = JobT & { applications?: IJobApplicationType[] };
+export type JobWithApplicationsT = JobT & { applications?: IJobApplication[] };

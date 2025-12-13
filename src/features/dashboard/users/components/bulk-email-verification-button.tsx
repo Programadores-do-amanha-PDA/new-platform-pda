@@ -10,7 +10,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { sendEmailVerificationToMultipleUsers } from "@/app/actions";
+import { sendEmailVerificationToMultipleUsers } from "@/actions";
 import { AuthUserWithProfileT } from "@/types/auth";
 import { MailCheck, Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -71,7 +71,7 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm" disabled={selectedCount === 0} className="gap-2">
-                    <MailCheck className="h-4 w-4" />
+                    <MailCheck className="w-4 h-4" />
                     Verificar Email ({selectedCount})
                 </Button>
             </DialogTrigger>
@@ -82,7 +82,7 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
                         Você está prestes a enviar emails de verificação para <strong>{validEmails}</strong> usuário(s)
                         selecionado(s).
                         {validEmails !== selectedCount && (
-                            <span className="text-yellow-600 block mt-2">
+                            <span className="block mt-2 text-yellow-600">
                                 ⚠️ {selectedCount - validEmails} usuário(s) não possuem email válido e serão ignorados.
                             </span>
                         )}
@@ -91,12 +91,12 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
 
                 <div className="py-4">
                     <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Usuários que receberão o email:</h4>
-                        <div className="max-h-32 overflow-y-auto space-y-1">
+                        <h4 className="font-medium text-sm">Usuários que receberão o email:</h4>
+                        <div className="space-y-1 max-h-32 overflow-y-auto">
                             {selectedUsers
                                 .filter((user) => user.profile?.email)
                                 .map((user, index) => (
-                                    <div key={index} className="text-sm text-muted-foreground">
+                                    <div key={index} className="text-muted-foreground text-sm">
                                         • {user.profile?.full_name} ({user.profile?.email})
                                     </div>
                                 ))}
@@ -109,7 +109,7 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
                         Cancelar
                     </Button>
                     <Button onClick={handleSendEmailVerification} disabled={isLoading || validEmails === 0} className="gap-2">
-                        {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                        {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                         Enviar Emails
                     </Button>
                 </DialogFooter>

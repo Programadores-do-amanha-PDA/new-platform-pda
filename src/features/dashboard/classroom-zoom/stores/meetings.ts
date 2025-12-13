@@ -7,7 +7,7 @@ import {
   updateZoomMeetingById,
   deleteZoomMeetingById,
   createZoomMeetingByClassroomId,
-} from "@/app/actions/classrooms/zoom/meetings";
+} from "@/actions/classrooms/zoom/meetings";
 
 import { useZoomMeetingPastInstanceStore, useZoomAPIStore } from "./";
 import {

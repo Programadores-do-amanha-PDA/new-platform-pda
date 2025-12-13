@@ -5,9 +5,9 @@ import PageLoader from "@/components/shared/page-loader";
 import { RolesT } from "@/types/auth";
 
 interface UsersCombinedProviderProps {
-  children: React.ReactNode;
-  initialRole?: RolesT;
-  loadUsers?: boolean;
+    children: React.ReactNode;
+    initialRole?: RolesT;
+    loadUsers?: boolean;
 }
 
 /**
@@ -16,22 +16,18 @@ interface UsersCombinedProviderProps {
  * - User Classrooms Store: Manages user-classroom relationships
  * - User Roles Store: Manages user roles
  */
-export default function UsersCombinedProvider({
-  children,
-  initialRole,
-  loadUsers = true,
-}: UsersCombinedProviderProps) {
-  const { getAllUsersWithProfiles, isLoading } = useUsersCombinedStore();
-  
-  useEffect(() => {
-    if (loadUsers) {
-      getAllUsersWithProfiles(initialRole);
+export default function UsersCombinedProvider({ children, initialRole, loadUsers = true }: UsersCombinedProviderProps) {
+    const { getAllUsersWithProfiles, isLoading } = useUsersCombinedStore();
+
+    useEffect(() => {
+        if (loadUsers) {
+            getAllUsersWithProfiles({ role: initialRole });
+        }
+    }, []);
+
+    if (isLoading() && loadUsers) {
+        return <PageLoader />;
     }
-  }, []);
 
-  if (isLoading() && loadUsers) {
-    return <PageLoader />;
-  }
-
-  return children;
+    return children;
 }

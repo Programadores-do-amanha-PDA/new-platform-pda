@@ -7,7 +7,7 @@ import {
   createMultipleActivities,
   updateActivityById,
   deleteActivityById,
-} from "@/app/actions/classrooms/activities/activity";
+} from "@/actions/classrooms/activities/activity";
 import { toast } from "sonner";
 import { ClassroomActivityT } from "./types";
 

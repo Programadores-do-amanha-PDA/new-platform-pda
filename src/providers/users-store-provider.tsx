@@ -22,7 +22,7 @@ export default function UsersStoreProvider({
 
   useEffect(() => {
     if (loadUsers) {
-      getAllUsersWithProfiles(initialRole);
+      getAllUsersWithProfiles({role: initialRole});
     }
   }, []);
 

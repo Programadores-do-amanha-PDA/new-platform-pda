@@ -20,7 +20,7 @@ import {
   deleteUserAvatar,
   updateUserAvatar,
   uploadUserAvatar,
-} from "@/app/actions/profile-avatar";
+} from "@/actions/profile-avatar";
 
 export const ProfileAvatarPicker = ({
   user,
@@ -179,7 +179,7 @@ export const ProfileAvatarPicker = ({
         <div className="flex flex-col gap-4">
           <Label
             htmlFor="profile_image"
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 h-9 px-4 py-2 cursor-pointer"
+            className="inline-flex justify-center items-center gap-2 bg-primary hover:bg-primary/90 disabled:opacity-50 shadow-sm px-4 py-2 rounded-md focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring h-9 [&_svg]:size-4 font-medium text-primary-foreground text-sm whitespace-nowrap transition-colors cursor-pointer [&_svg]:pointer-events-none disabled:pointer-events-none [&_svg]:shrink-0"
             role="button"
             tabIndex={0}
             onKeyDown={handleKeyDown}
@@ -189,7 +189,7 @@ export const ProfileAvatarPicker = ({
                 : "Adicionar foto de perfil"
             }
           >
-            <Camera className="size-5! stroke-2! stroke-primary-foreground" />
+            <Camera className="stroke-2! stroke-primary-foreground size-5!" />
             {user.profile?.avatar_url ? "Editar" : "Adicionar"}
           </Label>
 
@@ -200,7 +200,7 @@ export const ProfileAvatarPicker = ({
               disabled={loading}
               aria-label="Deletar foto de perfil"
             >
-              <Trash className="size-5! stroke-2!" />
+              <Trash className="stroke-2! size-5!" />
               Deletar
             </Button>
           )}

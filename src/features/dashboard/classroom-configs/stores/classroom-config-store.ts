@@ -6,7 +6,7 @@ import {
   createConfig,
   updateConfigById,
   deleteConfigById,
-} from "@/app/actions/classrooms/configs";
+} from "@/actions/classrooms/configs";
 import { ClassroomConfigT } from "../types";
 import { toast } from "sonner";
 

@@ -3,7 +3,7 @@ import {
   deleteClassroom,
   getAllClassrooms,
   updateClassroom,
-} from "@/app/actions";
+} from "@/actions";
 import { ClassroomT } from "@/types/classrooms";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";

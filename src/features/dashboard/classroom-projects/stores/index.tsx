@@ -7,7 +7,7 @@ import {
   getAllProjectsByClassroomId,
   updateClassroomProjectById,
   deleteProjectById,
-} from "@/app/actions/classrooms/projects";
+} from "@/actions/classrooms/projects";
 import { ClassroomProjectT, ProjectStoreStateT } from "../types";
 
 interface ProjectActions {

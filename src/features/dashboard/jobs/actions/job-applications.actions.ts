@@ -1,39 +1,26 @@
 "use server";
 
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
-import { IJobApplicationType } from "../types";
+import {
+    CreateJobApplicationProps,
+    CreateJobApplicationResult,
+    DeleteJobApplicationByIdProps,
+    DeleteJobApplicationByIdResult,
+    GetAllJobApplicationsByJobIdProps,
+    GetAllJobApplicationsByJobIdResult,
+    GetAllJobApplicationsResult,
+    GetJobApplicationByIdProps,
+    GetJobApplicationByIdResult,
+    GetJobApplicationsByUserIdProps,
+    GetJobApplicationsByUserIdResult,
+    IJobApplication,
+    UpdateJobApplicationByIdProps,
+    UpdateJobApplicationByIdResult,
+} from "../types";
 import { newJobApplicationFormSchema, updateJobApplicationFormSchema } from "../utils/job-application-schema";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "job-applications.actions" });
-
-export type CreateJobApplicationProps = {
-    applicationData: Omit<IJobApplicationType, "id" | "created_at" | "updated_at">;
-};
-export type CreateJobApplicationResult = IJobApplicationType | null;
-
-export type GetAllJobApplicationsResult = IJobApplicationType[] | null;
-
-export type GetJobApplicationsByUserIdProps = {
-    userId: string;
-};
-export type GetJobApplicationsByUserIdResult = IJobApplicationType[] | null;
-
-export type GetAllJobApplicationsByJobIdProps = {
-    jobId: string;
-};
-export type GetAllJobApplicationsByJobIdResult = IJobApplicationType[] | null;
-
-export type GetJobApplicationByIdProps = {
-    id: string;
-};
-export type GetJobApplicationByIdResult = IJobApplicationType | null;
-
-export type UpdateJobApplicationByIdProps = {
-    id: string;
-    applicationData: IJobApplicationType;
-};
-export type UpdateJobApplicationByIdResult = IJobApplicationType | null;
 
 export const getAllJobApplications = async (): Promise<GetAllJobApplicationsResult> => {
     try {
@@ -60,7 +47,7 @@ export const getAllJobApplicationsByUserId = async ({
         const { data, error } = await supabase.from("job_applications").select("*").eq("user_id", userId);
         if (error) throw error;
 
-        return data as IJobApplicationType[];
+        return data as IJobApplication[];
     } catch (error) {
         log.error(
             { err: error, userId, operation: "getAllJobApplicationsByUserId" },
@@ -161,9 +148,15 @@ export const updateJobApplicationById = async ({
     }
 };
 
-export const deleteJobApplicationById = async (id: number) => {
+export const deleteJobApplicationById = async ({
+    id,
+}: DeleteJobApplicationByIdProps): Promise<DeleteJobApplicationByIdResult> => {
     try {
+        if (!id) throw new Error("Invalid job application id");
+
         const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
+
         const { error } = await supabase.from("job_applications").delete().eq("id", id);
 
         if (error) throw error;

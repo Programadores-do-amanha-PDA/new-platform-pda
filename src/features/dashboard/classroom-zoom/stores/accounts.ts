@@ -8,7 +8,7 @@ import {
   updateZoomAccountById,
   deleteZoomAccountById,
   createZoomAccountByClassroomId,
-} from "@/app/actions/classrooms/zoom/accounts";
+} from "@/actions/classrooms/zoom/accounts";
 
 import { ZoomAccountT } from "../types";
 import { useZoomAPIStore } from "./";

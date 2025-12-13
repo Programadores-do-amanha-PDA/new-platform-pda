@@ -6,7 +6,7 @@ import {
   getAllCoodeshAssessment,
   updateCoodeshAssessment,
   deleteCoodeshAssessment,
-} from "@/app/actions/classrooms/coodesh/assessments";
+} from "@/actions/classrooms/coodesh/assessments";
 import { ClassroomCoodeshAssessmentT } from "@/types";
 
 interface CoodeshAssessmentState {

@@ -25,7 +25,7 @@ import {
 
 // Local imports
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
-import { updateAuthUser } from "@/app/actions";
+import { updateAuthUser } from "@/actions";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
 import { ProfileDataTabsPropsT, ProfileFormSchemaT } from "../types";
 import {
@@ -111,11 +111,11 @@ export const ProfileDataTabs = ({
   };
 
   return (
-    <div className="w-full flex flex-col justify-between">
+    <div className="flex flex-col justify-between w-full">
       <Form {...form}>
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+          className="gap-8 grid grid-cols-1 lg:grid-cols-2"
         >
           <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
           <Separator className="col-span-1 lg:col-span-2" />
@@ -124,8 +124,8 @@ export const ProfileDataTabs = ({
             control={form.control}
             name="fullName"
             render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left font-semibold text-base">
+              <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                <FormLabel className="font-semibold text-base text-left">
                   Nome completo
                 </FormLabel>
                 <FormControl>
@@ -141,8 +141,8 @@ export const ProfileDataTabs = ({
               control={form.control}
               name="bio"
               render={({ field }) => (
-                <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                  <FormLabel className="row-span-1 w-full flex justify-between items-center">
+                <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                  <FormLabel className="flex justify-between items-center row-span-1 w-full">
                     <span className="w-max font-semibold text-base">
                       Biografia
                     </span>
@@ -166,10 +166,10 @@ export const ProfileDataTabs = ({
           <Separator className="col-span-1 lg:col-span-2" />
 
           <div className="col-span-1 lg:col-span-2">
-            <p className="text-left h-max font-semibold text-base">
+            <p className="h-max font-semibold text-base text-left">
               Alterar email
             </p>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Para concluir a alteração de email você deve verificar sua caixa
               de entrada do email atual ou do novo email e aceitar a troca.
             </span>
@@ -179,8 +179,8 @@ export const ProfileDataTabs = ({
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
+              <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                <FormLabel className="h-max font-semibold text-left">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -199,10 +199,10 @@ export const ProfileDataTabs = ({
           <Separator className="col-span-1 lg:col-span-2" />
 
           <div className="col-span-1 lg:col-span-2">
-            <p className="text-left h-max font-semibold text-base">
+            <p className="h-max font-semibold text-base text-left">
               Alterar senha
             </p>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               A senha precisa ter um mínimo de 7 caracteres, incluindo letras
               minúsculas, letras maiúsculas, números e caracteres especiais.
             </span>
@@ -212,8 +212,8 @@ export const ProfileDataTabs = ({
             control={form.control}
             name="newPassword"
             render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
+              <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                <FormLabel className="h-max font-semibold text-left">
                   Nova senha
                 </FormLabel>
                 <FormControl>
@@ -233,8 +233,8 @@ export const ProfileDataTabs = ({
             control={form.control}
             name="confirmNewPassword"
             render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
+              <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                <FormLabel className="h-max font-semibold text-left">
                   Confirme nova senha
                 </FormLabel>
                 <FormControl>
@@ -252,9 +252,9 @@ export const ProfileDataTabs = ({
 
           <Separator className="col-span-1 lg:col-span-2" />
 
-          <div className="grid grid-rows-2 items-center gap-4">
+          <div className="items-center gap-4 grid grid-rows-2">
             <Label className="font-semibold text-base">Seus cargos</Label>
-            <div className="col-span-3 flex gap-1">
+            <div className="flex gap-1 col-span-3">
               {currentUser.profile?.user_roles?.map((r, i) => (
                 <Badge variant="default" key={i}>
                   {
@@ -269,7 +269,7 @@ export const ProfileDataTabs = ({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="gap-2 flex font-semibold w-max self-end col-span-1 lg:col-span-2"
+            className="flex self-end gap-2 col-span-1 lg:col-span-2 w-max font-semibold"
           >
             {isSubmitting && <LoaderCircle className="size-5 animate-spin" />}
             {isSubmitting ? "Salvando mudanças" : "Salvar mudanças"}
