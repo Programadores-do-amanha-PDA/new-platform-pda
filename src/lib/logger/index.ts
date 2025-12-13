@@ -1,16 +1,4 @@
-import pino, { Logger } from "pino";
+import { Logger } from "pino";
+import { generateLoggerConfigByEnvironment } from "./logger.utils";
 
-export const logger: Logger =
-    process.env["NODE_ENV"] === "production"
-        ? // JSON in production
-          pino({ level: "warn" })
-        : // Pretty print in development
-          pino({
-              transport: {
-                  target: "pino-pretty",
-                  options: {
-                      colorize: true,
-                  },
-              },
-              level: "debug",
-          });
+export const logger: Logger = generateLoggerConfigByEnvironment();
