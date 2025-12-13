@@ -1,11 +1,11 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateWithSupabase } from "@/app/api/middleware/supabase-auth";
+import { authenticateWithSupabase } from "@/lib/supabase/middlewares";
+import { logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/errors/api-error";
 import { projectFeedbackSchema } from "./utils/validations";
 import { ProjectFeedbackEmailService } from "./utils/project-feedback-email-service";
-import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "emails.project-feedback-email" });
 

@@ -1,10 +1,11 @@
 "use server";
+
 import { NextRequest, NextResponse } from "next/server";
+import { authenticateWithSupabase } from "@/lib/supabase/middlewares";
+import { logger } from "@/lib/logger";
 import { handleApiError } from "@/lib/errors/api-error";
-import { authenticateWithSupabase } from "@/app/api/middleware/supabase-auth";
 import { userCredentialsSchema } from "./utils/validations";
 import { UserCredentialsEmailService } from "./utils/user-credentials-email-service";
-import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "email.user-credentials" });
 
