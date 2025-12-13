@@ -1,7 +1,7 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { Session, type EmailOtpType } from "@supabase/supabase-js";
 import { toast } from "sonner";
-import { setSession, verifyOtp } from "@/app/actions";
+import { setSession, verifyOtp } from "@/actions";
 import { OtpFlowParamsT, OtpFlowResultT } from "../types";
 
 /**

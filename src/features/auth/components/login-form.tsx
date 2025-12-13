@@ -13,7 +13,7 @@ import Image from "next/image";
 import useAuth from "@/hooks/use-auth";
 
 // Actions
-import { signInWithPassword } from "@/app/actions";
+import { signInWithPassword } from "@/actions";
 
 // UI components
 import { Button } from "@/components/ui/button";
@@ -101,11 +101,11 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
+    <div className="flex flex-col gap-8 mx-auto w-full max-w-sm">
       <div className="flex flex-col gap-6">
         <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
         <div className="flex flex-col gap-3">
-          <p className="text-4xl font-bold">Entrar</p>
+          <p className="font-bold text-4xl">Entrar</p>
           <p className="text-muted-foreground">
             Use suas credenciais para acessar sua conta
           </p>
@@ -142,11 +142,11 @@ export const LoginForm = () => {
               name="password"
               render={({ field }) => (
                 <FormItem className="flex flex-col gap-2">
-                  <div className="flex items-center justify-between">
+                  <div className="flex justify-between items-center">
                     <FormLabel className="font-semibold">Senha</FormLabel>
                     <Link
                       href="/reset-password"
-                      className="text-sm text-muted-foreground hover:text-primary hover:underline underline-offset-4 transition-colors"
+                      className="text-muted-foreground hover:text-primary text-sm hover:underline underline-offset-4 transition-colors"
                       tabIndex={-1}
                     >
                       Esqueceu a senha?
@@ -166,7 +166,7 @@ export const LoginForm = () => {
             />
 
             {errors.root && (
-              <div className="text-sm text-destructive font-medium">
+              <div className="font-medium text-destructive text-sm">
                 {errors.root.message}
               </div>
             )}
@@ -174,12 +174,12 @@ export const LoginForm = () => {
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full font-semibold mt-2 cursor-pointer"
+              className="mt-2 w-full font-semibold cursor-pointer"
               size="lg"
             >
               {isSubmitting ? (
                 <>
-                  <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                  <LoaderCircle className="mr-2 w-4 h-4 animate-spin" />
                   Entrando...
                 </>
               ) : (
@@ -189,11 +189,11 @@ export const LoginForm = () => {
           </form>
         </Form>
 
-        <div className="flex gap-2 justify-center items-center mt-6 text-center">
-          <p className="text-sm text-muted-foreground">Primeiro acesso?</p>
+        <div className="flex justify-center items-center gap-2 mt-6 text-center">
+          <p className="text-muted-foreground text-sm">Primeiro acesso?</p>
           <Link
             href="/resend-confirmation"
-            className="text-sm font-medium text-primary hover:underline underline-offset-4 transition-colors"
+            className="font-medium text-primary text-sm hover:underline underline-offset-4 transition-colors"
           >
             Confirme seu email
           </Link>
