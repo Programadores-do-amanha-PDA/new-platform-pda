@@ -1,6 +1,6 @@
 "use server";
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "./server";
+import { createClient } from "../server";
 
 export async function updateSession(request: NextRequest) {
   const supabaseResponse = NextResponse.next({
