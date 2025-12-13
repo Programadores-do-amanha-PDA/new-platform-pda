@@ -47,7 +47,7 @@ export const getAllUsers = async ({ role }: GetAllUsersProps): Promise<GetAllUse
 
             return usersWithProfiles;
         } else {
-            const filteredProfiles = await getAllProfilesFilteredByRole(role);
+            const filteredProfiles = await getAllProfilesFilteredByRole({role});
 
             if (!users || !filteredProfiles) {
                 throw new Error(`Users or profiles for role ${role} is not available`);

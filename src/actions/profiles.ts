@@ -1,122 +1,141 @@
 "use server";
-import { createClient } from "@/lib/supabase/server";
-import { ProfileT, RolesT } from "@/types";
 
-export const createProfile = async (profileData: {
-  full_name: string;
-  email: string;
-  user_role: number;
-}) => {
-  try {
-    const supabase = await createClient();
+import { getSupabaseClient } from "@/lib/supabase/client-manager";
+import { ProfileT } from "@/types";
+import { logger } from "@/lib/logger";
+import type {
+    GetAllProfilesResult,
+    GetAllProfilesFilteredByRoleProps,
+    GetAllProfilesFilteredByRoleResult,
+    GetProfileByIdProps,
+    GetProfileByIdResult,
+    CreateProfileProps,
+    CreateProfileResult,
+    UpdateProfileProps,
+    UpdateProfileResult,
+    DeleteProfileProps,
+    DeleteProfileResult,
+} from "@/types";
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .insert([profileData])
-      .select();
+const log = logger.child({ module: "profiles.actions" });
 
-    if (error) throw error;
+export const getAllProfiles = async (): Promise<GetAllProfilesResult> => {
+    try {
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    return data[0];
-  } catch (error) {
-    console.error("Error creating profile:", error);
-    return null;
-  }
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)");
+
+        if (error) throw error;
+
+        return data as ProfileT[];
+    } catch (error) {
+        log.error({ err: error, operation: "getAllProfiles" }, "Failed to fetch all profiles");
+        return null;
+    }
 };
 
-export const getAllProfiles = async () => {
-  try {
-    const supabase = await createClient();
+export const getAllProfilesFilteredByRole = async ({
+    role,
+}: GetAllProfilesFilteredByRoleProps): Promise<GetAllProfilesFilteredByRoleResult> => {
+    try {
+        if (!role) throw new Error("Invalid role");
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select(
-        "id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)"
-      );
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    if (error) throw error;
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("*, user_roles!inner(id, role), classrooms:user_classrooms(*)")
+            .eq("user_roles.role", role);
 
-    return data as ProfileT[];
-  } catch (error) {
-    console.error("Error fetching all alumni profiles:", error);
-    return null;
-  }
+        if (error) throw error;
+
+        return data as ProfileT[];
+    } catch (error) {
+        log.error({ err: error, role, operation: "getAllProfilesFilteredByRole" }, "Failed to fetch filtered profiles");
+        return null;
+    }
 };
 
-export const getAllProfilesFilteredByRole = async (role: RolesT) => {
-  try {
-    const supabase = await createClient();
+export const getProfileById = async ({ id }: GetProfileByIdProps): Promise<GetProfileByIdResult> => {
+    try {
+        if (!id) throw new Error("Invalid profile id");
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select(
-        "*, user_roles!inner(id, role), classrooms:user_classrooms(*)"
-      )
-      .eq("user_roles.role", role);
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    if (error) throw error;
+        const { data, error } = await supabase
+            .from("profiles")
+            .select("id, full_name, email, bio, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)")
+            .eq("id", id)
+            .single();
 
-    return data as ProfileT[];
-  } catch (error) {
-    console.error("Error fetching all filtered profiles:", error);
-    return null;
-  }
+        if (error) throw error;
+
+        return data as ProfileT;
+    } catch (error) {
+        log.error({ err: error, profileId: id, operation: "getProfileById" }, "Failed to fetch profile by ID");
+        return null;
+    }
 };
 
-export const getProfileById = async (id: string) => {
-  try {
-    const supabase = await createClient();
+export const createProfile = async ({ profileData }: CreateProfileProps): Promise<CreateProfileResult> => {
+    try {
+        if (!profileData) throw new Error("Invalid profile data");
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .select(
-        "id, full_name, email, bio, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)"
-      )
-      .eq("id", id)
-      .single();
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    if (error) throw error;
+        const { data, error } = await supabase.from("profiles").insert([profileData]).select();
 
-    return data as ProfileT;
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-    return null;
-  }
+        if (error) throw error;
+
+        log.info({ profileId: data[0]?.id }, "Profile created successfully");
+        return data[0];
+    } catch (error) {
+        log.error({ err: error, operation: "createProfile" }, "Failed to create profile");
+        return null;
+    }
 };
 
-export const updateProfile = async (
-  id: number,
-  profileData: Partial<{ full_name: string; email: string; user_role: number }>
-) => {
-  try {
-    const supabase = await createClient();
+export const updateProfile = async ({ id, updates }: UpdateProfileProps): Promise<UpdateProfileResult> => {
+    try {
+        if (!id) throw new Error("Invalid profile id");
+        if (!updates) throw new Error("Invalid update data");
 
-    const { data, error } = await supabase
-      .from("profiles")
-      .update(profileData)
-      .eq("id", id)
-      .select();
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    if (error) throw error;
+        const { data, error } = await supabase.from("profiles").update(updates).eq("id", id).select();
 
-    return data[0];
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    return null;
-  }
+        if (error) throw error;
+
+        log.info({ profileId: id }, "Profile updated successfully");
+        return data[0];
+    } catch (error) {
+        log.error({ err: error, profileId: id, operation: "updateProfile" }, "Failed to update profile");
+        return null;
+    }
 };
 
-export const deleteProfile = async (id: number) => {
-  try {
-    const supabase = await createClient();
+export const deleteProfile = async ({ id }: DeleteProfileProps): Promise<DeleteProfileResult> => {
+    try {
+        if (!id) throw new Error("Invalid profile id");
 
-    const { error } = await supabase.from("profiles").delete().eq("id", id);
+        const supabase = await getSupabaseClient();
+        if (!supabase) throw new Error("Invalid supabase client");
 
-    if (error) throw error;
+        const { error } = await supabase.from("profiles").delete().eq("id", id);
 
-    return true;
-  } catch (error) {
-    console.error("Error deleting profile:", error);
-    return false;
-  }
+        if (error) throw error;
+
+        log.info({ profileId: id }, "Profile deleted successfully");
+        return true;
+    } catch (error) {
+        log.error({ err: error, profileId: id, operation: "deleteProfile" }, "Failed to delete profile");
+        return false;
+    }
 };
