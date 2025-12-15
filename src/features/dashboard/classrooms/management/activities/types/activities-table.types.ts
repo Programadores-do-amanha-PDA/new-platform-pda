@@ -1,9 +1,9 @@
 import { AuthUserWithProfileT } from "@/types";
-import { ClassroomActivityT } from "../types";
+import { Activity } from ".";
 
 export interface ActivitiesTablePropsT {
   allVisibleUsers: Partial<AuthUserWithProfileT>[];
   allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-  activities: ClassroomActivityT[];
+  activities: Activity[];
   classroomId: string;
 }

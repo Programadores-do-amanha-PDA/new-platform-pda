@@ -1,1 +1,1 @@
-export { default } from "@/features/dashboard/classroom-activities/page";
+export { default } from "@/features/dashboard/classrooms/management/activities";

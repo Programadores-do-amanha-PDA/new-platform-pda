@@ -1,5 +1,5 @@
 import { AuthUserWithProfileT } from "@/types";
-import { ClassroomActivityT } from "../types";
+import { Activity } from "../types";
 
 /**
  * Calculates the percentage of students who participated in an activity
@@ -8,7 +8,7 @@ import { ClassroomActivityT } from "../types";
  * @returns Percentage of students who participated (0-100)
  */
 export function calculateActivityDelivery(
-  activity: ClassroomActivityT,
+  activity: Activity,
   students: Partial<AuthUserWithProfileT>[]
 ): number {
   if (!students || students.length === 0) {

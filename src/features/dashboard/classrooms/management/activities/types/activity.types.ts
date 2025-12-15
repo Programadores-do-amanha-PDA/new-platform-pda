@@ -1,22 +1,22 @@
-export type ActivityTClassT =
+export type ActivityClassTypes =
   | "programming"
   | "english"
   | "soft-skills"
   | "community";
 
-export interface ClassroomActivityJustificationT {
+export interface ActivityJustification {
   id?: string;
   user_email: string;
   message: string;
 }
 
-export interface ClassroomActivityT {
+export interface Activity {
   id: string;
   classroom_id: string;
-  class_type?: ActivityTClassT;
+  class_type?: ActivityClassTypes;
   participants_email?: string[];
   is_visible_on_schedule?: boolean;
   created_at: string;
   updated_at?: string;
-  justifications?: ClassroomActivityJustificationT[];
+  justifications?: ActivityJustification[];
 }

@@ -1,14 +1,11 @@
 "use client";
 
-// Global imports
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-// UI Imports
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
-// Local Imports
 import { AuthUserWithProfileT, ProfileT } from "@/types";
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
@@ -17,8 +14,8 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
     header: ({ column }) => {
       const sortState = column.getIsSorted();
       return (
-        <div className="w-full h-[133.5px] flex justify-between items-center border-r border-b px-2">
-          <p className="text-left font-semibold">Usuário</p>
+        <div className="flex justify-between items-center px-2 border-r border-b w-full h-[133.5px]">
+          <p className="font-semibold text-left">Usuário</p>
           <Button
             variant="ghost"
             onClick={() => {
@@ -43,7 +40,7 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
       );
     },
     cell: ({ row }) => (
-      <div className="w-full h-[57px] flex flex-row gap-2 justify-start items-center px-2 border-r border-b bg-background group-hover/row:bg-muted/50!">
+      <div className="flex flex-row justify-start items-center gap-2 bg-background group-hover/row:bg-muted/50! px-2 border-r border-b w-full h-[57px]">
         <Avatar>
           <AvatarFallback>
             {row
@@ -57,8 +54,8 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = [
             src={row.getValue<ProfileT>("profile").avatar_url || ""}
           />
         </Avatar>
-        <div className="w-full flex flex-col justify-center lowercase truncate">
-          <p className="text-sm font-bold capitalize">
+        <div className="flex flex-col justify-center w-full truncate lowercase">
+          <p className="font-bold text-sm capitalize">
             {row.getValue<ProfileT>("profile").full_name}
           </p>
           <p>{row.getValue<ProfileT>("profile").email}</p>
