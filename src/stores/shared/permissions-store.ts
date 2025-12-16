@@ -7,11 +7,11 @@ import {
   deleteRolePermission, 
   deleteAllPermissionsForRole 
 } from "@/actions/role-permissions";
-import { RolesT, RolePermissionT, PermissionT } from "@/types";
+import { Role, RolePermissionT, PermissionT } from "@/types";
 
 interface PermissionsAdminState {
   allRolePermissions: RolePermissionT[];
-  rolePermissions: Record<RolesT, PermissionT[]>;
+  rolePermissions: Record<Role, PermissionT[]>;
   loading: boolean;
   operationLoading: boolean;
 }
@@ -19,19 +19,19 @@ interface PermissionsAdminState {
 interface PermissionsAdminActions {
   // Fetch operations
   fetchAllRolePermissions: () => Promise<void>;
-  fetchPermissionsForRole: (role: RolesT) => Promise<void>;
+  fetchPermissionsForRole: (role: Role) => Promise<void>;
   fetchPermissionsForAllRoles: () => Promise<void>;
   
   // Admin operations
-  addPermissionToRole: (role: RolesT, permission: string) => Promise<boolean>;
-  removePermissionFromRole: (role: RolesT, permission: string) => Promise<boolean>;
-  removeAllPermissionsFromRole: (role: RolesT) => Promise<boolean>;
+  addPermissionToRole: (role: Role, permission: string) => Promise<boolean>;
+  removePermissionFromRole: (role: Role, permission: string) => Promise<boolean>;
+  removeAllPermissionsFromRole: (role: Role) => Promise<boolean>;
   
   // Utility functions
-  getRolePermissions: (role: RolesT) => PermissionT[];
-  roleHasPermission: (role: RolesT, permission: string) => boolean;
-  roleHasAnyPermission: (role: RolesT, permissions: string[]) => boolean;
-  roleHasAllPermissions: (role: RolesT, permissions: string[]) => boolean;
+  getRolePermissions: (role: Role) => PermissionT[];
+  roleHasPermission: (role: Role, permission: string) => boolean;
+  roleHasAnyPermission: (role: Role, permissions: string[]) => boolean;
+  roleHasAllPermissions: (role: Role, permissions: string[]) => boolean;
   
   // State management
   reset: () => void;
@@ -39,7 +39,7 @@ interface PermissionsAdminActions {
 
 const initialState: PermissionsAdminState = {
   allRolePermissions: [],
-  rolePermissions: {} as Record<RolesT, PermissionT[]>,
+  rolePermissions: {} as Record<Role, PermissionT[]>,
   loading: false,
   operationLoading: false,
 };
@@ -80,7 +80,7 @@ export const usePermissionsStore = create<PermissionsAdminState & PermissionsAdm
       fetchPermissionsForAllRoles: async () => {
         set({ loading: true });
         try {
-          const roles: RolesT[] = ["admin", "employer", "class_manager", "teacher", "student", "alumni"];
+          const roles: Role[] = ["admin", "employer", "class_manager", "teacher", "student", "alumni"];
           const rolePermissionsPromises = roles.map(async (role) => {
             const permissions = await getPermissionsByRole(role);
             return { role, permissions };
@@ -90,7 +90,7 @@ export const usePermissionsStore = create<PermissionsAdminState & PermissionsAdm
           const rolePermissions = results.reduce((acc, { role, permissions }) => {
             acc[role] = permissions;
             return acc;
-          }, {} as Record<RolesT, PermissionT[]>);
+          }, {} as Record<Role, PermissionT[]>);
 
           set({ rolePermissions, loading: false });
         } catch (error) {

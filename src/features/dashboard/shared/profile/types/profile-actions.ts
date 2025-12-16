@@ -1,16 +1,17 @@
-import { ProfileT, RolesT } from ".";
+import { Role } from "@/types";
+import { Profile } from "./profile";
 
-export type GetAllProfilesResult = ProfileT[] | null;
+export type GetAllProfilesResult = Profile[] | null;
 
 export type GetAllProfilesFilteredByRoleProps = {
-    role: RolesT;
+    role: Role;
 };
-export type GetAllProfilesFilteredByRoleResult = ProfileT[] | null;
+export type GetAllProfilesFilteredByRoleResult = Profile[] | null;
 
 export type GetProfileByIdProps = {
     id: string;
 };
-export type GetProfileByIdResult = ProfileT | null;
+export type GetProfileByIdResult = Profile | null;
 
 export type CreateProfileProps = {
     profileData: {
@@ -19,13 +20,13 @@ export type CreateProfileProps = {
         user_role: number;
     };
 };
-export type CreateProfileResult = ProfileT | null;
+export type CreateProfileResult = Profile | null;
 
 export type UpdateProfileProps = {
     id: string;
     updates: Partial<{ full_name: string; email: string; user_role: number }>;
 };
-export type UpdateProfileResult = ProfileT | null;
+export type UpdateProfileResult = Profile | null;
 
 export type DeleteProfileProps = {
     id: string;

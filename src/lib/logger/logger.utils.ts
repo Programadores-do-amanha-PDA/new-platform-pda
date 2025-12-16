@@ -1,4 +1,4 @@
-import { AuthUserWithProfileT } from "@/types";
+import { AuthUserWithProfile } from "@/types";
 import { MaskEmailProps } from "./logger.types";
 import pino, { Logger, LoggerOptions } from "pino";
 
@@ -36,7 +36,7 @@ export const maskEmail = ({ email }: MaskEmailProps) => {
 };
 
 export const SECURITY_SERIALIZER = {
-    user: (user: AuthUserWithProfileT) => ({
+    user: (user: AuthUserWithProfile) => ({
         id: user.id,
         username: user?.profile?.full_name,
         email: user.email ? maskEmail({ email: user.email }) : undefined,

@@ -9,7 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import { getProfileById, getAuthUser, getSession, getPermissionsByRole } from "@/actions";
 
 // Types
-import { JwtPayloadT, ProfileT, AuthActionsT, AuthStateT } from "@/types";
+import { JwtPayloadT, Profile, AuthActionsT, AuthStateT } from "@/types";
 
 const initialState: AuthStateT = {
     user: null,
@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthStateT & AuthActionsT>()(
                             user: {
                                 ...user,
                                 profile: {
-                                    ...(userProfile as ProfileT),
+                                    ...(userProfile as Profile),
                                 },
                             },
                             loading: false,

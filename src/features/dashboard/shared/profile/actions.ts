@@ -1,21 +1,22 @@
 "use server";
 
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
-import { ProfileT } from "@/types";
 import { logger } from "@/lib/logger";
+
 import type {
-    GetAllProfilesResult,
-    GetAllProfilesFilteredByRoleProps,
-    GetAllProfilesFilteredByRoleResult,
-    GetProfileByIdProps,
-    GetProfileByIdResult,
     CreateProfileProps,
     CreateProfileResult,
-    UpdateProfileProps,
-    UpdateProfileResult,
     DeleteProfileProps,
     DeleteProfileResult,
-} from "@/types";
+    GetAllProfilesFilteredByRoleProps,
+    GetAllProfilesFilteredByRoleResult,
+    GetAllProfilesResult,
+    GetProfileByIdProps,
+    GetProfileByIdResult,
+    Profile,
+    UpdateProfileProps,
+    UpdateProfileResult,
+} from "./types";
 
 const log = logger.child({ module: "profiles.actions" });
 
@@ -30,7 +31,7 @@ export const getAllProfiles = async (): Promise<GetAllProfilesResult> => {
 
         if (error) throw error;
 
-        return data as ProfileT[];
+        return data as Profile[];
     } catch (error) {
         log.error({ err: error, operation: "getAllProfiles" }, "Failed to fetch all profiles");
         return null;
@@ -53,7 +54,7 @@ export const getAllProfilesFilteredByRole = async ({
 
         if (error) throw error;
 
-        return data as ProfileT[];
+        return data as Profile[];
     } catch (error) {
         log.error({ err: error, role, operation: "getAllProfilesFilteredByRole" }, "Failed to fetch filtered profiles");
         return null;
@@ -75,7 +76,7 @@ export const getProfileById = async ({ id }: GetProfileByIdProps): Promise<GetPr
 
         if (error) throw error;
 
-        return data as ProfileT;
+        return data as Profile;
     } catch (error) {
         log.error({ err: error, profileId: id, operation: "getProfileById" }, "Failed to fetch profile by ID");
         return null;
