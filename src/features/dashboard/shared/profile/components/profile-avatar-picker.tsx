@@ -50,7 +50,7 @@ export const ProfileAvatarPicker = ({ user, onUpdateUser }: ProfileAvatarPickerP
 
     const onCropComplete = async (_: Area, croppedAreaPixels: Area): Promise<void> => {
         try {
-            const blob = await getCroppedImageBlob(newProfileImage, croppedAreaPixels);
+            const blob = await getCroppedImageBlob({ imageSrc: newProfileImage, pixelCrop: croppedAreaPixels });
             if (blob instanceof Blob) {
                 const file = new File([blob], "cropped-image.png", {
                     type: "image/png",
