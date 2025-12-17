@@ -2,8 +2,18 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 
-import { createEnrollments, updateEnrollment, removeEnrollments } from "./actions";
+import {
+    createEnrollments,
+    updateEnrollment,
+    removeEnrollments,
+    getAllEnrollments,
+    getEnrollmentsByClassroomId,
+    getEnrollmentsByUserId,
+} from "./actions";
 import { Enrollment } from "./types";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ module: "EnrollmentsStore" });
 
 interface EnrollmentsState {
     enrollments: Map<string, Enrollment[]>;
@@ -11,6 +21,26 @@ interface EnrollmentsState {
 }
 
 interface EnrollmentsActions {
+    /**
+     * Busca todas as inscrições.
+     * @returns Array de inscrições ou null em caso de erro.
+     */
+    fetchAllEnrollments: () => Promise<boolean>;
+
+    /**
+     * Busca inscrições de uma turma específica.
+     * @param classroomId ID da turma.
+     * @returns true se sucesso, false caso contrário.
+     */
+    fetchEnrollmentsByClassroomId: (classroomId: string) => Promise<boolean>;
+
+    /**
+     * Busca inscrições de um usuário específico.
+     * @param userId ID do usuário.
+     * @returns true se sucesso, false caso contrário.
+     */
+    fetchEnrollmentsByUserId: (userId: string) => Promise<boolean>;
+
     /**
      * Define as inscrições de uma turma específica.
      * @param classroomId ID da turma.
@@ -43,9 +73,11 @@ interface EnrollmentsActions {
      */
     updateEnrollmentByShortIdAndClassroomId: ({
         shortId,
+        classroomId,
         updates,
     }: {
         readonly shortId: string;
+        readonly classroomId: string;
         readonly updates: Partial<Omit<Enrollment, "short_id" | "created_at" | "user_id" | "classroom_id">>;
     }) => Promise<boolean>;
 
@@ -76,14 +108,108 @@ export const useEnrollmentsStore = create<EnrollmentsState & EnrollmentsActions>
         (set) => ({
             ...initialState,
 
-            setEnrollmentsByClassroom: ({ classroomId, enrollments }) => {
-                if (!enrollments.length || !classroomId) return;
+            fetchAllEnrollments: async () => {
+                try {
+                    set({ loading: true });
 
-                set((state) => {
-                    const updatedEnrollments = new Map(state.enrollments);
-                    updatedEnrollments.set(classroomId, enrollments);
-                    return { enrollments: updatedEnrollments };
-                });
+                    const response = await getAllEnrollments();
+                    if (!response) throw new Error("no get all enrollments response");
+
+                    // Agrupar inscrições por turma
+                    set((state) => {
+                        const updatedEnrollments = new Map(state.enrollments);
+
+                        response.forEach((enrollment) => {
+                            const classroomId = enrollment.classroom_id;
+                            updatedEnrollments.set(classroomId, [...(updatedEnrollments.get(classroomId) || []), enrollment]);
+                        });
+
+                        return { enrollments: updatedEnrollments };
+                    });
+
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn({ err: error, operation: "fetchAllEnrollments" }, "Error fetching all enrollments");
+                    }
+                    toast.error("Erro ao buscar inscrições!");
+
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchEnrollmentsByClassroomId: async (classroomId: string) => {
+                try {
+                    if (!classroomId) {
+                        throw new Error("classroom_id is required");
+                    }
+
+                    set({ loading: true });
+
+                    const response = await getEnrollmentsByClassroomId({ classroom_id: classroomId });
+                    if (!response) throw new Error("no get enrollments by classroom response");
+
+                    set((state) => {
+                        const updatedEnrollments = new Map(state.enrollments);
+                        updatedEnrollments.set(classroomId, response);
+                        return { enrollments: updatedEnrollments };
+                    });
+
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn(
+                            { err: error, classroomId, operation: "fetchEnrollmentsByClassroomId" },
+                            "Error fetching enrollments by classroom id",
+                        );
+                    }
+                    toast.error("Erro ao buscar inscrições da turma!");
+
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            fetchEnrollmentsByUserId: async (userId: string) => {
+                try {
+                    if (!userId) {
+                        throw new Error("userId is required");
+                    }
+
+                    set({ loading: true });
+
+                    const response = await getEnrollmentsByUserId({ userId });
+                    if (!response) throw new Error("no get enrollments by user response");
+
+                    // Agrupar inscrições do usuário por turma
+                    set((state) => {
+                        const updatedEnrollments = new Map(state.enrollments);
+
+                        response.forEach((enrollment) => {
+                            const classroomId = enrollment.classroom_id;
+                            updatedEnrollments.set(classroomId, [...(updatedEnrollments.get(classroomId) || []), enrollment]);
+                        });
+
+                        return { enrollments: updatedEnrollments };
+                    });
+
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn(
+                            { err: error, userId, operation: "fetchEnrollmentsByUserId" },
+                            "Error fetching enrollments by user id",
+                        );
+                    }
+                    toast.error("Erro ao buscar inscrições do usuário!");
+
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
             },
 
             createNewEnrollments: async ({ enrollments }) => {
@@ -94,7 +220,7 @@ export const useEnrollmentsStore = create<EnrollmentsState & EnrollmentsActions>
                     }
 
                     const response = await createEnrollments({ enrollments: Array.from(enrollments) });
-                    if (!response) throw new Error("No create enrollments response");
+                    if (!response || response.length === 0) throw new Error("No create enrollments response");
 
                     // Agrupar inscrições por turma e atualizar estado
                     set((state) => {
@@ -110,23 +236,22 @@ export const useEnrollmentsStore = create<EnrollmentsState & EnrollmentsActions>
                     });
 
                     toast.success(`${response.length} vínculo(s) criado(s) com sucesso!`);
+
                     return true;
                 } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, enrollments, operation: "createNewEnrollments" },
+                            "Error creating new enrollments",
+                        );
+                    }
                     toast.error("Erro ao vincular usuários à turma!");
-                    console.error(error);
+
                     return false;
                 }
             },
 
-            updateEnrollmentByShortIdAndClassroomId: async ({
-                shortId,
-                classroomId,
-                updates,
-            }: {
-                readonly shortId: string;
-                readonly classroomId: string;
-                readonly updates: Partial<Omit<Enrollment, "short_id" | "created_at" | "user_id" | "classroom_id">>;
-            }) => {
+            updateEnrollmentByShortIdAndClassroomId: async ({ shortId, classroomId, updates }) => {
                 try {
                     if (!shortId || !classroomId || !Object.keys(updates).length) {
                         throw new Error("short_id, classroomId and updates are required");
@@ -147,12 +272,18 @@ export const useEnrollmentsStore = create<EnrollmentsState & EnrollmentsActions>
                         updatedEnrollments.set(classroomId, updated);
                         return { enrollments: updatedEnrollments };
                     });
-
                     toast.success("Inscrição atualizada com sucesso!");
+
                     return true;
                 } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, shortId, classroomId, updates, operation: "updateEnrollmentByShortIdAndClassroomId" },
+                            "Error updating enrollment",
+                        );
+                    }
                     toast.error("Erro ao atualizar inscrição!");
-                    console.error(error);
+
                     return false;
                 }
             },
@@ -178,12 +309,18 @@ export const useEnrollmentsStore = create<EnrollmentsState & EnrollmentsActions>
 
                         return { enrollments: updatedEnrollments };
                     });
-
                     toast.success("Vínculo usuário-turma removido com sucesso!");
+
                     return true;
                 } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, userId, classroomIds, operation: "removeEnrollmentsByUserAndClassrooms" },
+                            "Error removing enrollments",
+                        );
+                    }
                     toast.error("Erro ao remover vínculo usuário-turma!");
-                    console.error(error);
+
                     return false;
                 }
             },
