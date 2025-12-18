@@ -60,7 +60,6 @@ const ProjectDeliveryModal = ({
   const { users } = useUsersStore();
   const isMobile = useIsMobile();
 
-  const squadRef = useRef<HTMLDivElement>(null);
   const membersRef = useRef<HTMLDivElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
 
@@ -145,11 +144,9 @@ const ProjectDeliveryModal = ({
     // Validations
     if (
       project.project_type === "end_module_project" &&
-      !squadSelected &&
       !currentDelivery
     ) {
       toast.error("Selecione sua Squad!");
-      scrollToRef(squadRef);
       return;
     }
 
