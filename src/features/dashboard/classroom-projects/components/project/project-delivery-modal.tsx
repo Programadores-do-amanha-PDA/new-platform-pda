@@ -74,7 +74,6 @@ const ProjectDeliveryModal = ({
     .filter(Boolean);
 
   // Form states
-  const [squadSelected, setSquadSelected] = useState<string>("");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [url, setUrl] = useState("");
   const [links, setLinks] = useState<LinkType[]>([]);
@@ -98,14 +97,12 @@ const ProjectDeliveryModal = ({
 
       if (currentDelivery) {
         // Populate form with existing delivery data
-        setSquadSelected(""); // Squad selection is not stored in delivery
         setSelectedMemberIds(currentDelivery.members_id || []);
         setUrl("");
         setLinks(currentDelivery.links.map((url) => ({ url })));
         setObservation(currentDelivery.observation || "");
       } else {
         // Reset form for new delivery
-        setSquadSelected("");
         setSelectedMemberIds([]);
         setUrl("");
         setLinks([]);
@@ -140,15 +137,6 @@ const ProjectDeliveryModal = ({
 
   const handleSubmitDelivery = async () => {
     if (!project || !deliveryAuthor) return;
-
-    // Validations
-    if (
-      project.project_type === "end_module_project" &&
-      !currentDelivery
-    ) {
-      toast.error("Selecione sua Squad!");
-      return;
-    }
 
     // Para projetos finais, pelo menos um membro é obrigatório
     if (
