@@ -38,7 +38,7 @@ Handles user authentication with email and password validation.
 
 Allows users to request password reset via email.
 
-### ResendConfirmationForm
+### EmailConfirmationForm
 
 Enables users to resend email confirmation links.
 

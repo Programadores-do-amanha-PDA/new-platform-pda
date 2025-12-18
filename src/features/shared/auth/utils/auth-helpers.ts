@@ -1,5 +1,5 @@
 // Local imports
-import { emailRegex } from "@/utils/regex/users";
+import { REGEX_FOR_EMAIL_VALIDATION } from "@/utils/regex/user-regex-validations";
 import { LoginResponseT } from "../types";
 
 /**
@@ -54,7 +54,7 @@ export const handleLoginResponse = (
  * @returns Boolean indicating if email is valid
  */
 export const isValidEmail = (email: string): boolean => {
-  return emailRegex.test(email);
+  return REGEX_FOR_EMAIL_VALIDATION.test(email);
 };
 
 /**
