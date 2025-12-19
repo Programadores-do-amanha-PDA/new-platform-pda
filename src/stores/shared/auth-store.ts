@@ -14,7 +14,6 @@ const log = logger.child({ module: "AuthStore" });
 
 const initialState: AuthState = {
     user: null,
-    userRole: null,
     permissions: [],
     loading: true,
 };
@@ -23,9 +22,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     devtools(
         (set, get) => ({
             ...initialState,
-
             setUser: (user) => set({ user }),
-            setUserRole: (userRole) => set({ userRole }),
             setPermissions: (permissions) => set({ permissions }),
 
             /**
@@ -76,7 +73,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 } catch (error) {
                     set({
                         user: null,
-                        userRole: null,
                         permissions: [],
                         loading: false,
                     });
@@ -101,10 +97,11 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                         return;
                     }
 
-                    set({ userRole: jwt.user_role });
-
                     // Fetch user profile and permissions in parallel
-                    await Promise.all([get().fetchUserProfile(session.access_token), get().fetchUserPermissions(jwt.user_role)]);
+                    await Promise.all([
+                        get().fetchUserProfile(session.access_token),
+                        get().fetchUserPermissions(jwt.user_role),
+                    ]);
                 } catch (error) {
                     log.debug({ err: error, operation: "updateAuthState" }, "Error updating auth state");
                     set({ ...initialState, loading: false });

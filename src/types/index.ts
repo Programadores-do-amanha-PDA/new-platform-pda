@@ -2,7 +2,6 @@
 export * from "./charts";
 export * from "./resume";
 export * from "./sidebar";
-export * from "./profiles.types";
 
 // Re-export types from subdirectories if needed
 export * from "./auth";

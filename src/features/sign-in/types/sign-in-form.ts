@@ -6,7 +6,7 @@ export interface SignInFormSchema {
     password: string;
 }
 
-export interface LoginResponseT {
+export interface signInResponse {
     error: boolean;
     confirmation?: boolean;
     data?: {

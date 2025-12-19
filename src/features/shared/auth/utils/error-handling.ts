@@ -2,14 +2,117 @@
  * Authentication error types for better error handling
  */
 export enum AuthErrorType {
-  INVALID_CREDENTIALS = "INVALID_CREDENTIALS",
-  EMAIL_NOT_CONFIRMED = "EMAIL_NOT_CONFIRMED",
-  TOO_MANY_REQUESTS = "TOO_MANY_REQUESTS",
-  USER_NOT_FOUND = "USER_NOT_FOUND",
+  INVALID_CREDENTIALS = "invalid_credentials",
+  EMAIL_NOT_CONFIRMED = "email_not_confirmed",
+  TOO_MANY_REQUESTS = "over_request_rate_limit",
+  USER_NOT_FOUND = "user_not_found",
   NETWORK_ERROR = "NETWORK_ERROR",
-  VALIDATION_ERROR = "VALIDATION_ERROR",
+  VALIDATION_ERROR = "validation_failed",
   UNKNOWN_ERROR = "UNKNOWN_ERROR",
 }
+
+/**
+ * Mapeamento completo de códigos de erro para mensagens em português
+ */
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  // Erros de autenticação e sessão
+  invalid_credentials: "Credenciais inválidas. Verifique seu email e senha.",
+  session_not_found: "Sessão inválida ou expirada. Por favor, faça login novamente.",
+  session_expired: "Sua sessão expirou. Por favor, faça login novamente.",
+  jwt_expired: "Sua sessão expirou. Por favor, faça login novamente.",
+  token_refreshed: "Token inválido. Por favor, faça login novamente.",
+  auth_timeout: "Tempo de autenticação expirado. Por favor, tente novamente.",
+
+  // Erros de senha
+  same_password: "A nova senha deve ser diferente da senha atual.",
+  weak_password: "A senha não atende aos requisitos de segurança. Use uma senha mais forte.",
+  password_pwned: "Esta senha foi comprometida em violações de dados. Escolha outra senha.",
+
+  // Erros de email
+  email_exists: "Já existe uma conta com este email.",
+  email_not_confirmed: "Seu email não foi confirmado. Verifique sua caixa de entrada.",
+  invalid_email: "Formato de email inválido.",
+  email_address_invalid: "Este domínio de email não é suportado. Use um email válido.",
+  email_address_not_authorized:
+    "Este email não está autorizado. Use um email autorizado ou configure um SMTP personalizado.",
+
+  // Erros de telefone
+  phone_exists: "Já existe uma conta com este número de telefone.",
+  phone_not_confirmed: "Seu número de telefone não foi confirmado.",
+
+  // Erros de token e código
+  otp_expired: "Código de verificação expirado. Solicite um novo código.",
+  otp_disabled: "Login com código está desabilitado.",
+  token_expired: "Token expirado. Solicite um novo.",
+  bad_token: "Token inválido ou corrompido.",
+  invalid_totp: "Código de autenticação inválido. Tente novamente.",
+
+  // Erros de provider OAuth
+  identity_already_exists: "Esta conta já está vinculada a outro usuário.",
+  identity_not_found: "Conta vinculada não encontrada.",
+  oauth_provider_not_supported: "Provedor OAuth não suportado ou desabilitado.",
+  saml_idp_not_found: "Provedor SAML não encontrado.",
+  saml_provider_disabled: "Login com SAML não está habilitado.",
+
+  // Erros de MFA
+  mfa_verification_failed: "Código de autenticação incorreto. Tente novamente.",
+  mfa_factor_not_found: "Método de autenticação não encontrado.",
+  mfa_challenge_expired: "Código MFA expirado. Solicite um novo.",
+  insufficient_aal: "Autenticação adicional necessária. Complete a verificação MFA.",
+
+  // Erros de rate limit
+  over_request_rate_limit: "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
+  over_email_send_rate_limit: "Muitos emails enviados. Aguarde antes de solicitar outro.",
+  over_sms_send_rate_limit: "Muitas mensagens SMS enviadas. Aguarde antes de tentar novamente.",
+
+  // Erros de signup/signin
+  user_already_exists: "Usuário já existe. Faça login ou use outro email.",
+  user_not_found: "Usuário não encontrado. Verifique suas credenciais.",
+  signup_disabled: "Cadastros estão desabilitados no momento.",
+  user_banned: "Sua conta está suspensa. Entre em contato com o suporte.",
+
+  // Erros de validação
+  validation_failed: "Dados fornecidos são inválidos. Verifique os campos e tente novamente.",
+  bad_request: "Requisição inválida. Verifique os dados enviados.",
+
+  // Erros de servidor
+  unexpected_failure: "Erro inesperado no servidor. Tente novamente mais tarde.",
+  service_timeout: "Serviço indisponível no momento. Tente novamente mais tarde.",
+  server_error: "Erro interno do servidor. Tente novamente mais tarde.",
+
+  // Erros de captcha
+  captcha_failed: "Verificação do captcha falhou. Tente novamente.",
+
+  // Erros de hook
+  hook_timeout: "Serviço temporariamente indisponível. Tente novamente mais tarde.",
+  hook_timeout_after_retry: "Serviço indisponível. Tente novamente mais tarde.",
+
+  // Erros gerais
+  conflict: "Conflito de dados. Tente novamente.",
+  bad_json: "Formato de dados inválido.",
+  no_authorization: "Autorização necessária. Faça login primeiro.",
+  not_admin: "Acesso restrito a administradores.",
+};
+
+/**
+ * Gets error message by error code from the comprehensive error messages map
+ * @param errorCode - The error code to look up
+ * @returns User-friendly error message
+ *
+ * @example
+ * const message = getAuthErrorMessage({ errorCode: 'invalid_credentials' });
+ */
+export const getAuthErrorMessage = ({ errorCode }: { errorCode: string }): { error: string } => {
+  if (!errorCode || errorCode.trim() === "") {
+    return { error: "Ocorreu um erro inesperado. Por favor, tente novamente." };
+  }
+
+  return {
+    error:
+      AUTH_ERROR_MESSAGES[errorCode] ||
+      "Ocorreu um erro inesperado. Por favor, tente novamente.",
+  };
+};
 
 /**
  * Structured error object for authentication operations
@@ -48,16 +151,25 @@ export const createAuthError = (
  */
 export const parseAuthError = (error: unknown): AuthErrorT => {
   if (typeof error === "string") {
-    return createAuthError(AuthErrorType.UNKNOWN_ERROR, error, error);
+    const messageData = getAuthErrorMessage({ errorCode: error });
+    return createAuthError(AuthErrorType.UNKNOWN_ERROR, messageData.error, error);
   }
 
   if (error instanceof Error) {
     const message = error.message.toLowerCase();
+    const errorCode = error.message;
 
+    // Tenta mapear pelo código de erro primeiro
+    const mappedMessage = getAuthErrorMessage({ errorCode });
+    if (mappedMessage.error !== "Ocorreu um erro inesperado. Por favor, tente novamente.") {
+      return createAuthError(AuthErrorType.UNKNOWN_ERROR, mappedMessage.error, error);
+    }
+
+    // Fallback para detecção de padrões
     if (message.includes("invalid login credentials")) {
       return createAuthError(
         AuthErrorType.INVALID_CREDENTIALS,
-        "Email ou senha incorretos.",
+        AUTH_ERROR_MESSAGES.invalid_credentials,
         error
       );
     }
@@ -65,7 +177,7 @@ export const parseAuthError = (error: unknown): AuthErrorT => {
     if (message.includes("email not confirmed")) {
       return createAuthError(
         AuthErrorType.EMAIL_NOT_CONFIRMED,
-        "Por favor, confirme seu email antes de fazer login.",
+        AUTH_ERROR_MESSAGES.email_not_confirmed,
         error
       );
     }
@@ -73,7 +185,7 @@ export const parseAuthError = (error: unknown): AuthErrorT => {
     if (message.includes("too many requests")) {
       return createAuthError(
         AuthErrorType.TOO_MANY_REQUESTS,
-        "Muitas tentativas. Tente novamente em alguns minutos.",
+        AUTH_ERROR_MESSAGES.over_request_rate_limit,
         error
       );
     }
@@ -81,7 +193,7 @@ export const parseAuthError = (error: unknown): AuthErrorT => {
     if (message.includes("user not found")) {
       return createAuthError(
         AuthErrorType.USER_NOT_FOUND,
-        "Usuário não encontrado.",
+        AUTH_ERROR_MESSAGES.user_not_found,
         error
       );
     }
@@ -144,27 +256,5 @@ export const getErrorAction = (error: AuthErrorT): string => {
       return "Corrija os campos destacados e tente novamente.";
     default:
       return "Tente novamente ou entre em contato com o suporte.";
-  }
-};
-
-/**
- * Logs authentication errors for debugging (development only)
- * @param error - AuthError object
- * @param context - Additional context for debugging
- */
-export const logAuthError = (
-  error: AuthErrorT,
-  context?: Record<string, unknown>
-): void => {
-  if (process.env.NODE_ENV === "development") {
-    console.group("🔐 Authentication Error");
-    console.error("Type:", error.type);
-    console.error("Message:", error.message);
-    console.error("Field:", error.field);
-    console.error("Original Error:", error.originalError);
-    if (context) {
-      console.error("Context:", context);
-    }
-    console.groupEnd();
   }
 };

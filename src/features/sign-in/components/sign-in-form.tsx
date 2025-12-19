@@ -14,11 +14,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import useAuth from "@/hooks/use-auth";
 
-import { SignInFormSchema, LoginResponseT } from "../types";
+import { signInWithEmailAndPassword } from "../actions";
+import { SignInFormSchema, signInResponse } from "../types";
 import { signInSchema } from "../utils/schema";
 
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
-import { signInWithEmailAndPassword } from "../actions";
 
 export const SignInForm = () => {
     const router = useRouter();
@@ -40,11 +40,11 @@ export const SignInForm = () => {
 
     const onSubmit = async (data: SignInFormSchema) => {
         try {
-            const response: LoginResponseT = await signInWithEmailAndPassword(data);
+            const response: signInResponse = await signInWithEmailAndPassword(data);
 
             if (response.error && response.confirmation) {
                 toast.error("Confirme seu email para continuar.");
-                router.push(`/resend-confirmation?email=${encodeURIComponent(data.email)}`);
+                router.push(`/email-confirmation?email=${encodeURIComponent(data.email)}`);
                 return;
             }
 
@@ -163,7 +163,7 @@ export const SignInForm = () => {
                 <div className="flex justify-center items-center gap-2 mt-6 text-center">
                     <p className="text-muted-foreground text-sm">Primeiro acesso?</p>
                     <Link
-                        href="/resend-confirmation"
+                        href="/email-confirmation"
                         className="font-medium text-primary text-sm hover:underline underline-offset-4 transition-colors"
                     >
                         Confirme seu email

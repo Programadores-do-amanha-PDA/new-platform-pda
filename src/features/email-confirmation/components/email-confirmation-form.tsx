@@ -41,7 +41,7 @@ export const EmailConfirmationForm = () => {
 
     const currentEmail = watch("email");
 
-    const { cooldown, lastSentEmail, isEmailChanged, canResend, startCooldown, formatTime } = useCooldownManager(
+    const { cooldown, lastSentEmail, isValueChanged, canResend, startCooldown, formatTime } = useCooldownManager(
         {
             durationInSeconds: 120,
             storageKey: "resend_confirmation_cooldown",
@@ -146,7 +146,7 @@ export const EmailConfirmationForm = () => {
                             )}
                         />
 
-                        {isEmailChanged && cooldown > 0 && (
+                        {isValueChanged && cooldown > 0 && (
                             <Alert variant="default">
                                 <AlertDescription className="text-sm">
                                     Você alterou o email. Pode reenviar imediatamente para o novo endereço.
@@ -177,7 +177,7 @@ export const EmailConfirmationForm = () => {
                             )}
                         </Button>
 
-                        {lastSentEmail && cooldown > 0 && !isEmailChanged && (
+                        {lastSentEmail && cooldown > 0 && !isValueChanged && (
                             <div className="text-center">
                                 <p className="text-sm text-muted-foreground">
                                     Email enviado para <span className="font-medium text-foreground">{lastSentEmail}</span>

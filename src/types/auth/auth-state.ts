@@ -3,14 +3,12 @@ import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
 
 export interface AuthState {
     user: AuthUserWithProfile | null;
-    userRole: Role | null;
     permissions: Permission[];
     loading: boolean;
 }
 
 export interface AuthActions {
     setUser: (user: AuthUserWithProfile | null) => void;
-    setUserRole: (role: Role | null) => void;
     setPermissions: (permissions: Permission[]) => void;
     fetchUserProfile: (jwt: string) => Promise<void>;
     fetchUserPermissions: (role: Role) => Promise<void>;

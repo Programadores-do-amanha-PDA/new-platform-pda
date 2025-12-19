@@ -1,22 +1,34 @@
 "use client";
+
 import { useEffect } from "react";
-import PageLoader from "@/components/shared/page-loader";
+
 import { useAuthStore } from "@/stores/shared/auth-store";
 
-export default function AuthStoreProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { loading, fetchSession } = useAuthStore();
+import { redirect, usePathname } from "next/navigation";
+import PageLoader from "@/components/shared/page-loader";
+import useAuthProcessUrlParams from "@/features/shared/auth/hooks/use-auth-confirmation";
 
-  useEffect(() => {
-    fetchSession();
-  }, []);
+export default function AuthStoreProvider({ children }: { children: React.ReactNode }) {
+    const path = usePathname();
+    const { loading, fetchSession, user } = useAuthStore();
 
-  if (loading) {
-    return <PageLoader />;
-  }
+    useAuthProcessUrlParams();
 
-  return children;
+    useEffect(() => {
+        fetchSession();
+    }, []);
+
+    useEffect(() => {
+        if (!loading && !user && path.startsWith("/dashboard")) {
+            redirect("/sign-in");
+        } else if (!loading && user && !path.startsWith("/dashboard")) {
+            redirect("/dashboard");
+        }
+    }, [loading, user, path]);
+
+    if (loading) {
+        return <PageLoader />;
+    }
+
+    return children;
 }

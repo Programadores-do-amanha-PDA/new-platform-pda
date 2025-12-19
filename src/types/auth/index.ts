@@ -1,5 +1,5 @@
 export type * from "./user";
-export type * from "./user-classroom";
+export type * from "../../features/dashboard/shared/enrollments/types";
 export type * from "./user-role";
 export type * from "./user-role-actions.types";
 export type * from "./role-permissions";

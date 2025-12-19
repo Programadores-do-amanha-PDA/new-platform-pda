@@ -1,33 +1,36 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-
 import React from "react";
-
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, AlertCircleIcon, ArrowLeft, Lock } from "lucide-react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { Loader2, AlertCircleIcon, Lock } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import useAuth from "@/hooks/use-auth";
 
-import { NewPasswordFormDataT } from "../types";
-import { newPasswordSchema } from "../utils";
+import { logger } from "@/lib/logger";
+import useAuth from "@/hooks/use-auth";
+import { getAuthErrorMessage } from "@/features/shared/auth/utils";
+
+import { SetNewPasswordSchema } from "../types";
+import { setNewPasswordSchema } from "../utils";
 
 import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
-import { getAuthErrorMessage } from "../utils/auth-error-messages";
 
-export const ResetPasswordForm = () => {
-    const { handleUpdateUser, user } = useAuth();
+const log = logger.child({ module: "SetNewPassword" });
 
-    const form = useForm<NewPasswordFormDataT>({
-        resolver: zodResolver(newPasswordSchema),
+export const SetNewPassword = () => {
+    const router = useRouter();
+    const { updateUser, user } = useAuth();
+
+    const form = useForm<SetNewPasswordSchema>({
+        resolver: zodResolver(setNewPasswordSchema),
         defaultValues: {
             password: "",
             confirmPassword: "",
@@ -41,47 +44,48 @@ export const ResetPasswordForm = () => {
         setError,
     } = form;
 
-    const onSubmit = async (data: NewPasswordFormDataT) => {
+    const onSubmit = async (formData: SetNewPasswordSchema) => {
         try {
+            if (isSubmitting) return;
             if (!user) throw new Error("user is null");
+            if (!formData.password || !setNewPasswordSchema.parse(formData)) {
+                throw new Error("Password is required");
+            }
 
-            const userUpdated = await handleUpdateUser({
-                password: data.password,
+            log.info({ user, formData, operation: "set_new_password" }, "Setting new password for user");
+
+            const userUpdated = await updateUser({
+                password: formData.password,
             });
-            console.log(userUpdated);
 
-            if (userUpdated && userUpdated.user && !userUpdated.error) {
-                toast.success("Senha redefinida com sucesso!");
-            } else if (userUpdated && userUpdated.error && userUpdated.isAuthError) {
-                const errorMessage = getAuthErrorMessage(userUpdated.error).error;
-                console.log("errorMessage", errorMessage);
+            if (userUpdated && userUpdated.error && userUpdated.isAuthError) {
+                const errorMessage = getAuthErrorMessage({ errorCode: userUpdated.error }).error;
                 setError("root", {
                     type: "manual",
                     message: errorMessage,
                 });
                 toast.error(errorMessage);
+                return;
             }
+
+            if (!userUpdated || userUpdated.user === null || userUpdated.error) {
+                throw new Error("Failed to update user password");
+            }
+
+            toast.success("Senha redefinida com sucesso!");
+            router.push("/sign-in");
         } catch (error) {
+            log.error({ err: error, operation: "set_new_password" }, "Error setting new password");
             setError("root", {
                 type: "manual",
                 message: "Erro ao redefinir a senha. Tente novamente.",
             });
             toast.error("Erro ao redefinir a senha. Tente novamente.");
-            console.error(error);
         }
     };
 
     return (
         <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
-            <div className="w-full flex items-start justify-start">
-                <Link
-                    href="/login"
-                    className="flex gap-2 items-center cursor-pointer text-muted-foreground font-semibold group"
-                >
-                    <ArrowLeft className="size-5" />
-                    <p className="group-hover:underline">Entrar</p>
-                </Link>
-            </div>
             <div className="flex flex-col gap-6">
                 <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
                 <div className="flex flex-col gap-3">

@@ -1,17 +1,18 @@
-export type RolesT =
+export type Role =
   | "admin"
   | "employer"
   | "class_manager"
   | "teacher"
   | "student"
-  | "alumni";
+  | "alumni"
+  | "guest";
 
 export interface UserRoleT {
   id?: number;
-  role: RolesT;
+  role: Role;
   user_id?: string;
 }
 
 export interface JwtPayloadT {
-  user_role: RolesT | null;
+  user_role: Role | null;
 }

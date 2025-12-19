@@ -1,17 +1,17 @@
 import { AuthUser } from "@supabase/supabase-js";
-import { AuthUserWithProfileT, RolesT } from ".";
+import { AuthUserWithProfile, Role } from ".";
 
 export interface IUsersState {
-    users: Partial<AuthUserWithProfileT>[];
+    users: Partial<AuthUserWithProfile>[];
     loading: boolean;
 }
 
 export type SetUsersProps = {
-    users: Partial<AuthUserWithProfileT>[];
+    users: Partial<AuthUserWithProfile>[];
 };
 
 export type GetAllUsersWithProfilesProps = {
-    role?: RolesT;
+    role?: Role;
 };
 
 export type CreateNewUserProps = {

@@ -18,7 +18,7 @@ export default function useAuth() {
     return {
         ...store,
         handleRequestResetPassword: requestPasswordResetByEmail,
-        handleUpdateUser: updateAuthUser,
+        updateUser: updateAuthUser,
         handleSignOut,
     };
 }

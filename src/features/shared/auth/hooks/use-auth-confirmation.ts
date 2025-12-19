@@ -34,7 +34,7 @@ import { getAuthParamsFromUrl, useOtpHandler } from "./process-pkce-flow";
  * ```typescript
  * // Use in root layout or authentication pages
  * function AuthCallbackPage() {
- *   useAuthConfirmation();
+ *   useAuthProcessUrlParams();
  *   return <AuthLoadingSpinner />;
  * }
  * ```
@@ -42,7 +42,7 @@ import { getAuthParamsFromUrl, useOtpHandler } from "./process-pkce-flow";
  * @see {@link useOtpHandler} for OTP verification implementation details
  * @see {@link getAuthParamsFromUrl} for URL parameter extraction
  */
-export default function useAuthConfirmation(): void {
+export default function useAuthProcessUrlParams(): void {
   const router = useRouter();
   const { updateAuthState } = useAuth();
   const { processOtpFlow, handleOAuthErrors } = useOtpHandler();
@@ -132,7 +132,7 @@ export default function useAuthConfirmation(): void {
 
       // Redirect to login page after brief delay to allow user to read error message
       setTimeout(() => {
-        router.push("/login");
+        router.push("/sign-in");
       }, 3000);
     };
 

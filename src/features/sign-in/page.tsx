@@ -4,7 +4,7 @@ import Image from "next/image";
 import BinaryGrid from "@/components/shared/binary-grid";
 
 import { SignInForm } from "./components";
-import womanArt from "/public/assets/images/login/woman-login-art.png";
+import womanArt from "/public/assets/images/auth/woman-login-art.png";
 
 export default function LoginPage() {
     return (

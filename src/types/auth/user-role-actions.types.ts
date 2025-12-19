@@ -1,4 +1,4 @@
-import { RolesT, UserRoleT } from "./user-role";
+import { Role, UserRoleT } from "./user-role";
 
 // Get All User Roles
 export type GetAllUserRolesResult = UserRoleT[] | null;
@@ -6,14 +6,14 @@ export type GetAllUserRolesResult = UserRoleT[] | null;
 // Insert User Role
 export type InsertUserRoleProps = {
     userId: string;
-    role: RolesT;
+    role: Role;
 };
 export type InsertUserRoleResult = UserRoleT[] | null;
 
 // Update User Role
 export type UpdateUserRoleProps = {
     userId: string;
-    newRole: RolesT;
+    newRole: Role;
 };
 export type UpdateUserRoleResult = UserRoleT[] | null;
 

@@ -9,7 +9,7 @@ interface CooldownConfig {
 interface CooldownState {
     cooldown: number;
     lastSentEmail: string;
-    isEmailChanged: boolean;
+    isValueChanged: boolean;
     canResend: boolean;
 }
 
@@ -94,13 +94,13 @@ export const useCooldownManager = (config: CooldownConfig, currentEmail: string)
         return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
     };
 
-    const isEmailChanged = currentEmail !== lastSentEmail;
-    const canResend = cooldown === 0 || isEmailChanged;
+    const isValueChanged = currentEmail !== lastSentEmail;
+    const canResend = cooldown === 0 || isValueChanged;
 
     return {
         cooldown,
         lastSentEmail,
-        isEmailChanged,
+        isValueChanged,
         canResend,
         startCooldown,
         formatTime,

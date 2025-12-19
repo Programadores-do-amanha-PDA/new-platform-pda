@@ -1,11 +1,11 @@
-export interface RolePermissionT {
+export interface RolePermission {
   id: number;
   role: string;
   permission: string;
 }
 
-export interface UserPermissionsT {
+export interface UserPermissions {
   permissions: string[];
 }
 
-export type PermissionT = string;
+export type Permission = string;
