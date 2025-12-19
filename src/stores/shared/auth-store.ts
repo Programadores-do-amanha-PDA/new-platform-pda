@@ -1,24 +1,25 @@
 "Use client";
 
-// Global import
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { jwtDecode } from "jwt-decode";
 
-// Actions
-import { getProfileById, getAuthUser, getSession, getPermissionsByRole } from "@/actions";
+import { getAuthUser, getSession, getPermissionsByRole } from "@/actions";
+import { logger } from "@/lib/logger";
 
-// Types
-import { JwtPayloadT, Profile, AuthActionsT, AuthStateT } from "@/types";
+import { JwtPayloadT, AuthActions, AuthState } from "@/types";
+import { getProfileById, Profile } from "@/features/dashboard/shared/profile";
 
-const initialState: AuthStateT = {
+const log = logger.child({ module: "AuthStore" });
+
+const initialState: AuthState = {
     user: null,
     userRole: null,
     permissions: [],
     loading: true,
 };
 
-export const useAuthStore = create<AuthStateT & AuthActionsT>()(
+export const useAuthStore = create<AuthState & AuthActions>()(
     devtools(
         (set, get) => ({
             ...initialState,
@@ -27,18 +28,30 @@ export const useAuthStore = create<AuthStateT & AuthActionsT>()(
             setUserRole: (userRole) => set({ userRole }),
             setPermissions: (permissions) => set({ permissions }),
 
+            /**
+             * Busca as permissões do usuário baseado em seu cargo.
+             * @param role O cargo do usuário.
+             */
             fetchUserPermissions: async (role) => {
                 try {
                     const permissions = await getPermissionsByRole(role);
                     set({ permissions });
                 } catch (error) {
-                    console.error("Error fetching permissions:", error);
                     set({ permissions: [] });
+                    log.warn({ err: error, role, operation: "fetchUserPermissions" }, "Error fetching permissions");
                 }
             },
 
-            getUserProfile: async (jwt) => {
+            /**
+             * Busca o perfil completo do usuário.
+             * @param jwt Token JWT contendo informações do usuário.
+             */
+            fetchUserProfile: async (jwt) => {
                 try {
+                    if (!jwt) {
+                        throw new Error("JWT not provided");
+                    }
+
                     const user = await getAuthUser(jwt);
                     if (!user?.id) {
                         set({ user: null, loading: false });
@@ -47,29 +60,34 @@ export const useAuthStore = create<AuthStateT & AuthActionsT>()(
 
                     const [userProfile] = await Promise.all([getProfileById({ id: user.id })]);
 
-                    if (userProfile) {
-                        set({
-                            user: {
-                                ...user,
-                                profile: {
-                                    ...(userProfile as Profile),
-                                },
-                            },
-                            loading: false,
-                        });
-                    } else {
-                        set({ user: null, loading: false });
+                    if (!userProfile) {
+                        throw new Error("User profile not found");
                     }
-                } catch {
+
+                    set({
+                        user: {
+                            ...user,
+                            profile: {
+                                ...(userProfile as Profile),
+                            },
+                        },
+                        loading: false,
+                    });
+                } catch (error) {
                     set({
                         user: null,
                         userRole: null,
                         permissions: [],
                         loading: false,
                     });
+                    log.error({ err: error, operation: "fetchUserProfile" }, "Error fetching user profile");
                 }
             },
 
+            /**
+             * Atualiza o estado de autenticação com base na sessão.
+             * @param session Sessão do usuário contendo access_token.
+             */
             updateAuthState: async (session) => {
                 try {
                     if (!session) {
@@ -86,38 +104,61 @@ export const useAuthStore = create<AuthStateT & AuthActionsT>()(
                     set({ userRole: jwt.user_role });
 
                     // Fetch user profile and permissions in parallel
-                    await Promise.all([get().getUserProfile(session.access_token), get().fetchUserPermissions(jwt.user_role)]);
-                } catch {
+                    await Promise.all([get().fetchUserProfile(session.access_token), get().fetchUserPermissions(jwt.user_role)]);
+                } catch (error) {
+                    log.debug({ err: error, operation: "updateAuthState" }, "Error updating auth state");
                     set({ ...initialState, loading: false });
                 }
             },
 
+            /**
+             * Busca a sessão atual do usuário e atualiza o estado de autenticação.
+             */
             fetchSession: async () => {
                 try {
                     const session = await getSession();
                     if (!session) throw new Error("No session found");
 
                     await get().updateAuthState(session);
-                } catch {
+                } catch (error) {
                     set({ ...initialState, loading: false });
+                    log.warn({ err: error, operation: "fetchSession" }, "Error fetching session");
                 }
             },
 
+            /**
+             * Verifica se o usuário possui uma permissão específica.
+             * @param permission A permissão a ser verificada.
+             * @returns true se o usuário possui a permissão, false caso contrário.
+             */
             hasPermission: (permission) => {
                 const { permissions } = get();
                 return permissions.includes(permission);
             },
 
+            /**
+             * Verifica se o usuário possui qualquer uma das permissões fornecidas.
+             * @param permissions Array de permissões a serem verificadas.
+             * @returns true se o usuário possui pelo menos uma das permissões, false caso contrário.
+             */
             hasAnyPermission: (permissions) => {
                 const { permissions: userPermissions } = get();
                 return permissions.some((permission) => userPermissions.includes(permission));
             },
 
+            /**
+             * Verifica se o usuário possui todas as permissões fornecidas.
+             * @param permissions Array de permissões a serem verificadas.
+             * @returns true se o usuário possui todas as permissões, false caso contrário.
+             */
             hasAllPermissions: (permissions) => {
                 const { permissions: userPermissions } = get();
                 return permissions.every((permission) => userPermissions.includes(permission));
             },
 
+            /**
+             * Reseta o estado de autenticação para o estado inicial.
+             */
             reset: () => {
                 set({ ...initialState, loading: false });
             },

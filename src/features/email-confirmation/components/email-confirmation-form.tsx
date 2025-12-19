@@ -9,13 +9,13 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Clock, AlertCircleIcon, ArrowLeft } from "lucide-react";
 
-import useAuth from "@/hooks/use-auth";
+import { useCooldownManager } from "@/hooks/cooldown-manager";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-import { useCooldownManager } from "../../shared/auth/utils/cooldown-manager";
+import { resendEmailSignupConfirmation } from "../actions";
 import { EmailConfirmationFormSchema } from "../types";
 import { emailConfirmationSchema } from "../utils";
 
@@ -23,7 +23,6 @@ import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 
 export const EmailConfirmationForm = () => {
     const searchParams = useSearchParams();
-    const { handleResendAnEmailSignupConfirmation } = useAuth();
 
     const form = useForm<EmailConfirmationFormSchema>({
         resolver: zodResolver(emailConfirmationSchema),
@@ -44,7 +43,7 @@ export const EmailConfirmationForm = () => {
 
     const { cooldown, lastSentEmail, isEmailChanged, canResend, startCooldown, formatTime } = useCooldownManager(
         {
-            duration: 120,
+            durationInSeconds: 120,
             storageKey: "resend_confirmation_cooldown",
             emailStorageKey: "pending_confirmation_email",
         },
@@ -84,7 +83,7 @@ export const EmailConfirmationForm = () => {
             if (!data.email) throw new Error("Email is not provided");
             if (!emailConfirmationSchema.parse(data)) throw new Error("Invalid email format");
 
-            const isSent = await handleResendAnEmailSignupConfirmation(data.email);
+            const isSent = await resendEmailSignupConfirmation({email: data.email});
 
             if (isSent) {
                 startCooldown(data.email);
@@ -108,7 +107,7 @@ export const EmailConfirmationForm = () => {
         <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
             <div className="w-full flex items-start justify-start">
                 <Link
-                    href="/login"
+                    href="/sign-in"
                     className="flex gap-2 items-center cursor-pointer text-muted-foreground font-semibold group"
                 >
                     <ArrowLeft className="size-5" />

@@ -4,7 +4,7 @@ import Image from "next/image";
 import BinaryGrid from "@/components/shared/binary-grid";
 
 import { EmailConfirmationForm } from "./components/email-confirmation-form";
-import womanArt from "/public/assets/images/login/woman-login-art.png";
+import womanArt from "/public/assets/images/auth/woman-login-art.png";
 
 export default function EmailConfirmationPage() {
   return (
