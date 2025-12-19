@@ -2,37 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { UserAuthLoginT } from "@/types";
-import { emailRegex, passwordRegex } from "@/utils/regex/users";
 import { AuthError } from "@supabase/supabase-js";
 
-export async function signInWithPassword(userCredentials: Pick<UserAuthLoginT, "email" | "password">) {
-    try {
-        if (
-            !userCredentials.email ||
-            !emailRegex.test(userCredentials.email) ||
-            !userCredentials.password ||
-            !passwordRegex.test(userCredentials.password)
-        )
-            throw new Error("Invalid credentials");
-
-        const supabase = await createClient();
-
-        const { data, error } = await supabase.auth.signInWithPassword(userCredentials);
-        if (error) throw new Error(error.message);
-
-        return { error: false, data };
-    } catch (error) {
-        if (
-            error instanceof Error &&
-            (error.message === "Request failed with status code 403" || error.message === "Email not confirmed")
-        ) {
-            return { error: true, confirmation: true };
-        } else {
-            console.error("Error on signInWithPassword", error);
-            return { error: true, confirmation: false };
-        }
-    }
-}
 
 export const updateAuthUser = async (updates: Partial<UserAuthLoginT>) => {
     try {

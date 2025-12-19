@@ -9,7 +9,7 @@ import {
   updateUserResumeById,
   deleteUserResumeById,
 } from "@/actions/resume";
-import { AuthUserWithProfileT } from "@/types/auth";
+import { AuthUserWithProfile } from "@/types/auth";
 
 interface ResumeState {
   resumes: ResumeT[];
@@ -19,10 +19,10 @@ interface ResumeState {
 interface ResumeActions {
   setResumes: (resumes: ResumeT[]) => void;
   getAllResumes: () => Promise<boolean>;
-  getResumeByUserId: (user: AuthUserWithProfileT) => Promise<boolean>;
+  getResumeByUserId: (user: AuthUserWithProfile) => Promise<boolean>;
   createResume: (
     resumeData: ResumeT,
-    user: AuthUserWithProfileT
+    user: AuthUserWithProfile
   ) => Promise<boolean>;
   updateResume: (id: string, resumeData: Partial<ResumeT>) => Promise<boolean>;
   deleteResume: (id: string) => Promise<boolean>;
