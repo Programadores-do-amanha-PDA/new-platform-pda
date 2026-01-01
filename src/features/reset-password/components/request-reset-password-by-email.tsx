@@ -19,10 +19,10 @@ import useAuth from "@/hooks/use-auth";
 import { RequestResetPasswordByEmailSchema } from "../types";
 import { requestResetPasswordByEmailSchema } from "../utils";
 
-import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "RequestResetPasswordForm" });
+const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
 
 export const RequestResetPasswordByEmail = () => {
     const { handleRequestResetPassword } = useAuth();
@@ -91,7 +91,7 @@ export const RequestResetPasswordByEmail = () => {
                 </Link>
             </div>
             <div className="flex flex-col gap-6">
-                <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
+                <Image width={36} height={36} src={SYMBOL_PATH} alt="PdA" />
                 <div className="flex flex-col gap-3">
                     <p className="text-4xl font-bold">Redefinir senha</p>
                     <p className="text-muted-foreground">

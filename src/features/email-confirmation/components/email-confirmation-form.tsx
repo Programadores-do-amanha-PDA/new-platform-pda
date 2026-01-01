@@ -19,7 +19,7 @@ import { resendEmailSignupConfirmation } from "../actions";
 import { EmailConfirmationFormSchema } from "../types";
 import { emailConfirmationSchema } from "../utils";
 
-import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
+const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
 
 export const EmailConfirmationForm = () => {
     const searchParams = useSearchParams();
@@ -83,7 +83,7 @@ export const EmailConfirmationForm = () => {
             if (!data.email) throw new Error("Email is not provided");
             if (!emailConfirmationSchema.parse(data)) throw new Error("Invalid email format");
 
-            const isSent = await resendEmailSignupConfirmation({email: data.email});
+            const isSent = await resendEmailSignupConfirmation({ email: data.email });
 
             if (isSent) {
                 startCooldown(data.email);
@@ -115,7 +115,7 @@ export const EmailConfirmationForm = () => {
                 </Link>
             </div>
             <div className="flex flex-col gap-6 bg-b">
-                <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
+                <Image width={36} height={36} src={SYMBOL_PATH} alt="PdA" />
                 <div className="flex flex-col gap-3">
                     <p className="text-4xl font-bold">Confirmar Email</p>
                     <p className="text-muted-foreground">

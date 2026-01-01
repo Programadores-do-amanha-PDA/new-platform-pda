@@ -15,10 +15,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import useAuth from "@/hooks/use-auth";
 
 import { signInWithEmailAndPassword } from "../actions";
-import { SignInFormSchema, signInResponse } from "../types";
 import { signInSchema } from "../utils/schema";
 
-import pdaSymbol from "/public/assets/logos/simbolo_pda_fundo_branco.png";
+interface SignInFormSchema {
+    email: string;
+    password: string;
+}
+
+const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
 
 export const SignInForm = () => {
     const router = useRouter();
@@ -40,7 +44,7 @@ export const SignInForm = () => {
 
     const onSubmit = async (data: SignInFormSchema) => {
         try {
-            const response: signInResponse = await signInWithEmailAndPassword(data);
+            const response = await signInWithEmailAndPassword(data);
 
             if (response.error && response.confirmation) {
                 toast.error("Confirme seu email para continuar.");
@@ -83,7 +87,7 @@ export const SignInForm = () => {
     return (
         <div className="flex flex-col gap-8 mx-auto w-full max-w-sm">
             <div className="flex flex-col gap-6">
-                <Image width={36} height={36} src={pdaSymbol} alt="PdA" />
+                <Image width={36} height={36} src={SYMBOL_PATH} alt="PdA" />
                 <div className="flex flex-col gap-3">
                     <p className="font-bold text-4xl">Entrar</p>
                     <p className="text-muted-foreground">Use suas credenciais para acessar sua conta</p>

@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import BinaryGrid from "@/components/shared/binary-grid";
 
+import BinaryGrid from "@/components/shared/binary-grid";
 import { SignInForm } from "./components";
-import womanArt from "/public/assets/images/auth/woman-login-art.png";
+
+const WOMAN_IMAGE_PATH = "/assets/images/auth/woman-login-art.png";
 
 export default function LoginPage() {
     return (
@@ -24,7 +25,7 @@ export default function LoginPage() {
                         characters={["0", "1"]}
                     />
                     <Image
-                        src={womanArt}
+                        src={WOMAN_IMAGE_PATH}
                         alt="Programadores do Amanhã"
                         width={500}
                         height={500}

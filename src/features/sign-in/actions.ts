@@ -3,6 +3,8 @@
 import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
 import { logger } from "@/lib/logger";
+import { Session } from "@supabase/supabase-js";
+import { signInSchema } from "./utils";
 
 const log = logger.child({ module: "sign-in/actions" });
 
@@ -11,10 +13,21 @@ type SignInWithEmailAndPasswordProps = {
     password: string;
 };
 
-export async function signInWithEmailAndPassword({ email, password }: SignInWithEmailAndPasswordProps) {
+type SignInWithEmailAndPasswordResponse = {
+    error: boolean;
+    confirmation?: boolean;
+    data?: {
+        session: Session;
+    };
+    message?: string;
+};
+
+export async function signInWithEmailAndPassword({
+    email,
+    password,
+}: SignInWithEmailAndPasswordProps): Promise<SignInWithEmailAndPasswordResponse> {
     try {
-        if (!email || !REGEX_FOR_EMAIL_VALIDATION.test(email) || !password || !REGEX_FOR_PASSWORD_VALIDATION.test(password))
-            throw new Error("Invalid credentials");
+        if (!signInSchema.parse({ email, password })) throw new Error("Invalid credentials");
 
         const supabase = await getSupabaseClient();
 
@@ -35,4 +48,3 @@ export async function signInWithEmailAndPassword({ email, password }: SignInWith
         }
     }
 }
-
