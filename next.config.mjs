@@ -4,9 +4,8 @@ const nextConfig = {
         serverActions: {
             bodySizeLimit: "15mb",
         },
-        instrumentationHook: true,
-        serverComponentsExternalPackages: ["pino", "pino-pretty"],
     },
+    serverExternalPackages: ["pino", "pino-pretty"],
 };
 
 export default nextConfig;
