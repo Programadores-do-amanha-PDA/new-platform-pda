@@ -1,4 +1,4 @@
 import { Logger } from "pino";
-import { generateLoggerConfigByEnvironment } from "./logger.utils";
+import { generateLoggerConfigByEnvironment } from "./utils";
 
 export const logger: Logger = generateLoggerConfigByEnvironment();

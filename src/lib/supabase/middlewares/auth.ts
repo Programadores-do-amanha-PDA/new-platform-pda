@@ -1,8 +1,10 @@
 "use server";
 
-import { ApiError } from "@/lib/errors/api-error";
-import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
+import createClient from "../client";
+import { ApiError } from "@/lib/errors/api-error";
+
+
 
 const log = logger.child({ module: "middleware.supabase-auth" });
 

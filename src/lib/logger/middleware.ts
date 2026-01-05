@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "./index";
-import { RequestLogOptions, LogContext } from "./logger.types";
+import { RequestLogOptions, LogContext } from "./types";
 
 export interface LoggedResponse extends NextResponse {
   responseTime?: number;

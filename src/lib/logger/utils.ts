@@ -1,5 +1,5 @@
-import { AuthUserWithProfile } from "@/types";
-import { MaskEmailProps } from "./logger.types";
+import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { MaskEmailProps } from "./types";
 import pino, { Logger, LoggerOptions } from "pino";
 
 export const generateLoggerConfigByEnvironment = (): Logger => {

@@ -1,2 +1,2 @@
-export * from "./update-session.middleware"
-export * from "./supabase-auth.middleware"
+export * from "./update-session"
+export * from "./auth"

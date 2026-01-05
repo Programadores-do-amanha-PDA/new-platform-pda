@@ -2,13 +2,13 @@
 
 import { createClient, createClientAdmin } from "./server";
 
-// Cache das instâncias do Supabase
 let supabaseClientCache: Awaited<ReturnType<typeof createClient>> | null = null;
 let supabaseAdminCache: Awaited<ReturnType<typeof createClientAdmin>> | null = null;
 
 /**
- * Retorna uma instância cached do Supabase client
- * Evita criar múltiplas instâncias desnecessárias
+ * Returns a cached instance of the Supabase client
+ * Prevents creating multiple unnecessary instances
+ * @returns {Promise<Awaited<ReturnType<typeof createClient>>>} Supabase client instance
  */
 export const getSupabaseClient = async () => {
     try {
@@ -22,8 +22,9 @@ export const getSupabaseClient = async () => {
 };
 
 /**
- * Retorna uma instância cached do Supabase admin client
- * Evita criar múltiplas instâncias desnecessárias
+ * Returns a cached instance of the Supabase admin client
+ * Prevents creating multiple unnecessary instances
+ * @returns {Promise<Awaited<ReturnType<typeof createClientAdmin>>>} Supabase admin client instance
  */
 export const getSupabaseAdminClient = async () => {
     try {
@@ -37,9 +38,11 @@ export const getSupabaseAdminClient = async () => {
 };
 
 /**
- * Limpa o cache das instâncias (útil para testes ou reset)
+ * Clears the cached Supabase client instances
+ * Useful for testing or resetting state
+ * @returns {Promise<void>}
  */
-export const clearSupabaseCache = () => {
+export const clearSupabaseCache = async () => {
     supabaseClientCache = null;
     supabaseAdminCache = null;
 };
