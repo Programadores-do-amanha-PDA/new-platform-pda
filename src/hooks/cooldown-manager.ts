@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 interface CooldownConfig {
-    durationInSeconds: number; // durationInSeconds in seconds
+    durationInSeconds: number;
     storageKey: string;
     emailStorageKey?: string;
 }

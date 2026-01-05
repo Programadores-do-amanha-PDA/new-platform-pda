@@ -1,203 +1,329 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { 
-  getAllRolePermissions, 
-  getPermissionsByRole, 
-  insertRolePermission, 
-  deleteRolePermission, 
-  deleteAllPermissionsForRole 
+import { toast } from "sonner";
+
+import {
+    getAllRolePermissions,
+    getPermissionsByRole,
+    insertRolePermission,
+    deleteRolePermission,
+    deleteAllPermissionsForRole,
 } from "@/actions/role-permissions";
-import { Role, RolePermissionT, PermissionT } from "@/types";
+import { Role, RolePermission, Permission } from "@/types";
+import { logger } from "@/lib/logger";
 
-interface PermissionsAdminState {
-  allRolePermissions: RolePermissionT[];
-  rolePermissions: Record<Role, PermissionT[]>;
-  loading: boolean;
-  operationLoading: boolean;
+const log = logger.child({ module: "PermissionsStore" });
+
+interface PermissionsState {
+    readonly allRolePermissions: RolePermission[];
+    readonly rolePermissions: Record<Role, Permission[]>;
+    readonly loading: boolean;
+    readonly operationLoading: boolean;
 }
 
-interface PermissionsAdminActions {
-  // Fetch operations
-  fetchAllRolePermissions: () => Promise<void>;
-  fetchPermissionsForRole: (role: Role) => Promise<void>;
-  fetchPermissionsForAllRoles: () => Promise<void>;
-  
-  // Admin operations
-  addPermissionToRole: (role: Role, permission: string) => Promise<boolean>;
-  removePermissionFromRole: (role: Role, permission: string) => Promise<boolean>;
-  removeAllPermissionsFromRole: (role: Role) => Promise<boolean>;
-  
-  // Utility functions
-  getRolePermissions: (role: Role) => PermissionT[];
-  roleHasPermission: (role: Role, permission: string) => boolean;
-  roleHasAnyPermission: (role: Role, permissions: string[]) => boolean;
-  roleHasAllPermissions: (role: Role, permissions: string[]) => boolean;
-  
-  // State management
-  reset: () => void;
+interface PermissionsActions {
+    fetchAllRolePermissions: () => Promise<boolean>;
+    fetchPermissionsForRole: ({ role }: { role: Role }) => Promise<boolean>;
+    fetchPermissionsForAllRoles: () => Promise<boolean>;
+    addPermissionToRole: ({ role, permission }: { role: Role; permission: string }) => Promise<boolean>;
+    removePermissionFromRole: ({ role, permission }: { role: Role; permission: string }) => Promise<boolean>;
+    removeAllPermissionsFromRole: ({ role }: { role: Role }) => Promise<boolean>;
+    getRolePermissions: ({ role }: { role: Role }) => Permission[];
+    roleHasPermission: ({ role, permission }: { role: Role; permission: string }) => boolean;
+    roleHasAnyPermission: ({ role, permissions }: { role: Role; permissions: readonly string[] }) => boolean;
+    roleHasAllPermissions: ({ role, permissions }: { role: Role; permissions: readonly string[] }) => boolean;
+    reset: () => void;
 }
 
-const initialState: PermissionsAdminState = {
-  allRolePermissions: [],
-  rolePermissions: {} as Record<Role, PermissionT[]>,
-  loading: false,
-  operationLoading: false,
+const initialState: PermissionsState = {
+    allRolePermissions: [],
+    rolePermissions: {} as Record<Role, Permission[]>,
+    loading: false,
+    operationLoading: false,
 };
 
-export const usePermissionsStore = create<PermissionsAdminState & PermissionsAdminActions>()(
-  devtools(
-    (set, get) => ({
-      ...initialState,
+export const usePermissionsStore = create<PermissionsState & PermissionsActions>()(
+    devtools(
+        (set, get) => ({
+            ...initialState,
 
-      fetchAllRolePermissions: async () => {
-        set({ loading: true });
-        try {
-          const allRolePermissions = await getAllRolePermissions();
-          set({ allRolePermissions, loading: false });
-        } catch (error) {
-          console.error("Error fetching all role permissions:", error);
-          set({ allRolePermissions: [], loading: false });
-        }
-      },
+            /**
+             * Fetches all role permissions.
+             * @returns true if successful, false otherwise.
+             */
+            fetchAllRolePermissions: async () => {
+                try {
+                    set({ loading: true });
 
-      fetchPermissionsForRole: async (role) => {
-        set({ loading: true });
-        try {
-          const permissions = await getPermissionsByRole(role);
-          set(state => ({
-            rolePermissions: {
-              ...state.rolePermissions,
-              [role]: permissions
+                    const allRolePermissions = await getAllRolePermissions();
+                    if (!allRolePermissions) throw new Error("no get all role permissions response");
+
+                    set({ allRolePermissions });
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn({ err: error, operation: "fetchAllRolePermissions" }, "Error fetching all role permissions");
+                    }
+                    toast.error("Erro ao buscar permissões dos cargos!");
+                    set({ allRolePermissions: [] });
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
             },
-            loading: false
-          }));
-        } catch (error) {
-          console.error(`Error fetching permissions for role ${role}:`, error);
-          set({ loading: false });
-        }
-      },
 
-      fetchPermissionsForAllRoles: async () => {
-        set({ loading: true });
-        try {
-          const roles: Role[] = ["admin", "employer", "class_manager", "teacher", "student", "alumni"];
-          const rolePermissionsPromises = roles.map(async (role) => {
-            const permissions = await getPermissionsByRole(role);
-            return { role, permissions };
-          });
+            /**
+             * Fetches permissions for a specific role.
+             * @param role Role to fetch permissions for.
+             * @returns true if successful, false otherwise.
+             */
+            fetchPermissionsForRole: async ({ role }) => {
+                try {
+                    if (!role) {
+                        throw new Error("role is required");
+                    }
 
-          const results = await Promise.all(rolePermissionsPromises);
-          const rolePermissions = results.reduce((acc, { role, permissions }) => {
-            acc[role] = permissions;
-            return acc;
-          }, {} as Record<Role, PermissionT[]>);
+                    set({ loading: true });
 
-          set({ rolePermissions, loading: false });
-        } catch (error) {
-          console.error("Error fetching permissions for all roles:", error);
-          set({ loading: false });
-        }
-      },
+                    const permissions = await getPermissionsByRole({ role });
+                    if (!permissions) throw new Error("no get permissions by role response");
 
-      addPermissionToRole: async (role, permission) => {
-        set({ operationLoading: true });
-        try {
-          const result = await insertRolePermission(role, permission);
-          if (result) {
-            // Update local state
-            set(state => ({
-              rolePermissions: {
-                ...state.rolePermissions,
-                [role]: [...(state.rolePermissions[role] || []), permission]
-              },
-              operationLoading: false
-            }));
-            return true;
-          }
-          set({ operationLoading: false });
-          return false;
-        } catch (error) {
-          console.error("Error adding permission to role:", error);
-          set({ operationLoading: false });
-          return false;
-        }
-      },
+                    set((state) => ({
+                        rolePermissions: {
+                            ...state.rolePermissions,
+                            [role]: permissions,
+                        },
+                    }));
 
-      removePermissionFromRole: async (role, permission) => {
-        set({ operationLoading: true });
-        try {
-          const result = await deleteRolePermission(role, permission);
-          if (result) {
-            // Update local state
-            set(state => ({
-              rolePermissions: {
-                ...state.rolePermissions,
-                [role]: (state.rolePermissions[role] || []).filter(p => p !== permission)
-              },
-              operationLoading: false
-            }));
-            return true;
-          }
-          set({ operationLoading: false });
-          return false;
-        } catch (error) {
-          console.error("Error removing permission from role:", error);
-          set({ operationLoading: false });
-          return false;
-        }
-      },
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn(
+                            { err: error, role, operation: "fetchPermissionsForRole" },
+                            "Error fetching permissions for role",
+                        );
+                    }
+                    toast.error(`Erro ao buscar permissões para o role ${role}!`);
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
+            },
 
-      removeAllPermissionsFromRole: async (role) => {
-        set({ operationLoading: true });
-        try {
-          const result = await deleteAllPermissionsForRole(role);
-          if (result) {
-            // Update local state
-            set(state => ({
-              rolePermissions: {
-                ...state.rolePermissions,
-                [role]: []
-              },
-              operationLoading: false
-            }));
-            return true;
-          }
-          set({ operationLoading: false });
-          return false;
-        } catch (error) {
-          console.error("Error removing all permissions from role:", error);
-          set({ operationLoading: false });
-          return false;
-        }
-      },
+            /**
+             * Fetches permissions for all roles.
+             * @returns true if successful, false otherwise.
+             */
+            fetchPermissionsForAllRoles: async () => {
+                try {
+                    set({ loading: true });
 
-      getRolePermissions: (role) => {
-        const { rolePermissions } = get();
-        return rolePermissions[role] || [];
-      },
+                    const roles: Role[] = ["admin", "employer", "class_manager", "teacher", "student", "alumni"];
+                    const rolePermissionsPromises = roles.map(async (role) => {
+                        const permissions = await getPermissionsByRole({ role });
+                        return { role, permissions };
+                    });
 
-      roleHasPermission: (role, permission) => {
-        const { rolePermissions } = get();
-        const permissions = rolePermissions[role] || [];
-        return permissions.includes(permission);
-      },
+                    const results = await Promise.all(rolePermissionsPromises);
+                    const rolePermissions = results.reduce(
+                        (acc, { role, permissions }) => {
+                            acc[role] = permissions || [];
+                            return acc;
+                        },
+                        {} as Record<Role, Permission[]>,
+                    );
 
-      roleHasAnyPermission: (role, permissions) => {
-        const { rolePermissions } = get();
-        const rolePerms = rolePermissions[role] || [];
-        return permissions.some(permission => rolePerms.includes(permission));
-      },
+                    set({ rolePermissions });
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.warn(
+                            { err: error, operation: "fetchPermissionsForAllRoles" },
+                            "Error fetching permissions for all roles",
+                        );
+                    }
+                    toast.error("Erro ao buscar permissões para todos os roles!");
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
+            },
 
-      roleHasAllPermissions: (role, permissions) => {
-        const { rolePermissions } = get();
-        const rolePerms = rolePermissions[role] || [];
-        return permissions.every(permission => rolePerms.includes(permission));
-      },
+            /**
+             * Adds a permission to a role.
+             * @param role Role to add permission to.
+             * @param permission Permission to be added.
+             * @returns true if successful, false otherwise.
+             */
+            addPermissionToRole: async ({ role, permission }) => {
+                try {
+                    if (!role || !permission) {
+                        throw new Error("role and permission are required");
+                    }
 
-      reset: () => {
-        set({ ...initialState });
-      },
-    }),
-    { name: "PermissionsAdminStore" }
-  )
+                    set({ operationLoading: true });
+
+                    const result = await insertRolePermission({ role, permission });
+                    if (!result) throw new Error("no insert role permission response");
+
+                    // Update local state
+                    set((state) => ({
+                        rolePermissions: {
+                            ...state.rolePermissions,
+                            [role]: [...(state.rolePermissions[role] || []), permission],
+                        },
+                    }));
+
+                    toast.success("Permissão adicionada ao cargo com sucesso!");
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, role, permission, operation: "addPermissionToRole" },
+                            "Error adding permission to role",
+                        );
+                    }
+                    toast.error("Erro ao adicionar permissão ao cargo!");
+                    return false;
+                } finally {
+                    set({ operationLoading: false });
+                }
+            },
+
+            /**
+             * Removes a permission from a role.
+             * @param role Role to remove permission from.
+             * @param permission Permission to be removed.
+             * @returns true if successful, false otherwise.
+             */
+            removePermissionFromRole: async ({ role, permission }) => {
+                try {
+                    if (!role || !permission) {
+                        throw new Error("role and permission are required");
+                    }
+
+                    set({ operationLoading: true });
+
+                    const result = await deleteRolePermission({ role, permission });
+                    if (!result) throw new Error("no delete role permission response");
+
+                    // Update local state
+                    set((state) => ({
+                        rolePermissions: {
+                            ...state.rolePermissions,
+                            [role]: (state.rolePermissions[role] || []).filter((p) => p !== permission),
+                        },
+                    }));
+
+                    toast.success("Permissão removida do cargo com sucesso!");
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, role, permission, operation: "removePermissionFromRole" },
+                            "Error removing permission from role",
+                        );
+                    }
+                    toast.error("Erro ao remover permissão do cargo!");
+                    return false;
+                } finally {
+                    set({ operationLoading: false });
+                }
+            },
+
+            /**
+             * Removes all permissions from a role.
+             * @param role Role to remove all permissions from.
+             * @returns true if successful, false otherwise.
+             */
+            removeAllPermissionsFromRole: async ({ role }) => {
+                try {
+                    if (!role) {
+                        throw new Error("role is required");
+                    }
+
+                    set({ operationLoading: true });
+
+                    const result = await deleteAllPermissionsForRole({ role });
+                    if (!result) throw new Error("no delete all permissions for role response");
+
+                    // Update local state
+                    set((state) => ({
+                        rolePermissions: {
+                            ...state.rolePermissions,
+                            [role]: [],
+                        },
+                    }));
+
+                    toast.success("Todas as permissões removidas do cargo com sucesso!");
+                    return true;
+                } catch (error) {
+                    if (error instanceof Error) {
+                        log.error(
+                            { err: error, role, operation: "removeAllPermissionsFromRole" },
+                            "Error removing all permissions from role",
+                        );
+                    }
+                    toast.error("Erro ao remover todas as permissões do cargo!");
+                    return false;
+                } finally {
+                    set({ operationLoading: false });
+                }
+            },
+
+            /**
+             * Gets the permissions for a role.
+             * @param role Role to get permissions for.
+             * @returns Array of role permissions.
+             */
+            getRolePermissions: ({ role }) => {
+                const { rolePermissions } = get();
+                return rolePermissions[role] || [];
+            },
+
+            /**
+             * Checks if a role has a specific permission.
+             * @param role Role to check.
+             * @param permission Permission to check.
+             * @returns true if the role has the permission, false otherwise.
+             */
+            roleHasPermission: ({ role, permission }) => {
+                const { rolePermissions } = get();
+                const permissions = rolePermissions[role] || [];
+                return permissions.includes(permission);
+            },
+
+            /**
+             * Checks if a role has at least one of the specified permissions.
+             * @param role Role to check.
+             * @param permissions Array of permissions to check.
+             * @returns true if the role has at least one permission, false otherwise.
+             */
+            roleHasAnyPermission: ({ role, permissions }) => {
+                const { rolePermissions } = get();
+                const rolePerms = rolePermissions[role] || [];
+                return permissions.some((permission) => rolePerms.includes(permission));
+            },
+
+            /**
+             * Checks if a role has all the specified permissions.
+             * @param role Role to check.
+             * @param permissions Array of permissions to check.
+             * @returns true if the role has all permissions, false otherwise.
+             */
+            roleHasAllPermissions: ({ role, permissions }) => {
+                const { rolePermissions } = get();
+                const rolePerms = rolePermissions[role] || [];
+                return permissions.every((permission) => rolePerms.includes(permission));
+            },
+
+            /**
+             * Resets the store state.
+             */
+            reset: () => {
+                set(initialState);
+            },
+        }),
+        { name: "PermissionsStore" },
+    ),
 );

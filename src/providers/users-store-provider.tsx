@@ -1,15 +1,14 @@
 "use client";
 import { useEffect } from "react";
 
-import { useUsersStore } from "@/stores/modules/users/users-store";
-
 import PageLoader from "@/components/shared/page-loader";
+import { useUsersStore } from "@/features/dashboard/shared/users/store";
+import { Role } from "@/types";
 
-import { RolesT } from "@/types/auth";
 
 interface UsersStoreProviderProps {
   children: React.ReactNode;
-  initialRole?: RolesT;
+  initialRole?: Role;
   loadUsers?: boolean;
 }
 
@@ -18,13 +17,14 @@ export default function UsersStoreProvider({
   initialRole,
   loadUsers = true,
 }: UsersStoreProviderProps) {
-  const { loading, getAllUsersWithProfiles } = useUsersStore();
+  const { loading, fetchAllUsersWithProfiles } = useUsersStore();
 
   useEffect(() => {
     if (loadUsers) {
-      getAllUsersWithProfiles({role: initialRole});
+      fetchAllUsersWithProfiles({role: initialRole});
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialRole]);
 
   if (loading && loadUsers) {
     return <PageLoader />;

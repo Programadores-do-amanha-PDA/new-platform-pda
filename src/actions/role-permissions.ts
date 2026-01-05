@@ -1,99 +1,167 @@
 "use server";
+
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import { RolePermissionT, RolesT } from "@/types";
+import { RolePermission, Role, Permission } from "@/types";
 
-export const getAllRolePermissions = async () => {
-  try {
-    const supabase = await createClient();
+const log = logger.child({ module: "rolePermissions" });
 
-    const { data, error } = await supabase
-      .from("role_permissions")
-      .select("*");
+type GetAllRolePermissionsResult = RolePermission[] | null;
 
-    if (error) throw error;
+type GetPermissionsByRoleProps = { role: Role };
+type GetPermissionsByRoleResult = Permission[] | null;
 
-    return data as RolePermissionT[];
-  } catch (error) {
-    console.error("SELECT -> role_permissions", error);
-    return [];
-  }
+type InsertRolePermissionProps = {
+    readonly role: Role;
+    readonly permission: string;
+};
+type InsertRolePermissionResult = RolePermission | null;
+
+type DeleteRolePermissionProps = {
+    readonly role: Role;
+    readonly permission: string;
+};
+type DeleteRolePermissionResult = boolean;
+
+type DeleteAllPermissionsForRoleResult = boolean;
+
+/**
+ * Fetches all role permissions from the system.
+ * @returns Array of role permissions or null in case of error.
+ */
+export const getAllRolePermissions = async (): Promise<GetAllRolePermissionsResult> => {
+    try {
+        const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
+
+        const { data, error } = await supabase.from("role_permissions").select("*").order("role", { ascending: true });
+
+        if (error) throw error;
+
+        return data as RolePermission[];
+    } catch (error) {
+        if (error instanceof Error) {
+            log.error({ err: error, operation: "getAllRolePermissions" }, "Error on get all role permissions");
+        }
+        return null;
+    }
 };
 
-export const getPermissionsByRole = async (role: RolesT) => {
-  try {
-    const supabase = await createClient();
+/**
+ * Fetches all permissions for a specific role.
+ * @param role Role to fetch permissions for.
+ * @returns Array of permissions or null in case of error.
+ */
+export const getPermissionsByRole = async ({ role }: GetPermissionsByRoleProps): Promise<GetPermissionsByRoleResult> => {
+    try {
+        if (!role) throw new Error("role is required");
 
-    const { data, error } = await supabase
-      .from("role_permissions")
-      .select("permission")
-      .eq("role", role);
+        const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
 
-    if (error) throw error;
+        const { data, error } = await supabase
+            .from("role_permissions")
+            .select("permission")
+            .eq("role", role)
+            .order("permission", { ascending: true });
 
-    return data.map(item => item.permission);
-  } catch (error) {
-    console.error("SELECT -> role_permissions by role", error);
-    return [];
-  }
+        if (error) throw error;
+
+        return data.map((item) => item.permission) as Permission[];
+    } catch (error) {
+        if (error instanceof Error) {
+            log.error({ err: error, role, operation: "getPermissionsByRole" }, "Error on get permissions by role");
+        }
+        return null;
+    }
 };
 
-export const insertRolePermission = async (
-  role: RolesT,
-  permission: string
-) => {
-  try {
-    const supabase = await createClient();
+/**
+ * Inserts a new permission for a specific role.
+ * @param role Role to add the permission to.
+ * @param permission Permission to be added.
+ * @returns Created role permission or null in case of error.
+ */
+export const insertRolePermission = async ({ role, permission }: InsertRolePermissionProps): Promise<InsertRolePermissionResult> => {
+    try {
+        if (!role || !permission) {
+            throw new Error("role and permission are required");
+        }
 
-    const { data, error } = await supabase
-      .from("role_permissions")
-      .insert({ role, permission })
-      .select();
+        const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
 
-    if (error) throw error;
+        const { data, error } = await supabase.from("role_permissions").insert({ role, permission }).select().single();
 
-    return data[0] as RolePermissionT;
-  } catch (error) {
-    console.error("INSERT -> role_permissions", error);
-    return null;
-  }
+        if (error) throw error;
+        if (!data) throw new Error("No data returned from insertRolePermission");
+
+        log.info({ role, permission, operation: "insertRolePermission" }, "Role permission created successfully");
+        return data as RolePermission;
+    } catch (error) {
+        if (error instanceof Error) {
+            log.error({ err: error, role, permission, operation: "insertRolePermission" }, "Error on insert role permission");
+        }
+        return null;
+    }
 };
 
-export const deleteRolePermission = async (
-  role: RolesT,
-  permission: string
-) => {
-  try {
-    const supabase = await createClient();
+/**
+ * Removes a specific permission from a role.
+ * @param role Role to remove the permission from.
+ * @param permission Permission to be removed.
+ * @returns true if removed successfully, false otherwise.
+ */
+export const deleteRolePermission = async ({ role, permission }: DeleteRolePermissionProps): Promise<DeleteRolePermissionResult> => {
+    try {
+        if (!role || !permission) {
+            throw new Error("role and permission are required");
+        }
 
-    const { error } = await supabase
-      .from("role_permissions")
-      .delete()
-      .eq("role", role)
-      .eq("permission", permission);
+        const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
 
-    if (error) throw error;
+        const { error } = await supabase.from("role_permissions").delete().eq("role", role).eq("permission", permission);
 
-    return true;
-  } catch (error) {
-    console.error("DELETE -> role_permissions", error);
-    return false;
-  }
+        if (error) throw error;
+
+        log.info({ role, permission, operation: "deleteRolePermission" }, "Role permission deleted successfully");
+        return true;
+    } catch (error) {
+        if (error instanceof Error) {
+            log.error({ err: error, role, permission, operation: "deleteRolePermission" }, "Error on delete role permission");
+        }
+        return false;
+    }
 };
 
-export const deleteAllPermissionsForRole = async (role: RolesT) => {
-  try {
-    const supabase = await createClient();
+/**
+ * Removes all permissions from a specific role.
+ * @param role Role to remove all permissions from.
+ * @returns true if removed successfully, false otherwise.
+ */
+export const deleteAllPermissionsForRole = async ({ role }: { role: Role }): Promise<DeleteAllPermissionsForRoleResult> => {
+    try {
+        if (!role) {
+            throw new Error("role is required");
+        }
 
-    const { error } = await supabase
-      .from("role_permissions")
-      .delete()
-      .eq("role", role);
+        const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
 
-    if (error) throw error;
+        const { error } = await supabase.from("role_permissions").delete().eq("role", role);
 
-    return true;
-  } catch (error) {
-    console.error("DELETE -> role_permissions for role", error);
-    return false;
-  }
+        if (error) throw error;
+
+        log.info({ role, operation: "deleteAllPermissionsForRole" }, "All permissions for role deleted successfully");
+        return true;
+    } catch (error) {
+        if (error instanceof Error) {
+            log.error(
+                { err: error, role, operation: "deleteAllPermissionsForRole" },
+                "Error on delete all permissions for role",
+            );
+        }
+        return false;
+    }
 };
