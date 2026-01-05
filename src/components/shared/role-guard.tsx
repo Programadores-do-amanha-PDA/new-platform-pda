@@ -1,10 +1,10 @@
 "use client";
 import useAuth from "@/hooks/use-auth";
-import { RolesT } from "@/types";
+import { Role } from "@/types";
 
 interface RoleGuardProps {
-  role?: RolesT;
-  roles?: RolesT[];
+  role?: Role;
+  roles?: Role[];
   fallback?: React.ReactNode;
   children: React.ReactNode;
 }
@@ -22,7 +22,7 @@ export default function RoleGuard({
   if (role) {
     hasAccess = userRole === role;
   } else if (roles) {
-    hasAccess = roles.includes(userRole as RolesT);
+    hasAccess = roles.includes(userRole as Role);
   }
 
   return hasAccess ? <>{children}</> : <>{fallback}</>;

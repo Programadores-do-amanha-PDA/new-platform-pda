@@ -1,11 +1,13 @@
+"use client";
 import Image from "next/image";
-import logo_symbol from "/public/assets/images/empty/no-access.png";
+
+const  NO_ACCESS_IMAGE_PATH = "/assets/images/empty/no-access.png";
 
 const NoAccessPage = () => {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10">
       <Image
-        src={logo_symbol}
+        src={NO_ACCESS_IMAGE_PATH}
         alt="Programadores do Amanhã. Logo"
         width={500}
         height={500}

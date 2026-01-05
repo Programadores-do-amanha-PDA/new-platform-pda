@@ -1,11 +1,9 @@
-"use client";
-
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
-import AuthStoreProvider from "@/providers/shared/auth-store-provider";
 import "@/styles/globals.css";
+import AuthStoreProvider from "@/features/shared/auth/provider";
 
 const IBMPlexSans = IBM_Plex_Sans({
     subsets: ["latin"],
@@ -30,10 +28,10 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="pt-BR" className="w-full h-full flex">
+        <html lang="pt-BR" className="flex w-full h-full">
             <body className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} antialiased`}>
                 <AuthStoreProvider>
-                    <main className="w-full h-full flex overflow-hidden">{children}</main>
+                    <main className="flex w-full h-full overflow-hidden">{children}</main>
                 </AuthStoreProvider>
                 <Toaster closeButton={true} expand richColors visibleToasts={9} />
             </body>

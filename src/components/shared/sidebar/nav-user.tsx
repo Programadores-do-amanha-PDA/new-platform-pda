@@ -20,24 +20,24 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
 
-import { AuthUserWithProfileT } from "@/types/auth";
 
-export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
+export default function NavUser({ user }: { user: AuthUserWithProfile }) {
   const router = useRouter();
   const { handleSignOut } = useAuth();
   const { isMobile } = useSidebar();
 
   return (
-    <SidebarMenu className="w-full h-max flex">
-      <SidebarMenuItem className="w-full h-max flex">
+    <SidebarMenu className="flex w-full h-max">
+      <SidebarMenuItem className="flex w-full h-max">
         <DropdownMenu>
-          <DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground rounded-lg cursor-pointer"
+              className="data-[state=open]:bg-sidebar-accent rounded-lg data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="rounded-lg w-8 h-8">
                 <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
                 <AvatarFallback className="rounded-lg">
                   {user?.profile?.full_name
@@ -48,11 +48,11 @@ export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
                     .toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
+              <div className="flex-1 grid text-sm text-left leading-tight">
+                <span className="font-semibold truncate">
                   {user?.profile?.full_name}
                 </span>
-                <span className="truncate text-xs">{user?.email}</span>
+                <span className="text-xs truncate">{user?.email}</span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -64,8 +64,8 @@ export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-sm text-left">
+                <Avatar className="rounded-lg w-8 h-8">
                   <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
                   <AvatarFallback>
                     {user?.profile?.full_name
@@ -76,11 +76,11 @@ export default function NavUser({ user }: { user: AuthUserWithProfileT }) {
                       .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
+                <div className="flex-1 grid text-sm text-left leading-tight">
+                  <span className="font-semibold truncate">
                     {user?.profile?.full_name}
                   </span>
-                  <span className="truncate text-xs">{user?.email}</span>
+                  <span className="text-xs truncate">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
