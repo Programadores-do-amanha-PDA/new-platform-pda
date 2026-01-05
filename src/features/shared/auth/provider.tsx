@@ -2,11 +2,10 @@
 
 import { useEffect } from "react";
 
-import { useAuthStore } from "@/stores/shared/auth-store";
-
 import { redirect, usePathname } from "next/navigation";
 import PageLoader from "@/components/shared/page-loader";
-import useAuthProcessUrlParams from "@/features/shared/auth/hooks/use-auth-confirmation";
+import { useAuthStore } from "./store";
+import { useAuthProcessUrlParams } from "./hooks";
 
 export default function AuthStoreProvider({ children }: { children: React.ReactNode }) {
     const path = usePathname();

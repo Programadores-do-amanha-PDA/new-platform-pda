@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import useAuth from "@/hooks/use-auth";
 import { getAuthParamsFromUrl, useOtpHandler } from "./process-pkce-flow";
+import { useAuth } from ".";
 
 /**
  * Authentication Confirmation Hook

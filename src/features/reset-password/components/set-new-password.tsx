@@ -15,8 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
 import { logger } from "@/lib/logger";
-import useAuth from "@/hooks/use-auth";
-import { getAuthErrorMessage } from "@/features/shared/auth/utils";
+import useAuth from "@/features/shared/auth";
+import { getAuthErrorMessage } from ""@/features/shared/auth"/utils";
 
 import { SetNewPasswordSchema } from "../types";
 import { setNewPasswordSchema } from "../utils";
@@ -85,11 +85,11 @@ export const SetNewPassword = () => {
     };
 
     return (
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
+        <div className="flex flex-col gap-8 mx-auto w-full max-w-sm">
             <div className="flex flex-col gap-6">
                 <Image width={36} height={36} src={SYMBOL_PATH} alt="PdA" />
                 <div className="flex flex-col gap-3">
-                    <p className="text-4xl font-bold">Redefinir senha</p>
+                    <p className="font-bold text-4xl">Redefinir senha</p>
                     <p className="text-muted-foreground">
                         Digite sua nova senha. Garanta que ela é segura e diferente de senhas anteriores.
                     </p>
@@ -153,15 +153,15 @@ export const SetNewPassword = () => {
                             </Alert>
                         )}
 
-                        <Button type="submit" disabled={isSubmitting} className="w-full font-semibold mt-2" size="lg">
+                        <Button type="submit" disabled={isSubmitting} className="mt-2 w-full font-semibold" size="lg">
                             {isSubmitting ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                                     Redefinindo...
                                 </>
                             ) : (
                                 <>
-                                    <Lock className="mr-2 h-4 w-4" />
+                                    <Lock className="mr-2 w-4 h-4" />
                                     Redefinir senha
                                 </>
                             )}
@@ -169,8 +169,8 @@ export const SetNewPassword = () => {
                     </form>
                 </Form>
                 <Separator />
-                <div className="text-sm text-muted-foreground">
-                    <p className="font-medium text-foreground mb-2">Dicas de segurança:</p>
+                <div className="text-muted-foreground text-sm">
+                    <p className="mb-2 font-medium text-foreground">Dicas de segurança:</p>
                     <ul className="space-y-1 text-xs">
                         <li>• Use uma combinação de letras maiúsculas e minúsculas</li>
                         <li>• Inclua números e caracteres especiais</li>

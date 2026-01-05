@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { useCooldownManager } from "@/hooks/cooldown-manager";
-import useAuth from "@/hooks/use-auth";
+import useAuth from "@/features/shared/auth";
 
 import { RequestResetPasswordByEmailSchema } from "../types";
 import { requestResetPasswordByEmailSchema } from "../utils";
@@ -80,11 +80,11 @@ export const RequestResetPasswordByEmail = () => {
     };
 
     return (
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
-            <div className="w-full flex items-start justify-start">
+        <div className="flex flex-col gap-8 mx-auto w-full max-w-sm">
+            <div className="flex justify-start items-start w-full">
                 <Link
                     href="/sign-in"
-                    className="flex gap-2 items-center cursor-pointer text-muted-foreground font-semibold group"
+                    className="group flex items-center gap-2 font-semibold text-muted-foreground cursor-pointer"
                 >
                     <ArrowLeft className="size-5" />
                     <p className="group-hover:underline">Voltar para login</p>
@@ -93,7 +93,7 @@ export const RequestResetPasswordByEmail = () => {
             <div className="flex flex-col gap-6">
                 <Image width={36} height={36} src={SYMBOL_PATH} alt="PdA" />
                 <div className="flex flex-col gap-3">
-                    <p className="text-4xl font-bold">Redefinir senha</p>
+                    <p className="font-bold text-4xl">Redefinir senha</p>
                     <p className="text-muted-foreground">
                         {isPasswordResetRequested
                             ? "Verifique seu e-mail para redefinir sua senha."
@@ -137,22 +137,22 @@ export const RequestResetPasswordByEmail = () => {
                             <Button
                                 type="submit"
                                 disabled={isRequesting || !canResend}
-                                className="w-full font-semibold mt-2 cursor-pointer"
+                                className="mt-2 w-full font-semibold cursor-pointer"
                                 size="lg"
                             >
                                 {isRequesting ? (
                                     <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                                         Enviando...
                                     </>
                                 ) : !canResend ? (
                                     <>
-                                        <Clock className="mr-2 h-4 w-4" />
+                                        <Clock className="mr-2 w-4 h-4" />
                                         Aguarde {formatTime(cooldown)}
                                     </>
                                 ) : (
                                     <>
-                                        <Mail className="mr-2 h-4 w-4" />
+                                        <Mail className="mr-2 w-4 h-4" />
                                         Enviar solicitação
                                     </>
                                 )}
@@ -160,10 +160,10 @@ export const RequestResetPasswordByEmail = () => {
 
                             {lastSentEmail && cooldown > 0 && !isValueChanged && (
                                 <div className="text-center">
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="text-muted-foreground text-sm">
                                         E-mail enviado para <span className="font-medium text-foreground">{lastSentEmail}</span>
                                     </p>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="mt-1 text-muted-foreground text-xs">
                                         Você pode reenviar em {formatTime(cooldown)}
                                     </p>
                                 </div>
@@ -196,11 +196,11 @@ export const RequestResetPasswordByEmail = () => {
                             onClick={handleResend}
                             disabled={!canResend}
                             variant="link"
-                            className="text-blue-600! cursor-pointer hover:outline disabled:opacity-50"
+                            className="disabled:opacity-50 hover:outline text-blue-600! cursor-pointer"
                         >
                             {!canResend ? (
                                 <>
-                                    <Clock className="mr-2 h-4 w-4" />
+                                    <Clock className="mr-2 w-4 h-4" />
                                     Aguarde {formatTime(cooldown)}
                                 </>
                             ) : (

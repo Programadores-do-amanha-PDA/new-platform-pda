@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-import useAuth from "@/hooks/use-auth";
+import useAuth from "@/features/shared/auth";
 
 import { signInWithEmailAndPassword } from "../actions";
 import { signInSchema } from "../utils/schema";

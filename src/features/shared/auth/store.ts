@@ -7,8 +7,9 @@ import { jwtDecode } from "jwt-decode";
 import { getAuthUser, getSession, getPermissionsByRole } from "@/actions";
 import { logger } from "@/lib/logger";
 
-import { JwtPayloadT, AuthActions, AuthState } from "@/types";
+import { JwtPayloadT } from "@/types";
 import { getProfileById, Profile } from "@/features/dashboard/shared/profile";
+import { AuthState, AuthActions } from "./types";
 
 const log = logger.child({ module: "AuthStore" });
 

@@ -1,4 +1,4 @@
-import { Permission, Role } from ".";
+import { Permission, Role } from "../../../../types/auth";
 import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
 
 export interface AuthState {

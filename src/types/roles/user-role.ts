@@ -12,7 +12,3 @@ export interface UserRoleT {
   role: Role;
   user_id?: string;
 }
-
-export interface JwtPayloadT {
-  user_role: Role | null;
-}

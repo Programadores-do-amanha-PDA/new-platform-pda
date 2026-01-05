@@ -3,11 +3,14 @@
 import { useRouter } from "next/navigation";
 
 import { updateAuthUser, requestPasswordResetByEmail, signOut } from "@/actions";
-import { useAuthStore } from "@/stores/shared/auth-store";
+import { useMemo } from "react";
+import { useAuthStore } from "@/features/shared/auth";
 
 export default function useAuth() {
     const store = useAuthStore();
     const router = useRouter();
+    const { user } = store;
+    const userRole = useMemo(() => user?.profile.user_role?.role, [user]);
 
     const handleSignOut = async () => {
         await signOut();
@@ -17,6 +20,7 @@ export default function useAuth() {
 
     return {
         ...store,
+        userRole,
         handleRequestResetPassword: requestPasswordResetByEmail,
         updateUser: updateAuthUser,
         handleSignOut,
