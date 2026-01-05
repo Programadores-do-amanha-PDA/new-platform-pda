@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getAuthParamsFromUrl, useOtpHandler } from "./process-pkce-flow";
-import { useAuth } from ".";
+
+import { getAuthParamsFromUrl, useAuth, useOtpHandler } from ".";
 
 /**
  * Authentication Confirmation Hook
@@ -43,100 +43,94 @@ import { useAuth } from ".";
  * @see {@link getAuthParamsFromUrl} for URL parameter extraction
  */
 export default function useAuthProcessUrlParams(): void {
-  const router = useRouter();
-  const { updateAuthState } = useAuth();
-  const { processOtpFlow, handleOAuthErrors } = useOtpHandler();
+    const router = useRouter();
+    const { updateAuthState } = useAuth();
+    const { processOtpFlow, handleOAuthErrors } = useOtpHandler();
 
-  useEffect(() => {
-    // Early return during server-side rendering
-    if (typeof window === "undefined") return;
+    useEffect(() => {
+        // Early return during server-side rendering
+        if (typeof window === "undefined") return;
 
-    /**
-     * Processes authentication parameters extracted from URL
-     *
-     * This function orchestrates the authentication flow by:
-     * 1. Extracting parameters from URL
-     * 2. Handling OAuth errors
-     * 3. Processing OTP verification when token_hash is present
-     *
-     * @returns Promise that resolves when authentication processing completes
-     */
-    const processAuthParams = async (): Promise<void> => {
-      const { tokenHash, type, error, errorDescription, expiresAt } =
-        getAuthParamsFromUrl();
+        /**
+         * Processes authentication parameters extracted from URL
+         *
+         * This function orchestrates the authentication flow by:
+         * 1. Extracting parameters from URL
+         * 2. Handling OAuth errors
+         * 3. Processing OTP verification when token_hash is present
+         *
+         * @returns Promise that resolves when authentication processing completes
+         */
+        const processAuthParams = async (): Promise<void> => {
+            const { tokenHash, type, error, errorDescription, expiresAt } = getAuthParamsFromUrl();
 
-      // Exit early if no relevant authentication parameters found
-      if (!tokenHash && !error) return;
+            // Exit early if no relevant authentication parameters found
+            if (!tokenHash && !error) return;
 
-      // Handle OAuth provider errors before attempting authentication
-      const hasOAuthError = handleOAuthErrors(
-        createSearchParamsWithAuthData(error, errorDescription, expiresAt)
-      );
+            // Handle OAuth provider errors before attempting authentication
+            const hasOAuthError = handleOAuthErrors(createSearchParamsWithAuthData(error, errorDescription, expiresAt));
 
-      if (hasOAuthError) return;
+            if (hasOAuthError) return;
 
-      // Process OTP verification flow when token_hash is present
-      if (tokenHash) {
-        await handleOtpAuthentication(tokenHash, type);
-      }
-    };
+            // Process OTP verification flow when token_hash is present
+            if (tokenHash) {
+                await handleOtpAuthentication(tokenHash, type);
+            }
+        };
 
-    /**
-     * Creates URLSearchParams object with authentication error data
-     *
-     * @param error - OAuth error code from provider
-     * @param errorDescription - Human-readable error description
-     * @param expiresAt - Token expiration timestamp
-     * @returns URLSearchParams containing authentication error data
-     */
-    const createSearchParamsWithAuthData = (
-      error: string | null,
-      errorDescription: string | null,
-      expiresAt: string | null
-    ): URLSearchParams => {
-      const params = new URLSearchParams();
+        /**
+         * Creates URLSearchParams object with authentication error data
+         *
+         * @param error - OAuth error code from provider
+         * @param errorDescription - Human-readable error description
+         * @param expiresAt - Token expiration timestamp
+         * @returns URLSearchParams containing authentication error data
+         */
+        const createSearchParamsWithAuthData = (
+            error: string | null,
+            errorDescription: string | null,
+            expiresAt: string | null,
+        ): URLSearchParams => {
+            const params = new URLSearchParams();
 
-      if (error) params.set("error", error);
-      if (errorDescription) params.set("error_description", errorDescription);
-      if (expiresAt) params.set("expires_at", expiresAt);
+            if (error) params.set("error", error);
+            if (errorDescription) params.set("error_description", errorDescription);
+            if (expiresAt) params.set("expires_at", expiresAt);
 
-      return params;
-    };
+            return params;
+        };
 
-    /**
-     * Handles OTP authentication flow with error recovery
-     *
-     * @param tokenHash - Token hash from email/SMS verification
-     * @param type - Type of authentication flow (signup, recovery, etc.)
-     */
-    const handleOtpAuthentication = async (
-      tokenHash: string,
-      type: string | null
-    ): Promise<void> => {
-      await processOtpFlow({
-        tokenHash,
-        type,
-        router,
-        updateAuthState,
-        onError: handleAuthenticationError,
-      });
-    };
+        /**
+         * Handles OTP authentication flow with error recovery
+         *
+         * @param tokenHash - Token hash from email/SMS verification
+         * @param type - Type of authentication flow (signup, recovery, etc.)
+         */
+        const handleOtpAuthentication = async (tokenHash: string, type: string | null): Promise<void> => {
+            await processOtpFlow({
+                tokenHash,
+                type,
+                router,
+                updateAuthState,
+                onError: handleAuthenticationError,
+            });
+        };
 
-    /**
-     * Handles authentication errors with user feedback and recovery
-     *
-     * @param error - Error encountered during authentication
-     */
-    const handleAuthenticationError = (error: Error): void => {
-      console.error("Authentication flow failed:", error);
+        /**
+         * Handles authentication errors with user feedback and recovery
+         *
+         * @param error - Error encountered during authentication
+         */
+        const handleAuthenticationError = (error: Error): void => {
+            console.error("Authentication flow failed:", error);
 
-      // Redirect to login page after brief delay to allow user to read error message
-      setTimeout(() => {
-        router.push("/sign-in");
-      }, 3000);
-    };
+            // Redirect to login page after brief delay to allow user to read error message
+            setTimeout(() => {
+                router.push("/sign-in");
+            }, 3000);
+        };
 
-    processAuthParams();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        processAuthParams();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 }

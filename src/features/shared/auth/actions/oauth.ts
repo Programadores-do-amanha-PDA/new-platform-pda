@@ -1,6 +1,6 @@
-import createClient from "@/lib/supabase/client";
 import { EmailOtpType } from "@supabase/supabase-js";
-import { VerifyOtpResults } from "@/types";
+import createClient from "@/lib/supabase/client";
+import { VerifyOtpResults } from "@/features/shared/auth";
 
 export const verifyOtp = async (
   tokenHash: string,

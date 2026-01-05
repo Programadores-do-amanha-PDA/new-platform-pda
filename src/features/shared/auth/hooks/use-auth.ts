@@ -1,10 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-import { updateAuthUser, requestPasswordResetByEmail, signOut } from "@/actions";
-import { useMemo } from "react";
 import { useAuthStore } from "@/features/shared/auth";
+import { signOut, requestPasswordResetByEmail, updateAuthUser } from "../actions";
 
 export default function useAuth() {
     const store = useAuthStore();

@@ -12,10 +12,10 @@ export enum AuthErrorType {
 }
 
 /**
- * Mapeamento completo de códigos de erro para mensagens em português
+ * Complete mapping of error codes to Portuguese messages
  */
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  // Erros de autenticação e sessão
+  // Authentication and session errors
   invalid_credentials: "Credenciais inválidas. Verifique seu email e senha.",
   session_not_found: "Sessão inválida ou expirada. Por favor, faça login novamente.",
   session_expired: "Sua sessão expirou. Por favor, faça login novamente.",
@@ -23,12 +23,12 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   token_refreshed: "Token inválido. Por favor, faça login novamente.",
   auth_timeout: "Tempo de autenticação expirado. Por favor, tente novamente.",
 
-  // Erros de senha
+  // Password errors
   same_password: "A nova senha deve ser diferente da senha atual.",
   weak_password: "A senha não atende aos requisitos de segurança. Use uma senha mais forte.",
   password_pwned: "Esta senha foi comprometida em violações de dados. Escolha outra senha.",
 
-  // Erros de email
+  // Email errors
   email_exists: "Já existe uma conta com este email.",
   email_not_confirmed: "Seu email não foi confirmado. Verifique sua caixa de entrada.",
   invalid_email: "Formato de email inválido.",
@@ -36,58 +36,58 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   email_address_not_authorized:
     "Este email não está autorizado. Use um email autorizado ou configure um SMTP personalizado.",
 
-  // Erros de telefone
+  // Phone errors
   phone_exists: "Já existe uma conta com este número de telefone.",
   phone_not_confirmed: "Seu número de telefone não foi confirmado.",
 
-  // Erros de token e código
+  // Token and code errors
   otp_expired: "Código de verificação expirado. Solicite um novo código.",
   otp_disabled: "Login com código está desabilitado.",
   token_expired: "Token expirado. Solicite um novo.",
   bad_token: "Token inválido ou corrompido.",
   invalid_totp: "Código de autenticação inválido. Tente novamente.",
 
-  // Erros de provider OAuth
+  // OAuth provider errors
   identity_already_exists: "Esta conta já está vinculada a outro usuário.",
   identity_not_found: "Conta vinculada não encontrada.",
   oauth_provider_not_supported: "Provedor OAuth não suportado ou desabilitado.",
   saml_idp_not_found: "Provedor SAML não encontrado.",
   saml_provider_disabled: "Login com SAML não está habilitado.",
 
-  // Erros de MFA
+  // MFA errors
   mfa_verification_failed: "Código de autenticação incorreto. Tente novamente.",
   mfa_factor_not_found: "Método de autenticação não encontrado.",
   mfa_challenge_expired: "Código MFA expirado. Solicite um novo.",
   insufficient_aal: "Autenticação adicional necessária. Complete a verificação MFA.",
 
-  // Erros de rate limit
+  // Rate limit errors
   over_request_rate_limit: "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.",
   over_email_send_rate_limit: "Muitos emails enviados. Aguarde antes de solicitar outro.",
   over_sms_send_rate_limit: "Muitas mensagens SMS enviadas. Aguarde antes de tentar novamente.",
 
-  // Erros de signup/signin
+  // Signup/signin errors
   user_already_exists: "Usuário já existe. Faça login ou use outro email.",
   user_not_found: "Usuário não encontrado. Verifique suas credenciais.",
   signup_disabled: "Cadastros estão desabilitados no momento.",
   user_banned: "Sua conta está suspensa. Entre em contato com o suporte.",
 
-  // Erros de validação
+  // Validation errors
   validation_failed: "Dados fornecidos são inválidos. Verifique os campos e tente novamente.",
   bad_request: "Requisição inválida. Verifique os dados enviados.",
 
-  // Erros de servidor
+  // Server errors
   unexpected_failure: "Erro inesperado no servidor. Tente novamente mais tarde.",
   service_timeout: "Serviço indisponível no momento. Tente novamente mais tarde.",
   server_error: "Erro interno do servidor. Tente novamente mais tarde.",
 
-  // Erros de captcha
+  // Captcha errors
   captcha_failed: "Verificação do captcha falhou. Tente novamente.",
 
-  // Erros de hook
+  // Hook errors
   hook_timeout: "Serviço temporariamente indisponível. Tente novamente mais tarde.",
   hook_timeout_after_retry: "Serviço indisponível. Tente novamente mais tarde.",
 
-  // Erros gerais
+  // General errors
   conflict: "Conflito de dados. Tente novamente.",
   bad_json: "Formato de dados inválido.",
   no_authorization: "Autorização necessária. Faça login primeiro.",
@@ -159,13 +159,13 @@ export const parseAuthError = (error: unknown): AuthErrorT => {
     const message = error.message.toLowerCase();
     const errorCode = error.message;
 
-    // Tenta mapear pelo código de erro primeiro
+    // Try to map by error code first
     const mappedMessage = getAuthErrorMessage({ errorCode });
     if (mappedMessage.error !== "Ocorreu um erro inesperado. Por favor, tente novamente.") {
       return createAuthError(AuthErrorType.UNKNOWN_ERROR, mappedMessage.error, error);
     }
 
-    // Fallback para detecção de padrões
+    // Fallback to pattern detection
     if (message.includes("invalid login credentials")) {
       return createAuthError(
         AuthErrorType.INVALID_CREDENTIALS,

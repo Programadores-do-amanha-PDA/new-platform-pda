@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import useAuth from "@/hooks/use-auth";
+import { useAuth } from "@/features/shared/auth";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -54,21 +54,21 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
     : breadcrumbItems[breadcrumbItems.length - 1]?.label;
 
   return (
-    <div className="flex flex-col items-start justify-between w-full max-h-28 min-h-[100px] gap-1 sticky top-0 left-0 z-50 border-b overflow-hidden !rounded-t-lg">
-      <div className="flex gap-4 items-center px-4 py-2">
-        <SidebarTrigger className="w-max border size-10 flex items-center justify-center rounded-lg cursor-pointer" />
+    <div className="top-0 left-0 z-50 sticky flex flex-col justify-between items-start gap-1 border-b !rounded-t-lg w-full min-h-[100px] max-h-28 overflow-hidden">
+      <div className="flex items-center gap-4 px-4 py-2">
+        <SidebarTrigger className="flex justify-center items-center border rounded-lg w-max size-10 cursor-pointer" />
 
-        <div className="space-y-2 flex flex-col gap-1 ml-2">
+        <div className="flex flex-col gap-1 space-y-2 ml-2">
           <h1
             className={cn(
-              "scroll-m-20 text-xl md:text-3xl font-bold tracking-tight"
+              "font-bold text-xl md:text-3xl tracking-tight scroll-m-20"
             )}
           >
             {title}
           </h1>
         </div>
       </div>
-      <div className="flex items-center w-full h-12 px-4 py-2 border-t">
+      <div className="flex items-center px-4 py-2 border-t w-full h-12">
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbItems.map((item, index) => (

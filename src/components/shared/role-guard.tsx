@@ -1,5 +1,6 @@
 "use client";
-import useAuth from "@/hooks/use-auth";
+
+import { useAuth } from "@/features/shared/auth";
 import { Role } from "@/types";
 
 interface RoleGuardProps {

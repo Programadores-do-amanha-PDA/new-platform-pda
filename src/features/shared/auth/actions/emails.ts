@@ -1,8 +1,8 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-import { getSupabaseAdminClient, getSupabaseClient } from "@/lib/supabase/client-manager";
-import { REGEX_FOR_EMAIL_VALIDATION } from "@/utils/regex/user-regex-validations";
+import { REGEX_FOR_EMAIL_VALIDATION } from "@/utils/regex";
+import { getSupabaseAdminClient, getSupabaseClient } from "@/lib/supabase";
 
 type SendEmailVerificationToMultipleUsersResultT = {
     success: boolean;
