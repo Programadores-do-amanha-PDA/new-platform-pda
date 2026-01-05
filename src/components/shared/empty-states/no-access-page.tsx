@@ -5,7 +5,7 @@ const  NO_ACCESS_IMAGE_PATH = "/assets/images/empty/no-access.png";
 
 const NoAccessPage = () => {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center gap-6 p-6 md:p-10">
+    <div className="flex flex-col justify-center items-center gap-6 p-6 md:p-10 w-full h-full">
       <Image
         src={NO_ACCESS_IMAGE_PATH}
         alt="Programadores do Amanhã. Logo"
@@ -13,10 +13,8 @@ const NoAccessPage = () => {
         height={500}
         className=""
       />
-      <p className="text-xl font-black text-center">
+      <p className="font-black text-xl text-center">
         A página que você está tentando acessar não está disponível para você.
-        <br /> Se você acredita que isso é um erro, entre em contato com a
-        <mark className="ml-2 bg-primary rounded-lg px-2 py-0.5">@Karlla</mark>
       </p>
     </div>
   );

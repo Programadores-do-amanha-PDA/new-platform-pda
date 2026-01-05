@@ -3,8 +3,10 @@
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
 import { createClient } from "@/lib/supabase/server";
 import { jwtDecode } from "jwt-decode";
-import { 
-    JwtPayloadT,
+
+import { logger } from "@/lib/logger";
+import { JwtPayloadT } from "@/features/shared/auth";
+import {
     GetAllUserRolesResult,
     InsertUserRoleProps,
     InsertUserRoleResult,
@@ -12,9 +14,8 @@ import {
     UpdateUserRoleResult,
     DeleteUserRoleProps,
     DeleteUserRoleResult,
-    GetUserRoleResult
+    GetUserRoleResult,
 } from "@/types";
-import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "user-role.actions" });
 
