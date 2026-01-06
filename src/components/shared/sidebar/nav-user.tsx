@@ -1,6 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { EllipsisVertical, LogOut, User } from "lucide-react";
+import { EllipsisVertical, LogOut, Pencil } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -15,12 +15,15 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
 import { useAuth } from "@/features/shared/auth";
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { Badge } from "@/components/ui/badge";
+import { rolesLabelsOptions } from "@/utils";
 
-export default function NavUser({ user }: { user: AuthUserWithProfile }) {
+const NavUser = () => {
     const router = useRouter();
-    const { handleSignOut } = useAuth();
+    const { handleSignOut, user, userRole } = useAuth();
     const { isMobile } = useSidebar();
+
+    if (!user) return null;
 
     return (
         <SidebarMenu className="flex w-full h-max">
@@ -33,7 +36,7 @@ export default function NavUser({ user }: { user: AuthUserWithProfile }) {
                         >
                             <Avatar className="rounded-lg w-8 h-8">
                                 <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
-                                <AvatarFallback className="rounded-lg">
+                                <AvatarFallback className="bg-zinc-200 rounded-lg font-bold text-foreground">
                                     {user?.profile?.full_name
                                         ?.split(" ")
                                         .slice(0, 3)
@@ -50,45 +53,81 @@ export default function NavUser({ user }: { user: AuthUserWithProfile }) {
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-                        side={isMobile ? "bottom" : "right"}
-                        align="end"
+                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg space-y-3 z-50 p-0! border-2 border-sidebar overflow-hidden"
+                        side={isMobile ? "bottom" : "top"}
+                        align="center"
                         sideOffset={4}
                     >
-                        <DropdownMenuLabel className="p-0 font-normal">
-                            <div className="flex items-center gap-2 px-1 py-1.5 text-sm text-left">
-                                <Avatar className="rounded-lg w-8 h-8">
-                                    <AvatarImage src={user?.profile?.avatar_url || ""} alt="" />
-                                    <AvatarFallback>
-                                        {user?.profile?.full_name
-                                            ?.split(" ")
-                                            .slice(0, 3)
-                                            .map((n) => n[0])
-                                            .join("")
-                                            .toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 grid text-sm text-left leading-tight">
-                                    <span className="font-semibold truncate">{user?.profile?.full_name}</span>
-                                    <span className="text-xs truncate">{user?.email}</span>
+                        <DropdownMenuGroup className="p-0 w-full font-normal">
+                            <div className="flex flex-col items-center gap-2 bg-sidebar rounded-b-lg w-full overflow-hidden">
+                                <figure className="relative flex flex-col bg-primary w-full h-28 overflow-hidden">
+                                    <section className="bottom-0 absolute bg-linear-to-b from-50% from-transparent to-50% to-sidebar px-2 w-full">
+                                        <Avatar className="flex flex-col bg-sidebar p-0! border-4 border-sidebar rounded-full size-16">
+                                            <AvatarImage src={user.profile?.avatar_url || ""} alt="" />
+                                            <AvatarFallback className="bg-zinc-300 font-bold text-foreground">
+                                                {user?.profile?.full_name
+                                                    ?.split(" ")
+                                                    .slice(0, 3)
+                                                    .map((n) => n[0])
+                                                    .join("")
+                                                    .toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                    </section>
+                                </figure>
+                                <div className="flex flex-col bg-red-100 p-2 px-4 pt-0 w-full text-sm text-left leading-tight">
+                                    <span className="w-full font-black text-base truncate">{user?.profile?.full_name}</span>
+                                    <span className="w-full text-xs truncate">{user?.email}</span>
                                 </div>
                             </div>
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem onClick={() => router.push(`/dashboard/profile`)}>
-                                <User />
-                                Perfil
+                        </DropdownMenuGroup>
+                        <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg!">
+                            <DropdownMenuItem className="font-medium" onClick={() => router.push(`/dashboard/profile`)}>
+                                <Pencil className="stroke-foreground" />
+                                Editar perfil
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleSignOut}>
-                            <LogOut />
-                            Desconectar
-                        </DropdownMenuItem>
+                        <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg! overflow-hidden">
+                            <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">Cargo</DropdownMenuLabel>
+                            <DropdownMenuItem className="font-medium">
+                                <Badge variant="outline" className="bg-transparent font-semibold">
+                                    {rolesLabelsOptions.find((role) => role.value === userRole)?.label}
+                                </Badge>
+                            </DropdownMenuItem>
+                            {user.profile.enrollments && user.profile.enrollments.length > 0 && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">
+                                        Inscrições (IDS)
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuItem className="font-medium">
+                                        {user.profile.enrollments.map((enrollment) => (
+                                            <Badge
+                                                key={enrollment.short_id}
+                                                variant="outline"
+                                                className="bg-transparent font-semibold"
+                                            >
+                                                {enrollment.short_id}
+                                            </Badge>
+                                        ))}
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+                        </DropdownMenuGroup>
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem
+                                onClick={handleSignOut}
+                                className="bg-red-50 mx-1 py-2 rounded-lg! overflow-hidden font-medium"
+                            >
+                                <LogOut className="stroke-foreground" />
+                                Sair
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
         </SidebarMenu>
     );
-}
+};
+
+export default NavUser;
