@@ -8,16 +8,14 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2, AlertCircleIcon, Lock } from "lucide-react";
 
+import { logger } from "@/lib/logger";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-import { logger } from "@/lib/logger";
-import useAuth from "@/features/shared/auth";
-import { getAuthErrorMessage } from ""@/features/shared/auth"/utils";
-
+import { useAuth, getAuthErrorMessage } from "@/features/shared/auth";
 import { SetNewPasswordSchema } from "../types";
 import { setNewPasswordSchema } from "../utils";
 

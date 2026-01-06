@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 
 import { logger } from "@/lib/logger";
 import { getPermissionsByRole } from "@/actions";
-import { AuthUserWithProfile, getProfileById, Profile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile, getProfileById, Profile } from "@/features/dashboard/profile";
 import { Permission, Role } from "@/types";
 
 import { getAuthUser, getSession } from ".";

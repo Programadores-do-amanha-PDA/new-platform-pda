@@ -6,7 +6,7 @@
  * maintaining flexibility for role-specific requirements and data structures.
  */
 
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { ClassroomT, Role, SidebarDataT } from "@/types";
 
 import { generateSidebarConfig as generateAdminConfig } from "../roles/admin/sidebar-config";

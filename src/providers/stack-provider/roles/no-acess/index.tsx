@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { SidebarDataT } from "@/types";
 import { rolesLabelsOptions } from "@/utils";
 

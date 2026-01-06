@@ -1,5 +1,5 @@
 import { LucideIcon } from "lucide-react";
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 export interface TeamInfoT {
   name: string;

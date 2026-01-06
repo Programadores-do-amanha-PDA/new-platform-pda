@@ -1,4 +1,4 @@
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { MaskEmailProps } from "./types";
 import pino, { Logger, LoggerOptions } from "pino";
 

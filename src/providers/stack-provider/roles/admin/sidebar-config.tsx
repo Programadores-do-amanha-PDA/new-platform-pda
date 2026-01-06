@@ -1,7 +1,7 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { AuthUserWithProfile } from "@/features/dashboard/shared/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { ClassroomT, SidebarDataT } from "@/types";
 import pathLabels from "@/utils/path-labels";
 

@@ -11,6 +11,7 @@ export type StudentProjectIndicators = {
 };
 
 export type StudentOverview = {
+  shortId: string;
   id: string;
   name: string;
   email: string;
