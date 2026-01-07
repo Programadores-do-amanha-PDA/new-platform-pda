@@ -21,11 +21,11 @@ export default function PermissionGuard({
   let hasAccess = false;
 
   if (permission) {
-    hasAccess = hasPermission(permission);
+    hasAccess = hasPermission({permission});
   } else if (permissions) {
     hasAccess = requireAll 
-      ? hasAllPermissions(permissions)
-      : hasAnyPermission(permissions);
+      ? hasAllPermissions({permissions})
+      : hasAnyPermission({permissions});
   }
 
   return hasAccess ? <>{children}</> : <>{fallback}</>;

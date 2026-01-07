@@ -73,7 +73,7 @@ A comprehensive pagination control component for navigating through date interva
 **Props:**
 
 - `onDateRangeChange: (dateRange: { from: Date; to: Date }) => void` - Callback function when date range changes
-- `modules?: ClassroomConfigModulesT[]` - Array of classroom modules for interval selection
+- `modules?: Modules[]` - Array of classroom modules for interval selection
 - `defaultInterval?: DefaultIntervalTypeT` - Default interval type ("manual" | "modules")
 
 **Usage:**
@@ -140,13 +140,13 @@ Formats a single date using Brazilian Portuguese locale.
 
 Returns the current week's date range (Sunday to Saturday).
 
-#### `getCurrentModuleRange(modules: ClassroomConfigModulesT[]): DateRange`
+#### `getCurrentModuleRange(modules: Modules[]): DateRange`
 
 Returns the current module's date range based on the provided modules array. Falls back to current week if no active module is found.
 
 ### Pagination Control Utilities
 
-#### `getCurrentModule(modules: ClassroomConfigModulesT[]): string`
+#### `getCurrentModule(modules: Modules[]): string`
 
 Finds the currently active module based on today's date. Returns "manual" if no active module is found.
 
@@ -162,7 +162,7 @@ Calculates the next interval based on the current date range, maintaining the sa
 
 Normalizes a date range to ensure proper start of day and end of day times.
 
-#### `getInitialDateRange(defaultInterval: DefaultIntervalTypeT, modules: ClassroomConfigModulesT[]): DateRange`
+#### `getInitialDateRange(defaultInterval: DefaultIntervalTypeT, modules: Modules[]): DateRange`
 
 Gets the initial date range based on the default interval type and available modules.
 

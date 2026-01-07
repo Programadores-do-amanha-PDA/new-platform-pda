@@ -1,4 +1,4 @@
-import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
+import { ClassModules } from "@/features/dashboard/classrooms/room/settings";
 import {
   endOfDay,
   endOfWeek,
@@ -16,7 +16,7 @@ export const getCurrentWeekRange = (): DateRange => {
 };
 
 export const getCurrentModuleRange = (
-  modules: ClassroomConfigModulesT[]
+  modules: ClassModules[]
 ): DateRange => {
   if (!modules.length) return getCurrentWeekRange();
 

@@ -31,7 +31,7 @@ export default function AppSidebar({ ...props }: AppSidebarPropsT) {
         )}
       </SidebarContent>
       <SidebarFooter className="flex pb-0 w-full h-max">
-        <NavUser user={props.data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

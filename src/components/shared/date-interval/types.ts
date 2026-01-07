@@ -1,6 +1,6 @@
 import { DateRange } from "react-day-picker";
 import { Locale } from "date-fns";
-import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
+import { ClassModules } from "@/features/dashboard/classrooms/room/settings";
 
 /**
  * Props interface for the DateIntervalPicker component
@@ -38,7 +38,7 @@ export interface DateIntervalPaginationControlPropsT {
   /** Callback function when date range changes */
   onDateRangeChange: (dateRange: { from: Date; to: Date }) => void;
   /** Array of classroom modules for interval selection */
-  modules?: ClassroomConfigModulesT[];
+  modules?: ClassModules[];
   /** Default interval type to use on initialization */
   defaultInterval?: DefaultIntervalTypeT;
 }
