@@ -1,9 +1,9 @@
-import { MeetingAttendanceT } from "../../classroom-attendance/types";
-import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
+import { ZoomPastMeetingAttendance } from "../../classroom-attendance/types";
+import { ClassTypes } from "../../settings/types";
 
 export interface IGetSatisfactionAccumulatorProps {
-    meetings: MeetingAttendanceT[];
-    classroomClassTypes: ClassroomConfigClassTypesT[];
+    meetings: ZoomPastMeetingAttendance[];
+    classroomClassTypes: ClassTypes[];
 }
 
 export interface IGetSatisfactionAccumulatorResult {
@@ -17,8 +17,8 @@ export interface IGetSatisfactionAccumulatorResult {
 }
 
 export interface IGetSatisfactionByWeeklyMeetingsGroupedByMonthProps {
-    allMeetings: MeetingAttendanceT[];
-    classroomClassTypes: ClassroomConfigClassTypesT[];
+    allMeetings: ZoomPastMeetingAttendance[];
+    classroomClassTypes: ClassTypes[];
 }
 
 export interface IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults {
@@ -27,6 +27,6 @@ export interface IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults {
 }
 
 export interface ISatisfactionByTypesGroupedByMonthType {
-    classType: ClassroomConfigClassTypesT | null | undefined;
+    classType: ClassTypes | null | undefined;
     satisfaction: IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
 }

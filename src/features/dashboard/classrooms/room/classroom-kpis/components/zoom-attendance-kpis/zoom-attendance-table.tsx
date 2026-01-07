@@ -4,51 +4,65 @@ import { useMemo } from "react";
 
 import { logger } from "@/lib/logger";
 
-import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../../classroom-zoom/stores";
-import { useClassroomConfigStore } from "../../../classroom-configs/stores";
+import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../../integrations/zoom/stores";
 
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-import { useZoomSatisfactionColumns } from "./zoom-satisfaction-columns";
-import { MeetingAttendanceT, PastInstancieAttendanceT } from "../../../classroom-attendance/types";
-import { ISatisfactionByTypesGroupedByMonthType } from "../../types";
-import { getSatisfactionByWeeklyMeetingsGroupedByMonth } from "../../utils/kpis-zoom-satisfaction.utils";
+import { useZoomAttendanceColumns } from "./zoom-attendance-columns";
+import { ZoomPastMeetingAttendance, ZoomMeetingPastInstanceAttendance } from "../../../classroom-attendance/types";
+import { AttendancesByTypesGroupedByMonthTypes } from "../../types";
+import { getAttendanceByWeeklyMeetingsGroupedByMonth } from "../../utils";
+import { useClassroomSettingStore } from "../../../settings";
+import { filterMetricClassroomStudents } from "@/features/dashboard/classrooms/shared/utils";
+import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
 
 const log = logger.child({ module: "ZoomAttendanceTable" });
 
-export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string }) => {
+export const KPIsZoomAttendanceTable = ({ classroomId }: { classroomId: string }) => {
     const { meetings } = useZoomMeetingStore();
     const { pastInstances } = useZoomMeetingPastInstanceStore();
-    const { configsByClassroom } = useClassroomConfigStore();
+    const { enrollments } = useEnrollmentsStore();
+    const { settingsByClassroom } = useClassroomSettingStore();
 
+    const classroomUsers = useMemo(
+        () => enrollments.get(classroomId) || [],
+        [enrollments, classroomId],
+    );
+
+    const userModes = useMemo(() => settingsByClassroom[classroomId]?.user_modes || [], [classroomId, settingsByClassroom]);
     const classroomClassTypes = useMemo(
-        () => configsByClassroom[classroomId]?.class_types || [],
-        [configsByClassroom, classroomId],
+        () => settingsByClassroom[classroomId]?.class_types || [],
+        [settingsByClassroom, classroomId],
+    );
+
+    const allAggregateInMetricUsers = useMemo(
+        () => filterMetricClassroomStudents(classroomUsers, classroomId, userModes, "attendance"),
+        [classroomUsers, classroomId, userModes],
     );
 
     const allPastsMeetings = useMemo(() => {
         const now = new Date().getTime();
 
         // Get past instances directly from the store and add meeting info
-        const pastsIntancies: PastInstancieAttendanceT[] = pastInstances
+        const pastsIntancies: ZoomMeetingPastInstanceAttendance[] = pastInstances
             ?.map(
                 (pastInstance) =>
                     ({
                         ...pastInstance,
                         meeting_type: "pastInstance",
-                    }) as PastInstancieAttendanceT,
+                    }) as ZoomMeetingPastInstanceAttendance,
             )
             .sort((a, b) => new Date(b.start_time || 0).getTime() - new Date(a.start_time || 0).getTime());
 
-        const pastMeetings: MeetingAttendanceT[] = meetings
+        const pastMeetings: ZoomPastMeetingAttendance[] = meetings
             .filter((meeting) => meeting.type !== 8 && new Date(meeting.start_time || 0).getTime() < now)
             .flatMap((meeting) => ({ ...meeting, meeting_type: "meeting" }));
 
         return [...pastsIntancies, ...pastMeetings]
             .sort((a, b) => new Date(b.start_time || 0).getTime() - new Date(a.start_time || 0).getTime())
-            .filter((m) => m.is_visible_on_schedule === true) as MeetingAttendanceT[];
+            .filter((m) => m.is_visible_on_schedule === true) as ZoomPastMeetingAttendance[];
     }, [meetings, pastInstances]);
 
     const meetingsByType = useMemo(() => {
@@ -62,11 +76,11 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
                 acc[meetingClassType].push(meeting);
                 return acc;
             },
-            {} as Record<string, MeetingAttendanceT[]>,
+            {} as Record<string, ZoomPastMeetingAttendance[]>,
         );
     }, [allPastsMeetings]);
 
-    const satisfactionByTypesGroupedByMonth = useMemo((): ISatisfactionByTypesGroupedByMonthType[] => {
+    const attendancesByTypesGroupedByMonth = useMemo((): AttendancesByTypesGroupedByMonthTypes[] => {
         const allMeetings = Object.entries(meetingsByType).filter(([key, value]) => {
             try {
                 const allClassTypesId = classroomClassTypes.flatMap((classType) => classType.id);
@@ -74,42 +88,43 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
 
                 return value.length > 0 || allClassTypesId.includes(key);
             } catch (error) {
-                log.debug({ err: error }, "Error in satisfaction allMeetings:");
+                log.error({ err: error }, "Error in attendances:");
                 return [];
             }
         });
 
-        if (!allMeetings.length) return [] as ISatisfactionByTypesGroupedByMonthType[];
+        if (!allMeetings.length) return [] as AttendancesByTypesGroupedByMonthTypes[];
 
-        const result: ISatisfactionByTypesGroupedByMonthType[] = allMeetings.map(([key, value]) => {
+        const result: AttendancesByTypesGroupedByMonthTypes[] = allMeetings.map(([key, value]) => {
             try {
                 if (!value.length || !key) throw new Error("no meetings found");
 
                 const currentClassType = classroomClassTypes.find((classType) => classType.id === key);
                 if (!currentClassType) throw new Error("no current classType");
 
-                const satisfactionByWeeklyMeetingsGroupedByMonth = getSatisfactionByWeeklyMeetingsGroupedByMonth({
+                const attendanceByWeeklyMeetingsGroupedByMonth = getAttendanceByWeeklyMeetingsGroupedByMonth({
                     allMeetings: value,
+                    allAggregateInMetricUsers,
                     classroomClassTypes,
                 });
-                if (!satisfactionByWeeklyMeetingsGroupedByMonth.length) throw new Error("no weekly meetings found");
+                if (!attendanceByWeeklyMeetingsGroupedByMonth.length) throw new Error("no weekly meetings found");
 
-                return { classType: currentClassType, satisfaction: satisfactionByWeeklyMeetingsGroupedByMonth };
+                return { classType: currentClassType, attendances: attendanceByWeeklyMeetingsGroupedByMonth };
             } catch (error) {
-                log.error({ err: error }, "Error on satisfactionByTypesGroupedByMonth");
-                return {} as ISatisfactionByTypesGroupedByMonthType;
+                log.error({ err: error }, "Error on attendances");
+                return {} as AttendancesByTypesGroupedByMonthTypes;
             }
         });
 
-        if (!result.length || !result) return [] as ISatisfactionByTypesGroupedByMonthType[];
+        if (!result.length || !result) return [] as AttendancesByTypesGroupedByMonthTypes[];
 
-        return result.filter((item) => item !== null || item !== undefined) || ([] as ISatisfactionByTypesGroupedByMonthType[]);
-    }, [meetingsByType, classroomClassTypes]);
+        return result.filter((item) => item !== null || item !== undefined) || ([] as AttendancesByTypesGroupedByMonthTypes[]);
+    }, [meetingsByType, allAggregateInMetricUsers, classroomClassTypes]);
 
-    const columns = useZoomSatisfactionColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
+    const columns = useZoomAttendanceColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
 
     const table = useReactTable({
-        data: satisfactionByTypesGroupedByMonth,
+        data: attendancesByTypesGroupedByMonth,
         columns,
         getCoreRowModel: getCoreRowModel(),
     });

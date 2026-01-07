@@ -2,7 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import { Enrollment } from "@/types";
+import { Enrollment } from "@/features/dashboard/shared/enrollments";
 
 const log = logger.child({ module: "enrollments." });
 

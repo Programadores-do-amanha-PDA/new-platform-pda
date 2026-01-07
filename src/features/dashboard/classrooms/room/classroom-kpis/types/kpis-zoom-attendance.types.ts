@@ -1,6 +1,6 @@
-import { AuthUserWithProfileT } from "@/types";
-import { MeetingAttendanceT } from "../../classroom-attendance/types";
-import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { ZoomPastMeetingAttendance } from "../../classroom-attendance/types";
+import { ClassTypes } from "../../settings/types";
 
 export type AttendanceAccumulatorT = {
     totalPresencePercentage: number;
@@ -8,22 +8,22 @@ export type AttendanceAccumulatorT = {
 };
 
 export interface GetMeetingsByTypeColumnsP {
-    meetingsByType: Record<string, MeetingAttendanceT[]>;
-    meetingsTypes:  ClassroomConfigClassTypesT[];
+    meetingsByType: Record<string, ZoomPastMeetingAttendance[]>;
+    meetingsTypes:  ClassTypes[];
 }
 
-export type meetingsByClassTypeT = Record<string, MeetingAttendanceT>;
+export type meetingsByClassTypeT = Record<string, ZoomPastMeetingAttendance>;
 
 export interface GetAttendanceAccumulatorProps {
-    meetings: MeetingAttendanceT[];
-    allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-    classroomClassTypes: ClassroomConfigClassTypesT[];
+    meetings: ZoomPastMeetingAttendance[];
+    allAggregateInMetricUsers: Partial<AuthUserWithProfile>[];
+    classroomClassTypes: ClassTypes[];
 }
 
 export interface GetAttendanceByWeeklyMeetingsGroupedByMonthProps {
-    allMeetings: MeetingAttendanceT[];
-    allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-    classroomClassTypes: ClassroomConfigClassTypesT[];
+    allMeetings: ZoomPastMeetingAttendance[];
+    allAggregateInMetricUsers: Partial<AuthUserWithProfile>[];
+    classroomClassTypes: ClassTypes[];
 }
 
 export interface GetAttendanceByWeeklyMeetingsGroupedByMonthResults {
@@ -32,12 +32,12 @@ export interface GetAttendanceByWeeklyMeetingsGroupedByMonthResults {
 }
 
 export interface AttendancesByTypesGroupedByMonthTypes {
-    classType: ClassroomConfigClassTypesT | null | undefined;
+    classType: ClassTypes | null | undefined;
     attendances: GetAttendanceByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
 }
 
 export interface GetMonthsAndWeeksInMonthByMeetingsProps {
-    meetings: MeetingAttendanceT[];
+    meetings: ZoomPastMeetingAttendance[];
 }
 
 export interface GetMonthsAndWeeksInMonthByMeetingsResult {
