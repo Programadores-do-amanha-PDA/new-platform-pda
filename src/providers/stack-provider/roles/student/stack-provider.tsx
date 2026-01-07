@@ -2,11 +2,11 @@
 
 import { useUsersStore } from "@/features/dashboard/shared/users";
 import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
-import { useZoomMeetingStore } from "@/features/dashboard/classrooms/room/integrations/zoom/stores";
-import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/room/integrations/coodesh/stores/assessments";
+import { useZoomMeetingStore } from "@/features/dashboard/classrooms/classroom/integrations/zoom/stores";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/classroom/integrations/coodesh/stores/assessments";
 import { BaseStackProvider } from "../../shared/base-stack-provider";
-import { useClassroomProjectStore } from "@/features/dashboard/classrooms/room/projects/stores";
-import { useClassroomStore } from "@/features/dashboard/classrooms/classrooms-homepage/store";
+import { useClassroomProjectStore } from "@/features/dashboard/classrooms/classroom/projects/stores";
+import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
 
 interface StudentStackProviderProps {
     children: React.ReactNode;

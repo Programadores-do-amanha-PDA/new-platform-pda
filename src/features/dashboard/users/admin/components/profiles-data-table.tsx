@@ -25,7 +25,7 @@ import BulkUsersCredentialsButton from "../../components/bulk-users-credentials-
 import { AuthUserWithProfile, Profile } from "@/features/dashboard/profile";
 import { Role } from "@/types";
 import { useUsersStore } from "@/features/dashboard/shared/users";
-import { useClassroomStore } from "@/features/dashboard/classrooms/classrooms-homepage/store";
+import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
 
 type ProfilesDataTableProps = {
     excludeRoles?: Role[];

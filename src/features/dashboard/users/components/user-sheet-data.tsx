@@ -27,7 +27,7 @@ import BadgeSelector from "@/components/shared/badge-selector";
 import { generateRandomPassword } from "@/utils/password-generator";
 import { userFormSchema, newUserFormSchema, UserFormData, NewUserFormData } from "../schemas/user-form-schema";
 import { cn } from "@/lib/utils";
-import { useClassroomStore } from "../../classrooms/classrooms-homepage/store";
+import { useClassroomStore } from "../../classrooms/home-page/store";
 import { Enrollment, useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { Role } from "@/types";

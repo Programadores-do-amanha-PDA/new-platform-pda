@@ -1,6 +1,6 @@
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/providers/stack-provider/roles/admin/sidebar-config";
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
-import { UserMode, UserModeFeatureRule } from "../../room/settings";
+import { UserMode, UserModeFeatureRule } from "../../classroom/settings";
 
 
 /**

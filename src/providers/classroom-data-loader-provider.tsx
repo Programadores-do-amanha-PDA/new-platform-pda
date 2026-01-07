@@ -4,19 +4,19 @@ import { createContext, useContext, useEffect, ReactNode } from "react";
 
 import { useAuth } from "@/features/shared/auth";
 import PageLoader from "@/components/shared/page-loader";
-import { useActivityStore } from "@/features/dashboard/classrooms/room/activities";
+import { useActivityStore } from "@/features/dashboard/classrooms/classroom/activities";
 import {
     useZoomAccountStore,
     useZoomMeetingStore,
     useZoomMeetingPastInstanceStore,
-} from "@/features/dashboard/classrooms/room/integrations/zoom/stores";
-import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/room/integrations/coodesh/stores/assessments";
-import { useClassroomSettingStore } from "@/features/dashboard/classrooms/room/settings";
-import { useClassroomProjectStore } from "@/features/dashboard/classrooms/room/projects/stores";
-import { useClassroomProjectCorrectionsStore } from "@/features/dashboard/classrooms/room/projects/stores/corrections";
-import { useClassroomProjectDeliveriesStore } from "@/features/dashboard/classrooms/room/projects/stores/deliveries";
+} from "@/features/dashboard/classrooms/classroom/integrations/zoom/stores";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/classroom/integrations/coodesh/stores/assessments";
+import { useClassroomSettingStore } from "@/features/dashboard/classrooms/classroom/settings";
+import { useClassroomProjectStore } from "@/features/dashboard/classrooms/classroom/projects/stores";
+import { useClassroomProjectCorrectionsStore } from "@/features/dashboard/classrooms/classroom/projects/stores/corrections";
+import { useClassroomProjectDeliveriesStore } from "@/features/dashboard/classrooms/classroom/projects/stores/deliveries";
 import { useParams } from "next/navigation";
-import { useClassroomStore } from "@/features/dashboard/classrooms/classrooms-homepage/store";
+import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
 
 interface ClassroomDataLoaderContextType {
     isLoading: boolean;

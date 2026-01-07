@@ -1,7 +1,7 @@
 "use client";
 
 import ProfilesDataTable from "./admin/components/profiles-data-table";
-import { useClassroomStore } from "../classrooms/classrooms-homepage/store";
+import { useClassroomStore } from "../classrooms/home-page/store";
 import { useUsersStore } from "@/features/dashboard/shared/users";
 import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
 

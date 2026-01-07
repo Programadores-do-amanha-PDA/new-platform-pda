@@ -1,4 +1,4 @@
-import { ClassModules } from "@/features/dashboard/classrooms/room/settings";
+import { ClassModules } from "@/features/dashboard/classrooms/classroom/settings";
 import {
   endOfDay,
   endOfWeek,

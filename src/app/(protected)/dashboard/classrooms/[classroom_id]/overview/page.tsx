@@ -1,1 +1,1 @@
-export { default } from "@/features/dashboard/classrooms/room/classroom-overview/page";
+export { default } from "@/features/dashboard/classrooms/classroom/overview/page";

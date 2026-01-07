@@ -1,1 +1,1 @@
-export {default} from "@/features/dashboard/classrooms/room/integrations/coodesh/pages/assessments-page"
+export {default} from "@/features/dashboard/classrooms/classroom/integrations/coodesh/pages/assessments-page"

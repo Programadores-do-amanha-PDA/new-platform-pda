@@ -9,7 +9,7 @@ import {
   isWithinInterval,
 } from "date-fns";
 import { getCurrentWeekRange } from "./intervals";
-import { ClassModules } from "@/features/dashboard/classrooms/room/settings";
+import { ClassModules } from "@/features/dashboard/classrooms/classroom/settings";
 
 /**
  * Gets the current module based on today's date
