@@ -1,5 +1,5 @@
-import { AuthUserWithProfileT } from "@/types";
-import { Activity } from "../types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { ClassActivity } from "../types";
 
 /**
  * Calculates the percentage of students who participated in an activity
@@ -8,8 +8,8 @@ import { Activity } from "../types";
  * @returns Percentage of students who participated (0-100)
  */
 export function calculateActivityDelivery(
-  activity: Activity,
-  students: Partial<AuthUserWithProfileT>[]
+  activity: ClassActivity,
+  students: Partial<AuthUserWithProfile>[]
 ): number {
   if (!students || students.length === 0) {
     return 0;

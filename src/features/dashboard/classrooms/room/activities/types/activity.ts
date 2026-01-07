@@ -10,7 +10,7 @@ export interface ActivityJustification {
   message: string;
 }
 
-export interface Activity {
+export interface ClassActivity {
   id: string;
   classroom_id: string;
   class_type?: ActivityClassTypes;

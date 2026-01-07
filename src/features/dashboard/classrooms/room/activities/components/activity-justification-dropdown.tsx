@@ -15,13 +15,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { useActivityStore } from "../store";
-import { Activity } from "../types";
+import { ClassActivity } from "../types";
 
 export function ActivityJustificationDropdown({
     currentActivity,
     currentUserEmail,
 }: {
-    currentActivity: Activity;
+    currentActivity: ClassActivity;
     currentUserEmail: string;
 }) {
     const [justification, setJustification] = useState<string>("");

@@ -2,9 +2,9 @@
 
 import { useParams } from "next/navigation";
 
-import { useUsersStore } from "@/stores/modules/users/users-store";
+import { useUsersStore } from "@/features/dashboard/shared/users/store";
 
-import { useSettingStore } from "../settings";
+import { useClassroomSettingStore } from "../settings";
 import { filterVisibilityClassroomStudents, filterMetricClassroomStudents } from "../../shared/utils";
 
 import { useActivityStore } from "./store";
@@ -14,7 +14,7 @@ export default function ClassroomActivitiesPage() {
     const { classroom_id } = useParams<{ classroom_id: string }>();
 
     const { users } = useUsersStore();
-    const { settingsByClassroom } = useSettingStore();
+    const { settingsByClassroom } = useClassroomSettingStore();
     const { activities } = useActivityStore();
     const currentClassroomConfig = settingsByClassroom[classroom_id];
     const classroomConfigUserModes = currentClassroomConfig?.user_modes || [];

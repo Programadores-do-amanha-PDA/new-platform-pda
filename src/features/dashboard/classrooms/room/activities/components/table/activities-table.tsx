@@ -19,12 +19,12 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
 
-import { useSettingStore } from "../../../settings";
+import { useClassroomSettingStore } from "../../../settings";
 import { useActivityStore } from "../../store";
 import { useActivityColumns } from "../../hooks";
 import { ActivitiesTablePropsT } from "../../types";
 
-import { usersColumns } from "./";
+import { usersColumns } from ".";
 import InsertManyActivitiesDialog from "../insert-many-activities-dialog";
 
 export default function ActivitiesTable({
@@ -38,7 +38,7 @@ export default function ActivitiesTable({
     const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
     const { updateActivityById, deleteActivityById } = useActivityStore();
-    const { settingsByClassroom } = useSettingStore();
+    const { settingsByClassroom } = useClassroomSettingStore();
 
     const currentConfig = settingsByClassroom[classroomId];
     const classroomModules = currentConfig?.modules || [];
@@ -114,14 +114,14 @@ export default function ActivitiesTable({
                 <Table className="w-max">
                     <TableHeader className="top-0 right-0 left-0 z-20 sticky bg-sidebar border-0! overflow-hidden">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="!p-0 border-0! max-w-[155px]! h-max">
+                            <TableRow key={headerGroup.id} className="p-0! border-0! max-w-[155px]! h-max">
                                 {headerGroup.headers.map((header) => {
                                     const isUserColumn = header.id === "profile";
                                     return (
                                         <TableHead
                                             key={header.id}
                                             className={cn(
-                                                "!m-0 !p-0 !border-0 w-full h-max",
+                                                "m-0! p-0! border-0! w-full h-max",
                                                 isUserColumn && "sticky left-0 bg-sidebar z-10",
                                             )}
                                         >

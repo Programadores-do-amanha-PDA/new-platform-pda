@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 
-import { emailRegex } from "@/utils/regex/users";
+import { REGEX_FOR_EMAIL_VALIDATION } from "@/utils/regex/user-regex-validations";
 
 import ActivityTypeSelector from "./activity-type-selector";
 import { useActivityStore } from "../store";
@@ -53,7 +53,7 @@ const InsertManyActivitiesDialog = ({ classroomId }: InsertManyActivitiesDialogP
     const { createMultipleActivities } = useActivityStore();
 
     const isValidEmail = (email: string): boolean => {
-        return !!email && emailRegex.test(email.trim());
+        return !!email && REGEX_FOR_EMAIL_VALIDATION.test(email.trim());
     };
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -198,7 +198,7 @@ const InsertManyActivitiesDialog = ({ classroomId }: InsertManyActivitiesDialogP
                     </div>
                 ) : (
                     <>
-                        {/* Activity Configuration */}
+                        {/* ClassActivity Configuration */}
                         <div className="gap-5 grid grid-cols-1 md:grid-cols-3 bg-muted/50 mb-4 p-4 rounded-lg">
                             <div className="space-y-2">
                                 <Label htmlFor="activity-type" className="font-medium text-sm">

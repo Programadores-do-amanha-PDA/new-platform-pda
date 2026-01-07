@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
-import { Activity } from "./types";
+import { ClassActivity } from "./types";
 import { logger } from "@/lib/logger";
 import {
     GetAllActivitiesByClassroomIdProps,
@@ -16,7 +16,7 @@ import {
     CreateMultipleActivitiesResult,
     DeleteActivityByIdProps,
     DeleteActivityByIdResult,
-} from "./types/activities-actions.types";
+} from "./types/activities-actions";
 
 const log = logger.child({ module: "classroom.activity-actions" });
 
@@ -37,7 +37,7 @@ export const getAllActivitiesByClassroomId = async ({
 
         if (error) throw error;
 
-        return data as Activity[];
+        return data as ClassActivity[];
     } catch (error) {
         log.error(
             { err: error, classroomId, operation: "getAllActivitiesByClassroomId" },
@@ -58,7 +58,7 @@ export const getActivityById = async ({ id }: GetActivityByIdProps): Promise<Get
 
         if (error) throw error;
 
-        return data as Activity;
+        return data as ClassActivity;
     } catch (error) {
         log.error({ err: error, id, operation: "getActivityById" }, "Failed to fetch activity by ID");
         return null;
@@ -77,8 +77,8 @@ export const createActivity = async ({ activityData }: CreateActivityProps): Pro
 
         if (error) throw error;
 
-        log.info({ activityId: data.id, classroomId: activityData.classroom_id }, "Activity created successfully");
-        return data as Activity;
+        log.info({ activityId: data.id, classroomId: activityData.classroom_id }, "ClassActivity created successfully");
+        return data as ClassActivity;
     } catch (error) {
         log.error({ err: error, operation: "createActivity" }, "Failed to create activity");
         return null;
@@ -102,8 +102,8 @@ export const updateActivityById = async ({ id, updates }: UpdateActivityByIdProp
 
         if (error) throw error;
 
-        log.info({ activityId: id }, "Activity updated successfully");
-        return data as Activity;
+        log.info({ activityId: id }, "ClassActivity updated successfully");
+        return data as ClassActivity;
     } catch (error) {
         log.error({ err: error, activityId: id, operation: "updateActivityById" }, "Failed to update activity");
         return null;
@@ -131,7 +131,7 @@ export const createMultipleActivities = async ({
         if (error) throw error;
 
         log.info({ activitiesCount: data.length }, "Multiple activities created successfully");
-        return data as Activity[];
+        return data as ClassActivity[];
     } catch (error) {
         log.error({ err: error, operation: "createMultipleActivities" }, "Failed to create multiple activities");
         return null;
@@ -149,7 +149,7 @@ export const deleteActivityById = async ({ id }: DeleteActivityByIdProps): Promi
 
         if (error) throw error;
 
-        log.info({ id }, "Activity deleted successfully");
+        log.info({ id }, "ClassActivity deleted successfully");
         return true;
     } catch (error) {
         log.error({ err: error, id, operation: "deleteActivityById" }, "Failed to delete activity");

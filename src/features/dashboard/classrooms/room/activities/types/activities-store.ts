@@ -1,13 +1,8 @@
-import { Activity } from ".";
+import { ClassActivity } from ".";
 
 export interface ActivityStoreState {
-    activities: Activity[];
-    isFetchActivitiesLoading: boolean;
-    isGetActivityByIdLoading: boolean;
-    isCreateActivityLoading: boolean;
-    isCreateMultipleActivitiesLoading: boolean;
-    isUpdateActivityLoading: boolean;
-    isDeleteActivityLoading: boolean;
+    activities: ClassActivity[];
+    loading: boolean;
 }
 
 export interface ActivityActions {
@@ -21,7 +16,7 @@ export interface ActivityActions {
     reset: () => void;
 }
 
-type SetActivitiesProps = { activities: Activity[] };
+type SetActivitiesProps = { activities: ClassActivity[] };
 
 type FetchAllActivitiesByClassroomProps = {
     classroomId: string;
@@ -31,18 +26,18 @@ type GetActivityByIdProps = {
     id: string;
 };
 type GetActivityByIdResult = {
-    activity: Activity | null;
+    activity: ClassActivity | null;
 };
 
-type CreateActivityProps = { activityData: Partial<Omit<Activity, "id" | "created_at">> };
+type CreateActivityProps = { activityData: Partial<Omit<ClassActivity, "id" | "created_at">> };
 
 type CreateMultipleActivitiesProps = {
-    activitiesData: Partial<Omit<Activity, "id" | "created_at">>[];
+    activitiesData: Partial<Omit<ClassActivity, "id" | "created_at">>[];
 };
 
 type UpdateActivityProps = {
     id: string;
-    updates: Partial<Omit<Activity, "id" | "created_at">>;
+    updates: Partial<Omit<ClassActivity, "id" | "created_at">>;
 };
 
 type DeleteActivityByIdProps = {

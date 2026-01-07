@@ -17,12 +17,7 @@ const log = logger.child({ module: "classroom.activities-store" });
 
 const initialState: ActivityStoreState = {
     activities: [],
-    isFetchActivitiesLoading: false,
-    isGetActivityByIdLoading: false,
-    isCreateActivityLoading: false,
-    isCreateMultipleActivitiesLoading: false,
-    isUpdateActivityLoading: false,
-    isDeleteActivityLoading: false,
+    loading: false,
 };
 
 export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
@@ -34,7 +29,7 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
 
             fetchAllActivitiesByClassroom: async ({ classroomId }) => {
                 try {
-                    set({ isFetchActivitiesLoading: true });
+                    set({ loading: true });
 
                     const allActivitiesByClassroom = await getAllActivitiesByClassroomId({ classroomId });
                     if (!allActivitiesByClassroom) throw new Error("no classroom activities");
@@ -51,14 +46,14 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
 
                     return false;
                 } finally {
-                    set({ isFetchActivitiesLoading: false });
+                    set({ loading: false });
                 }
             },
 
             getActivityById: async ({ id }) => {
                 try {
                     if (!id) throw new Error("Required ID field is missing");
-                    set({ isGetActivityByIdLoading: true });
+                    set({ loading: true });
 
                     const activityById = await getActivityById({ id });
                     if (!activityById) throw new Error("no activity by ID");
@@ -73,7 +68,7 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     }
                     return null;
                 } finally {
-                    set({ isGetActivityByIdLoading: false });
+                    set({ loading: false });
                 }
             },
 
@@ -83,8 +78,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         toast.error("o ID da turma é obrigatório!");
                         throw new Error("Missing required field: classroom_id");
                     }
-
-                    set({ isCreateActivityLoading: true });
 
                     const newActivity = await createActivity({ activityData });
                     if (!newActivity) throw new Error("no activity create response");
@@ -106,8 +99,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
 
                     toast.error("Erro ao criar nova atividade. Tente novamente mais tarde!");
                     return false;
-                } finally {
-                    set({ isCreateActivityLoading: false });
                 }
             },
 
@@ -126,8 +117,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                             throw new Error("The required classroom ID field is missing in one or more activities.");
                         }
                     }
-
-                    set({ isCreateMultipleActivitiesLoading: true });
 
                     loadingToastId = toast.loading(`Criando ${activitiesData.length} atividades...`);
 
@@ -156,7 +145,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     toast.error("Erro ao criar múltiplas atividades!");
                     return false;
                 } finally {
-                    set({ isCreateMultipleActivitiesLoading: false });
                     if (loadingToastId) toast.dismiss(loadingToastId);
                 }
             },
@@ -166,8 +154,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     if (!id || !updates) {
                         throw new Error("id and updates fields are required");
                     }
-
-                    set({ isUpdateActivityLoading: true });
 
                     const loadingToastId = toast.loading("Atualizando atividade...");
                     const updatedActivity = await updateActivityById({ id, updates });
@@ -198,14 +184,11 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
 
                     toast.error("Erro ao atualizar a atividade!");
                     return false;
-                } finally {
-                    set({ isUpdateActivityLoading: false });
                 }
             },
 
             deleteActivityById: async ({ id }) => {
                 try {
-                    set({ isDeleteActivityLoading: true });
                     if (!id) throw new Error("activity id is required to delete");
 
                     const isActivityDeleted = await deleteActivityById({ id });
@@ -230,8 +213,6 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     toast.error("Erro ao deletar atividade. Tente novamente mais tarde!");
 
                     return false;
-                } finally {
-                    set({ isDeleteActivityLoading: false });
                 }
             },
 

@@ -8,17 +8,17 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-import { AuthUserWithProfileT } from "@/types";
-import { Activity } from "../types/activity.types";
+import { ClassActivity } from "../types/activity";
 import ActivityTypeSelector from "../components/activity-type-selector";
 import { ActivityJustificationDropdown } from "../components/activity-justification-dropdown";
 import { calculateActivityDelivery } from "../utils/activity-delivery-calculator";
 import { calculateUserActivityParticipation } from "../utils/activity-calculator";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 interface UseActivityColumnsProps {
-    displayedActivities: Activity[];
-    allAggregateInMetricUsers: Partial<AuthUserWithProfileT>[];
-    updateActivityById: (params: { id: string; updates: Partial<Activity> }) => Promise<unknown>;
+    displayedActivities: ClassActivity[];
+    allAggregateInMetricUsers: Partial<AuthUserWithProfile>[];
+    updateActivityById: (params: { id: string; updates: Partial<ClassActivity> }) => Promise<unknown>;
     deleteActivityById: (params: { id: string }) => Promise<boolean>;
 }
 
@@ -28,7 +28,7 @@ export function useActivityColumns({
     updateActivityById,
     deleteActivityById,
 }: UseActivityColumnsProps) {
-    const activityColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = useMemo(() => {
+    const activityColumns: ColumnDef<Partial<AuthUserWithProfile>>[] = useMemo(() => {
         return displayedActivities.map((activity, index) => ({
             id: `activity-${activity.id}-${index}`,
             header: () => (

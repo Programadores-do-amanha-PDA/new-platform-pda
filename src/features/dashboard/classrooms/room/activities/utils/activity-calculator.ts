@@ -1,4 +1,4 @@
-import { Activity } from "../types";
+import { ClassActivity } from "../types";
 
 /**
  * Represents the activity participation result for a user
@@ -21,7 +21,7 @@ export interface ActivityParticipationResult {
  * @param activity - The classroom activity to analyze
  * @param userEmail - Email of the user to calculate participation for
  * @param shouldAggregateInMetric - Whether this user should be counted in metrics (default: true)
- * @returns Activity participation result with status, label, color, and justification access
+ * @returns ClassActivity participation result with status, label, color, and justification access
  *
  * @example
  * ```typescript
@@ -41,7 +41,7 @@ export interface ActivityParticipationResult {
  * - Users with participation or justification show normal status even if not in metrics
  */
 export function calculateUserActivityParticipation(
-    activity: Activity,
+    activity: ClassActivity,
     userEmail: string,
     shouldAggregateInMetric: boolean = true,
 ): ActivityParticipationResult {
