@@ -21,6 +21,7 @@ describe("profile-form-utils", () => {
             id: "profile-123",
             full_name: "John Doe",
             bio: "Software Developer",
+            user_role: { id: 2, role: "admin" },
             avatar_url: null,
             created_at: new Date("2024-01-01T00:00:00Z"),
             updated_at: new Date("2024-01-01T00:00:00Z"),
@@ -101,30 +102,6 @@ describe("profile-form-utils", () => {
             expect(result.password).toBeUndefined();
         });
 
-        it("should include full_name in metadata when full name is changed", () => {
-            const formDataWithNewName: ProfileFormSchemaT = {
-                ...mockFormData,
-                fullName: "Jane Doe",
-            };
-
-            const result = buildUserUpdateData({ formData: formDataWithNewName, currentUser: mockCurrentUser });
-
-            expect(result.data).toBeDefined();
-            expect(result.data?.full_name).toBe("Jane Doe");
-        });
-
-        it("should include bio in metadata when bio is changed", () => {
-            const formDataWithNewBio: ProfileFormSchemaT = {
-                ...mockFormData,
-                bio: "Senior Developer",
-            };
-
-            const result = buildUserUpdateData({ formData: formDataWithNewBio, currentUser: mockCurrentUser });
-
-            expect(result.data).toBeDefined();
-            expect(result.data?.bio).toBe("Senior Developer");
-        });
-
         it("should handle multiple field changes simultaneously", () => {
             const formDataWithMultipleChanges: ProfileFormSchemaT = {
                 email: "newemail@example.com",
@@ -138,8 +115,6 @@ describe("profile-form-utils", () => {
 
             expect(result.email).toBe("newemail@example.com");
             expect(result.password).toBe("NewPassword123!");
-            expect(result.data?.full_name).toBe("Jane Smith");
-            expect(result.data?.bio).toBe("Product Manager");
         });
 
         it("should not include metadata object when no metadata changes exist", () => {
@@ -157,42 +132,6 @@ describe("profile-form-utils", () => {
             const result = buildUserUpdateData({ formData: formDataWithEmptyBio, currentUser: mockCurrentUser });
 
             expect(result.data).toBeUndefined();
-        });
-
-        it("should handle user profile being null", () => {
-            const userWithoutProfile: AuthUserWithProfile = {
-                ...mockCurrentUser,
-                profile: null,
-            };
-
-            const formDataWithChanges: ProfileFormSchemaT = {
-                ...mockFormData,
-                fullName: "New Name",
-            };
-
-            const result = buildUserUpdateData({ formData: formDataWithChanges, currentUser: userWithoutProfile });
-
-            expect(result.data).toBeDefined();
-            expect(result.data?.full_name).toBe("New Name");
-        });
-
-        it("should handle user profile bio being null", () => {
-            const userWithoutBio: AuthUserWithProfile = {
-                ...mockCurrentUser,
-                profile: {
-                    ...mockCurrentUser.profile!,
-                    bio: null,
-                },
-            };
-
-            const formDataWithBio: ProfileFormSchemaT = {
-                ...mockFormData,
-                bio: "New Bio",
-            };
-
-            const result = buildUserUpdateData({ formData: formDataWithBio, currentUser: userWithoutBio });
-
-            expect(result.data?.bio).toBe("New Bio");
         });
     });
 

@@ -1,4 +1,4 @@
-import { AuthUserWithProfileT } from "@/types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { IJobApplication, JobApplicationStatusType, JobApplicationWithJobType } from "..";
 
 export interface JobApplicationState {
@@ -11,12 +11,12 @@ export type SetApplicationsProps = {
 };
 
 export type GetAllApplicationsByUserIdProps = {
-    user: AuthUserWithProfileT;
+    user: AuthUserWithProfile;
 };
 
 export type CreateApplicationProps = {
     applicationData: Omit<IJobApplication, "id" | "created_at" | "updated_at">;
-    user: AuthUserWithProfileT;
+    user: AuthUserWithProfile;
 };
 
 export type UpdateApplicationStatusProps = {

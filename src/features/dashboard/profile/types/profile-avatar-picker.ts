@@ -1,4 +1,4 @@
-import { AuthUserWithProfile } from "@/types/auth";
+import { AuthUserWithProfile } from "../../profile";
 
 export interface ProfileAvatarPickerPropsT {
   user: AuthUserWithProfile;

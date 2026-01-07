@@ -31,6 +31,9 @@ interface ClassroomDataLoaderProviderProps {
 export function ClassroomDataLoaderProvider({ children }: ClassroomDataLoaderProviderProps) {
     const { classroom_id: classroomId } = useParams<{ classroom_id: string }>();
 
+    if (!classroomId) {
+        throw new Error("ClassroomDataLoaderProvider requires a classroom_id route param");
+    }
     const classroomStore = useClassroomStore();
     const coodeshAssessmentStore = useCoodeshAssessmentStore();
     const projectStore = useClassroomProjectStore();
@@ -107,12 +110,10 @@ export function ClassroomDataLoaderProvider({ children }: ClassroomDataLoaderPro
 
 export function useClassroomDataLoader() {
     const context = useContext(ClassroomDataLoaderContext);
-    if (context === undefined) {
-        throw new Error("useClassroomDataLoader must be used within a ClassroomDataLoaderProvider");
-    }
 
-    if (context.isLoading) {
+    if (context === undefined || context.isLoading) {
         return <PageLoader />;
     }
+
     return context;
 }

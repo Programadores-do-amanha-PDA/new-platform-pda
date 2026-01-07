@@ -111,7 +111,7 @@ describe("avatar-utils", () => {
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
-            const result = await getCroppedImageBlob(imageSrc, pixelCrop);
+            const result = await getCroppedImageBlob({ imageSrc, pixelCrop });
             expect(result).toBeNull();
         });
     });

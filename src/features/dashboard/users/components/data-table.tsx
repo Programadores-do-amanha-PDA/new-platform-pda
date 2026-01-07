@@ -24,13 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { AuthUserWithProfileT } from "@/types/auth";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 type DataTableProps = {
-  data: Partial<AuthUserWithProfileT>[];
-  columns: ColumnDef<Partial<AuthUserWithProfileT>>[];
+  data: Partial<AuthUserWithProfile>[];
+  columns: ColumnDef<Partial<AuthUserWithProfile>>[];
   loading: boolean;
-  headerRightOptions?: (selectedUsers: AuthUserWithProfileT[], clearSelection?: () => void) => React.ReactNode;
+  headerRightOptions?: (selectedUsers: AuthUserWithProfile[], clearSelection?: () => void) => React.ReactNode;
 };
 
 export function DataTable({
@@ -75,7 +75,7 @@ export function DataTable({
   });
 
   // Get selected users
-  const selectedUsers = table.getFilteredSelectedRowModel().rows.map(row => row.original) as AuthUserWithProfileT[];
+  const selectedUsers = table.getFilteredSelectedRowModel().rows.map(row => row.original) as AuthUserWithProfile[];
   
   // Function to clear selection
   const clearSelection = () => {
@@ -83,8 +83,8 @@ export function DataTable({
   };
 
   return (
-    <div className="w-full h-full flex flex-col flex-1 overflow-hidden">
-      <div className="flex items-center justify-between py-4 sticky">
+    <div className="flex flex-col flex-1 w-full h-full overflow-hidden">
+      <div className="sticky flex justify-between items-center py-4">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
@@ -96,9 +96,9 @@ export function DataTable({
         {headerRightOptions?.(selectedUsers, clearSelection)}
       </div>
 
-      <div className="w-full h-full flex border rounded-lg overflow-hidden">
+      <div className="flex border rounded-lg w-full h-full overflow-hidden">
         <Table>
-          <TableHeader className="sticky top-0 bg-white z-10">
+          <TableHeader className="top-0 z-10 sticky bg-white">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
@@ -161,8 +161,8 @@ export function DataTable({
       </div>
 
       {table.getFilteredSelectedRowModel().rows.length > 0 && (
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
+        <div className="flex justify-end items-center space-x-2 py-4">
+          <div className="flex-1 text-muted-foreground text-sm">
             {table.getFilteredSelectedRowModel().rows.length} de{" "}
             {table.getFilteredRowModel().rows.length} linha(s) selecionada(s).
           </div>

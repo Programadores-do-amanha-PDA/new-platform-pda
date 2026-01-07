@@ -20,20 +20,20 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { AuthUserWithProfileT } from "@/types/auth";
 import { Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UsersCredentialsValuesT } from "@/features/api/emails/user-credentials/type";
 import axios from "axios";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
-interface UserWithStatus extends AuthUserWithProfileT {
+interface UserWithStatus extends AuthUserWithProfile {
   status?: "success" | "error" | "skipped";
 }
 
 interface BulkUsersCredentialsButtonProps {
-  selectedUsers: AuthUserWithProfileT[];
+  selectedUsers: AuthUserWithProfile[];
   onComplete?: () => void;
 }
 
@@ -73,7 +73,7 @@ export default function BulkUsersCredentialsButton({
       try {
         // Skip if user has no classroom short_ids
         const shortIds =
-          user?.profile?.classrooms?.map((c) => c.short_id) || [];
+          user.profile?.enrollments?.map((c) => c.short_id) || [];
         if (shortIds.length === 0) {
           setUsers((prev) =>
             prev.map((u, index) =>
@@ -89,7 +89,7 @@ export default function BulkUsersCredentialsButton({
           subject,
           values: {
             to_name: user.profile?.full_name.split(" ")[0] || "Usuário",
-            to_email: user.profile?.email || user.email,
+            to_email: user.email,
             short_ids: shortIds,
           } as UsersCredentialsValuesT,
         };
@@ -142,7 +142,7 @@ export default function BulkUsersCredentialsButton({
 
   const selectedCount = selectedUsers.length;
   const validEmails = selectedUsers.filter(
-    (user) => user.profile?.email || user.email
+    (user) => user.email
   ).length;
 
   return (
@@ -154,11 +154,11 @@ export default function BulkUsersCredentialsButton({
           disabled={selectedCount === 0}
           className="gap-2"
         >
-          <Mail className="h-4 w-4" />
+          <Mail className="w-4 h-4" />
           Enviar Credenciais ({selectedCount})
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[85vw] w-max overflow-hidden">
+      <DialogContent className="w-max max-w-[85vw] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Enviar Credenciais por Email</DialogTitle>
           <DialogDescription>
@@ -167,7 +167,7 @@ export default function BulkUsersCredentialsButton({
                 Você está prestes a enviar emails com credenciais para{" "}
                 <strong>{validEmails}</strong> usuário(s) selecionado(s).
                 {validEmails !== selectedCount && (
-                  <span className="text-yellow-600 block mt-2">
+                  <span className="block mt-2 text-yellow-600">
                     ⚠️ {selectedCount - validEmails} usuário(s) não possuem
                     email válido e serão ignorados.
                   </span>
@@ -181,25 +181,25 @@ export default function BulkUsersCredentialsButton({
         {stage === 0 ? (
           <div className="py-4">
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">
+              <h4 className="font-medium text-sm">
                 Usuários que receberão o email:
               </h4>
-              <div className="max-h-32 overflow-y-auto space-y-1">
+              <div className="space-y-1 max-h-32 overflow-y-auto">
                 {selectedUsers
-                  .filter((user) => user.profile?.email || user.email)
+                  .filter((user) => user.email)
                   .map((user, index) => (
-                    <div key={index} className="text-sm text-muted-foreground">
+                    <div key={index} className="text-muted-foreground text-sm">
                       • {user.profile?.full_name} (
-                      {user.profile?.email || user.email})
+                      {user.email})
                     </div>
                   ))}
               </div>
             </div>
           </div>
         ) : (
-          <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
+          <div className="flex my-4 border rounded-lg w-full max-h-96 overflow-y-auto">
             <Table className="w-full h-full">
-              <TableHeader className="sticky top-0 bg-background z-10 shadow-sm">
+              <TableHeader className="top-0 z-10 sticky bg-background shadow-sm">
                 <TableRow>
                   <TableHead className="font-semibold">Perfil</TableHead>
                   <TableHead className="font-semibold">
@@ -219,7 +219,7 @@ export default function BulkUsersCredentialsButton({
                   >
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="w-8 h-8">
                           <AvatarImage
                             src={user.profile?.avatar_url || ""}
                             alt={user.profile?.full_name}
@@ -237,15 +237,15 @@ export default function BulkUsersCredentialsButton({
                           <span className="font-medium">
                             {user.profile?.full_name || "Nome não informado"}
                           </span>
-                          <span className="text-sm text-muted-foreground">
-                            {user.profile?.email || user.email}
+                          <span className="text-muted-foreground text-sm">
+                            {user.email}
                           </span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {user?.profile?.classrooms?.map((classroom, idx) => (
+                        {user.profile?.enrollments?.map((classroom, idx) => (
                           <Badge
                             key={idx}
                             variant="secondary"
@@ -254,7 +254,7 @@ export default function BulkUsersCredentialsButton({
                             {classroom.short_id}
                           </Badge>
                         )) || (
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-muted-foreground text-sm">
                             Nenhuma turma
                           </span>
                         )}
@@ -282,7 +282,7 @@ export default function BulkUsersCredentialsButton({
                 disabled={isLoading || validEmails === 0}
                 className="gap-2"
               >
-                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                 Enviar Emails
               </Button>
             </>

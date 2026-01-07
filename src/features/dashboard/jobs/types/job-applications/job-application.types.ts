@@ -1,5 +1,5 @@
 import { z } from "zod/mini";
-import { JobT } from "..";
+import { Job } from "..";
 import { newJobApplicationFormSchema } from "../../utils/job-application-schema";
 
 export type JobApplicationStatusType = "applied" | "rejected" | "accepted" | string;
@@ -13,7 +13,7 @@ export interface IJobApplication {
     updated_at?: string;
 }
 
-export type JobApplicationWithJobType = IJobApplication & { jobs?: JobT };
+export type JobApplicationWithJobType = IJobApplication & { jobs?: Job };
 
 export type newJobApplicationFormSchemaType = z.infer<typeof newJobApplicationFormSchema>;
 

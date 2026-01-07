@@ -1,32 +1,32 @@
 "use server";
 
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
-import { JobT, JobWithApplicationsT } from "../types";
+import { Job, JobWithApplicationsT } from "../types";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "jobs.actions" });
 
-export type GetAllJobsResult = JobT[] | null;
+export type GetAllJobsResult = Job[] | null;
 
 export type GetAllJobsWithApplicationsResult = JobWithApplicationsT[] | null;
 
-export type GetAllCuratedJobsResult = JobT[] | null;
+export type GetAllCuratedJobsResult = Job[] | null;
 
 export type GetJobByIdProps = {
     jobId: string;
 };
-export type GetJobByIdResult = JobT | null;
+export type GetJobByIdResult = Job | null;
 
 export type CreateJobProps = {
-    jobData: Partial<JobT>;
+    jobData: Partial<Job>;
 };
-export type CreateJobResult = JobT | null;
+export type CreateJobResult = Job | null;
 
 export type UpdateJobProps = {
     jobId: string;
-    updates: Partial<JobT>;
+    updates: Partial<Job>;
 };
-export type UpdateJobResult = JobT | null;
+export type UpdateJobResult = Job | null;
 
 export type DeleteJobProps = {
     jobId: string;
@@ -42,7 +42,7 @@ export const getAllJobs = async (): Promise<GetAllJobsResult> => {
 
         if (error) throw error;
 
-        return data as JobT[];
+        return data as Job[];
     } catch (error) {
         log.error({ err: error, operation: "getAllJobs" }, "Failed to fetch all jobs");
         return null;
@@ -74,7 +74,7 @@ export const getAllCuratedJobs = async (): Promise<GetAllCuratedJobsResult> => {
 
         if (error) throw error;
 
-        return data as JobT[];
+        return data as Job[];
     } catch (error) {
         log.error({ err: error, operation: "getAllCuratedJobs" }, "Failed to fetch all curated jobs");
         return null;
@@ -92,7 +92,7 @@ export const getJobByID = async ({ jobId }: GetJobByIdProps): Promise<GetJobById
 
         if (error) throw error;
 
-        return data as JobT;
+        return data as Job;
     } catch (error) {
         log.error({ err: error, jobId, operation: "getJobByID" }, "Failed to fetch job by ID");
         return null;

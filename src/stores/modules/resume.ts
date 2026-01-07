@@ -9,7 +9,7 @@ import {
   updateUserResumeById,
   deleteUserResumeById,
 } from "@/actions/resume";
-import { AuthUserWithProfile } from "@/types/auth";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 interface ResumeState {
   resumes: ResumeT[];

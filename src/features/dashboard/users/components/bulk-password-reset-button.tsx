@@ -10,14 +10,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { sendPasswordResetToMultipleUsers } from "@/actions";
-import { AuthUserWithProfileT } from "@/types/auth";
+import { sendPasswordResetToMultipleUsers } from "@/features/shared/auth";
 import { Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 interface BulkPasswordResetButtonProps {
-    selectedUsers: AuthUserWithProfileT[];
+    selectedUsers: AuthUserWithProfile[];
     onComplete?: () => void;
 }
 
@@ -34,7 +34,7 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
         setIsLoading(true);
 
         try {
-            const emails = selectedUsers.map((user) => user.profile?.email).filter(Boolean) as string[];
+            const emails = selectedUsers.map((user) => user.email).filter(Boolean) as string[];
 
             if (emails.length === 0) {
                 toast.error("Nenhum email válido encontrado nos usuários selecionados");
@@ -65,7 +65,7 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
     };
 
     const selectedCount = selectedUsers.length;
-    const validEmails = selectedUsers.filter((user) => user.profile?.email).length;
+    const validEmails = selectedUsers.filter((user) => user.email).length;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -94,10 +94,10 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
                         <h4 className="font-medium text-sm">Usuários que receberão o email:</h4>
                         <div className="space-y-1 max-h-32 overflow-y-auto">
                             {selectedUsers
-                                .filter((user) => user.profile?.email)
+                                .filter((user) => user.email)
                                 .map((user, index) => (
                                     <div key={index} className="text-muted-foreground text-sm">
-                                        • {user.profile?.full_name} ({user.profile?.email})
+                                        • {user.profile?.full_name} ({user.email})
                                     </div>
                                 ))}
                         </div>

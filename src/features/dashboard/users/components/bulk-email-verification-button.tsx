@@ -10,14 +10,14 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { sendEmailVerificationToMultipleUsers } from "@/actions";
-import { AuthUserWithProfileT } from "@/types/auth";
+import { resendEmailSignupConfirmationToMultipleUsers } from "@/features/shared/auth";
 import { MailCheck, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 interface BulkEmailVerificationButtonProps {
-    selectedUsers: AuthUserWithProfileT[];
+    selectedUsers: AuthUserWithProfile[];
     onComplete?: () => void;
 }
 
@@ -34,14 +34,14 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
         setIsLoading(true);
 
         try {
-            const emails = selectedUsers.map((user) => user.profile?.email).filter(Boolean) as string[];
+            const emails = selectedUsers.map((user) => user.email).filter(Boolean) as string[];
 
             if (emails.length === 0) {
                 toast.error("Nenhum email válido encontrado nos usuários selecionados");
                 return;
             }
 
-            const result = await sendEmailVerificationToMultipleUsers(emails);
+            const result = await resendEmailSignupConfirmationToMultipleUsers(emails);
             if (!result || !result.results) {
                 throw new Error("Failed to send email verification emails");
             }
@@ -65,7 +65,7 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
     };
 
     const selectedCount = selectedUsers.length;
-    const validEmails = selectedUsers.filter((user) => user.profile?.email).length;
+    const validEmails = selectedUsers.filter((user) => user.email).length;
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -94,10 +94,10 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
                         <h4 className="font-medium text-sm">Usuários que receberão o email:</h4>
                         <div className="space-y-1 max-h-32 overflow-y-auto">
                             {selectedUsers
-                                .filter((user) => user.profile?.email)
+                                .filter((user) => user.email)
                                 .map((user, index) => (
                                     <div key={index} className="text-muted-foreground text-sm">
-                                        • {user.profile?.full_name} ({user.profile?.email})
+                                        • {user.profile?.full_name} ({user.email})
                                     </div>
                                 ))}
                         </div>

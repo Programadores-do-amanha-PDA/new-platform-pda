@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailRegex, passwordRegex } from "@/utils/regex/users";
+import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
 
 export const userFormSchema = z.object({
   fullName: z
@@ -15,18 +15,18 @@ export const userFormSchema = z.object({
     .min(1, "Email é obrigatório")
     .toLowerCase()
     .refine(
-      (email) => emailRegex.test(email),
+      (email) => REGEX_FOR_EMAIL_VALIDATION.test(email),
       "Email deve ter um formato válido"
     ),
   password: z
     .string()
     .optional()
     .refine(
-      (password) => !password || passwordRegex.test(password),
+      (password) => !password || REGEX_FOR_PASSWORD_VALIDATION.test(password),
       "Senha deve atender aos critérios de segurança"
     ),
-  userRoles: z.array(z.string()).default([]),
-  userClassrooms: z.array(z.string()).default([]),
+  userRole: z.string().default(""),
+  enrollments: z.array(z.string()).default([]),
 });
 
 export const newUserFormSchema = userFormSchema.extend({
@@ -34,7 +34,7 @@ export const newUserFormSchema = userFormSchema.extend({
     .string()
     .min(1, "Senha é obrigatória")
     .refine(
-      (password) => passwordRegex.test(password),
+      (password) => REGEX_FOR_PASSWORD_VALIDATION.test(password),
       "Senha deve atender aos critérios de segurança"
     ),
 });

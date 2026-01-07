@@ -16,11 +16,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { ClassroomCombobox } from "./classroom-combobox";
-import { emailRegex, passwordRegex } from "@/utils/regex/users";
-import { AuthUserWithProfileT, RolesT, UserClassroomT } from "@/types/auth";
+import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
 import { ClassroomT } from "@/types/classrooms";
-import { useUsersStore } from "@/stores/modules/users/users-store";
-import { useUserClassroomsStore } from "@/stores/modules/users/user-classrooms-store";
+import { useUsersStore } from "@/features/dashboard/shared/users";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -28,14 +26,17 @@ import { Badge } from "@/components/ui/badge";
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
 import BadgeSelector from "@/components/shared/badge-selector";
 import { cn } from "@/lib/utils";
-import { useRolesStore } from "@/stores/modules/users/user-role.store";
+import { Role } from "@/types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { Enrollment, useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
+import { useRolesStore } from "../stores/user-role";
 
 interface UserData {
     name: string;
     email: string;
     password?: string;
     status?: "success" | "error" | "warning";
-    userRoles?: RolesT[];
+    userRoles?: Role[];
     userClassrooms?: string[];
 }
 
@@ -49,7 +50,7 @@ interface UserRow {
 }
 
 type InsertManyUsersDialogProps = {
-    excludeRoles?: RolesT[];
+    excludeRoles?: Role[];
     classrooms?: ClassroomT[];
 };
 
@@ -57,14 +58,14 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
     const [open, setOpen] = useState(false);
 
     const [users, setUsers] = useState<UserData[]>([]);
-    const [allUsersRole, setAllUsersRole] = useState<RolesT[]>([]);
+    const [allUsersRole, setAllUsersRole] = useState<Role[]>([]);
     const [allUsersClassroom, setAllUsersClassroom] = useState<string[]>([]);
     const [stage, setStage] = useState<0 | 1 | 2>(0);
     const [loading, setLoading] = useState(false);
 
     const { createNewUser } = useUsersStore();
     const { addUserRole } = useRolesStore();
-    const { createUserClassrooms } = useUserClassroomsStore();
+    const { createNewEnrollments } = useEnrollmentsStore();
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -126,10 +127,10 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
         setUsers((users) =>
             users.map((user) => ({
                 ...user,
-                userRoles: [newRoleName as RolesT],
+                userRoles: [newRoleName as Role],
             })),
         );
-        setAllUsersRole([newRoleName as RolesT]);
+        setAllUsersRole([newRoleName as Role]);
     };
 
     const handleSetClassroomsForAll = (newClassroom: string[]) => {
@@ -160,10 +161,10 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                 if (!user.email || !user.name || !user.password) throw "fill the fields";
 
                 if (user.name.split(" ").length < 2 || user.name.length < 5) throw "Invalid full name";
-                if (!emailRegex.test(user.email)) throw "Invalid email";
-                if (!passwordRegex.test(user.password)) throw "Invalid password";
+                if (!REGEX_FOR_EMAIL_VALIDATION.test(user.email)) throw "Invalid email";
+                if (!REGEX_FOR_PASSWORD_VALIDATION.test(user.password)) throw "Invalid password";
 
-                const data: Partial<AuthUserWithProfileT & { password: string }> = {
+                const data: Partial<AuthUserWithProfile & { password: string }> = {
                     email: user.email,
                     password: user.password,
                     user_metadata: {
@@ -179,13 +180,15 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                         await addUserRole(userCreatedId, role);
                     }
 
-                    if (classrooms && classrooms?.length > 0 && createUserClassrooms) {
+                    if (classrooms && classrooms?.length > 0 && createNewEnrollments) {
                         if (user.userClassrooms && user.userClassrooms.length > 0) {
-                            const uClassroom: Omit<UserClassroomT, "short_id" | "mode">[] = user.userClassrooms.map((id) => ({
-                                user_id: userCreatedId,
-                                classroom_id: id,
-                            }));
-                            await createUserClassrooms(uClassroom);
+                            const newClassroomEnrollments: Omit<Enrollment, "short_id" | "mode">[] = user.userClassrooms.map(
+                                (id) => ({
+                                    user_id: userCreatedId,
+                                    classroom_id: id,
+                                }),
+                            );
+                            await createNewEnrollments({ enrollments: newClassroomEnrollments });
                         }
                     }
                 }
@@ -471,7 +474,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                                                                                 index === i
                                                                                     ? {
                                                                                           ...u,
-                                                                                          userRoles: [role as RolesT],
+                                                                                          userRoles: [role as Role],
                                                                                       }
                                                                                     : u,
                                                                             ),

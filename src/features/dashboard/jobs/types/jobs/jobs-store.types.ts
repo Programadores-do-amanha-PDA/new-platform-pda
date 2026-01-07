@@ -1,4 +1,4 @@
-import { JobWithApplicationsT, JobT } from "..";
+import { JobWithApplicationsT, Job } from "..";
 
 export interface IJobState {
     jobs: JobWithApplicationsT[];
@@ -10,12 +10,12 @@ export type SetJobsProps = {
 };
 
 export type CreateJobStoreProps = {
-    jobData: Partial<JobT>;
+    jobData: Partial<Job>;
 };
 
 export type UpdateJobStoreProps = {
     jobId: string;
-    updates: Partial<JobT>;
+    updates: Partial<Job>;
 };
 
 export type CurateJobProps = {
