@@ -17,6 +17,7 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/c
 import { useAuth } from "@/features/shared/auth";
 import { Badge } from "@/components/ui/badge";
 import { rolesLabelsOptions } from "@/utils";
+import { TooltipWrapper } from "../tooltip-wrapper";
 
 const NavUser = () => {
     const router = useRouter();
@@ -53,9 +54,9 @@ const NavUser = () => {
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg space-y-3 z-50 p-0! border-2 border-sidebar overflow-hidden"
+                        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg space-y-3 z-50 p-0! pb-2! border-2 border-sidebar overflow-hidden"
                         side={isMobile ? "bottom" : "top"}
-                        align="center"
+                        align={isMobile ? "center" : "start"}
                         sideOffset={4}
                     >
                         <DropdownMenuGroup className="p-0 w-full font-normal">
@@ -75,54 +76,47 @@ const NavUser = () => {
                                         </Avatar>
                                     </section>
                                 </figure>
-                                <div className="flex flex-col bg-red-100 p-2 px-4 pt-0 w-full text-sm text-left leading-tight">
+                                <div className="flex flex-col p-2 px-4 pt-0 w-full text-sm text-left leading-tight bg-sidebar">
                                     <span className="w-full font-black text-base truncate">{user?.profile?.full_name}</span>
-                                    <span className="w-full text-xs truncate">{user?.email}</span>
+                                    <TooltipWrapper title={user?.email || ""}>
+                                        <p className="w-full text-xs truncate">{user?.email}</p>
+                                    </TooltipWrapper>
                                 </div>
                             </div>
                         </DropdownMenuGroup>
-                        <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg!">
-                            <DropdownMenuItem className="font-medium" onClick={() => router.push(`/dashboard/profile`)}>
-                                <Pencil className="stroke-foreground" />
-                                Editar perfil
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        <DropdownMenuItem
+                            className="font-medium mx-2 p-2 bg-sidebar cursor-pointer hover:bg-zinc-100"
+                            onClick={() => router.push(`/dashboard/profile`)}
+                        >
+                            <Pencil className="stroke-foreground" />
+                            Editar perfil
+                        </DropdownMenuItem>
                         <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg! overflow-hidden">
                             <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">Cargo</DropdownMenuLabel>
-                            <DropdownMenuItem className="font-medium">
+                            <DropdownMenuItem className="font-medium flex flex-wrap gap-1 bg-sidebar cursor-default hover:bg-sidebar">
                                 <Badge variant="outline" className="bg-transparent font-semibold">
                                     {rolesLabelsOptions.find((role) => role.value === userRole)?.label}
                                 </Badge>
-                            </DropdownMenuItem>
-                            {user.profile.enrollments && user.profile.enrollments.length > 0 && (
-                                <>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">
-                                        Inscrições (IDS)
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuItem className="font-medium">
-                                        {user.profile.enrollments.map((enrollment) => (
-                                            <Badge
-                                                key={enrollment.short_id}
-                                                variant="outline"
-                                                className="bg-transparent font-semibold"
-                                            >
-                                                {enrollment.short_id}
-                                            </Badge>
-                                        ))}
-                                    </DropdownMenuItem>
-                                </>
-                            )}
-                        </DropdownMenuGroup>
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem
-                                onClick={handleSignOut}
-                                className="bg-red-50 mx-1 py-2 rounded-lg! overflow-hidden font-medium"
-                            >
-                                <LogOut className="stroke-foreground" />
-                                Sair
+                                {user.profile.enrollments &&
+                                    user.profile.enrollments.length > 0 &&
+                                    user.profile.enrollments.map((enrollment) => (
+                                        <Badge
+                                            key={enrollment.short_id}
+                                            variant="outline"
+                                            className="bg-transparent font-semibold"
+                                        >
+                                            {enrollment.short_id}
+                                        </Badge>
+                                    ))}
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
+                        <DropdownMenuItem
+                            onClick={handleSignOut}
+                            className="bg-red-50 hover:bg-red-100 cursor-pointer mx-2 p-2 rounded-lg! overflow-hidden font-medium"
+                        >
+                            <LogOut className="stroke-foreground" />
+                            Sair
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
