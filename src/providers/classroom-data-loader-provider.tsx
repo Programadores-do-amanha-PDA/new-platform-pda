@@ -1,134 +1,118 @@
 "use client";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useCallback,
-  ReactNode,
-} from "react";
 
-import useAuth from "@/hooks/use-auth";
+import { createContext, useContext, useEffect, ReactNode } from "react";
+
+import { useAuth } from "@/features/shared/auth";
 import PageLoader from "@/components/shared/page-loader";
-
-import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
-
+import { useActivityStore } from "@/features/dashboard/classrooms/room/activities";
 import {
-  useZoomMeetingStore,
-  useZoomMeetingPastInstanceStore,
-} from "@/features/dashboard/classroom-zoom/stores";
-import { useClassroomStore } from "@/features/dashboard/classrooms/stores/classrooms";
-import { useProjectStore } from "@/features/dashboard/classroom-projects/stores";
-import { useDeliveryStore } from "@/features/dashboard/classroom-projects/stores/deliveries";
-import { useCorrectionStore } from "@/features/dashboard/classroom-projects/stores/corrections";
-import { useZoomAccountStore } from "@/features/dashboard/classroom-zoom/stores/accounts";
-import { useCoodeshAssessmentStore } from "@/features/dashboard/classroom-coodesh/stores/assessments";
-import { useClassroomActivityStore } from "@/features/dashboard/classroom-activities/store";
+    useZoomAccountStore,
+    useZoomMeetingStore,
+    useZoomMeetingPastInstanceStore,
+} from "@/features/dashboard/classrooms/room/integrations/zoom/stores";
+import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/room/integrations/coodesh/stores/assessments";
+import { useClassroomSettingStore } from "@/features/dashboard/classrooms/room/settings";
+import { useClassroomProjectStore } from "@/features/dashboard/classrooms/room/projects/stores";
+import { useClassroomProjectCorrectionsStore } from "@/features/dashboard/classrooms/room/projects/stores/corrections";
+import { useClassroomProjectDeliveriesStore } from "@/features/dashboard/classrooms/room/projects/stores/deliveries";
+import { useParams } from "next/navigation";
+import { useClassroomStore } from "@/features/dashboard/classrooms/classrooms-homepage/store";
+
 interface ClassroomDataLoaderContextType {
-  isLoading: boolean;
-  classroomId: string;
-  refreshData: () => Promise<void>;
+    isLoading: boolean;
+    classroomId: string;
+    refreshData: () => Promise<void>;
 }
-const ClassroomDataLoaderContext = createContext<
-  ClassroomDataLoaderContextType | undefined
->(undefined);
+const ClassroomDataLoaderContext = createContext<ClassroomDataLoaderContextType | undefined>(undefined);
 interface ClassroomDataLoaderProviderProps {
-  children: ReactNode;
-  classroomId: string;
+    children: ReactNode;
 }
-export function ClassroomDataLoaderProvider({
-  children,
-  classroomId,
-}: ClassroomDataLoaderProviderProps) {
-  const classroomStore = useClassroomStore();
-  const coodeshAssessmentStore = useCoodeshAssessmentStore();
-  const projectStore = useProjectStore();
-  const deliveryStore = useDeliveryStore();
-  const correctionStore = useCorrectionStore();
-  const zoomAccountStore = useZoomAccountStore();
-  const zoomMeetingStore = useZoomMeetingStore();
-  const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
-  const classroomActivityStore = useClassroomActivityStore();
-  const classroomConfigStore = useClassroomConfigStore();
-  const { userRole } = useAuth();
 
-  const isLoading =
-    classroomStore.loading ||
-    classroomConfigStore.loading ||
-    coodeshAssessmentStore.loading ||
-    projectStore.loading ||
-    deliveryStore.loading ||
-    correctionStore.loading ||
-    zoomAccountStore.loading ||
-    zoomMeetingStore.loading ||
-    zoomMeetingPastInstanceStore.loading ||
-    classroomActivityStore.loading;
+export function ClassroomDataLoaderProvider({ children }: ClassroomDataLoaderProviderProps) {
+    const { classroom_id: classroomId } = useParams<{ classroom_id: string }>();
 
-  const loadAllData = useCallback(async () => {
-    if (!classroomId) return;
+    const classroomStore = useClassroomStore();
+    const coodeshAssessmentStore = useCoodeshAssessmentStore();
+    const projectStore = useClassroomProjectStore();
+    const deliveryStore = useClassroomProjectDeliveriesStore();
+    const correctionStore = useClassroomProjectCorrectionsStore();
+    const zoomAccountStore = useZoomAccountStore();
+    const zoomMeetingStore = useZoomMeetingStore();
+    const zoomMeetingPastInstanceStore = useZoomMeetingPastInstanceStore();
+    const classroomActivityStore = useActivityStore();
+    const classroomConfigStore = useClassroomSettingStore();
+    const { userRole } = useAuth();
 
-    try {
-      if (userRole === "teacher" || userRole === "admin") {
-        await Promise.all([
-          classroomConfigStore.getConfigByClassroom(classroomId),
-          coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
-          projectStore.getAllProjectsByClassroomId(classroomId),
-          deliveryStore.getAllDeliveriesByClassroomId(classroomId),
-          correctionStore.getAllCorrectionsByClassroomId(classroomId),
-          zoomAccountStore.getAllAccounts(classroomId),
-          zoomMeetingStore.getAllMeetings(classroomId),
-          zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(
-            classroomId
-          ),
-          classroomActivityStore.getAllActivitiesByClassroom(classroomId),
-        ]);
-      } else {
-        await Promise.all([
-          classroomConfigStore.getConfigByClassroom(classroomId),
-          projectStore.getAllProjectsByClassroomId(classroomId),
-          deliveryStore.getAllDeliveriesByClassroomId(classroomId),
-          correctionStore.getAllCorrectionsByClassroomId(classroomId),
-        ]);
-      }
-    } catch (error) {
-      console.error("Error loading classroom data:", error);
+    const isLoading =
+        classroomStore.loading ||
+        classroomConfigStore.loading ||
+        coodeshAssessmentStore.loading ||
+        projectStore.loading ||
+        deliveryStore.loading ||
+        correctionStore.loading ||
+        zoomAccountStore.loading ||
+        zoomMeetingStore.loading ||
+        zoomMeetingPastInstanceStore.loading ||
+        classroomActivityStore.loading;
+
+    const loadAllData = async () => {
+        if (!classroomId) return;
+
+        try {
+            if (userRole === "teacher" || userRole === "admin") {
+                await Promise.all([
+                    classroomConfigStore.fetchSettingByClassroomId({ classroomId }),
+                    coodeshAssessmentStore.getAllAssessmentsByClassroomId(classroomId),
+                    projectStore.getAllProjectsByClassroomId(classroomId),
+                    deliveryStore.getAllDeliveriesByClassroomId(classroomId),
+                    correctionStore.getAllCorrectionsByClassroomId(classroomId),
+                    zoomAccountStore.getAllAccounts(classroomId),
+                    zoomMeetingStore.getAllMeetings(classroomId),
+                    zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(classroomId),
+                    classroomActivityStore.fetchAllActivitiesByClassroom({ classroomId }),
+                ]);
+            } else {
+                await Promise.all([
+                    classroomConfigStore.fetchSettingByClassroomId({ classroomId }),
+                    projectStore.getAllProjectsByClassroomId(classroomId),
+                    deliveryStore.getAllDeliveriesByClassroomId(classroomId),
+                    correctionStore.getAllCorrectionsByClassroomId(classroomId),
+                ]);
+            }
+        } catch (error) {
+            console.error("Error loading classroom data:", error);
+        }
+    };
+
+    useEffect(() => {
+        loadAllData();
+    }, [classroomId]);
+
+    const refreshData = async () => {
+        await loadAllData();
+    };
+
+    const contextValue: ClassroomDataLoaderContextType = {
+        isLoading,
+        classroomId,
+        refreshData,
+    };
+
+    if (isLoading) {
+        return <PageLoader />;
     }
-  }, [classroomId]);
 
-  useEffect(() => {
-    loadAllData();
-  }, [classroomId]);
-
-  const refreshData = async () => {
-    await loadAllData();
-  };
-
-  const contextValue: ClassroomDataLoaderContextType = {
-    isLoading,
-    classroomId,
-    refreshData,
-  };
-
-  if (isLoading) {
-    return <PageLoader />;
-  }
-
-  return (
-    <ClassroomDataLoaderContext.Provider value={contextValue}>
-      {children}
-    </ClassroomDataLoaderContext.Provider>
-  );
+    return <ClassroomDataLoaderContext.Provider value={contextValue}>{children}</ClassroomDataLoaderContext.Provider>;
 }
 
 export function useClassroomDataLoader() {
-  const context = useContext(ClassroomDataLoaderContext);
-  if (context === undefined) {
-    throw new Error(
-      "useClassroomDataLoader must be used within a ClassroomDataLoaderProvider"
-    );
-  }
+    const context = useContext(ClassroomDataLoaderContext);
+    if (context === undefined) {
+        throw new Error("useClassroomDataLoader must be used within a ClassroomDataLoaderProvider");
+    }
 
-  if (context.isLoading) {
-    return <PageLoader />;
-  }
-  return context;
+    if (context.isLoading) {
+        return <PageLoader />;
+    }
+    return context;
 }

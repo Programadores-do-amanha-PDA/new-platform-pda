@@ -2,11 +2,11 @@
 
 import { useUsersStore } from "@/features/dashboard/shared/users";
 import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
-import { useClassroomStore } from "@/features/dashboard/classrooms/classroom-list/stores/classrooms";
-import { useProjectStore } from "@/features/dashboard/classrooms/room/classroom-projects/stores";
-import { useZoomMeetingStore } from "@/features/dashboard/classrooms/room/integrations/classroom-zoom/stores";
+import { useZoomMeetingStore } from "@/features/dashboard/classrooms/room/integrations/zoom/stores";
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/room/integrations/coodesh/stores/assessments";
 import { BaseStackProvider } from "../../shared/base-stack-provider";
+import { useClassroomProjectStore } from "@/features/dashboard/classrooms/room/projects/stores";
+import { useClassroomStore } from "@/features/dashboard/classrooms/classrooms-homepage/store";
 
 interface StudentStackProviderProps {
     children: React.ReactNode;
@@ -16,7 +16,7 @@ interface StudentStackProviderProps {
 export const StudentStackProvider = ({ children, loadInitialData = true }: StudentStackProviderProps) => {
     const usersStore = useUsersStore();
     const classroomStore = useClassroomStore();
-    const projectStore = useProjectStore();
+    const projectStore = useClassroomProjectStore();
     const coodeshAssessmentStore = useCoodeshAssessmentStore();
     const zoomMeetingStore = useZoomMeetingStore();
     const enrollmentsStore = useEnrollmentsStore();
