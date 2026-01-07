@@ -34,7 +34,7 @@ src/features/dashboard/classroom-overview/
 - **Student Performance**: Track individual and class-wide performance metrics
 - **Attendance Analysis**: Monitor attendance patterns across different activity types
 - **Project Progress**: Visualize project completion and grading status
-- **Assessment Results**: Integrate Coodesh assessment scores and analytics
+- **CoodeshAssessmentPayload Results**: Integrate Coodesh assessment scores and analytics
 
 ### Data Visualization
 - **Interactive Tables**: Sortable, filterable data tables with column customization
@@ -72,14 +72,14 @@ Reusable data table component with advanced features like pagination, sorting, a
 Processes Coodesh assessment data to calculate student performance metrics.
 
 ```typescript
-calculateCoodeshScores(studentEmail: string, assessments: ClassroomCoodeshAssessmentT[])
+calculateCoodeshScores(studentEmail: string, assessments: CoodeshAssessment[])
 ```
 
 ### Calculate General Presence
 Computes overall attendance rates from various activity sources.
 
 ```typescript
-calculateGeneralPresence(studentEmail: string, activities: ClassroomActivityT[])
+calculateGeneralPresence(studentEmail: string, activities: ClassActivity[])
 calculateGeneralPresenceFromZoom(studentId: string, studentEmail: string, ...)
 ```
 
@@ -94,7 +94,7 @@ calculateProjectNotes(studentEmail: string, projects: ClassroomProjectWithDelive
 Breaks down attendance by activity type (programming, English, soft skills, etc.).
 
 ```typescript
-calculatePresenceByType(studentId: string, zoomPastInstances: ZoomMeetingPastInstanceT[], ...)
+calculatePresenceByType(studentId: string, zoomPastInstances: ZoomMeetingPastInstance[], ...)
 ```
 
 ## Data Sources Integration
@@ -106,10 +106,10 @@ calculatePresenceByType(studentId: string, zoomPastInstances: ZoomMeetingPastIns
 
 ### Attendance System
 - Zoom meeting participation
-- Activity attendance tracking
+- ClassActivity attendance tracking
 - Justification management
 
-### Assessment System
+### CoodeshAssessmentPayload System
 - Coodesh assessment results
 - Performance analytics
 - Progress tracking

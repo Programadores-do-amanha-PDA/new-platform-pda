@@ -5,10 +5,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassroomConfigUserModeT } from "@/features/dashboard/classroom-configs/types";
+import { UserMode } from "../../settings";
 
 interface UserModeSelectorProps {
-  options: ClassroomConfigUserModeT[];
+  options: UserMode[];
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
@@ -22,7 +22,7 @@ const UserModeSelector = ({
 }: UserModeSelectorProps) => {
   return (
     <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger className="h-7 w-full">
+      <SelectTrigger className="w-full h-7">
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent>
@@ -30,11 +30,11 @@ const UserModeSelector = ({
           <SelectItem key={mode.id} value={mode.id}>
             <div className="flex items-center gap-2">
               <div
-                className="w-3 h-3 rounded-full"
+                className="rounded-full w-3 h-3"
                 style={{ backgroundColor: mode.color }}
               />
               <span>{mode.title}</span>
-              <span className="text-xs text-muted-foreground">({mode.key})</span>
+              <span className="text-muted-foreground text-xs">({mode.key})</span>
             </div>
           </SelectItem>
         ))}

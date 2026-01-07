@@ -1,13 +1,13 @@
 "use client";
 
 import { ClassroomOverviewData } from "@/types/classroom-overview";
-import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 import { DataTable } from "./data-table";
 import { createColumns } from "./columns";
+import { ClassModules } from "../../settings";
 
 interface ClassroomOverviewTableProps {
   data: ClassroomOverviewData;
-  modules?: ClassroomConfigModulesT[];
+  modules?: ClassModules[];
   onDateRangeChange?: (dateRange: { from: Date; to: Date }) => void;
   onUserModeChange?: (studentId: string, userModeId: string) => void;
 }

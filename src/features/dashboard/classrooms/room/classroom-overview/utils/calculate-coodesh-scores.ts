@@ -1,8 +1,8 @@
-import { ClassroomCoodeshAssessmentT } from "@/types/classroom-coodesh";
+import { CoodeshAssessment } from "../../integrations/coodesh/types";
 
 export function calculateCoodeshScores(
   studentEmail: string,
-  assessments: ClassroomCoodeshAssessmentT[]
+  assessments: CoodeshAssessment[]
 ): { [testId: string]: number } {
   const scores: { [testId: string]: number } = {};
 

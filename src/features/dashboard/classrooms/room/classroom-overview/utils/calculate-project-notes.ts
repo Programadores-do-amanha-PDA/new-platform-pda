@@ -1,14 +1,11 @@
-import {
-  ClassroomProjectDeliveryT,
-  ClassroomProjectT,
-} from "../../classroom-projects/types";
-import { ClassroomProjectCorrectionT } from "@/features/dashboard/classroom-projects/types/corrections";
+import { ClassroomProject, ClassroomProjectDelivery, ClassProjectCorrection } from "../../projects/types";
+
 
 export function calculateProjectNotes(
   studentIdentifier: string,
-  projects: ClassroomProjectT[],
-  deliveries: ClassroomProjectDeliveryT[],
-  corrections: ClassroomProjectCorrectionT[]
+  projects: ClassroomProject[],
+  deliveries: ClassroomProjectDelivery[],
+  corrections: ClassProjectCorrection[]
 ): { [projectId: string]: number } {
   const notes: { [projectId: string]: number } = {};
 

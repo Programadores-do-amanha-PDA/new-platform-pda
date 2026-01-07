@@ -1,8 +1,8 @@
-import { ClassroomActivityT } from "../../classroom-activities/types";
+import { ClassActivity } from "../../activities/types";
 
 export function calculateGeneralPresence(
   studentEmail: string,
-  activities: ClassroomActivityT[]
+  activities: ClassActivity[]
 ): number {
   if (activities.length === 0) return 0;
 

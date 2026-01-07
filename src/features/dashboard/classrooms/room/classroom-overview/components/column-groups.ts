@@ -2,13 +2,12 @@ import { ClassroomOverviewData } from "@/types/classroom-overview";
 
 export interface ColumnGroup {
   id: string;
-  label: string | null; // null means it's an individual column that spans 2 rows
+  label: string | null;
   colspan: number;
   columns: string[];
-  columnHeaders?: { [key: string]: string }; // Map of column id to header name
+  columnHeaders?: { [key: string]: string };
 }
 
-// Function to get descriptive column names
 export function getDescriptiveColumnName(
   columnId: string,
   accessorKey?: string,

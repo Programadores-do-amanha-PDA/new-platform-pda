@@ -1,8 +1,8 @@
-import { ClassroomCoodeshAssessmentT } from "@/types";
+import { CoodeshAssessment } from "../../integrations/coodesh/types";
 
 export function getStudentCoodeshGrades(
   studentId: string,
-  assessments: ClassroomCoodeshAssessmentT[],
+  assessments: CoodeshAssessment[],
   studentEmail: string
 ) {
   const coodeshGrades: { [key: string]: number } = {};

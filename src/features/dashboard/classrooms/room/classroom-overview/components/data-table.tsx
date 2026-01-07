@@ -27,14 +27,14 @@ import { ColumnVisibilityDropdown } from "./column-visibility-dropdown";
 import { getColumnGroups } from "./column-groups";
 import { ClassroomOverviewData } from "@/types/classroom-overview";
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
+import { ClassModules } from "../../settings";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  fullData?: ClassroomOverviewData; // For accessing coodesh tests and projects names
+  fullData?: ClassroomOverviewData;
   onDateRangeChange?: (dateRange: { from: Date; to: Date }) => void;
-  modules?: ClassroomConfigModulesT[];
+  modules?: ClassModules[];
 }
 
 export function DataTable<TData, TValue>({
@@ -98,8 +98,8 @@ export function DataTable<TData, TValue>({
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4 overflow-hidden">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 w-full h-full overflow-hidden">
+      <div className="flex justify-between items-center">
         <Input
           placeholder="Procurando por alguém?"
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -118,11 +118,11 @@ export function DataTable<TData, TValue>({
         <ColumnVisibilityDropdown table={table} columnGroups={columnGroups} />
       </div>
 
-      <div className="rounded-md border flex w-full h-full overflow-auto">
+      <div className="flex border rounded-md w-full h-full overflow-auto">
         <Table className="w-full">
-          <TableHeader className="bg-sidebar sticky top-0 left-0 right-0 z-20 overflow-hidden shadow-md">
+          <TableHeader className="top-0 right-0 left-0 z-20 sticky bg-sidebar shadow-md overflow-hidden">
             {/* Group headers row */}
-            <TableRow className="w-full p-0">
+            <TableRow className="p-0 w-full">
               {/* Name column */}
               {columnGroups
                 .filter((group) => {
@@ -151,11 +151,11 @@ export function DataTable<TData, TValue>({
                       }`}
                     >
                       {group.label ? (
-                        <div className="w-full h-11 flex justify-start items-center px-2 font-bold border-r border-b">
+                        <div className="flex justify-start items-center px-2 border-r border-b w-full h-11 font-bold">
                           {group.label}
                         </div>
                       ) : (
-                        <div className="w-full h-full flex justify-center items-center">
+                        <div className="flex justify-center items-center w-full h-full">
                           {(() => {
                             const header = table
                               .getHeaderGroups()[0]
@@ -193,7 +193,7 @@ export function DataTable<TData, TValue>({
                   }
 
                   return (
-                    <TableHead key={header.id} className="w-full h-11 p-0">
+                    <TableHead key={header.id} className="p-0 w-full h-11">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -211,7 +211,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="!border-0 !h-max"
+                  className="border-0! !h-max"
                 >
                   {row.getVisibleCells().map((cell, index) => {
                     const isFirstColumn = index === 0;

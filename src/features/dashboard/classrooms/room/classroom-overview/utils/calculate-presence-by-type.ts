@@ -3,17 +3,17 @@ import {
   calculateUserWeeklyPresence,
 } from "../../classroom-attendance/utils";
 import {
-  ZoomMeetingPastInstanceT,
-  ZoomMeetingT,
-} from "../../classroom-zoom/types";
-import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
+  ZoomMeetingPastInstance,
+  ZoomMeeting,
+} from "../../integrations/zoom/types";
+import { ClassTypes } from "../../settings/types";
 import { startOfWeek } from "date-fns";
 
 export function calculatePresenceByType(
-  zoomPastInstances: ZoomMeetingPastInstanceT[],
-  zoomMeetings: ZoomMeetingT[],
+  zoomPastInstances: ZoomMeetingPastInstance[],
+  zoomMeetings: ZoomMeeting[],
   studentEmail: string,
-  classTypes?: ClassroomConfigClassTypesT[]
+  classTypes?: ClassTypes[]
 ) {
   const presenceData = {} as Record<string, number>;
 
@@ -32,7 +32,7 @@ export function calculatePresenceByType(
   });
 
   // Combinar past instances com meetings que já passaram
-  const allPastEvents: Array<ZoomMeetingPastInstanceT | ZoomMeetingT> = [
+  const allPastEvents: Array<ZoomMeetingPastInstance | ZoomMeeting> = [
     ...zoomPastInstances,
     ...pastMeetings,
   ];
@@ -45,7 +45,7 @@ export function calculatePresenceByType(
     }
     acc[classType].push(event);
     return acc;
-  }, {} as Record<string, Array<ZoomMeetingPastInstanceT | ZoomMeetingT>>);
+  }, {} as Record<string, Array<ZoomMeetingPastInstance | ZoomMeeting>>);
 
   // calculando presença para cada tipo
   Object.keys(eventsByType).forEach((classType) => {
@@ -123,7 +123,7 @@ export function calculatePresenceByType(
  * @returns Presence percentage for the individual user
  */
 function calculateIndividualWeeklyPresence(
-  meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
+  meetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
   userEmail: string,
   options: {
     includeJustifications?: boolean;
@@ -140,7 +140,7 @@ function calculateIndividualWeeklyPresence(
   // Group meetings by week
   const meetingsByWeek = new Map<
     string,
-    (ZoomMeetingT | ZoomMeetingPastInstanceT)[]
+    (ZoomMeeting | ZoomMeetingPastInstance)[]
   >();
 
   meetings.forEach((meeting) => {
