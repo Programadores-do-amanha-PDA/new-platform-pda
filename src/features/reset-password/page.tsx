@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import BinaryGrid from "@/components/shared/binary-grid";
-import useAuth from "@/features/shared/auth";
+import { useAuth } from "@/features/shared/auth";
 
 import { RequestResetPasswordByEmail, SetNewPassword } from "./components";
 

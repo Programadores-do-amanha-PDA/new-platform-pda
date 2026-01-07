@@ -14,7 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { useCooldownManager } from "@/hooks/cooldown-manager";
-import useAuth from "@/features/shared/auth";
+import { useAuth } from "@/features/shared/auth";
 
 import { RequestResetPasswordByEmailSchema } from "../types";
 import { requestResetPasswordByEmailSchema } from "../utils";
