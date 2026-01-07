@@ -1,16 +1,16 @@
 "use client"
 import { Map } from "lucide-react";
-import { ActionPlanRowT } from "@/types";
+import { CoodeshAttemptActionPlanRow } from "../../types";
 
 const AttemptActionPlanCard = ({
   actionPlans,
 }: {
-  actionPlans: ActionPlanRowT[];
+  actionPlans: CoodeshAttemptActionPlanRow[];
 }) => {
   if (actionPlans.length === 0) {
     return (
-      <div className="w-full h-full flex flex-col justify-center items-center gap-4 py-4 px-2">
-        <Map className="size-12 stroke-muted-foreground" />
+      <div className="flex flex-col justify-center items-center gap-4 px-2 py-4 w-full h-full">
+        <Map className="stroke-muted-foreground size-12" />
         <p className="text-muted-foreground text-sm text-center">
           Nenhuma recomendação
         </p>
@@ -18,8 +18,8 @@ const AttemptActionPlanCard = ({
     );
   }
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center gap-4 py-4 px-2">
-      <p className="text-foreground text-2xl font-bold p-4 size-12 rounded-md bg-green-100 flex items-center justify-center">
+    <div className="flex flex-col justify-center items-center gap-4 px-2 py-4 w-full h-full">
+      <p className="flex justify-center items-center bg-green-100 p-4 rounded-md size-12 font-bold text-foreground text-2xl">
         {actionPlans.length}
       </p>
 

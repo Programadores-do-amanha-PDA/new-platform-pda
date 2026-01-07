@@ -23,7 +23,7 @@ import { MarkdownRenderer } from "@/components/shared/shiki-markdown";
 import { AttemptScoreRadialChart } from "./attempt-score-radial-chart";
 import AttemptIntegrityCard from "./attempt-integrity-card";
 import AttemptActionPlanCard from "./attempt-action-plan-card";
-import { ActionPlanRowT, ParticipantDataT } from "@/types";
+import { CoodeshAttemptParticipantData, CoodeshAttemptActionPlanRow } from "../../types";
 import { EVENT_TYPE_LABELS } from "../../utils/event-type";
 
 const AttemptDialog = ({
@@ -33,17 +33,17 @@ const AttemptDialog = ({
 }: {
   open: boolean;
   onClose: (open: boolean) => void;
-  attempt: ParticipantDataT;
+  attempt: CoodeshAttemptParticipantData;
 }) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-full! max-w-[700px]! max-h-[90vh]! overflow-hidden px-0">
-        <DialogHeader className="w-full h-full overflow-hidden px-4">
+      <DialogContent className="px-0 w-full! max-w-[700px]! max-h-[90vh]! overflow-hidden">
+        <DialogHeader className="px-4 w-full h-full overflow-hidden">
           <DialogTitle>{attempt.name}</DialogTitle>
           <DialogDescription>{attempt.email}</DialogDescription>
         </DialogHeader>
-        <div className="w-full max-h-[70vh]! flex flex-col gap-8 mt-4 overflow-y-auto px-4">
-          <header className="w-full flex justify-between gap-4">
+        <div className="flex flex-col gap-8 mt-4 px-4 w-full max-h-[70vh]! overflow-y-auto">
+          <header className="flex justify-between gap-4 w-full">
             <div className="border rounded-md size-40">
               <AttemptScoreRadialChart
                 chartData={[
@@ -74,7 +74,7 @@ const AttemptDialog = ({
             </TabsList>
             <TabsContent
               value="generalInformation"
-              className="w-full gap-1 bg-muted rounded-xl p-2"
+              className="gap-1 bg-muted p-2 rounded-xl w-full"
             >
               <div className="flex gap-2 text-sm">
                 <p className="text-muted-foreground">Dispositivo usado:</p>
@@ -115,9 +115,9 @@ const AttemptDialog = ({
                 {attempt.integrityEvents.filter(
                   (event) => event.eventType === "fullscreen_leave"
                 ).length > 0 ? (
-                  <p className="font-semibold uppercase text-red-400">sim</p>
+                  <p className="font-semibold text-red-400 uppercase">sim</p>
                 ) : (
-                  <p className="font-semibold uppercase text-green-400">não</p>
+                  <p className="font-semibold text-green-400 uppercase">não</p>
                 )}
               </div>
               <div className="flex gap-2 text-sm">
@@ -127,9 +127,9 @@ const AttemptDialog = ({
                 {attempt.integrityEvents.filter(
                   (event) => event.eventType === "tab_exit"
                 ).length > 0 ? (
-                  <p className="font-semibold uppercase text-red-400">sim</p>
+                  <p className="font-semibold text-red-400 uppercase">sim</p>
                 ) : (
-                  <p className="font-semibold uppercase text-green-400">não</p>
+                  <p className="font-semibold text-green-400 uppercase">não</p>
                 )}
               </div>
               <div className="flex gap-2 text-sm">
@@ -141,9 +141,9 @@ const AttemptDialog = ({
                     .filter((e) => e.ipAddress !== undefined)
                     .map((event) => event.ipAddress)
                 ).size > 0 ? (
-                  <p className="font-semibold uppercase text-red-400">sim</p>
+                  <p className="font-semibold text-red-400 uppercase">sim</p>
                 ) : (
-                  <p className="font-semibold uppercase text-green-400">não</p>
+                  <p className="font-semibold text-green-400 uppercase">não</p>
                 )}
               </div>
               <div className="flex gap-2 text-sm">
@@ -153,9 +153,9 @@ const AttemptDialog = ({
                     event.eventType === "copy_content" ||
                     event.eventType === "paste_content"
                 ).length > 0 ? (
-                  <p className="font-semibold uppercase text-red-400">sim</p>
+                  <p className="font-semibold text-red-400 uppercase">sim</p>
                 ) : (
-                  <p className="font-semibold uppercase text-green-400">não</p>
+                  <p className="font-semibold text-green-400 uppercase">não</p>
                 )}
               </div>
             </TabsContent>
@@ -197,7 +197,7 @@ const AttemptDialog = ({
                               })
                             : ""}
                         </TableCell>
-                        <TableCell className="text-right font-bold text-primary">
+                        <TableCell className="font-bold text-primary text-right">
                           {question.challengeScore
                             ? question.challengeScore.toFixed(0)
                             : "0"}
@@ -206,10 +206,10 @@ const AttemptDialog = ({
 
                         {question.challengeLink && (
                           <TableCell
-                            className="text-right cursor-pointer group"
+                            className="group text-right cursor-pointer"
                             onClick={() => window.open(question.challengeLink)}
                           >
-                            <SquareArrowOutUpRight className="size-4 stroke-muted-foreground ml-auto group-hover:stroke-primary" />
+                            <SquareArrowOutUpRight className="stroke-muted-foreground group-hover:stroke-primary ml-auto size-4" />
                           </TableCell>
                         )}
                       </TableRow>
@@ -243,7 +243,7 @@ const AttemptDialog = ({
                               })
                             : "N/A"}
                         </TableCell>
-                        <TableCell className="font-medium capitalize truncate">
+                        <TableCell className="font-medium truncate capitalize">
                           {EVENT_TYPE_LABELS[event.eventType] ||
                             event.eventType.replace("_", " ")}
                         </TableCell>
@@ -252,11 +252,11 @@ const AttemptDialog = ({
                           event.eventType === "fullscreen_leave" ||
                           event.eventType === "copy_content" ||
                           event.eventType === "paste_content" ? (
-                            <span className="text-red-400 font-semibold">
+                            <span className="font-semibold text-red-400">
                               Suspeito
                             </span>
                           ) : (
-                            <span className="text-green-400 font-semibold">
+                            <span className="font-semibold text-green-400">
                               Normal
                             </span>
                           )}
@@ -285,7 +285,7 @@ const AttemptDialog = ({
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {attempt.actionPlans.map((plan: ActionPlanRowT) => (
+                    {attempt.actionPlans.map((plan: CoodeshAttemptActionPlanRow) => (
                       <TableRow key={`plan-${plan.id}`}>
                         <TableCell className="font-medium truncate">
                           {plan.challenge}
@@ -299,7 +299,7 @@ const AttemptDialog = ({
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="text-left hover:bg-muted w-full justify-start"
+                                className="justify-start hover:bg-muted w-full text-left"
                                 disabled={!plan.actionPlanText}
                               >
                                 {plan.actionPlanText ? (
@@ -309,11 +309,11 @@ const AttemptDialog = ({
                                 )}
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+                            <DialogContent className="flex flex-col max-w-2xl max-h-[90vh] overflow-hidden">
                               <DialogHeader>
                                 <DialogTitle>Plano de Ação</DialogTitle>
                               </DialogHeader>
-                              <div className="p-4 bg-muted rounded-lg h-full overflow-y-auto">
+                              <div className="bg-muted p-4 rounded-lg h-full overflow-y-auto">
                                 <div className="whitespace-pre-wrap">
                                   {plan.actionPlanText ? (
                                     <MarkdownRenderer

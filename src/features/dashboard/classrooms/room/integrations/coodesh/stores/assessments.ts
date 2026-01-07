@@ -1,32 +1,27 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
-import {
-  createCoodeshAssessment,
-  getAllCoodeshAssessment,
-  updateCoodeshAssessment,
-  deleteCoodeshAssessment,
-} from "@/actions/classrooms/coodesh/assessments";
-import { ClassroomCoodeshAssessmentT } from "@/types";
+import { getAllCoodeshAssessmentByClassroomId, createCoodeshAssessment, updateCoodeshAssessment, deleteCoodeshAssessment } from "../actions";
+import { CoodeshAssessment } from "../types";
 
 interface CoodeshAssessmentState {
-  assessments: ClassroomCoodeshAssessmentT[];
+  assessments: CoodeshAssessment[];
   loading: boolean;
 }
 
 interface CoodeshAssessmentActions {
-  setAssessments: (assessments: ClassroomCoodeshAssessmentT[]) => void;
+  setAssessments: (assessments: CoodeshAssessment[]) => void;
   getAllAssessmentsByClassroomId: (classroomId: string) => Promise<boolean>;
   createAssessment: (
-    assessmentData: Partial<ClassroomCoodeshAssessmentT>
+    assessmentData: Partial<CoodeshAssessment>
   ) => Promise<boolean>;
   createManualAssessment: (
     classroomId: string,
-    assessmentData: Partial<ClassroomCoodeshAssessmentT>
+    assessmentData: Partial<CoodeshAssessment>
   ) => Promise<boolean>;
   updateAssessment: (
-    assessment: ClassroomCoodeshAssessmentT,
-    updatedData: Partial<ClassroomCoodeshAssessmentT>
+    assessment: CoodeshAssessment,
+    updatedData: Partial<CoodeshAssessment>
   ) => Promise<boolean>;
   deleteAssessment: (assessmentId: string) => Promise<boolean>;
   reset: () => void;
@@ -51,7 +46,7 @@ export const useCoodeshAssessmentStore = create<
         try {
           if (!classroomId) throw new Error("required fields");
 
-          const allAssessments = await getAllCoodeshAssessment(classroomId);
+          const allAssessments = await getAllCoodeshAssessmentByClassroomId({classroomId});
 
           if (!allAssessments)
             throw new Error("no assessment created successfully");
@@ -101,7 +96,7 @@ export const useCoodeshAssessmentStore = create<
           // Generate a unique assessment_id for manual assessments
           const assessment_id = assessmentData.assessment_id || "";
 
-          const manualAssessmentData: Partial<ClassroomCoodeshAssessmentT> = {
+          const manualAssessmentData: Partial<CoodeshAssessment> = {
             assessment_id,
             classroom_id: classroomId,
             name: assessmentData.name,
@@ -171,7 +166,7 @@ export const useCoodeshAssessmentStore = create<
       deleteAssessment: async (assessmentId) => {
         try {
           if (!assessmentId) {
-            throw new Error("Assessment ID is required");
+            throw new Error("CoodeshAssessmentPayload ID is required");
           }
 
           const deleted = await deleteCoodeshAssessment(assessmentId);

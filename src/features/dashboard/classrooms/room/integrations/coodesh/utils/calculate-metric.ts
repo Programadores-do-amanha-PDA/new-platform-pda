@@ -1,11 +1,11 @@
-import { ParticipantDataT } from "@/types/classroom-coodesh/attempts";
+import { CoodeshAttemptParticipantData } from "../types";
 
 interface MetricResult {
   [key: string]: number;
 }
 
 export function calculateOverallAccuracy(
-  participants: ParticipantDataT[]
+  participants: CoodeshAttemptParticipantData[]
 ): number {
   const validResults = participants
     .flatMap((p) => p.results)
@@ -25,7 +25,7 @@ export function calculateOverallAccuracy(
 }
 
 export function calculateAccuracyByChallenge(
-  participants: ParticipantDataT[]
+  participants: CoodeshAttemptParticipantData[]
 ): MetricResult {
   const challengeMap = participants.reduce((acc, participant) => {
     participant.results.forEach((result) => {
@@ -49,7 +49,7 @@ export function calculateAccuracyByChallenge(
 }
 
 export function calculateOverallAverageDuration(
-  participants: ParticipantDataT[]
+  participants: CoodeshAttemptParticipantData[]
 ): number {
   const validDurations = participants
     .flatMap((p) => p.results)
@@ -69,7 +69,7 @@ export function calculateOverallAverageDuration(
 }
 
 export function calculateAverageDurationByChallenge(
-  participants: ParticipantDataT[]
+  participants: CoodeshAttemptParticipantData[]
 ): MetricResult {
   const challengeMap = participants.reduce((acc, participant) => {
     participant.results.forEach((result) => {

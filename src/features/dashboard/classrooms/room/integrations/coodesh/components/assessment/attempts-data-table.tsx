@@ -36,23 +36,16 @@ import {
 
 import InsertAssessmentAttempts from "./insert-assessment-attempts";
 import AttemptDialog from "./attempt-dialog";
-
-import {
-  ActionPlanRowT,
-  IntegrityRowT,
-  ParticipantDataT,
-  ResultsRowT,
-  ClassroomCoodeshAssessmentT,
-} from "@/types";
+import { CoodeshAssessment, CoodeshAttemptParticipantData, CoodeshAttemptResultsRow, CoodeshAttemptIntegrityRow, CoodeshAttemptActionPlanRow } from "../../types";
 
 export function AttemptsDataTable({
   assessment,
   updateAssessment,
 }: {
-  assessment: ClassroomCoodeshAssessmentT | undefined;
+  assessment: CoodeshAssessment | undefined;
   updateAssessment: (
-    assessment: ClassroomCoodeshAssessmentT,
-    assessmentData: Partial<ClassroomCoodeshAssessmentT>
+    assessment: CoodeshAssessment,
+    assessmentData: Partial<CoodeshAssessment>
   ) => Promise<boolean>;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -60,11 +53,11 @@ export function AttemptsDataTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
-  const columns: ColumnDef<ParticipantDataT>[] = [
+  const columns: ColumnDef<CoodeshAttemptParticipantData>[] = [
     {
       id: "select",
       header: ({ table }) => (
-        <div className="w-full h-full flex justify-center items-center px-2 border-r">
+        <div className="flex justify-center items-center px-2 border-r w-full h-full">
           <Checkbox
             checked={
               table.getIsAllPageRowsSelected() ||
@@ -78,7 +71,7 @@ export function AttemptsDataTable({
         </div>
       ),
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center p-2 border-r border-b">
+        <div className="flex justify-center items-center p-2 border-r border-b w-full h-full">
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -93,7 +86,7 @@ export function AttemptsDataTable({
       accessorKey: "name",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <div className="flex justify-between items-center gap-4 px-2 border-r w-full h-full">
             <p>Nome</p>
             <Button
               variant="ghost"
@@ -108,9 +101,9 @@ export function AttemptsDataTable({
         );
       },
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <div className="flex justify-start items-center p-2 border-r border-b w-full h-full">
           <p
-            className="font-medium capitalize cursor-pointer hover:underline"
+            className="font-medium hover:underline capitalize cursor-pointer"
             onClick={() => handleOpenChangeAttemptDialog(true, row.original)}
           >
             {row.getValue("name")}
@@ -122,7 +115,7 @@ export function AttemptsDataTable({
       accessorKey: "email",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <div className="flex justify-between items-center gap-4 px-2 border-r w-full h-full">
             <p>Email</p>
             <Button
               variant="ghost"
@@ -137,7 +130,7 @@ export function AttemptsDataTable({
         );
       },
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-start items-center p-2 border-r border-b">
+        <div className="flex justify-start items-center p-2 border-r border-b w-full h-full">
           <span className="lowercase">{row.getValue("email")}</span>
         </div>
       ),
@@ -146,7 +139,7 @@ export function AttemptsDataTable({
       accessorKey: "results",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <div className="flex justify-between items-center gap-4 px-2 border-r w-full h-full">
             <p>Respostas</p>
             <Button
               variant="ghost"
@@ -161,8 +154,8 @@ export function AttemptsDataTable({
         );
       },
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center px-2 border-r border-b">
-          <span>{row.getValue<ResultsRowT[]>("results").length}</span>
+        <div className="flex justify-center items-center px-2 border-r border-b w-full h-full">
+          <span>{row.getValue<CoodeshAttemptResultsRow[]>("results").length}</span>
         </div>
       ),
     },
@@ -170,7 +163,7 @@ export function AttemptsDataTable({
       accessorKey: "integrityEvents",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <div className="flex justify-between items-center gap-4 px-2 border-r w-full h-full">
             <p>Integridade</p>
             <Button
               variant="ghost"
@@ -185,8 +178,8 @@ export function AttemptsDataTable({
         );
       },
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center px-2 border-r border-b">
-          <span>{row.getValue<IntegrityRowT[]>("integrityEvents").length}</span>
+        <div className="flex justify-center items-center px-2 border-r border-b w-full h-full">
+          <span>{row.getValue<CoodeshAttemptIntegrityRow[]>("integrityEvents").length}</span>
         </div>
       ),
     },
@@ -194,7 +187,7 @@ export function AttemptsDataTable({
       accessorKey: "actionPlans",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r">
+          <div className="flex justify-between items-center gap-4 px-2 border-r w-full h-full">
             <p>Planos de ações</p>
             <Button
               variant="ghost"
@@ -209,8 +202,8 @@ export function AttemptsDataTable({
         );
       },
       cell: ({ row }) => (
-        <div className="w-full h-full flex justify-center items-center px-2 border-r border-b">
-          <span>{row.getValue<ActionPlanRowT[]>("actionPlans").length}</span>
+        <div className="flex justify-center items-center px-2 border-r border-b w-full h-full">
+          <span>{row.getValue<CoodeshAttemptActionPlanRow[]>("actionPlans").length}</span>
         </div>
       ),
     },
@@ -218,7 +211,7 @@ export function AttemptsDataTable({
       accessorKey: "assessmentScore",
       header: ({ column }) => {
         return (
-          <div className="w-full h-full flex justify-between items-center px-2 gap-4 border-r bg-primary/15">
+          <div className="flex justify-between items-center gap-4 bg-primary/15 px-2 border-r w-full h-full">
             <p className="font-semibold">Pontuação</p>
             <Button
               variant="ghost"
@@ -234,16 +227,16 @@ export function AttemptsDataTable({
       },
       cell: ({ row }) => {
         return (
-          <div className="w-full h-full flex justify-center items-center px-2 border-r border-b bg-primary/15">
+          <div className="flex justify-center items-center bg-primary/15 px-2 border-r border-b w-full h-full">
             <p className="font-semibold">
-              {row.getValue<ResultsRowT[]>("results")[0].assessmentScore}%
+              {row.getValue<CoodeshAttemptResultsRow[]>("results")[0].assessmentScore}%
             </p>
           </div>
         );
       },
       sortingFn: (rowA, rowB, columnId) => {
-        const resultsA = rowA.getValue<ResultsRowT[]>(columnId);
-        const resultsB = rowB.getValue<ResultsRowT[]>(columnId);
+        const resultsA = rowA.getValue<CoodeshAttemptResultsRow[]>(columnId);
+        const resultsB = rowB.getValue<CoodeshAttemptResultsRow[]>(columnId);
 
         const scoreA = resultsA[0].assessmentScore;
         const scoreB = resultsB[0].assessmentScore;
@@ -254,7 +247,7 @@ export function AttemptsDataTable({
     {
       id: "actions",
       header: () => (
-        <div className="w-full h-full flex justify-center items-center px-2">
+        <div className="flex justify-center items-center px-2 w-full h-full">
           <p>Ações</p>
         </div>
       ),
@@ -263,10 +256,10 @@ export function AttemptsDataTable({
         const participant = row.original;
 
         return (
-          <div className="w-full h-full flex justify-center items-center p-2 border-b">
+          <div className="flex justify-center items-center p-2 border-b w-full h-full">
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="p-0 w-8 h-8">
                   <span className="sr-only">Open menu</span>
                   <MoreHorizontal />
                 </Button>
@@ -339,11 +332,11 @@ export function AttemptsDataTable({
   const [isAttemptDialogOpen, setIsAttemptDialogOpen] =
     useState<boolean>(false);
   const [selectedAttempt, setSelectedAttempt] =
-    useState<ParticipantDataT | null>(null);
+    useState<CoodeshAttemptParticipantData | null>(null);
 
   const handleOpenChangeAttemptDialog = (
     isOpen: boolean,
-    attempt: ParticipantDataT | null
+    attempt: CoodeshAttemptParticipantData | null
   ) => {
     if (isOpen === true && attempt) {
       setSelectedAttempt(attempt);
@@ -355,8 +348,8 @@ export function AttemptsDataTable({
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-4 w-full h-full">
+      <div className="flex justify-between items-center">
         <Input
           placeholder="Procurando por alguém?"
           value={
@@ -377,7 +370,7 @@ export function AttemptsDataTable({
             />
             <DropdownMenu>
               <DropdownMenuTrigger>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="p-0 w-8 h-8">
                   <span className="sr-only">Abrir menu</span>
                   <MoreHorizontal />
                 </Button>
@@ -405,13 +398,13 @@ export function AttemptsDataTable({
           </div>
         )}
       </div>
-      <div className="w-full h-full flex border rounded-lg overflow-hidden">
+      <div className="flex border rounded-lg w-full h-full overflow-hidden">
         <Table>
-          <TableHeader className="sticky top-0 bg-white z-10 p-0!">
+          <TableHeader className="top-0 z-10 sticky bg-white p-0!">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className="shadow rounded-t-lg! overflow-hidden p-0!"
+                className="shadow p-0! rounded-t-lg! overflow-hidden"
               >
                 {headerGroup.headers.map((header) => {
                   return (
@@ -434,12 +427,12 @@ export function AttemptsDataTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="p-0! h-full! border-0!"
+                  className="p-0! border-0! h-full!"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       key={cell.id}
-                      className="p-0! h-full!  border-0!"
+                      className="p-0! border-0! h-full!"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

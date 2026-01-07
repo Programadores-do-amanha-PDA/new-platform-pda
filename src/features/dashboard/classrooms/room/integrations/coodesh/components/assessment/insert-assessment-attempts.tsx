@@ -14,19 +14,19 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-import { ClassroomCoodeshAssessmentT, ParticipantDataT } from "@/types";
 import { formatParticipantsData } from "../../utils/format-participant-data";
 import FileUploadStage from "./file-upload-stage";
 import DataReviewStage from "./data-review-stage";
+import { CoodeshAssessment, CoodeshAttemptParticipantData } from "../../types";
 
 const InsertAssessmentAttempts = ({
   assessment,
   updateAssessment,
 }: {
-  assessment: ClassroomCoodeshAssessmentT | undefined;
+  assessment: CoodeshAssessment | undefined;
   updateAssessment: (
-    assessment: ClassroomCoodeshAssessmentT,
-    assessmentData: Partial<ClassroomCoodeshAssessmentT>
+    assessment: CoodeshAssessment,
+    assessmentData: Partial<CoodeshAssessment>
   ) => Promise<boolean>;
 }) => {
   const [open, setOpen] = useState(false);
@@ -37,7 +37,7 @@ const InsertAssessmentAttempts = ({
   const [integrityCsv, setIntegrityCsv] = useState<string | null>(null);
   const [actionPlansCsv, setActionPlansCsv] = useState<string | null>(null);
 
-  const [participantData, setParticipantData] = useState<ParticipantDataT[]>(
+  const [participantData, setParticipantData] = useState<CoodeshAttemptParticipantData[]>(
     []
   );
 
@@ -62,7 +62,7 @@ const InsertAssessmentAttempts = ({
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      if (!assessment?.id) throw new Error("Assessment ID is missing.");
+      if (!assessment?.id) throw new Error("CoodeshAssessmentPayload ID is missing.");
       if (!participantData) throw new Error("Participant data is missing.");
 
       // Get the existing participant data from the assessment
@@ -151,7 +151,7 @@ const InsertAssessmentAttempts = ({
           Carregar arquivos de respostas
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-[65vw]! w-full! overflow-hidden">
+      <DialogContent className="w-full! max-w-[65vw]! overflow-hidden">
         <DialogHeader>
           <DialogTitle>Carregar arquivos de respostas</DialogTitle>
           <DialogDescription>

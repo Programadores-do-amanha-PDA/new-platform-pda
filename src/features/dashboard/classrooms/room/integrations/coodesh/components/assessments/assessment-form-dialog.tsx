@@ -32,8 +32,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AssessmentPayloadT, ClassroomCoodeshAssessmentT } from "@/types";
 import { useCoodeshAssessmentStore } from "../../stores/assessments";
+import { CoodeshAssessmentPayload, CoodeshAssessment } from "../../types";
 
 const assessmentFormSchema = z.object({
   name: z
@@ -56,7 +56,7 @@ const assessmentFormSchema = z.object({
 type AssessmentFormData = z.infer<typeof assessmentFormSchema>;
 
 interface AssessmentFormDialogProps {
-  currentAssessment?: AssessmentPayloadT;
+  currentAssessment?: CoodeshAssessmentPayload;
   classroomId?: string;
   onSubmit?: (data: AssessmentFormData) => Promise<void>;
 }
@@ -111,7 +111,7 @@ const AssessmentFormDialog = ({
       } else if (currentAssessment) {
         // Update existing assessment
         await updateAssessment(
-          currentAssessment as ClassroomCoodeshAssessmentT,
+          currentAssessment as CoodeshAssessment,
           data
         );
       } else if (classroomId) {
@@ -195,7 +195,7 @@ const AssessmentFormDialog = ({
               )}
             />
 
-            <div className="w-full flex justify-between items-start gap-4">
+            <div className="flex justify-between items-start gap-4 w-full">
               <FormField
                 control={form.control}
                 name="default_locale"
@@ -281,7 +281,7 @@ const AssessmentFormDialog = ({
               />
             </div>
 
-            <DialogFooter className="w-full flex gap-4 mt-4">
+            <DialogFooter className="flex gap-4 mt-4 w-full">
               <Button
                 type="button"
                 variant="outline"

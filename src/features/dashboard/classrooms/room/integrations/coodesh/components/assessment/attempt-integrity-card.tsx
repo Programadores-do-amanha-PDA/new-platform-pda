@@ -1,16 +1,16 @@
 "use client";
 import { ShieldCheck } from "lucide-react";
-import { IntegrityRowT } from "@/types";
+import { CoodeshAttemptIntegrityRow } from "../../types";
 
 const AttemptIntegrityCard = ({
   integrityEvents,
 }: {
-  integrityEvents: IntegrityRowT[];
+  integrityEvents: CoodeshAttemptIntegrityRow[];
 }) => {
   if (integrityEvents.filter((event) => event.suspect === "Yes").length === 0) {
     return (
-      <div className="w-full h-full flex flex-col justify-center items-center gap-4 py-4 px-2">
-        <ShieldCheck className="size-12 stroke-green-400" />
+      <div className="flex flex-col justify-center items-center gap-4 px-2 py-4 w-full h-full">
+        <ShieldCheck className="stroke-green-400 size-12" />
         <p className="text-muted-foreground text-sm text-center">
           Nenhuma atividade suspeita encontrada
         </p>
@@ -18,8 +18,8 @@ const AttemptIntegrityCard = ({
     );
   }
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center gap-4 py-4 px-2">
-      <p className="text-foreground text-2xl font-bold p-4 size-12 rounded-md bg-red-100 flex items-center justify-center">
+    <div className="flex flex-col justify-center items-center gap-4 px-2 py-4 w-full h-full">
+      <p className="flex justify-center items-center bg-red-100 p-4 rounded-md size-12 font-bold text-foreground text-2xl">
         {integrityEvents.filter((event) => event.suspect === "Yes").length}
       </p>
 

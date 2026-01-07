@@ -15,7 +15,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
-import { AssessmentPayloadT } from "@/types";
+import { CoodeshAssessmentPayload } from "../../types";
 
 const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -64,19 +64,19 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
   return (
     <Sheet onOpenChange={handleOpen} open={openModal}>
       <SheetTrigger asChild>
-        <Button className="px-4! w-max items-start justify-start font-semibold">
+        <Button className="justify-start items-start px-4! w-max font-semibold">
           Anexar Avaliação
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="h-full flex flex-col">
+      <SheetContent className="flex flex-col h-full">
         <SheetHeader>
           <SheetTitle>Anexar Avaliação</SheetTitle>
           <SheetDescription>
             Anexe abaixo as avaliações da Coodesh que fazem parte desta turma
           </SheetDescription>
         </SheetHeader>
-        <main className="h-full flex flex-col gap-4 xl:gap-6 p-2 overflow-hidden">
+        <main className="flex flex-col gap-4 xl:gap-6 p-2 h-full overflow-hidden">
           <div>
             <Input
               placeholder="Procurando por algo?"
@@ -85,14 +85,14 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
             />
           </div>
           {!loading ? (
-            <ul className="p-2 h-full flex flex-col gap-4 xl:gap-6 py-2 overflow-y-auto">
+            <ul className="flex flex-col gap-4 xl:gap-6 p-2 py-2 h-full overflow-y-auto">
               {filteredAssessments.map(
-                (assessmentPayload: AssessmentPayloadT) => (
+                (assessmentPayload: CoodeshAssessmentPayload) => (
                   <li
                     key={assessmentPayload.assessment_id}
-                    className="w-full  h-max p-2 border rounded-lg"
+                    className="p-2 border rounded-lg w-full h-max"
                   >
-                    <div className="flex items-center gap-4 justify-between">
+                    <div className="flex justify-between items-center gap-4">
                       <div className="flex flex-col gap-1">
                         <h2
                           className="w-full font-semibold text-sm"
@@ -113,7 +113,7 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                             classroom_id: classroom_id,
                           })
                         }
-                        className="font-semibold min-w-9 min-h-9"
+                        className="min-w-9 min-h-9 font-semibold"
                         size={"icon"}
                       >
                         <Plus />
@@ -132,11 +132,11 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                       .includes(p.assessment_id)
                   )
               ).length === 0 && (
-                <div className="flex flex-col gap-2 h-full items-center justify-center">
-                  <h2 className="text-sm font-bold text-gray-800">
+                <div className="flex flex-col justify-center items-center gap-2 h-full">
+                  <h2 className="font-bold text-gray-800 text-sm">
                     Não ha avaliações disponíveis
                   </h2>
-                  <i className="text-xs text-muted-foreground px-2 text-center">
+                  <i className="px-2 text-muted-foreground text-xs text-center">
                     (Avaliações que ja estão anexadas a esta turma não aparecem
                     aqui.)
                   </i>
@@ -152,11 +152,11 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
                       .includes(p.assessment_id)
                   )
               ).length === 0 && (
-                <div className="flex flex-col gap-2 h-full items-center justify-center">
-                  <h2 className="text-sm font-bold text-gray-800">
+                <div className="flex flex-col justify-center items-center gap-2 h-full">
+                  <h2 className="font-bold text-gray-800 text-sm">
                     Não ha avaliações com esse título
                   </h2>
-                  <i className="text-xs text-muted-foreground px-2 text-center">
+                  <i className="px-2 text-muted-foreground text-xs text-center">
                     (Avaliações que ja estão anexadas a esta turma não aparecem
                     aqui.)
                   </i>
@@ -164,8 +164,8 @@ const AssessmentsSheetData = ({ classroom_id }: { classroom_id: string }) => {
               )}
             </ul>
           ) : (
-            <div className="h-full w-full flex items-center justify-center">
-              <LoaderCircle className="size-6 stroke-primary animate-spin" />
+            <div className="flex justify-center items-center w-full h-full">
+              <LoaderCircle className="stroke-primary size-6 animate-spin" />
             </div>
           )}
         </main>

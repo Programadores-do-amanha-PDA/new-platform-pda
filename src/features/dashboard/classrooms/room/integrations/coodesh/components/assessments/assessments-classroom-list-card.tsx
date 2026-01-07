@@ -14,12 +14,12 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DateIntervalPicker } from "@/components/shared/date-interval";
 
-import { ClassroomCoodeshAssessmentT } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { CoodeshAssessment } from "../../types";
 
 type AssessmentsClassroomListCardProps = {
-  assessment: ClassroomCoodeshAssessmentT;
+  assessment: CoodeshAssessment;
   expansive: boolean;
 };
 
@@ -108,7 +108,7 @@ const AssessmentsClassroomListCard = ({
   const handleUpdateAssessment = async () => {
     setLoading(true);
     try {
-      if (!assessment.id) throw new Error("Assessment ID is required");
+      if (!assessment.id) throw new Error("CoodeshAssessmentPayload ID is required");
 
       await updateAssessment(assessment, {
         accept_late_deliveries: acceptLateDeliveries,
@@ -123,8 +123,8 @@ const AssessmentsClassroomListCard = ({
   };
 
   return (
-    <li className="p-4 border rounded-lg max-w-xs w-80 h-max flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-4">
+    <li className="flex flex-col gap-4 p-4 border rounded-lg w-80 max-w-xs h-max">
+      <div className="flex justify-between items-center gap-4">
         <div className="flex flex-col gap-1 truncate">
           <div className="flex items-center gap-2">
             <Link
@@ -133,7 +133,7 @@ const AssessmentsClassroomListCard = ({
                   ? `${path}/${assessment.id}`
                   : `${path}/assessments/${assessment.id}`
               }
-              className="font-semibold truncate hover:underline cursor-pointer"
+              className="font-semibold hover:underline truncate cursor-pointer"
               title={assessment.name}
             >
               {assessment.name}
@@ -141,14 +141,14 @@ const AssessmentsClassroomListCard = ({
           </div>
           {assessment.description.length > 0 && (
             <p
-              className="text-sm h-5 text-gray-500"
+              className="h-5 text-gray-500 text-sm"
               title={assessment.description}
             >
               {assessment.description}
             </p>
           )}
           {assessment.duration && (
-            <p className="text-sm h-5 text-gray-500 flex gap-1">
+            <p className="flex gap-1 h-5 text-gray-500 text-sm">
               Duração:
               <p className="font-bold">
                 {assessment.duration}{" "}
@@ -158,16 +158,16 @@ const AssessmentsClassroomListCard = ({
           )}
 
           {assessment.questions.length > 0 && (
-            <p className="text-sm h-5 text-gray-500 flex gap-1">
+            <p className="flex gap-1 h-5 text-gray-500 text-sm">
               Questões:
               <p className="font-bold">{assessment.questions.length}</p>
             </p>
           )}
 
           {isExpired && (
-            <p className="text-sm h-5 text-gray-500 flex gap-1">
+            <p className="flex gap-1 h-5 text-gray-500 text-sm">
               Status:
-              <Badge className="text-xs bg-orange-200 text-orange-800">
+              <Badge className="bg-orange-200 text-orange-800 text-xs">
                 Finalizado
               </Badge>
             </p>
@@ -175,27 +175,27 @@ const AssessmentsClassroomListCard = ({
 
           {/* Mostrar métricas para assessments expirados */}
           {expansive && isExpired && assessmentMetrics && (
-            <div className="w-full h-max flex flex-col gap-1 mt-3 py-3 rounded-lg bg-orange-50">
-              <h4 className="text-sm font-semibold text-gray-700 px-3">
+            <div className="flex flex-col gap-1 bg-orange-50 mt-3 py-3 rounded-lg w-full h-max">
+              <h4 className="px-3 font-semibold text-gray-700 text-sm">
                 Resultados
               </h4>
               <Separator />
               <div className="flex flex-col gap-2 p-3 py-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-gray-600">Respostas:</span>
-                  <span className="text-sm font-bold">
+                  <span className="text-gray-600 text-sm">Respostas:</span>
+                  <span className="font-bold text-sm">
                     {assessmentMetrics.totalResponses}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-gray-600">Planos de ação</span>
-                  <span className="text-sm font-bold">
+                  <span className="text-gray-600 text-sm">Planos de ação</span>
+                  <span className="font-bold text-sm">
                     {assessmentMetrics.totalActionPlans}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm text-gray-600">Média geral</span>
-                  <span className="text-sm font-bold">
+                  <span className="text-gray-600 text-sm">Média geral</span>
+                  <span className="font-bold text-sm">
                     {assessmentMetrics.averageScore.toFixed(1)}%
                   </span>
                 </div>
@@ -206,8 +206,8 @@ const AssessmentsClassroomListCard = ({
       </div>
       {expansive && !isExpired && (
         <div className="flex flex-col items-start gap-4 bg-primary/25 p-4 rounded-xl">
-          <div className="w-full flex flex-col gap-6">
-            <div className="w-full flex flex-col gap-2">
+          <div className="flex flex-col gap-6 w-full">
+            <div className="flex flex-col gap-2 w-full">
               <Label htmlFor="startDate" className="font-semibold">
                 Período de entregas:
               </Label>

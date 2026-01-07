@@ -11,11 +11,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { CoodeshAttemptParticipantData } from "../../types";
 
-import { ParticipantDataT } from "@/types";
 
 interface DataReviewStageProps {
-  participantData: ParticipantDataT[];
+  participantData: CoodeshAttemptParticipantData[];
   loading: boolean;
   onSubmit: () => void;
   onBackToFileSelection: () => void;
@@ -29,32 +29,32 @@ const DataReviewStage = ({
 }: DataReviewStageProps) => {
   return (
     <>
-      <div className="w-full max-h-96 flex overflow-y-auto my-4 border rounded-lg">
+      <div className="flex my-4 border rounded-lg w-full max-h-96 overflow-y-auto">
         <Table className="w-full h-full">
-          <TableHeader className="sticky top-0 bg-sidebar z-10 border-0!">
+          <TableHeader className="top-0 z-10 sticky bg-sidebar border-0!">
             <TableRow className="border-0!">
-              <TableHead className="max-w-56 w-56 truncate font-semibold p-0! border-0!">
-                <div className="w-full h-full p-2 flex justify-start items-center border-r border-b">
+              <TableHead className="p-0! border-0! w-56 max-w-56 font-semibold truncate">
+                <div className="flex justify-start items-center p-2 border-r border-b w-full h-full">
                   Nome
                 </div>
               </TableHead>
-              <TableHead className="max-w-56 w-56 truncate font-semibold p-0! border-0!">
-                <div className="w-full h-full p-2 flex justify-start items-center border-r border-b">
+              <TableHead className="p-0! border-0! w-56 max-w-56 font-semibold truncate">
+                <div className="flex justify-start items-center p-2 border-r border-b w-full h-full">
                   Email
                 </div>
               </TableHead>
-              <TableHead className="max-w-32 w-32 truncate font-semibold p-0! border-0!">
-                <div className="w-full h-full p-2 flex justify-center items-center border-r border-b">
+              <TableHead className="p-0! border-0! w-32 max-w-32 font-semibold truncate">
+                <div className="flex justify-center items-center p-2 border-r border-b w-full h-full">
                   Respostas
                 </div>
               </TableHead>
-              <TableHead className="max-w-32 w-32 truncate font-semibold p-0! border-0!">
-                <div className="w-full h-full p-2 flex justify-center items-center border-r border-b">
+              <TableHead className="p-0! border-0! w-32 max-w-32 font-semibold truncate">
+                <div className="flex justify-center items-center p-2 border-r border-b w-full h-full">
                   Integridade
                 </div>
               </TableHead>
-              <TableHead className="max-w-32 w-32 truncate font-semibold p-0! border-0">
-                <div className="w-full h-full p-2 flex justify-center items-center border-b">
+              <TableHead className="p-0! border-0 w-32 max-w-32 font-semibold truncate">
+                <div className="flex justify-center items-center p-2 border-b w-full h-full">
                   Planos de ação
                 </div>
               </TableHead>
@@ -67,31 +67,31 @@ const DataReviewStage = ({
               .map((participant) => (
                 <TableRow key={participant.email} className="p-0! border-0!">
                   <TableCell className="p-0! border-0!">
-                    <div className="h-14! flex justify-start items-center border-r border-b p-2 truncate">
+                    <div className="flex justify-start items-center p-2 border-r border-b h-14! truncate">
                       {participant.name}
                     </div>
                   </TableCell>
                   <TableCell className="p-0!">
-                    <div className="h-14! flex justify-start items-center border-r border-b p-2 truncate">
+                    <div className="flex justify-start items-center p-2 border-r border-b h-14! truncate">
                       {participant.email}
                     </div>
                   </TableCell>
                   <TableCell className="p-0!">
-                    <div className="h-14! flex justify-center items-center border-r border-b p-2">
+                    <div className="flex justify-center items-center p-2 border-r border-b h-14!">
                       <span className="font-semibold">
                         {participant.results.length}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="p-0!">
-                    <div className="h-14! flex justify-center items-center border-r border-b p-2">
+                    <div className="flex justify-center items-center p-2 border-r border-b h-14!">
                       <span className="font-semibold">
                         {participant.integrityEvents.length}
                       </span>
                     </div>
                   </TableCell>
                   <TableCell className="p-0!">
-                    <div className="h-14! flex justify-center items-center border-b p-2">
+                    <div className="flex justify-center items-center p-2 border-b h-14!">
                       <span className="font-semibold">
                         {participant.actionPlans.length}
                       </span>
