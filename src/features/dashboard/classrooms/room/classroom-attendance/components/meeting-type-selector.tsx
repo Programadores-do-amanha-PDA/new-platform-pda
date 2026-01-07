@@ -8,27 +8,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { ClassroomConfigClassTypesT } from "../../classroom-configs/types";
+import { ClassTypes } from "../../settings/types";
 import {
   ZoomClassT,
-  ZoomMeetingPastInstanceT,
-  ZoomMeetingT,
-} from "../../classroom-zoom/types";
+  ZoomMeetingPastInstance,
+  ZoomMeeting,
+} from "../../integrations/zoom/types";
 import {
   useZoomMeetingPastInstanceStore,
   useZoomMeetingStore,
-} from "../../classroom-zoom/stores";
+} from "../../integrations/zoom/stores";
 
 const MeetingTypeSelector = ({
   options,
   meeting,
 }: {
-  options: ClassroomConfigClassTypesT[];
+  options: ClassTypes[];
   meeting:
-    | (ZoomMeetingPastInstanceT & {
+    | (ZoomMeetingPastInstance & {
         meeting_type: "meeting" | "pastInstance";
       })
-    | (ZoomMeetingT & {
+    | (ZoomMeeting & {
         meeting_type: "meeting" | "pastInstance";
       });
 }) => {
@@ -45,7 +45,7 @@ const MeetingTypeSelector = ({
 
   return (
     <Select value={meeting.class_type} onValueChange={handleValueChange}>
-      <SelectTrigger className="h-7! w-full">
+      <SelectTrigger className="w-full h-7!">
         <SelectValue placeholder="Tipo de reunião" className="h-7!" />
       </SelectTrigger>
       <SelectContent>

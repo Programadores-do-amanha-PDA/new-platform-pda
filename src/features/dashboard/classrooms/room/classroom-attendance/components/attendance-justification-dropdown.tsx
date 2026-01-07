@@ -12,15 +12,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader, Pen, Trash } from "lucide-react";
 import { useState } from "react";
 
-import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../classroom-zoom/stores";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
+import { useZoomMeetingPastInstanceStore, useZoomMeetingStore } from "../../integrations/zoom/stores";
+import { ZoomMeetingPastInstance, ZoomMeeting } from "../../integrations/zoom/types";
 
 export function AttendanceJustificationDropdown({
   currentMeeting,
   currentUserEmail,
   type,
 }: {
-  currentMeeting: ZoomMeetingT | ZoomMeetingPastInstanceT;
+  currentMeeting: ZoomMeeting | ZoomMeetingPastInstance;
   currentUserEmail: string;
   type: "meeting" | "pastInstance";
 }) {
@@ -98,20 +98,20 @@ export function AttendanceJustificationDropdown({
           onClick={() => {}}
           className="ml-auto"
         >
-          <Pen className="size-3 stroke-muted-foreground" />
+          <Pen className="stroke-muted-foreground size-3" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         <DropdownMenuLabel>Justificar Falta</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <div className="w-full max-w-72 max-h-56 flex flex-col p-2 gap-2">
+        <div className="flex flex-col gap-2 p-2 w-full max-w-72 max-h-56">
           <Textarea
             value={justification}
             onChange={(e) => setJustification(e.target.value)}
             placeholder="Qual a justificativa?"
-            className="resize-none w-full h-full"
+            className="w-full h-full resize-none"
           />
-          <div className="w-full flex flex-row gap-2 items-center justify-between">
+          <div className="flex flex-row justify-between items-center gap-2 w-full">
             {currentJustification && (
               <Button
                 disabled={loading || deleteLoading}
@@ -121,7 +121,7 @@ export function AttendanceJustificationDropdown({
                 className="!min-w-9"
               >
                 {!deleteLoading ? (
-                  <Trash className="size-3 " />
+                  <Trash className="size-3" />
                 ) : (
                   <Loader className="size-5 animate-spin" />
                 )}
@@ -136,7 +136,7 @@ export function AttendanceJustificationDropdown({
                   currentJustification.message === justification)
               }
               onClick={handleAddJustification}
-              className="w-1/2 ml-auto"
+              className="ml-auto w-1/2"
             >
               {loading && <Loader className="size-5 animate-spin" />}
               {!loading

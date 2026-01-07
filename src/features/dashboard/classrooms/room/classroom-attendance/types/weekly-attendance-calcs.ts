@@ -1,9 +1,9 @@
-import { ClassroomConfigClassTypesT, ClassroomConfigJustificationT } from "../../classroom-configs/types";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
+import { ClassTypes, SettingJustification } from "../../settings/types";
+import { ZoomMeetingPastInstance, ZoomMeeting } from "../../integrations/zoom/types";
 
 export interface WeeklyPresenceDataT {
     weekStart: Date;
-    meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[];
+    meetings: (ZoomMeeting | ZoomMeetingPastInstance)[];
     presencePercentage: number;
     presentUsers: string[];
 }
@@ -20,9 +20,9 @@ export interface AttendanceCalculationOptionsT {
 
 export interface CalculateUserWeeklyAttendancePropsT {
     userEmail: string;
-    currentMeeting: ZoomMeetingT | ZoomMeetingPastInstanceT;
-    weekMeetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[];
-    currentClassType?: ClassroomConfigClassTypesT;
-    availableJustifications?: ClassroomConfigJustificationT[];
+    currentMeeting: ZoomMeeting | ZoomMeetingPastInstance;
+    weekMeetings: (ZoomMeeting | ZoomMeetingPastInstance)[];
+    currentClassType?: ClassTypes;
+    availableJustifications?: SettingJustification[];
     shouldAggregateInMetric?: boolean;
 }

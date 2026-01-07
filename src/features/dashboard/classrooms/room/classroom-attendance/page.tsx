@@ -1,15 +1,14 @@
 "use client";
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
-import { useUsersStore } from "@/stores/modules/users/users-store";
+import { useUsersStore } from "@/features/dashboard/shared/users/store";
 
 import AttendanceTable from "./components/attendance-table";
-import { ZoomMeetingPastInstanceT } from "../classroom-zoom/types";
-import { filterVisibilityClassroomStudents } from "../utils/filter-visibility-classroom-students";
-import { filterMetricClassroomStudents } from "../utils/filter-metric-classroom-students";
-import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../classroom-zoom/stores";
-import { AttendanceAllPastMeetingT } from "./types";
+import { ZoomMeetingPastInstance } from "../integrations/zoom/types";
+import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../integrations/zoom/stores";
+import { ZoomPastMeetingAndPastInstanciesAttendance } from "./types";
+import { filterVisibilityClassroomStudents, filterMetricClassroomStudents } from "../../shared/utils";
+import { useClassroomSettingStore } from "../settings";
 
 export default function AttendancePage() {
     const { classroom_id } = useParams<{ classroom_id: string }>();
@@ -17,14 +16,14 @@ export default function AttendancePage() {
     const { users } = useUsersStore();
     const { meetings } = useZoomMeetingStore();
     const { pastInstances } = useZoomMeetingPastInstanceStore();
-    const { configsByClassroom } = useClassroomConfigStore();
+    const { settingsByClassroom } = useClassroomSettingStore();
 
     const allPastsMeetings = useMemo(() => {
         // eslint-disable-next-line
         const now = Date.now();
 
         // Get past instances directly from the store and add meeting info
-        const pastsMeetings: ZoomMeetingPastInstanceT[] = pastInstances
+        const pastsMeetings: ZoomMeetingPastInstance[] = pastInstances
             ?.map((pastInstance) => ({
                 ...pastInstance,
                 meeting_type: "pastInstance",
@@ -45,18 +44,18 @@ export default function AttendancePage() {
         return <div>Turma não encontrada.</div>;
     }
 
-    const userModes = configsByClassroom[classroom_id]?.user_modes || [];
+    const userModes = settingsByClassroom[classroom_id]?.user_modes || [];
 
     const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, userModes, "attendance");
 
     const allAggregateInMetricUsers = filterMetricClassroomStudents(users, classroom_id, userModes, "attendance");
 
     return (
-        <div className="w-full h-full p-4">
+        <div className="p-4 w-full h-full">
             <AttendanceTable
                 allVisibleUsers={allVisibleUsers}
                 allAggregateInMetricUsers={allAggregateInMetricUsers}
-                meetings={allPastsMeetings as AttendanceAllPastMeetingT[]}
+                meetings={allPastsMeetings as ZoomPastMeetingAndPastInstanciesAttendance[]}
                 classroomId={classroom_id}
             />
         </div>

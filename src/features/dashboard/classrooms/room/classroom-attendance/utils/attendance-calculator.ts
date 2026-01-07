@@ -1,13 +1,7 @@
-import {
-  ClassroomConfigClassTypesLimitT,
-  ClassroomConfigJustificationT,
-} from "@/features/dashboard/classroom-configs/types";
-import {
-  ZoomMeetingT,
-  ZoomMeetingPastInstanceT,
-} from "@/features/dashboard/classroom-zoom/types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { ZoomMeeting, ZoomMeetingPastInstance } from "../../integrations/zoom/types";
+import { SettingJustification, ClassTypesLimit } from "../../settings";
 import { AttendanceCalcResultT, CalculateUserAttendancePropsT } from "../types";
-import { AuthUserWithProfileT } from "@/types";
 
 /**
  * Calculates user attendance status and participation minutes for a meeting
@@ -43,7 +37,7 @@ import { AuthUserWithProfileT } from "@/types";
  * @remarks
  * - Justifications take precedence over participation time
  * - Uses default rules when class type configuration is missing
- * - Handles both ZoomMeetingT and ZoomMeetingPastInstanceT
+ * - Handles both ZoomMeeting and ZoomMeetingPastInstance
  * - Returns "--" limit for users not in metrics without presence/justification
  */
 export function calculateUserAttendance({
@@ -53,12 +47,10 @@ export function calculateUserAttendance({
   availableJustifications,
   shouldAggregateInMetric = true,
 }: CalculateUserAttendancePropsT): AttendanceCalcResultT {
-  // Check if user has provided a justification for this meeting
   const userJustification = meeting?.justifications?.find(
     (justification) => justification.user_email === userEmail
   );
 
-  // Handle justified absence case
   if (userJustification) {
     // Fallback to default justification if none are configured
     if (!availableJustifications || availableJustifications.length === 0) {
@@ -81,13 +73,11 @@ export function calculateUserAttendance({
     };
   }
 
-  // Find all user participation's in this meeting
   const userParticipations =
     meeting?.participants?.filter(
       (participant) => participant.user_email === userEmail
     ) || [];
 
-  // Calculate total minutes attended (convert from seconds to minutes)
   const totalMinutesAttended = Math.round(
     userParticipations.reduce(
       (accumulator, participation) => accumulator + participation.duration,
@@ -99,7 +89,6 @@ export function calculateUserAttendance({
   if (!meeting?.class_type || !currentClassType) {
     const defaultLimit = getDefaultLimit(totalMinutesAttended);
 
-    // Check if user shouldn't be in metrics and doesn't have presence
     if (!shouldAggregateInMetric && !defaultLimit.is_presence) {
       return {
         minutesAttended: totalMinutesAttended,
@@ -138,7 +127,7 @@ export function calculateUserAttendance({
  *
  * @returns Default justified absence configuration
  */
-function getDefaultJustification(): ClassroomConfigJustificationT {
+function getDefaultJustification(): SettingJustification {
   return {
     id: "default-justified",
     key: "FJ",
@@ -153,13 +142,13 @@ function getDefaultJustification(): ClassroomConfigJustificationT {
  *
  * @returns Not in metric limit configuration
  */
-function getNotInMetricLimit(): ClassroomConfigClassTypesLimitT {
+function getNotInMetricLimit(): ClassTypesLimit {
   return {
     id: "not-in-metric",
     min: 0,
     key: "--",
     title: "Não contabilizado na métrica",
-    color: "#6b7280", // muted color
+    color: "#6b7280",
     allow_justification: false,
     is_presence: false,
   };
@@ -177,8 +166,8 @@ function getNotInMetricLimit(): ClassroomConfigClassTypesLimitT {
  */
 function findBestJustification(
   message: string,
-  justifications: ClassroomConfigJustificationT[]
-): ClassroomConfigJustificationT {
+  justifications: SettingJustification[]
+): SettingJustification {
   if (justifications.length === 0) {
     return getDefaultJustification();
   }
@@ -203,7 +192,7 @@ function findBestJustification(
  */
 function getDefaultLimit(
   minutesAttended: number
-): ClassroomConfigClassTypesLimitT {
+): ClassTypesLimit {
   if (minutesAttended >= 60) {
     return {
       id: "default-present",
@@ -251,12 +240,10 @@ function getDefaultLimit(
  */
 function findBestLimit(
   minutesAttended: number,
-  limits: ClassroomConfigClassTypesLimitT[]
-): ClassroomConfigClassTypesLimitT | undefined {
-  // Sort limits by minimum requirement (highest to lowest)
+  limits: ClassTypesLimit[]
+): ClassTypesLimit | undefined {
   const sortedLimits = [...limits].sort((a, b) => b.min - a.min);
 
-  // Find the first limit that matches the attendance criteria
   for (const limit of sortedLimits) {
     const meetsMinimum = minutesAttended >= limit.min;
     const withinMaximum =
@@ -272,8 +259,8 @@ function findBestLimit(
 }
 
 export function calculateClassPresence(
-  meeting: ZoomMeetingT | ZoomMeetingPastInstanceT,
-  users: Partial<AuthUserWithProfileT>[]
+  meeting: ZoomMeeting | ZoomMeetingPastInstance,
+  users: Partial<AuthUserWithProfile>[]
 ): number {
   if (!meeting.participants || meeting.participants.length === 0) {
     return 0;

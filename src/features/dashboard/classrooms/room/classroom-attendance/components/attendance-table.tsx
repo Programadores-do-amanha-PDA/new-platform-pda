@@ -20,9 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { DateIntervalPaginationControl } from "@/components/shared/date-interval";
-import { useClassroomConfigStore } from "@/features/dashboard/classroom-configs/stores";
 import { cn } from "@/lib/utils";
-import { AuthUserWithProfileT } from "@/types";
 
 import MeetingTypeSelector from "./meeting-type-selector";
 import { AttendanceJustificationDropdown } from "./attendance-justification-dropdown";
@@ -30,6 +28,8 @@ import { usersColumns } from "./attendance-table-users-columns";
 import { calculateClassPresence, calculateUserAttendance } from "../utils";
 import { calculateUserWeeklyAttendance, getMeetingsByWeek } from "../utils/weekly-attendance-calcs";
 import { AttendanceTableProps } from "../types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { useClassroomSettingStore } from "../../settings";
 
 export default function AttendanceTable({
     allVisibleUsers,
@@ -41,12 +41,12 @@ export default function AttendanceTable({
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [dateRange, setDateRange] = useState<DateRange | null>(null);
 
-    const { configsByClassroom } = useClassroomConfigStore();
+    const { settingsByClassroom } = useClassroomSettingStore();
 
     const currentConfig = useMemo(() => {
-        if (configsByClassroom[classroomId]) return configsByClassroom[classroomId];
+        if (settingsByClassroom[classroomId]) return settingsByClassroom[classroomId];
         else return null;
-    }, [configsByClassroom, classroomId]);
+    }, [settingsByClassroom, classroomId]);
 
     const classroomModules = useMemo(() => {
         if (currentConfig && currentConfig.modules) return currentConfig.modules;
@@ -89,13 +89,13 @@ export default function AttendanceTable({
     };
 
     // Create dynamic columns for meetings
-    const meetingColumns: ColumnDef<Partial<AuthUserWithProfileT>>[] = useMemo(() => {
+    const meetingColumns: ColumnDef<Partial<AuthUserWithProfile>>[] = useMemo(() => {
         return displayedMeetings.map((meeting, index) => ({
             id: `meeting-${meeting.id}-${index}`,
             header: () => {
                 return (
-                    <div className="w-[155px]! h-full flex flex-col justify-center items-center border-r border-b">
-                        <div className="w-[155px]! h-11 flex justify-center items-center border-b px-2">
+                    <div className="flex flex-col justify-center items-center border-r border-b w-[155px]! h-full">
+                        <div className="flex justify-center items-center px-2 border-b w-[155px]! h-11">
                             <p className="font-bold">
                                 {new Date(meeting.start_time || 0).getTime() === new Date().getTime()
                                     ? "Hoje"
@@ -106,14 +106,14 @@ export default function AttendanceTable({
                                       })}
                             </p>
                         </div>
-                        <div className="w-[155px]! h-11 flex justify-center items-center p-2">
+                        <div className="flex justify-center items-center p-2 w-[155px]! h-11">
                             <MeetingTypeSelector
                                 key={`MeetingTypeSelector-${meeting.id}-${index}`}
                                 meeting={meeting}
                                 options={classroomClassTypes}
                             />
                         </div>
-                        <div className="w-[155px]! h-11 flex justify-center items-center gap-1 border-t px-2">
+                        <div className="flex justify-center items-center gap-1 px-2 border-t w-[155px]! h-11">
                             <p>{calculateClassPresence(meeting, allAggregateInMetricUsers)}%</p>
                         </div>
                     </div>
@@ -150,7 +150,7 @@ export default function AttendanceTable({
                 }
 
                 return (
-                    <div className="w-[155px]! h-[57px] flex items-center justify-between gap-1 px-2 border-b border-r">
+                    <div className="flex justify-between items-center gap-1 px-2 border-r border-b w-[155px]! h-[57px]">
                         <div className="flex flex-col">
                             <p
                                 className="font-semibold"
@@ -165,7 +165,7 @@ export default function AttendanceTable({
                             </p>
 
                             {userAttendance.minutesAttended > 0 && userAttendance?.limit?.key !== "--" && (
-                                <p className="text-sm text-muted-foreground">{userAttendance.minutesAttended}M</p>
+                                <p className="text-muted-foreground text-sm">{userAttendance.minutesAttended}M</p>
                             )}
                         </div>
                         {userEmail &&
@@ -213,8 +213,8 @@ export default function AttendanceTable({
     });
 
     return (
-        <div className="w-full h-full flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 w-full h-full">
+            <div className="flex justify-between items-center">
                 <Input
                     placeholder="Procurando por alguém?"
                     value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
@@ -224,18 +224,18 @@ export default function AttendanceTable({
                 <DateIntervalPaginationControl onDateRangeChange={handleDateRangeChange} modules={classroomModules} />
             </div>
 
-            <div className="rounded-md border flex w-full h-full overflow-y-auto">
+            <div className="flex border rounded-md w-full h-full overflow-y-auto">
                 <Table className="w-max">
-                    <TableHeader className="bg-sidebar border-0! sticky top-0 left-0 right-0 z-20 overflow-hidden">
+                    <TableHeader className="top-0 right-0 left-0 z-20 sticky bg-sidebar border-0! overflow-hidden">
                         {table.getHeaderGroups().map((headerGroup) => (
-                            <TableRow key={headerGroup.id} className="max-w-[155px]! border-0! !p-0 h-max">
+                            <TableRow key={headerGroup.id} className="p-0! border-0! max-w-[155px]! h-max">
                                 {headerGroup.headers.map((header) => {
                                     const isUserColumn = header.id === "profile";
                                     return (
                                         <TableHead
                                             key={header.id}
                                             className={cn(
-                                                "w-full h-max !p-0 !m-0 !border-0",
+                                                "m-0! p-0! border-0! w-full h-max",
                                                 isUserColumn && "sticky left-0 bg-sidebar z-10",
                                             )}
                                         >
@@ -254,7 +254,7 @@ export default function AttendanceTable({
                                 <TableRow
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
-                                    className="group/row max-w-[155px]! w-full border-0!"
+                                    className="group/row border-0! w-full max-w-[155px]!"
                                 >
                                     {row.getVisibleCells().map((cell) => {
                                         const isUserColumn = cell.column.id === "profile";
@@ -262,7 +262,7 @@ export default function AttendanceTable({
                                         return (
                                             <TableCell
                                                 key={cell.id}
-                                                className={cn("w-max p-0 h-full border-0!", isUserColumn && "sticky left-0")}
+                                                className={cn("p-0 border-0! w-max h-full", isUserColumn && "sticky left-0")}
                                             >
                                                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                             </TableCell>

@@ -1,8 +1,7 @@
 import { startOfWeek } from "date-fns";
-import { AuthUserWithProfileT } from "@/types";
-import { ZoomMeetingPastInstanceT, ZoomMeetingT } from "../../classroom-zoom/types";
+import { ZoomMeetingPastInstance, ZoomMeeting } from "../../integrations/zoom/types";
 import { calculateUserAttendance } from "./attendance-calculator";
-import { ClassroomConfigJustificationT, ClassroomConfigClassTypesT } from "../../classroom-configs/types";
+import { SettingJustification, ClassTypes } from "../../settings/types";
 import {
     AttendanceCalculationOptionsT,
     WeeklyClassPresenceResultT,
@@ -10,6 +9,7 @@ import {
     AttendanceCalcResultT,
     CalculateUserWeeklyAttendancePropsT,
 } from "../types";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 /**
  * Default configuration for attendance calculations
@@ -30,7 +30,7 @@ const DEFAULT_OPTIONS: Required<AttendanceCalculationOptionsT> = {
  * ## Key Features
  * - Groups meetings by calendar week
  * - Considers users present if they attended at least one meeting in the week
- * - Supports both ZoomMeetingT and ZoomMeetingPastInstanceT
+ * - Supports both ZoomMeeting and ZoomMeetingPastInstance
  * - Handles justification-based presence
  * - Provides detailed weekly breakdowns
  *
@@ -62,8 +62,8 @@ const DEFAULT_OPTIONS: Required<AttendanceCalculationOptionsT> = {
  * - Users without email addresses are excluded from presence tracking
  */
 export function calculateWeeklyClassPresence(
-    meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
-    users: Partial<AuthUserWithProfileT>[],
+    meetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
+    users: Partial<AuthUserWithProfile>[],
     options: AttendanceCalculationOptionsT = {},
 ): WeeklyClassPresenceResultT {
     const config = { ...DEFAULT_OPTIONS, ...options };
@@ -89,18 +89,18 @@ export function calculateWeeklyClassPresence(
 /**
  * Filters users with valid email addresses for attendance tracking
  */
-function filterValidUsers(users: Partial<AuthUserWithProfileT>[]): AuthUserWithProfileT[] {
-    return users.filter((user): user is AuthUserWithProfileT => !!user.email && typeof user.email === "string");
+function filterValidUsers(users: Partial<AuthUserWithProfile>[]): AuthUserWithProfile[] {
+    return users.filter((user): user is AuthUserWithProfile => !!user.email && typeof user.email === "string");
 }
 
 /**
  * Groups meetings by their calendar week for presence analysis
  */
 function groupMeetingsByWeek(
-    meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
+    meetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
     weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6,
-): Map<string, { weekStart: Date; meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[] }> {
-    const weekGroups = new Map<string, { weekStart: Date; meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[] }>();
+): Map<string, { weekStart: Date; meetings: (ZoomMeeting | ZoomMeetingPastInstance)[] }> {
+    const weekGroups = new Map<string, { weekStart: Date; meetings: (ZoomMeeting | ZoomMeetingPastInstance)[] }>();
 
     meetings.forEach((meeting) => {
         if (!meeting.start_time) return;
@@ -126,8 +126,8 @@ function groupMeetingsByWeek(
  * Calculates presence data for each week group
  */
 function calculateWeeklyPresenceDataT(
-    weekGroups: Map<string, { weekStart: Date; meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[] }>,
-    users: AuthUserWithProfileT[],
+    weekGroups: Map<string, { weekStart: Date; meetings: (ZoomMeeting | ZoomMeetingPastInstance)[] }>,
+    users: AuthUserWithProfile[],
     config: Required<AttendanceCalculationOptionsT>,
 ): Record<string, WeeklyPresenceDataT> {
     const weeklyPresence: Record<string, WeeklyPresenceDataT> = {};
@@ -152,10 +152,10 @@ function calculateWeeklyPresenceDataT(
  * Identifies users present in at least one meeting during the week
  */
 function calculatePresentUsersForWeek(
-    weekMeetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
-    users: AuthUserWithProfileT[],
-    currentClassType?: ClassroomConfigClassTypesT,
-    availableJustifications?: ClassroomConfigJustificationT[],
+    weekMeetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
+    users: AuthUserWithProfile[],
+    currentClassType?: ClassTypes,
+    availableJustifications?: SettingJustification[],
     shouldAggregateInMetric: boolean = true,
 ): Set<string> {
     const presentUsers = new Set<string>();
@@ -239,10 +239,10 @@ function calculateOverallPresence(weeklyPresence: Record<string, WeeklyPresenceD
  */
 export function calculateUserWeeklyPresence(
     userEmail: string,
-    meetings: (ZoomMeetingT | ZoomMeetingPastInstanceT)[],
+    meetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
     includeJustifications: boolean = true,
-    currentClassType?: ClassroomConfigClassTypesT,
-    availableJustifications?: ClassroomConfigJustificationT[],
+    currentClassType?: ClassTypes,
+    availableJustifications?: SettingJustification[],
     shouldAggregateInMetric: boolean = true,
 ): boolean {
     if (!userEmail || !meetings.length) {
@@ -349,7 +349,7 @@ export function calculateUserWeeklyAttendance({
 /**
  * Provides a default justification for weekly meetings when user attended other meetings in the week
  */
-function getDefaultWeeklyJustification(): ClassroomConfigJustificationT {
+function getDefaultWeeklyJustification(): SettingJustification {
     return {
         id: "weekly-justified",
         key: "JS",
