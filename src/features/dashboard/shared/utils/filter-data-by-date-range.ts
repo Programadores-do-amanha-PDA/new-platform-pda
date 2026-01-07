@@ -34,28 +34,24 @@
  * - Inclusive range (includes both 'from' and 'to' dates)
  */
 
-export const filterDataByDateRange = <T>(
-  data: T[],
-  dateField: keyof T,
-  dateRange: { from: Date; to: Date } | null
-): T[] => {
-  // Early return if no date range provided - no filtering needed
-  if (!dateRange) return data;
+type FilterDataByDateRangeParams<T> = {
+    data: T[];
+    dateField: keyof T;
+    dateRange: { from: Date; to: Date } | null;
+};
 
-  return data.filter((item) => {
-    // Extract the date value from the specified field
-    const itemDate = item[dateField];
+export const filterDataByDateRange = <T>({ data, dateField, dateRange }: FilterDataByDateRangeParams<T>): T[] => {
+    if (!dateRange) return data;
 
-    // Skip items with missing or nullish date values
-    if (!itemDate) return false;
+    return data.filter((item) => {
+        if (!item) return false;
 
-    // Convert to Date object regardless of original format (string, Date, etc.)
-    const date = new Date(itemDate as unknown as string | Date);
+        const itemDate = item[dateField];
+        if (!itemDate) return false;
 
-    // Validate the converted date - exclude invalid dates
-    if (isNaN(date.getTime())) return false;
+        const date = new Date(itemDate as unknown as string | Date);
+        if (isNaN(date.getTime())) return false;
 
-    // Check if date falls within the specified range (inclusive)
-    return date >= dateRange.from && date <= dateRange.to;
-  });
+        return date >= dateRange.from && date <= dateRange.to;
+    });
 };

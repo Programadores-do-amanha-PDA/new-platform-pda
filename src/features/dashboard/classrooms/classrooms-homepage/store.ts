@@ -1,14 +1,9 @@
-import {
-  createClassroom,
-  deleteClassroom,
-  getAllClassrooms,
-  updateClassroom,
-} from "@/actions";
 import { ClassroomT } from "@/types/classrooms";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 import { safeIconName } from "@/utils/lucide-safe";
+import { getAllClassrooms, createClassroom, updateClassroom, deleteClassroom } from "./actions";
 
 interface ClassroomState {
   classrooms: ClassroomT[];

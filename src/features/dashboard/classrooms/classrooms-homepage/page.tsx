@@ -1,6 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
-import { useClassroomStore } from "./stores/classrooms";
+import { useClassroomStore } from "./store";
 import { Input } from "@/components/ui/input";
 import ClassroomFormDialog from "./components/classroom-form-dialog";
 import ClassroomCard from "./components/classroom-card";
@@ -31,8 +31,8 @@ const TeamPage = () => {
   }, [classrooms, searchQuery]);
 
   return (
-    <div className="w-full h-max py-4 px-2 flex flex-col gap-6 overflow-hidden">
-      <header className="w-full flex items-center justify-between flex-wrap p-2 gap-4">
+    <div className="flex flex-col gap-6 px-2 py-4 w-full h-max overflow-hidden">
+      <header className="flex flex-wrap justify-between items-center gap-4 p-2 w-full">
         <Input
           placeholder="Procurando por algo?"
           value={searchQuery}
@@ -44,9 +44,9 @@ const TeamPage = () => {
         </PermissionGuard>
       </header>
 
-      <ul className="w-full h-full flex flex-wrap items-start gap-4 overflow-y-auto px-2 pb-4">
+      <ul className="flex flex-wrap items-start gap-4 px-2 pb-4 w-full h-full overflow-y-auto">
         {displayedClassrooms.length === 0 && (
-          <p className="w-full h-full text-center text-lg font-semibold">
+          <p className="w-full h-full font-semibold text-lg text-center">
             Nenhuma turma encontrada
           </p>
         )}

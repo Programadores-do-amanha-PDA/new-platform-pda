@@ -20,7 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import ClassroomPeriodSelector from "./classroom-period-selector";
 import ClassroomStatusSelector from "./classroom-status-selector";
 import { ClassroomT } from "@/types/classrooms";
-import { useClassroomStore } from "../stores/classrooms";
+import { useClassroomStore } from "../store";
 import { IconPicker, IconName } from "@/components/ui/icon-picker";
 
 const classroomFormSchema = z.object({
@@ -114,7 +114,7 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                        <div className="w-full flex justify-between items-start gap-4">
+                        <div className="flex justify-between items-start gap-4 w-full">
                             <FormField
                                 control={form.control}
                                 name="icon"
@@ -150,7 +150,7 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
                             />
                         </div>
 
-                        <div className="w-full flex justify-between items-start gap-4">
+                        <div className="flex justify-between items-start gap-4 w-full">
                             <FormField
                                 control={form.control}
                                 name="period"
@@ -183,7 +183,7 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
                             />
                         </div>
 
-                        <DialogFooter className="w-full flex gap-4 mt-4">
+                        <DialogFooter className="flex gap-4 mt-4 w-full">
                             <Button type="button" variant="outline" onClick={() => handleSetModalOpen(false)}>
                                 Cancelar
                             </Button>
