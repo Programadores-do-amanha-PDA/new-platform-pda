@@ -1,12 +1,10 @@
 import { Role } from "@/types";
 import { Profile } from "./profile";
 
-export type GetAllProfilesResult = Profile[] | null;
-
-export type GetAllProfilesFilteredByRoleProps = {
-    role: Role;
+export type GetAllProfilesProps = {
+    role?: Role;
 };
-export type GetAllProfilesFilteredByRoleResult = Profile[] | null;
+export type GetAllProfilesResult = Profile[] | null;
 
 export type GetProfileByIdProps = {
     id: string;

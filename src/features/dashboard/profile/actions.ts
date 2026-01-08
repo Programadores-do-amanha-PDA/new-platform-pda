@@ -8,8 +8,7 @@ import type {
     CreateProfileResult,
     DeleteProfileProps,
     DeleteProfileResult,
-    GetAllProfilesFilteredByRoleProps,
-    GetAllProfilesFilteredByRoleResult,
+    GetAllProfilesProps,
     GetAllProfilesResult,
     GetProfileByIdProps,
     GetProfileByIdResult,
@@ -20,43 +19,43 @@ import type {
 
 const log = logger.child({ module: "profiles.actions" });
 
-export const getAllProfiles = async (): Promise<GetAllProfilesResult> => {
-    try {
-        const supabase = await getSupabaseClient();
-        if (!supabase) throw new Error("Invalid supabase client");
-
-        const { data, error } = await supabase
-            .from("profiles")
-            .select("id, full_name, email, created_at, updated_at, user_roles(id, role), classrooms:user_classrooms(*)");
-
-        if (error) throw error;
-
-        return data as unknown as Profile[];
-    } catch (error) {
-        log.error({ err: error, operation: "getAllProfiles" }, "Failed to fetch all profiles");
-        return null;
-    }
-};
-
-export const getAllProfilesFilteredByRole = async ({
+/**
+ * Fetch all profiles, optionally filtered by role.
+ *
+ * @param props - Configuration object with optional role filter.
+ * @returns Array of profiles or null if operation fails.
+ *
+ * @example
+ * // Get all profiles
+ * const profiles = await getAllProfiles();
+ *
+ * @example
+ * // Get profiles filtered by role
+ * const adminProfiles = await getAllProfiles({ role: 'admin' });
+ */
+export const getAllProfiles = async ({
     role,
-}: GetAllProfilesFilteredByRoleProps): Promise<GetAllProfilesFilteredByRoleResult> => {
+}: GetAllProfilesProps = {}): Promise<GetAllProfilesResult> => {
     try {
-        if (!role) throw new Error("Invalid role");
-
         const supabase = await getSupabaseClient();
         if (!supabase) throw new Error("Invalid supabase client");
 
-        const { data, error } = await supabase
-            .from("profiles")
-            .select("*, user_roles!inner(id, role), classrooms:user_classrooms(*)")
-            .eq("user_roles.role", role);
+        let query = supabase.from("profiles").select("*, user_role: user_roles(id, role), enrollments:user_classrooms(*)");
+
+        if (role) {
+            query = query.eq("user_roles.role", role);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
         return data as Profile[];
     } catch (error) {
-        log.error({ err: error, role, operation: "getAllProfilesFilteredByRole" }, "Failed to fetch filtered profiles");
+        log.error(
+            { err: error, role, operation: "getAllProfiles" },
+            role ? "Failed to fetch profiles filtered by role" : "Failed to fetch all profiles"
+        );
         return null;
     }
 };
@@ -70,7 +69,7 @@ export const getProfileById = async ({ id }: GetProfileByIdProps): Promise<GetPr
 
         const { data, error } = await supabase
             .from("profiles")
-            .select("id, full_name, email, bio, created_at, updated_at, user_role: user_roles(id, role), enrollments:user_classrooms(short_id, classroom_id, mode)")
+            .select("id, full_name, bio, created_at, updated_at, user_role: user_roles(id, role), enrollments:user_classrooms(short_id, classroom_id, mode)")
             .eq("id", id)
             .single();
 
