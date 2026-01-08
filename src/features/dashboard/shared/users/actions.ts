@@ -1,11 +1,10 @@
 "use server";
 
 import { AuthUser } from "@supabase/supabase-js";
-import { getAllProfiles, getAllProfilesFilteredByRole } from "@/features/dashboard/profile/actions";
 import { createClientAdmin } from "@/lib/supabase/server";
 import { logger } from "@/lib/logger";
 
-import { Profile, AuthUserWithProfile } from "@/features/dashboard/profile";
+import { Profile, AuthUserWithProfile, getAllProfiles } from "@/features/dashboard/profile";
 import {
     GetAllUsersProps,
     GetAllUsersResult,
@@ -52,7 +51,7 @@ export const getAllUsers = async ({ role }: GetAllUsersProps): Promise<GetAllUse
 
             return usersWithProfiles;
         } else {
-            const filteredProfiles = await getAllProfilesFilteredByRole({ role });
+            const filteredProfiles = await getAllProfiles({ role });
 
             if (!users || !filteredProfiles) {
                 throw new Error(`Users or profiles for role ${role} is not available`);
