@@ -32,7 +32,7 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
     const [dateRange, setDateRange] = useState<DateRange | undefined>();
     const [loading, setLoading] = useState(false);
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     useEffect(() => {
         if (currentModule) {
@@ -90,7 +90,7 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
                 updatedModules = [...currentConfig.modules, newModule];
             }
 
-            const success = await updateSettingById({
+            const success = await updateClassroomSettingById({
                 id: configId,
                 updates: {
                     modules: updatedModules,

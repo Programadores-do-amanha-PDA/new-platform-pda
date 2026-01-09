@@ -28,14 +28,14 @@ interface ClassTypeCardProps {
 export const ClassTypeCard = ({ classType, configId, onEdit }: ClassTypeCardProps) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const handleDeleteClassType = async () => {
         const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
         if (!currentConfig) return;
 
         const updatedClassTypes = currentConfig.class_types.filter((c: ClassTypes) => c.id !== classType.id);
-        await updateSettingById({ id: configId, updates: { class_types: updatedClassTypes } });
+        await updateClassroomSettingById({ id: configId, updates: { class_types: updatedClassTypes } });
     };
 
     const backgroundColor = (color: string) => {

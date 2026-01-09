@@ -28,14 +28,14 @@ interface JustificationCardProps {
 export const JustificationCard = ({ configId, justification, onEdit }: JustificationCardProps) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const handleDeleteJustification = async () => {
         const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
         if (!currentConfig) return;
 
         const updatedClassTypes = currentConfig.justifications.filter((j: SettingJustification) => j.id !== justification.id);
-        await updateSettingById({ id: configId, updates: { justifications: updatedClassTypes } });
+        await updateClassroomSettingById({ id: configId, updates: { justifications: updatedClassTypes } });
     };
 
     const backgroundColor = (color: string) => {

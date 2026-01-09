@@ -42,7 +42,7 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
     const isEditing = !!currentUserMode;
     const allFeatureRules = getAllFeaturesRules(currentUserMode || null, false);
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const form = useForm<UserModeFormSchemaT>({
         resolver: zodResolver(UserModeFormSchema),
@@ -105,7 +105,7 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
             const currentUserModes = currentConfig.user_modes || [];
             const updatedUserModes = updateUserModesArray(currentUserModes, newUserMode, isEditing);
 
-            const success = await updateSettingById({
+            const success = await updateClassroomSettingById({
                 id: configId,
                 updates: {
                     user_modes: updatedUserModes,

@@ -92,8 +92,8 @@ const NavUser = () => {
                             Editar perfil
                         </DropdownMenuItem>
                         <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg! overflow-hidden">
-                            <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">Cargo</DropdownMenuLabel>
-                            <DropdownMenuItem className="font-medium flex flex-wrap gap-1 bg-sidebar cursor-default hover:bg-sidebar">
+                            <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">Credencias</DropdownMenuLabel>
+                            <DropdownMenuItem className="font-medium flex flex-wrap gap-1 bg-sidebar cursor-default hover:bg-sidebar!">
                                 <Badge variant="outline" className="bg-transparent font-semibold">
                                     {rolesLabelsOptions.find((role) => role.value === userRole)?.label}
                                 </Badge>
@@ -112,7 +112,7 @@ const NavUser = () => {
                         </DropdownMenuGroup>
                         <DropdownMenuItem
                             onClick={handleSignOut}
-                            className="bg-red-50 hover:bg-red-100 cursor-pointer mx-2 p-2 rounded-lg! overflow-hidden font-medium"
+                            className="bg-red-50 hover:bg-red-100! cursor-pointer mx-2 p-2 rounded-lg! overflow-hidden font-medium"
                         >
                             <LogOut className="stroke-foreground" />
                             Sair

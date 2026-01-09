@@ -17,20 +17,20 @@ export default function ClassroomActivitiesPage() {
     const { settingsByClassroom } = useClassroomSettingStore();
     const { activities } = useActivityStore();
     const currentClassroomConfig = settingsByClassroom[classroom_id];
-    const classroomConfigUserModes = currentClassroomConfig?.user_modes || [];
+    const classroomSettingUserModes = currentClassroomConfig?.user_modes || [];
 
     if (!classroom_id) {
         return <div>Turma não encontrada.</div>;
     }
 
-    const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, classroomConfigUserModes, "activities");
+    const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, classroomSettingUserModes, "activities");
 
-    const allAggregateInMetricUsers = filterMetricClassroomStudents(
+    const allAggregateInMetricUsers = filterMetricClassroomStudents({
         users,
-        classroom_id,
-        classroomConfigUserModes,
-        "activities",
-    );
+        classroomId: classroom_id,
+        userModes: classroomSettingUserModes,
+        ruleId: "activities",
+    });
 
     const sortedActivities = activities
         .filter((activity) => activity.classroom_id === classroom_id)

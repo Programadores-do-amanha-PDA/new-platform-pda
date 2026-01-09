@@ -27,14 +27,14 @@ interface ModuleCardProps {
 
 export const ModuleCard = ({ module, configId, onEdit }: ModuleCardProps) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const handleDeleteModule = async () => {
         const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
         if (!currentConfig) return;
 
         const updatedModules = currentConfig.modules.filter((m: ClassModules) => m.id !== module.id);
-        await updateSettingById({ id: configId, updates: { modules: updatedModules } });
+        await updateClassroomSettingById({ id: configId, updates: { modules: updatedModules } });
     };
 
     const formatDateRange = () => {

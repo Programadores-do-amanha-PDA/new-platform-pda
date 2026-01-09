@@ -19,8 +19,7 @@ export default function AttendancePage() {
     const { settingsByClassroom } = useClassroomSettingStore();
 
     const allPastsMeetings = useMemo(() => {
-        // eslint-disable-next-line
-        const now = Date.now();
+        const now = new Date().getTime();
 
         // Get past instances directly from the store and add meeting info
         const pastsMeetings: ZoomMeetingPastInstance[] = pastInstances
@@ -48,7 +47,12 @@ export default function AttendancePage() {
 
     const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, userModes, "attendance");
 
-    const allAggregateInMetricUsers = filterMetricClassroomStudents(users, classroom_id, userModes, "attendance");
+    const allAggregateInMetricUsers = filterMetricClassroomStudents({
+        users,
+        classroomId: classroom_id,
+        userModes,
+        ruleId: "attendance",
+    });
 
     return (
         <div className="p-4 w-full h-full">

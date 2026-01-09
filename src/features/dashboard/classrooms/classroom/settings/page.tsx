@@ -11,12 +11,12 @@ import { useClassroomStore } from "../../home-page/store";
 import { ModulesList, ClassTypesList, JustificationsList, UserModesList } from "./components";
 
 const ClassroomConfigsPage = () => {
-    const { classroomId } = useParams<{ classroomId: string }>();
+    const { classroom_id } = useParams<{ classroom_id: string }>();
     const { classrooms } = useClassroomStore();
 
-    const currentClassroom = classrooms.find((classroom) => classroom.id === classroomId);
+    const currentClassroom = classrooms.find((classroom) => classroom.id === classroom_id);
 
-    if (!classroomId || !currentClassroom)
+    if (!classroom_id || !currentClassroom)
         return (
             <NotFoundState
                 title="Turma não encontrada"
@@ -39,9 +39,9 @@ const ClassroomConfigsPage = () => {
             >
                 <div className="flex flex-wrap gap-6 p-6 w-full">
                     <ModulesList classroomId={currentClassroom.id} />
-                    <ClassTypesList classroomId={classroomId} />
-                    <JustificationsList classroomId={classroomId} />
-                    <UserModesList classroomId={classroomId} />
+                    <ClassTypesList classroomId={classroom_id} />
+                    <JustificationsList classroomId={classroom_id} />
+                    <UserModesList classroomId={classroom_id} />
                 </div>
             </PermissionGuard>
         </div>

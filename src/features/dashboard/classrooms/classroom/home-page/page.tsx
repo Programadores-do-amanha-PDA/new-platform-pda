@@ -26,7 +26,7 @@ const ClassroomHomePage = () => {
           <ButtonGroup>
             <ClassroomFormDialog currentClassroom={currentClassroom} />
             <Button variant="outline" size="icon" asChild>
-              <Link href={`/dashboard/classrooms/${classroom_id}/configs`}>
+              <Link href={`/dashboard/classrooms/${classroom_id}/settings`}>
                 <Cog />
               </Link>
             </Button>

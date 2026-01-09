@@ -2,30 +2,40 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 
-import { getSettingByClassroomId, getSettingById, createSetting, updateSettingById, deleteSettingById } from "./actions";
-import { ClassSetting } from "./types";
+import { ClassroomSetting } from "./types";
 import { logger } from "@/lib/logger";
+import {
+    getSettingByClassroomId,
+    createClassroomSetting,
+    updateClassroomSettingById,
+    deleteClassroomSettingById,
+    getClassroomSettingById,
+} from "./actions";
 
 const log = logger.child({ module: "classroom.management.settings" });
 
 interface ClassroomSettingState {
-    settingsByClassroom: Record<string, ClassSetting>;
+    settingsByClassroom: Record<string, ClassroomSetting>;
     loading: boolean;
 }
 
 interface ClassroomSettingActions {
-    setSettingByClassroomId: ({ classroomId, setting }: { classroomId: string; setting: ClassSetting }) => void;
+    setSettingByClassroomId: ({ classroomId, setting }: { classroomId: string; setting: ClassroomSetting }) => void;
     fetchSettingByClassroomId: ({ classroomId }: { classroomId: string }) => Promise<void>;
-    getSettingById: ({ id }: { id: string }) => Promise<ClassSetting | boolean>;
-    createNewSetting: ({ settingData }: { settingData: Partial<Omit<ClassSetting, "id" | "created_at">> }) => Promise<boolean>;
-    updateSettingById: ({
+    getSettingById: ({ id }: { id: string }) => Promise<ClassroomSetting | boolean>;
+    createNewSetting: ({
+        settingData,
+    }: {
+        settingData: Partial<Omit<ClassroomSetting, "id" | "created_at">>;
+    }) => Promise<boolean>;
+    updateClassroomSettingById: ({
         id,
         updates,
     }: {
         id: string;
-        updates: Partial<Omit<ClassSetting, "id" | "created_at">>;
+        updates: Partial<Omit<ClassroomSetting, "id" | "created_at">>;
     }) => Promise<boolean>;
-    deleteSettingById: ({ id }: { id: string }) => Promise<boolean>;
+    deleteClassroomSettingById: ({ id }: { id: string }) => Promise<boolean>;
     reset: () => void;
 }
 
@@ -64,11 +74,13 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
 
                     const settingResponse = await getSettingByClassroomId({ classroomId });
 
+                    // If no setting exists, create a new one with default values
                     if (!settingResponse) {
                         get().createNewSetting({ settingData: { classroom_id: classroomId, modules: [] } });
-                    } else if (settingResponse.length === 0) {
-                        get().createNewSetting({ settingData: { classroom_id: classroomId, modules: [] } });
+                        return;
                     }
+
+                    get().setSettingByClassroomId({ classroomId, setting: settingResponse });
                 } catch (error) {
                     if (error instanceof Error) {
                         log.warn(
@@ -85,7 +97,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                 try {
                     set({ loading: true });
 
-                    const settingResponse = await getSettingById({ id });
+                    const settingResponse = await getClassroomSettingById({ id });
                     if (!settingResponse) throw new Error("no setting response");
 
                     return settingResponse;
@@ -107,7 +119,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                         throw new Error("Missing required field: classroom_id");
                     }
 
-                    const newSetting = await createSetting({ settingData });
+                    const newSetting = await createClassroomSetting({ settingData });
                     if (!newSetting) throw new Error("no setting create response");
 
                     get().setSettingByClassroomId({ classroomId: settingData.classroom_id, setting: newSetting });
@@ -124,7 +136,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                 }
             },
 
-            updateSettingById: async ({ id, updates }) => {
+            updateClassroomSettingById: async ({ id, updates }) => {
                 let loadingToastId;
                 try {
                     if (!id || !updates || Object.keys(updates).length === 0) {
@@ -132,7 +144,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                     }
 
                     loadingToastId = toast.loading("Atualizando a configuração...");
-                    const updatedSetting = await updateSettingById({ id, updates });
+                    const updatedSetting = await updateClassroomSettingById({ id, updates });
                     if (!updatedSetting) throw new Error("no update setting response");
 
                     get().setSettingByClassroomId({ classroomId: updatedSetting.classroom_id, setting: updatedSetting });
@@ -141,7 +153,10 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
-                        log.warn({ err: error, id, updates, operation: "updateSettingById" }, "Error updating setting");
+                        log.warn(
+                            { err: error, id, updates, operation: "updateClassroomSettingById" },
+                            "Error updating setting",
+                        );
                     }
 
                     toast.error("Erro ao atualizar a configuração. Tente novamente mais tarde!");
@@ -152,15 +167,15 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                 }
             },
 
-            deleteSettingById: async ({ id }) => {
+            deleteClassroomSettingById: async ({ id }) => {
                 try {
-                    if (!id) throw new Error("ClassSetting id is required to delete");
+                    if (!id) throw new Error("ClassroomSetting id is required to delete");
 
                     const settingToDelete = Object.values(get().settingsByClassroom).find((setting) => setting.id === id);
 
-                    if (!settingToDelete) throw new Error("ClassSetting not found");
+                    if (!settingToDelete) throw new Error("ClassroomSetting not found");
 
-                    const isSettingDeleted = await deleteSettingById({ id });
+                    const isSettingDeleted = await deleteClassroomSettingById({ id });
                     if (!isSettingDeleted) throw new Error("no delete setting response");
 
                     set((prev) => {

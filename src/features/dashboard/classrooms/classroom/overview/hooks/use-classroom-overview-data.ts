@@ -5,7 +5,7 @@ import { filterDataByDateRange } from "@/features/dashboard/shared/utils/filter-
 import { filterVisibilityClassroomStudents } from "../../../shared/utils";
 import { ClassActivity } from "../../activities";
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
-import { ClassSetting, UserMode } from "../../settings";
+import { ClassroomSetting, UserMode } from "../../settings";
 import { CoodeshAssessment } from "../../integrations/coodesh/types";
 import { ZoomMeetingPastInstance, ZoomMeeting } from "../../integrations/zoom/types";
 import { ClassroomProject, ClassroomProjectDelivery, ClassProjectCorrection } from "../../projects/types";
@@ -13,7 +13,7 @@ import { ClassroomProject, ClassroomProjectDelivery, ClassProjectCorrection } fr
 interface UseClassroomOverviewDataParams {
     readonly classroomId: string;
     readonly users: AuthUserWithProfile[];
-    readonly currentSetting: ClassSetting;
+    readonly currentSetting: ClassroomSetting;
     readonly currentSettingUserModes: UserMode[];
     readonly activities: ClassActivity[];
     readonly assessments: CoodeshAssessment[];

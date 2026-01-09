@@ -25,14 +25,14 @@ interface UserModeCardProps {
 export const UserModeCard = ({ configId, userMode, onEdit }: UserModeCardProps) => {
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const handleDeleteUserMode = async () => {
         const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
         if (!currentConfig) return;
 
         const updatedUserModes = currentConfig.user_modes.filter((u: UserMode) => u.id !== userMode.id);
-        await updateSettingById({ id: configId, updates: { user_modes: updatedUserModes } });
+        await updateClassroomSettingById({ id: configId, updates: { user_modes: updatedUserModes } });
     };
 
     const backgroundColor = (color: string) => {

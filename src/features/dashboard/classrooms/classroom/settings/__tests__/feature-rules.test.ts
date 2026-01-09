@@ -12,7 +12,7 @@ jest.mock("zod/mini", () => ({
     },
 }));
 
-jest.mock("@/providers/admin/sidebar-config", () => ({
+jest.mock("@/providers/stack-provider/roles/admin/sidebar-config", () => ({
     ADMIN_CLASSROOM_PAGES_KEYS: ["overview", "kpis", "attendance", "satisfaction", "activities", "projects", "coodesh", "zoom"],
 }));
 

@@ -5,7 +5,7 @@ import {
   UserMode,
 } from ".";
 
-export interface ClassSetting {
+export interface ClassroomSetting {
   id: string;
   classroom_id: string;
   modules: Array<ClassModules>;

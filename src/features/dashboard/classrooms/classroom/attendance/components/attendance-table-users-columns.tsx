@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { AuthUserWithProfile, Profile } from "@/features/dashboard/profile";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 export const usersColumns: ColumnDef<Partial<AuthUserWithProfile>>[] = [
     {
@@ -39,25 +39,28 @@ export const usersColumns: ColumnDef<Partial<AuthUserWithProfile>>[] = [
                 </div>
             );
         },
-        cell: ({ row }) => (
-            <div className="flex flex-row justify-start items-center gap-2 bg-background group-hover/row:bg-muted/50! px-2 border-r border-b w-full h-[57px]">
-                <Avatar>
-                    <AvatarFallback>
-                        {row
-                            .getValue<Profile>("profile")
-                            .full_name.split(" ")
-                            .filter((_, i) => i < 2)
-                            .map((word) => word[0].toUpperCase())
-                            .join("") || "U"}
-                    </AvatarFallback>
-                    <AvatarImage src={row.getValue<Profile>("profile").avatar_url || ""} />
-                </Avatar>
-                <div className="flex flex-col justify-center w-full truncate lowercase">
-                    <p className="font-bold text-sm capitalize">{row.getValue<Profile>("profile").full_name}</p>
-                    <p>{row.getValue("email")}</p>
+        cell: ({ row }) => {
+            const user = row.original as AuthUserWithProfile;
+
+            return (
+                <div className="flex flex-row justify-start items-center gap-2 bg-background group-hover/row:bg-muted/50! px-2 border-r border-b w-full h-[57px]">
+                    <Avatar>
+                        <AvatarFallback>
+                            {user.profile.full_name
+                                .split(" ")
+                                .filter((_, i) => i < 2)
+                                .map((word) => word[0].toUpperCase())
+                                .join("") || ""}
+                        </AvatarFallback>
+                        <AvatarImage src={user.profile.avatar_url || ""} />
+                    </Avatar>
+                    <div className="flex flex-col justify-center w-full truncate lowercase">
+                        <p className="font-bold text-sm capitalize">{user.profile.full_name}</p>
+                        <p>{user.email}</p>
+                    </div>
                 </div>
-            </div>
-        ),
+            );
+        },
         sortingFn: (rowA, rowB) => {
             const nameA = rowA.original?.profile?.full_name?.toLowerCase() || "";
             const nameB = rowB.original?.profile?.full_name?.toLowerCase() || "";

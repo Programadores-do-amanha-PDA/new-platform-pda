@@ -7,7 +7,7 @@ import { ClassroomOverviewTable } from "./components/classroom-overview-table";
 import { useUsersStore } from "@/features/dashboard/shared/users/store";
 import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../integrations/zoom/stores";
 import { useActivityStore } from "../activities/store";
-import { ClassSetting, useClassroomSettingStore } from "../settings";
+import { ClassroomSetting, useClassroomSettingStore } from "../settings";
 import { useCoodeshAssessmentStore } from "../integrations/coodesh/stores/assessments";
 import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
 import { useClassroomOverviewData } from "./hooks/use-classroom-overview-data";
@@ -30,7 +30,7 @@ export default function ClassroomAttendancePage() {
     const { pastInstances } = useZoomMeetingPastInstanceStore();
     const { meetings } = useZoomMeetingStore();
 
-    const currentSetting: ClassSetting = settingsByClassroom[classroom_id];
+    const currentSetting: ClassroomSetting = settingsByClassroom[classroom_id];
     const currentSettingUserModes = useMemo(() => currentSetting?.user_modes || [], [currentSetting]);
     const modules = useMemo(() => currentSetting?.modules || [], [currentSetting?.modules]);
     const classroomDeliveries = useMemo(() => deliveries[classroom_id] || [], [deliveries, classroom_id]);

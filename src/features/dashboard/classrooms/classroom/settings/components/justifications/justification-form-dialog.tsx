@@ -28,7 +28,7 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
     const [loading, setLoading] = useState(false);
     const isEditing = !!currentJustification;
 
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const form = useForm<JustificationFormData>({
         resolver: zodResolver(JustificationFormSchema),
@@ -125,7 +125,7 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
                 updatedJustifications = [...currentJustifications, newJustification];
             }
 
-            const success = await updateSettingById({
+            const success = await updateClassroomSettingById({
                 id: configId,
                 updates: {
                     justifications: updatedJustifications,

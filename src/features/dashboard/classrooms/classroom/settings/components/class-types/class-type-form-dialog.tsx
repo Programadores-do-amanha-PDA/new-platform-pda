@@ -31,7 +31,7 @@ interface ClassTypeFormDialogProps {
 export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuccess, trigger }: ClassTypeFormDialogProps) => {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { updateSettingById, settingsByClassroom } = useClassroomSettingStore();
+    const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const isEditing = !!currentClassType;
 
@@ -236,7 +236,7 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
                 updatedClassTypes.push(newClassType);
             }
 
-            const result = await updateSettingById({
+            const result = await updateClassroomSettingById({
                 id: currentConfig.id,
                 updates: {
                     class_types: updatedClassTypes,
