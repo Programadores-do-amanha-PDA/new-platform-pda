@@ -1,11 +1,3 @@
-/**
- * Factory pattern for creating sidebar configurations based on user roles.
- * Centralizes common logic and delegates role-specific configurations to individual generators.
- * 
- * This factory provides a unified interface for creating sidebar configurations while
- * maintaining flexibility for role-specific requirements and data structures.
- */
-
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { ClassroomT, Role, SidebarDataT } from "@/types";
 

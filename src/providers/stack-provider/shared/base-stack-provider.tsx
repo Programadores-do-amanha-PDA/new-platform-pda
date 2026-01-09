@@ -1,14 +1,6 @@
-/**
- * Base Stack Provider that can be reused by different roles.
- * Centralizes common logic and uses the factory pattern for sidebar configurations.
- * 
- * This provider handles authentication, loading states, sidebar creation, and path label generation
- * while allowing role-specific customization through props and callbacks.
- */
-
 "use client";
 
-import { createContext, useContext, useLayoutEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import PageLoader from "@/components/shared/page-loader";
 import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
@@ -81,7 +73,7 @@ export const BaseStackProvider = ({
      * Effect to load initial data when component mounts or dependencies change.
      * Only executes if user is authenticated and has appropriate role.
      */
-    useLayoutEffect(() => {
+    useEffect(() => {
         const fetchInitialData = async () => {
             if (!loadInitialData || !user || !userRole || !allowedRoles.includes(userRole)) return;
             if (!onLoadData) return;
@@ -98,7 +90,7 @@ export const BaseStackProvider = ({
 
         fetchInitialData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user, userRole, loadInitialData]);
+    }, [user]);
 
     // Show no access screen for unauthorized users
     if (!user || !userRole || !allowedRoles.includes(userRole)) {
