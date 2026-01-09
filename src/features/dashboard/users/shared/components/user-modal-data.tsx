@@ -27,24 +27,24 @@ import BadgeSelector from "@/components/shared/badge-selector";
 import { generateRandomPassword } from "@/utils/password-generator";
 import { userFormSchema, newUserFormSchema, UserFormData, NewUserFormData } from "../schemas/user-form-schema";
 import { cn } from "@/lib/utils";
-import { useClassroomStore } from "../../classrooms/home-page/store";
+import { useClassroomStore } from "../../../classrooms/home-page/store";
 import { Enrollment, useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { Role } from "@/types";
 
-import { useRolesStore } from "../stores/user-role";
+import { useRolesStore } from "../../stores/user-role";
 import { useUsersStore } from "@/features/dashboard/shared/users";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "user-sheet-data" });
 
-type UserSheetDataProps = {
+type UserModalDataProps = {
     mode: "new" | "edit";
     currentUser?: Partial<AuthUserWithProfile>;
     excludeRoles?: Role[];
 };
 
-const UserSheetData = ({ mode, currentUser, excludeRoles }: UserSheetDataProps) => {
+const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -232,7 +232,7 @@ const UserSheetData = ({ mode, currentUser, excludeRoles }: UserSheetDataProps) 
                 if (!roleSuccess) throw new Error("Failed to remove role");
             }
 
-            // Handle classroom updates
+            // Handle enrollments updates
             if (classrooms && classrooms.length > 0 && createNewEnrollments && removeEnrollmentsByUserAndClassrooms) {
                 const currentClassrooms = currentUser.profile?.enrollments?.map((c) => c.classroom_id) || [];
 
@@ -471,4 +471,4 @@ const UserSheetData = ({ mode, currentUser, excludeRoles }: UserSheetDataProps) 
     );
 };
 
-export default UserSheetData;
+export default UserModalData;

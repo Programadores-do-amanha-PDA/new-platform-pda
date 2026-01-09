@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils";
 import { Role } from "@/types";
 import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { Enrollment, useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
-import { useRolesStore } from "../stores/user-role";
+import { useRolesStore } from "../../stores/user-role";
 
 interface UserData {
     name: string;

@@ -89,6 +89,7 @@ export function ClassroomDataLoaderProvider({ children }: ClassroomDataLoaderPro
 
     useEffect(() => {
         loadAllData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classroomId]);
 
     const refreshData = async () => {
