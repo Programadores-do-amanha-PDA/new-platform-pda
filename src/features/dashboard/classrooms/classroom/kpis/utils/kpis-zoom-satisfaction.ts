@@ -7,8 +7,8 @@ import {
     IGetSatisfactionByWeeklyMeetingsGroupedByMonthProps,
 } from "../types";
 import { logger } from "@/lib/logger";
-import { getMonthsAndWeeksInMonthByMeetings } from "./kpis-zoom-meetings.utils";
-import { calculatePollPercentage } from "../../classroom-zoom-satisfaction/utils/question-percentage-calc";
+import { getMonthsAndWeeksInMonthByMeetings } from "./kpis-zoom-meetings";
+import { calculatePollPercentage } from "../../zoom-satisfaction/utils/question-percentage-calc";
 
 const log = logger.child({ module: "KPIs-zoom-satisfaction" });
 

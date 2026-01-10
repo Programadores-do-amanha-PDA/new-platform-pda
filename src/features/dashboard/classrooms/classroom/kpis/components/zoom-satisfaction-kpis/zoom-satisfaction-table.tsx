@@ -14,7 +14,7 @@ import { useClassroomSettingStore } from "../../../settings";
 import { useZoomSatisfactionColumns } from "./zoom-satisfaction-columns";
 import { ZoomPastMeetingAttendance, ZoomMeetingPastInstanceAttendance } from "../../../attendance/types";
 import { ISatisfactionByTypesGroupedByMonthType } from "../../types";
-import { getSatisfactionByWeeklyMeetingsGroupedByMonth } from "../../utils/kpis-zoom-satisfaction.utils";
+import { getSatisfactionByWeeklyMeetingsGroupedByMonth } from "../../utils/kpis-zoom-satisfaction";
 
 const log = logger.child({ module: "ZoomAttendanceTable" });
 

@@ -1,3 +1,3 @@
-export * from "./kpis-zoom-meetings.utils";
-export * from "./kpis-zoom-attendance.utils";
-export * from "./kpis-zoom-satisfaction.utils";
+export * from "./kpis-zoom-meetings";
+export * from "./kpis-zoom-attendance";
+export * from "./kpis-zoom-satisfaction";
