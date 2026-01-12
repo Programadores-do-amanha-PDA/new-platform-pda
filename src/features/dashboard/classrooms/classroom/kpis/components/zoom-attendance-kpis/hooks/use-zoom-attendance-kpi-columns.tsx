@@ -7,13 +7,32 @@ import {
     DefaultTableHeaderCell,
     TableHeaderItemWithCustomItem,
 } from "@/components/shared/custom-data-table";
-import { AttendancesByTypesGroupedByMonthTypes, GetMeetingsByTypeColumnsP } from "../../types";
-import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../utils";
+import { AttendancesByTypesGroupedByMonthTypes, GetMeetingsByTypeColumnsP } from "../../../types";
+import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../../utils";
 import { cn } from "@/lib/utils";
 import { ChevronsLeftRight } from "lucide-react";
 
-export const useZoomAttendanceColumns = ({ meetingsByType, meetingsTypes }: GetMeetingsByTypeColumnsP) => {
-    const LOCAL_STORAGE_KEY = "zoom-attendance-columns";
+/**
+ * Custom hook to generate dynamic table columns for Zoom attendance KPI display.
+ *
+ * This hook manages the column definitions for a React Table component that displays
+ * attendance data grouped by meeting types and organized by months and weeks. It handles:
+ * - Dynamic column generation based on available meeting types and attendance data
+ * - LocalStorage persistence for month minimization/expansion state
+ * - Responsive column sizing and borders based on data presence
+ *
+ * @param meetingsByType - Object mapping meeting types to arrays of meetings
+ * @param meetingsTypes - Array of available meeting types for the classroom
+ * @returns Array of column definitions for React Table with proper typing
+ *
+ * @example
+ * const columns = useZoomAttendanceKPIColumns({
+ *   meetingsByType: { 'lecture': [...], 'workshop': [...] },
+ *   meetingsTypes: [{ id: '1', title: 'lecture' }, ...]
+ * });
+ */
+export const useZoomAttendanceKPIColumns = ({ meetingsByType, meetingsTypes }: GetMeetingsByTypeColumnsP) => {
+    const ZOOM_ATTENDANCE_COLUMNS_KEY = "zoom-attendance-columns";
 
     const monthsWithWeeksByMeetings = useMemo(() => {
         const meetings = Object.values(meetingsByType).flat();
@@ -22,14 +41,35 @@ export const useZoomAttendanceColumns = ({ meetingsByType, meetingsTypes }: GetM
     }, [meetingsByType]);
 
     const [rowsMinimized, setRowsMinimized] = useState<string[]>(() => {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
+        if (typeof window === "undefined") {
+            return [];
+        }
+
+        try {
+            const stored = window.localStorage.getItem(ZOOM_ATTENDANCE_COLUMNS_KEY);
+            return stored ? JSON.parse(stored) : [];
+        } catch {
+            // If localStorage is unavailable or JSON.parse fails, fall back to default value.
+            return [];
+        }
     });
 
     useEffect(() => {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(rowsMinimized));
-    }, [rowsMinimized])
+        if (typeof window === "undefined") {
+            return;
+        }
 
+        window.localStorage.setItem(ZOOM_ATTENDANCE_COLUMNS_KEY, JSON.stringify(rowsMinimized));
+    }, [rowsMinimized]);
+
+    /**
+     * Toggles the minimization state of a month row in the attendance table.
+     * When minimized, the month displays in compact view showing only monthly totals.
+     * When expanded, the month shows weekly breakdown data.
+     *
+     * @param rowId - The ISO string identifier of the month to toggle (month.toISOString())
+     * @returns void
+     */
     const handleSetMonthsMinimized = (rowId: string) => {
         setRowsMinimized((prev) => {
             if (prev.includes(rowId)) {

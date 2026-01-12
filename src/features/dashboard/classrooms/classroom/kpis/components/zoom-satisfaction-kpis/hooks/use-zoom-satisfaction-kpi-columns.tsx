@@ -10,11 +10,32 @@ import {
     DefaultTableHeaderCell,
     TableHeaderItemWithCustomItem,
 } from "@/components/shared/custom-data-table";
-import { GetMeetingsByTypeColumnsP, ISatisfactionByTypesGroupedByMonthType } from "../../types";
-import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../utils";
+import { GetMeetingsByTypeColumnsP, SatisfactionByClassTypeGroupedByMonth } from "../../../types";
+import { extractFirstDayOfWeekByDate, extractMonthNameAndYearByDate, getMonthsAndWeeksInMonthByMeetings } from "../../../utils";
 
-export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: GetMeetingsByTypeColumnsP) => {
-    const LOCAL_STORAGE_KEY = "zoom-satisfaction-columns";
+/**
+ * Hook that generates column definitions for a satisfaction KPI table with expandable/collapsible months.
+ * 
+ * @param {GetMeetingsByTypeColumnsP} props - The hook parameters
+ * @param {Record<string, Meeting[]>} props.meetingsByType - Meetings grouped by type
+ * @param {MeetingType[]} props.meetingsTypes - Available meeting types
+ * 
+ * @returns {ColumnDef<SatisfactionByClassTypeGroupedByMonth>[]} Array of column definitions including:
+ *   - Title column showing class type percentages
+ *   - Satisfaction columns with nested month/week breakdown, supporting:
+ *     - Monthly aggregated satisfaction metrics
+ *     - Weekly satisfaction metrics (collapsible per month)
+ *     - Three satisfaction indicators: Content (blue), Facilitation (purple), Self-Development (orange)
+ *     - LocalStorage persistence of minimized/expanded month states
+ * 
+ * @example
+ * const columns = useZoomSatisfactionKPIColumns({ 
+ *   meetingsByType: { 'online': [...], 'in-person': [...] },
+ *   meetingsTypes: [{ id: 1, title: 'Online' }, { id: 2, title: 'In-person' }]
+ * });
+ */
+export const useZoomSatisfactionKPIColumns = ({ meetingsByType, meetingsTypes }: GetMeetingsByTypeColumnsP) => {
+    const ZOOM_SATISFACTION_COLUMNS_KEY = "zoom-satisfaction-columns";
     const monthsWithWeeksByMeetings = useMemo(() => {
         const meetings = Object.values(meetingsByType).flat();
         if (!meetings.length) return [];
@@ -22,12 +43,24 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
     }, [meetingsByType]);
 
     const [rowsMinimized, setRowsMinimized] = useState<string[]>(() => {
-        const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
+        if (typeof window === "undefined") {
+            return [];
+        }
+
+        try {
+            const stored = window.localStorage.getItem(ZOOM_SATISFACTION_COLUMNS_KEY);
+            return stored ? (JSON.parse(stored) as string[]) : [];
+        } catch {
+            return [];
+        }
     });
 
     useEffect(() => {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(rowsMinimized));
+        if (typeof window === "undefined") {
+            return;
+        }
+
+        window.localStorage.setItem(ZOOM_SATISFACTION_COLUMNS_KEY, JSON.stringify(rowsMinimized));
     }, [rowsMinimized]);
 
     const handleSetMonthsMinimized = (rowId: string) => {
@@ -40,7 +73,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
     };
 
     return useMemo(() => {
-        const classTypeColumns: ColumnDef<ISatisfactionByTypesGroupedByMonthType>[] = [
+        const classTypeColumns: ColumnDef<SatisfactionByClassTypeGroupedByMonth>[] = [
             {
                 accessorKey: "title",
                 header: ({ column }) => {
@@ -73,7 +106,7 @@ export const useZoomSatisfactionColumns = ({ meetingsByType, meetingsTypes }: Ge
             },
         ];
 
-        const satisfactionColumnsByMonth: ColumnDef<ISatisfactionByTypesGroupedByMonthType>[] = [
+        const satisfactionColumnsByMonth: ColumnDef<SatisfactionByClassTypeGroupedByMonth>[] = [
             {
                 accessorKey: "satisfaction",
                 header: () => {

@@ -11,9 +11,9 @@ import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-tabl
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 import { useClassroomSettingStore } from "../../../settings";
-import { useZoomSatisfactionColumns } from "./zoom-satisfaction-columns";
+import { useZoomSatisfactionKPIColumns } from "./hooks/use-zoom-satisfaction-kpi-columns";
 import { ZoomPastMeetingAttendance, ZoomMeetingPastInstanceAttendance } from "../../../attendance/types";
-import { ISatisfactionByTypesGroupedByMonthType } from "../../types";
+import { SatisfactionByClassTypeGroupedByMonth } from "../../types";
 import { getSatisfactionByWeeklyMeetingsGroupedByMonth } from "../../utils/kpis-zoom-satisfaction";
 
 const log = logger.child({ module: "ZoomAttendanceTable" });
@@ -66,7 +66,7 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
         );
     }, [allPastsMeetings]);
 
-    const satisfactionByTypesGroupedByMonth = useMemo((): ISatisfactionByTypesGroupedByMonthType[] => {
+    const satisfactionByTypesGroupedByMonth = useMemo((): SatisfactionByClassTypeGroupedByMonth[] => {
         const allMeetings = Object.entries(meetingsByType).filter(([key, value]) => {
             try {
                 const allClassTypesId = classroomClassTypes.flatMap((classType) => classType.id);
@@ -79,9 +79,9 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
             }
         });
 
-        if (!allMeetings.length) return [] as ISatisfactionByTypesGroupedByMonthType[];
+        if (!allMeetings.length) return [] as SatisfactionByClassTypeGroupedByMonth[];
 
-        const result: ISatisfactionByTypesGroupedByMonthType[] = allMeetings.map(([key, value]) => {
+        const result: SatisfactionByClassTypeGroupedByMonth[] = allMeetings.map(([key, value]) => {
             try {
                 if (!value.length || !key) throw new Error("no meetings found");
 
@@ -97,16 +97,16 @@ export const KPIsZoomSatisfactionTable = ({ classroomId }: { classroomId: string
                 return { classType: currentClassType, satisfaction: satisfactionByWeeklyMeetingsGroupedByMonth };
             } catch (error) {
                 log.error({ err: error }, "Error on satisfactionByTypesGroupedByMonth");
-                return {} as ISatisfactionByTypesGroupedByMonthType;
+                return {} as SatisfactionByClassTypeGroupedByMonth;
             }
         });
 
-        if (!result.length || !result) return [] as ISatisfactionByTypesGroupedByMonthType[];
+        if (!result.length || !result) return [] as SatisfactionByClassTypeGroupedByMonth[];
 
-        return result.filter((item) => item !== null || item !== undefined) || ([] as ISatisfactionByTypesGroupedByMonthType[]);
+        return result.filter((item) => item !== null || item !== undefined) || ([] as SatisfactionByClassTypeGroupedByMonth[]);
     }, [meetingsByType, classroomClassTypes]);
 
-    const columns = useZoomSatisfactionColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
+    const columns = useZoomSatisfactionKPIColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
 
     const table = useReactTable({
         data: satisfactionByTypesGroupedByMonth,

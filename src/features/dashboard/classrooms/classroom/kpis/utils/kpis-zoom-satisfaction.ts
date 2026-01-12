@@ -1,10 +1,10 @@
 import { isSameMonth, isSameWeek } from "date-fns";
 
 import {
-    IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults,
-    IGetSatisfactionAccumulatorProps,
-    IGetSatisfactionAccumulatorResult,
-    IGetSatisfactionByWeeklyMeetingsGroupedByMonthProps,
+    GetSatisfactionByWeeklyMeetingsGroupedByMonthResults,
+    GetSatisfactionAccumulatorProps,
+    GetSatisfactionAccumulatorResult,
+    GetSatisfactionByWeeklyMeetingsGroupedByMonthProps,
 } from "../types";
 import { logger } from "@/lib/logger";
 import { getMonthsAndWeeksInMonthByMeetings } from "./kpis-zoom-meetings";
@@ -15,7 +15,7 @@ const log = logger.child({ module: "KPIs-zoom-satisfaction" });
 export const getSatisfactionAccumulator = ({
     meetings,
     classroomClassTypes,
-}: IGetSatisfactionAccumulatorProps): IGetSatisfactionAccumulatorResult | null => {
+}: GetSatisfactionAccumulatorProps): GetSatisfactionAccumulatorResult | null => {
     // Se não houver reuniões, retorna null para indicar ausência de dados
     if (!meetings.length) {
         return null;
@@ -64,7 +64,7 @@ export const getSatisfactionAccumulator = ({
                 totalSelfDev: 0,
             },
             count: 0,
-        } as IGetSatisfactionAccumulatorResult,
+        } as GetSatisfactionAccumulatorResult,
     );
 
     const averageSatisfaction = result.count > 0 ? result.totalSatisfaction / result.count : 0;
@@ -86,7 +86,7 @@ export const getSatisfactionAccumulator = ({
 export const getSatisfactionByWeeklyMeetingsGroupedByMonth = ({
     allMeetings,
     classroomClassTypes,
-}: IGetSatisfactionByWeeklyMeetingsGroupedByMonthProps): IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[] => {
+}: GetSatisfactionByWeeklyMeetingsGroupedByMonthProps): GetSatisfactionByWeeklyMeetingsGroupedByMonthResults[] => {
     try {
         if (!allMeetings.length || !classroomClassTypes.length) throw new Error("all params is required");
 
@@ -162,21 +162,21 @@ export const getSatisfactionByWeeklyMeetingsGroupedByMonth = ({
                 return {
                     month: { date: month, satisfaction: monthSatisfaction },
                     weeks: weeklyMeetingsSatisfaction,
-                } as IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults;
+                } as GetSatisfactionByWeeklyMeetingsGroupedByMonthResults;
             } catch (error) {
                 log.error({ err: error }, "Error in getAttendanceByWeeklyMeetingsGroupedByMonth");
-                return null as unknown as IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults;
+                return null as unknown as GetSatisfactionByWeeklyMeetingsGroupedByMonthResults;
             }
         });
 
         if (!satisfactionByWeeklyMeetingsGroupedByMonth.length)
-            return [] as unknown as IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
+            return [] as unknown as GetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
 
         return satisfactionByWeeklyMeetingsGroupedByMonth.filter(
             (month) => month !== null,
-        ) as IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
+        ) as GetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
     } catch (error) {
         log.error({ err: error }, "Error in getAttendanceByWeeklyMeetingsGroupedByMonth");
-        return [] as unknown as IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
+        return [] as unknown as GetSatisfactionByWeeklyMeetingsGroupedByMonthResults[];
     }
 };

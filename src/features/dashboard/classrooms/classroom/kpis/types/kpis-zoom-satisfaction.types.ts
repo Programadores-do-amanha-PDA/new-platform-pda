@@ -1,12 +1,12 @@
 import { ZoomPastMeetingAttendance } from "../../attendance/types";
 import { ClassTypes } from "../../settings/types";
 
-export interface IGetSatisfactionAccumulatorProps {
+export interface GetSatisfactionAccumulatorProps {
     meetings: ZoomPastMeetingAttendance[];
     classroomClassTypes: ClassTypes[];
 }
 
-export interface IGetSatisfactionAccumulatorResult {
+export interface GetSatisfactionAccumulatorResult {
     totalSatisfaction: number;
     indicators: {
         totalContent: number;
@@ -16,17 +16,17 @@ export interface IGetSatisfactionAccumulatorResult {
     count: number;
 }
 
-export interface IGetSatisfactionByWeeklyMeetingsGroupedByMonthProps {
+export interface GetSatisfactionByWeeklyMeetingsGroupedByMonthProps {
     allMeetings: ZoomPastMeetingAttendance[];
     classroomClassTypes: ClassTypes[];
 }
 
-export interface IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults {
-    month: { date: Date; satisfaction: IGetSatisfactionAccumulatorResult | null };
-    weeks: { date: Date; satisfaction: IGetSatisfactionAccumulatorResult | null }[];
+export interface GetSatisfactionByWeeklyMeetingsGroupedByMonthResults {
+    month: { date: Date; satisfaction: GetSatisfactionAccumulatorResult | null };
+    weeks: { date: Date; satisfaction: GetSatisfactionAccumulatorResult | null }[];
 }
 
-export interface ISatisfactionByTypesGroupedByMonthType {
+export interface SatisfactionByClassTypeGroupedByMonth {
     classType: ClassTypes | null | undefined;
-    satisfaction: IGetSatisfactionByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
+    satisfaction: GetSatisfactionByWeeklyMeetingsGroupedByMonthResults[] | null | undefined;
 }

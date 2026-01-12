@@ -13,7 +13,7 @@ import { ZoomPastMeetingAttendance, ZoomMeetingPastInstanceAttendance } from "..
 import { useClassroomSettingStore } from "../../../settings";
 import { AttendancesByTypesGroupedByMonthTypes } from "../../types";
 import { getAttendanceByWeeklyMeetingsGroupedByMonth } from "../../utils";
-import { useZoomAttendanceColumns } from "./zoom-attendance-columns";
+import { useZoomAttendanceKPIColumns } from "./hooks/use-zoom-attendance-kpi-columns";
 
 const log = logger.child({ module: "ZoomAttendanceTable" });
 
@@ -119,7 +119,7 @@ export const KPIsZoomAttendanceTable = ({ classroomId }: { classroomId: string }
         return result.filter((item) => item !== null || item !== undefined) || ([] as AttendancesByTypesGroupedByMonthTypes[]);
     }, [classroomId, settingsByClassroom, meetingsByType, allAggregateInMetricUsers, classroomClassTypes]);
 
-    const columns = useZoomAttendanceColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
+    const columns = useZoomAttendanceKPIColumns({ meetingsByType, meetingsTypes: classroomClassTypes });
 
     const table = useReactTable({
         data: attendancesByTypesGroupedByMonth,
