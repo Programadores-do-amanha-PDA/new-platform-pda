@@ -1,5 +1,4 @@
 import { DateRange } from "react-day-picker";
-import { ClassroomConfigModulesT } from "@/features/dashboard/classroom-configs/types";
 import {
   startOfWeek,
   endOfWeek,
@@ -10,12 +9,13 @@ import {
   isWithinInterval,
 } from "date-fns";
 import { getCurrentWeekRange } from "./intervals";
+import { ClassModules } from "@/features/dashboard/classrooms/classroom/settings";
 
 /**
  * Gets the current module based on today's date
  */
 export const getCurrentModule = (
-  modules: ClassroomConfigModulesT[]
+  modules: ClassModules[]
 ): string => {
   if (!modules.length) return "manual";
 
@@ -156,7 +156,7 @@ export const normalizeDateRange = (
  */
 export const getInitialDateRange = (
   defaultInterval: "manual" | "modules",
-  modules: ClassroomConfigModulesT[]
+  modules: ClassModules[]
 ): DateRange => {
   if (defaultInterval === "modules" && modules.length > 0) {
     const currentModuleId = getCurrentModule(modules);

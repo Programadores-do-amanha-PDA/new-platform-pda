@@ -1,281 +1,211 @@
 "use client";
 
-// Global imports
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { LoaderCircle } from "lucide-react";
 
-// UI components
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
-// Local imports
 import { rolesLabelsOptions } from "@/utils/user-roles-labels";
-import { updateAuthUser } from "@/app/actions";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
-import { ProfileDataTabsPropsT, ProfileFormSchemaT } from "../types";
-import {
-  profileFormSchema,
-  buildUserUpdateData,
-  isEmailChanged,
-} from "../utils";
+import { AuthUserWithProfile, ProfileFormSchemaT } from "../types";
+import { profileFormSchema, buildUserUpdateData, isValueChanged } from "../utils";
+import { updateAuthUser } from "@/features/shared/auth";
 
-export const ProfileDataTabs = ({
-  currentUser,
-  onUpdateUser,
-}: ProfileDataTabsPropsT): React.JSX.Element => {
-  const form = useForm<ProfileFormSchemaT>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      newPassword: "",
-      confirmNewPassword: "",
-      bio: "",
-    },
-    mode: "onChange",
-  });
+export interface ProfileDataTabsPropsT {
+    currentUser: AuthUserWithProfile;
+    onUpdateUser: () => void;
+}
 
-  const {
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { isSubmitting },
-    setError,
-  } = form;
+export const ProfileDataTabs = ({ currentUser, onUpdateUser }: ProfileDataTabsPropsT): React.JSX.Element => {
+    const form = useForm<ProfileFormSchemaT>({
+        resolver: zodResolver(profileFormSchema),
+        defaultValues: {
+            fullName: currentUser.profile.full_name || "",
+            email: currentUser.email || "",
+            bio: currentUser.profile?.bio || "",
+            newPassword: "",
+            confirmNewPassword: "",
+        },
+        mode: "onChange",
+    });
 
-  const currentBio = watch("bio");
+    const {
+        handleSubmit,
+        watch,
+        formState: { isSubmitting },
+        setError,
+    } = form;
 
-  useEffect(() => {
-    setValue("fullName", currentUser.profile?.full_name || "");
-    setValue("email", currentUser.email || "");
-    setValue("bio", currentUser.profile?.bio || "");
-  }, [currentUser, setValue]);
+    const currentBio = watch("bio");
 
-  const onSubmit = async (data: ProfileFormSchemaT): Promise<void> => {
-    try {
-      const userData = buildUserUpdateData(data, currentUser);
+    const onSubmit = async (data: ProfileFormSchemaT): Promise<void> => {
+        try {
+            if (!profileFormSchema.parse(data)) throw new Error("Form data is invalid");
 
-      if (Object.keys(userData).length === 0) {
-        toast.info("Nenhuma alteração foi feita.");
-        return;
-      }
+            const userData = buildUserUpdateData({ formData: data, currentUser });
 
-      const userUpdateResponse = await updateAuthUser(userData);
+            if (Object.keys(userData).length === 0) {
+                toast.info("Nenhuma alteração foi feita.");
+                return;
+            }
 
-      if (
-        !userUpdateResponse ||
-        typeof userUpdateResponse === "boolean" ||
-        !userUpdateResponse.user?.id
-      ) {
-        throw new Error("Falha ao atualizar dados do usuário");
-      }
+            const userUpdateResponse = await updateAuthUser(userData);
 
-      toast.success("Sucesso ao editar seus dados!");
+            if (!userUpdateResponse || typeof userUpdateResponse === "boolean" || !userUpdateResponse.user?.id) {
+                throw new Error("Falha ao atualizar dados do usuário");
+            }
 
-      if (isEmailChanged(data.email, currentUser.email)) {
-        toast.info(
-          "Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!"
-        );
-      }
+            toast.success("Sucesso ao editar seus dados!");
 
-      onUpdateUser();
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
+            if (isValueChanged({ currentValue: data.email, newValue: currentUser.email })) {
+                toast.info("Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!");
+            }
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Erro ao atualizar seus dados! Tente novamente mais tarde.";
+            onUpdateUser();
+        } catch (error) {
+            console.error("Erro ao atualizar perfil:", error);
 
-      toast.error(errorMessage);
-      setError("root", {
-        type: "manual",
-        message: errorMessage,
-      });
-    }
-  };
+            const errorMessage =
+                error instanceof Error ? error.message : "Erro ao atualizar seus dados! Tente novamente mais tarde.";
 
-  return (
-    <div className="w-full flex flex-col justify-between">
-      <Form {...form}>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-        >
-          <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
-          <Separator className="col-span-1 lg:col-span-2" />
+            toast.error(errorMessage);
+            setError("root", {
+                type: "manual",
+                message: errorMessage,
+            });
+        }
+    };
 
-          <FormField
-            control={form.control}
-            name="fullName"
-            render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left font-semibold text-base">
-                  Nome completo
-                </FormLabel>
-                <FormControl>
-                  <Input type="text" disabled={isSubmitting} {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    return (
+        <div className="flex flex-col justify-between w-full">
+            <Form {...form}>
+                <form onSubmit={handleSubmit(onSubmit)} className="gap-8 grid grid-cols-1 lg:grid-cols-2">
+                    <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
+                    <Separator className="col-span-1 lg:col-span-2" />
 
-          <div className="col-span-1 lg:col-span-2">
-            <FormField
-              control={form.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                  <FormLabel className="row-span-1 w-full flex justify-between items-center">
-                    <span className="w-max font-semibold text-base">
-                      Biografia
-                    </span>
-                    <span className="w-max text-sm">
-                      {(currentBio || "").length}/190
-                    </span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      disabled={isSubmitting}
-                      className="row-span-1 resize-none"
-                      {...field}
+                    <FormField
+                        control={form.control}
+                        name="fullName"
+                        render={({ field }) => (
+                            <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                                <FormLabel className="font-semibold text-base text-left">Nome completo</FormLabel>
+                                <FormControl>
+                                    <Input type="text" disabled={isSubmitting} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
 
-          <Separator className="col-span-1 lg:col-span-2" />
+                    <div className="col-span-1 lg:col-span-2">
+                        <FormField
+                            control={form.control}
+                            name="bio"
+                            render={({ field }) => (
+                                <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                                    <FormLabel className="flex justify-between items-center row-span-1 w-full">
+                                        <span className="w-max font-semibold text-base">Biografia</span>
+                                        <span className="w-max text-sm">{(currentBio || "").length}/190</span>
+                                    </FormLabel>
+                                    <FormControl>
+                                        <Textarea disabled={isSubmitting} className="row-span-1 resize-none" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
-          <div className="col-span-1 lg:col-span-2">
-            <p className="text-left h-max font-semibold text-base">
-              Alterar email
-            </p>
-            <span className="text-sm text-muted-foreground">
-              Para concluir a alteração de email você deve verificar sua caixa
-              de entrada do email atual ou do novo email e aceitar a troca.
-            </span>
-          </div>
+                    <div className="col-span-1 lg:col-span-2">
+                        <p className="h-max font-semibold text-base text-left">Alterar email</p>
+                        <span className="text-muted-foreground text-sm">
+                            Para concluir a alteração de email você deve verificar sua caixa de entrada do email atual ou do
+                            novo email e aceitar a troca.
+                        </span>
+                    </div>
 
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
-                  Email
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    disabled={isSubmitting}
-                    className="col-span-3"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                                <FormLabel className="h-max font-semibold text-left">Email</FormLabel>
+                                <FormControl>
+                                    <Input type="email" disabled={isSubmitting} className="col-span-3" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-          <Separator className="col-span-1 lg:col-span-2" />
+                    <Separator className="col-span-1 lg:col-span-2" />
 
-          <div className="col-span-1 lg:col-span-2">
-            <p className="text-left h-max font-semibold text-base">
-              Alterar senha
-            </p>
-            <span className="text-sm text-muted-foreground">
-              A senha precisa ter um mínimo de 7 caracteres, incluindo letras
-              minúsculas, letras maiúsculas, números e caracteres especiais.
-            </span>
-          </div>
+                    <div className="col-span-1 lg:col-span-2">
+                        <p className="h-max font-semibold text-base text-left">Alterar senha</p>
+                        <span className="text-muted-foreground text-sm">
+                            A senha precisa ter um mínimo de 7 caracteres, incluindo letras minúsculas, letras maiúsculas,
+                            números e caracteres especiais.
+                        </span>
+                    </div>
 
-          <FormField
-            control={form.control}
-            name="newPassword"
-            render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
-                  Nova senha
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    disabled={isSubmitting}
-                    className="col-span-3"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormField
+                        control={form.control}
+                        name="newPassword"
+                        render={({ field }) => (
+                            <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                                <FormLabel className="h-max font-semibold text-left">Nova senha</FormLabel>
+                                <FormControl>
+                                    <Input type="password" disabled={isSubmitting} className="col-span-3" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-          <FormField
-            control={form.control}
-            name="confirmNewPassword"
-            render={({ field }) => (
-              <FormItem className="grid grid-rows-[20px_1fr] items-center gap-4">
-                <FormLabel className="text-left h-max font-semibold">
-                  Confirme nova senha
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    disabled={isSubmitting}
-                    className="col-span-3"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                    <FormField
+                        control={form.control}
+                        name="confirmNewPassword"
+                        render={({ field }) => (
+                            <FormItem className="items-center gap-4 grid grid-rows-[20px_1fr]">
+                                <FormLabel className="h-max font-semibold text-left">Confirme nova senha</FormLabel>
+                                <FormControl>
+                                    <Input type="password" disabled={isSubmitting} className="col-span-3" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
 
-          <Separator className="col-span-1 lg:col-span-2" />
+                    <Separator className="col-span-1 lg:col-span-2" />
 
-          <div className="grid grid-rows-2 items-center gap-4">
-            <Label className="font-semibold text-base">Seus cargos</Label>
-            <div className="col-span-3 flex gap-1">
-              {currentUser.profile?.user_roles?.map((r, i) => (
-                <Badge variant="default" key={i}>
-                  {
-                    rolesLabelsOptions.find((role) => role.value === r.role)
-                      ?.label
-                  }
-                </Badge>
-              ))}
-            </div>
-          </div>
+                    <div className="items-center gap-4 grid grid-rows-2">
+                        <Label className="font-semibold text-base">Seus cargos</Label>
+                        <div className="flex gap-1 col-span-3">
+                            <Badge variant="default">
+                                {rolesLabelsOptions.find((role) => role.value === currentUser.profile.user_role.role)?.label}
+                            </Badge>
+                        </div>
+                    </div>
 
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="gap-2 flex font-semibold w-max self-end col-span-1 lg:col-span-2"
-          >
-            {isSubmitting && <LoaderCircle className="size-5 animate-spin" />}
-            {isSubmitting ? "Salvando mudanças" : "Salvar mudanças"}
-          </Button>
-        </form>
-      </Form>
-    </div>
-  );
+                    <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex self-end gap-2 col-span-1 lg:col-span-2 w-max font-semibold"
+                    >
+                        {isSubmitting && <LoaderCircle className="size-5 animate-spin" />}
+                        {isSubmitting ? "Salvando mudanças" : "Salvar mudanças"}
+                    </Button>
+                </form>
+            </Form>
+        </div>
+    );
 };

@@ -129,7 +129,7 @@ function AvatarGroupTooltip(props: AvatarGroupTooltipProps) {
 type AvatarGroupVariant = 'motion' | 'css' | 'stack';
 
 type AvatarGroupProps = Omit<React.ComponentProps<'div'>, 'translate'> & {
-  children: React.ReactElement[];
+  children: React.ReactElement<any>[];
   variant?: AvatarGroupVariant;
   transition?: Transition;
   invertOverlap?: boolean;

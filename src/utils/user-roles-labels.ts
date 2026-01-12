@@ -1,11 +1,10 @@
-import { RolesT } from "@/types/auth";
-import { RolesLabelsE } from "@/types/auth/enum/roles";
+import { Role, RolesLabels } from "@/types";
 
-export const rolesLabelsOptions: { value: RolesT; label: string }[] = [
-  { value: RolesLabelsE.ADMIN, label: "Administrador" },
-  { value: RolesLabelsE.EMPLOYER, label: "Gerente de empregabilidade" },
-  { value: RolesLabelsE.CLASS_MANAGER, label: "Gerente de turma" },
-  { value: RolesLabelsE.STUDENT, label: "Estudante" },
-  { value: RolesLabelsE.TEACHER, label: "Facilitador" },
-  { value: RolesLabelsE.ALUMNI, label: "Alumni" },
+export const rolesLabelsOptions: { value: Role; label: string }[] = [
+  { value: RolesLabels.ADMIN, label: "Administrador" },
+  { value: RolesLabels.EMPLOYER, label: "Gerente de empregabilidade" },
+  { value: RolesLabels.CLASS_MANAGER, label: "Gerente de turma" },
+  { value: RolesLabels.STUDENT, label: "Estudante" },
+  { value: RolesLabels.TEACHER, label: "Facilitador" },
+  { value: RolesLabels.ALUMNI, label: "Alumni" },
 ];

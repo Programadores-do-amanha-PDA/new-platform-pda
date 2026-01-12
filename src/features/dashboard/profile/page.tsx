@@ -1,20 +1,17 @@
 "use client";
 
-// Hooks
-import useAuth from "@/hooks/use-auth";
-
-// Local imports
+import { useAuth } from "@/features/shared/auth";
 import { ProfileDataTabs } from "./components";
 
 export default function Page() {
-  const { user, fetchSession } = useAuth();
-  if (!user) return;
+    const { user, fetchSession } = useAuth();
+    if (!user) return;
 
-  return (
-    <main className="relative w-full h-max flex flex-col p-4 overflow-y-auto">
-      <div className="w-full max-w-3xl h-max rounded-xl flex flex-col items-center justify-center gap-4">
-        <ProfileDataTabs currentUser={user} onUpdateUser={fetchSession} />
-      </div>
-    </main>
-  );
+    return (
+        <main className="relative flex flex-col p-4 w-full h-max overflow-y-auto">
+            <div className="flex flex-col justify-center items-center gap-4 rounded-xl w-full max-w-3xl h-max">
+                <ProfileDataTabs currentUser={user} onUpdateUser={fetchSession} />
+            </div>
+        </main>
+    );
 }

@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 
 import {
   Sidebar,
@@ -16,7 +15,7 @@ import { AppSidebarPropsT } from "@/types/sidebar";
 
 export default function AppSidebar({ ...props }: AppSidebarPropsT) {
   return (
-    <Sidebar collapsible="icon" {...props} className="!border-0 py-4">
+    <Sidebar collapsible="icon" {...props} className="py-4 border-0!">
       <SidebarHeader>
         {props.data.team && <TeamSwitcher team={props.data.team} />}
       </SidebarHeader>
@@ -31,8 +30,8 @@ export default function AppSidebar({ ...props }: AppSidebarPropsT) {
           <NavProjects projects={props.data?.projects} />
         )}
       </SidebarContent>
-      <SidebarFooter className="w-full h-max flex pb-0">
-        <NavUser user={props.data.user} />
+      <SidebarFooter className="flex pb-0 w-full h-max">
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

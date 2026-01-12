@@ -13,8 +13,6 @@ const config: Config = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
-    '^@features/(.*)$': '<rootDir>/src/features/$1',
-    '^@components/(.*)$': '<rootDir>/src/components/$1',
   },
   testMatch: [
     '**/__tests__/**/*.(ts|tsx|js)',

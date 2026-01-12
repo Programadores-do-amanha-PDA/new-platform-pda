@@ -137,3 +137,5 @@ dist
 
 # kiro
 .kiro/
+
+next-env.d.ts

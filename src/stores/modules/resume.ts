@@ -8,8 +8,8 @@ import {
   getUserResumeByUserId,
   updateUserResumeById,
   deleteUserResumeById,
-} from "@/app/actions/resume";
-import { AuthUserWithProfileT } from "@/types/auth";
+} from "@/actions/resume";
+import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 interface ResumeState {
   resumes: ResumeT[];
@@ -19,10 +19,10 @@ interface ResumeState {
 interface ResumeActions {
   setResumes: (resumes: ResumeT[]) => void;
   getAllResumes: () => Promise<boolean>;
-  getResumeByUserId: (user: AuthUserWithProfileT) => Promise<boolean>;
+  getResumeByUserId: (user: AuthUserWithProfile) => Promise<boolean>;
   createResume: (
     resumeData: ResumeT,
-    user: AuthUserWithProfileT
+    user: AuthUserWithProfile
   ) => Promise<boolean>;
   updateResume: (id: string, resumeData: Partial<ResumeT>) => Promise<boolean>;
   deleteResume: (id: string) => Promise<boolean>;

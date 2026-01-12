@@ -1,9 +1,9 @@
-// Global imports
+"use client"
+
 import React from "react";
 import Cropper, { Area, Point } from "react-easy-crop";
 import { ImageUpscale } from "lucide-react";
 
-//  UI components
 import {
   AlertDialog,
   AlertDialogAction,

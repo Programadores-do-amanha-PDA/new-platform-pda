@@ -1,1 +1,1 @@
-export { default } from "@/features/dashboard/classroom-zoom/pages/accounts-page";
+export { default } from "@/features/dashboard/classrooms/classroom/integrations/zoom/pages/accounts-page";

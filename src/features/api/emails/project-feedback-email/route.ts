@@ -1,47 +1,48 @@
 "use server";
-import { NextRequest, NextResponse } from "next/server";
-import { authenticateWithSupabase } from "@/app/api/middleware/supabase-auth";
-import { handleApiError } from "@/lib/errors/api-error";
-import { logInfo, logError } from "@/lib/logger";
 
+import { NextRequest, NextResponse } from "next/server";
+import { authenticateWithSupabase } from "@/lib/supabase/middlewares";
+import { logger } from "@/lib/logger";
+import { handleApiError } from "@/lib/errors/api-error";
 import { projectFeedbackSchema } from "./utils/validations";
 import { ProjectFeedbackEmailService } from "./utils/project-feedback-email-service";
 
+const log = logger.child({ module: "emails.project-feedback-email" });
+
 export async function POST(request: NextRequest) {
-  try {
-    const user = await authenticateWithSupabase();
+    try {
+        const user = await authenticateWithSupabase();
 
-    // Log com contexto do usuário
-    logInfo("Sending project feedback email", {
-      userId: user.userId,
-      email: user.email,
-      role: user.role,
-    });
+        log.info(
+            {
+                userId: user.userId,
+                email: user.email,
+                role: user.role,
+            },
+            "Sending project feedback email",
+        );
 
-    const body = await request.json();
-    const validatedData = projectFeedbackSchema.parse(body);
+        const body = await request.json();
+        const validatedData = projectFeedbackSchema.parse(body);
 
-    //  TODO exchange role permissions
-    // if (user.role !== "admin") {
-    //   throw new ApiError(
-    //     403,
-    //     "Not allowed to send user credentials"
-    //   );
-    // }
+        //  TODO exchange role permissions
 
-    await ProjectFeedbackEmailService.sendProjectFeedbackEmail(validatedData);
+        await ProjectFeedbackEmailService.sendProjectFeedbackEmail(validatedData);
 
-    logInfo("Feedback email sent successfully", {
-      userId: user.userId,
-      recipient: validatedData.email,
-    });
+        log.info(
+            {
+                userId: user.userId,
+                recipient: validatedData.email,
+            },
+            "Feedback email sent successfully",
+        );
 
-    return NextResponse.json({
-      status: true,
-      message: "Email sent successfully",
-    });
-  } catch (error) {
-    logError("Error sending feedback email", error);
-    return handleApiError(error);
-  }
+        return NextResponse.json({
+            status: true,
+            message: "Email sent successfully",
+        });
+    } catch (error) {
+        log.error({ err: error }, "Error sending feedback email");
+        return handleApiError(error);
+    }
 }

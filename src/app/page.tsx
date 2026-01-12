@@ -1,20 +1,10 @@
 "use client";
 
-//  GLobal imports
-import { useEffect } from "react";
-import { redirect } from "next/navigation";
-
-// Hooks
-import useAuth from "@/hooks/use-auth";
+import Link from "next/link";
 
 export default function RootPage() {
-  const { user } = useAuth();
-  useEffect(() => {
-    if (user) {
-      redirect("/dashboard");
-    } else {
-      redirect("/login");
-    }
-  }, []);
-  return;
+
+  return <div>
+    <Link href="/sign-in">Go to Sign In</Link>
+  </div>;
 }

@@ -1,1 +1,1 @@
-export {default} from "@/features/dashboard/classroom-projects/pages/project-page"
+export {default} from "@/features/dashboard/classrooms/classroom/projects/pages/project-page"
