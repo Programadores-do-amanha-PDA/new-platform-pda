@@ -22,7 +22,12 @@ export default function PollResultsPage() {
 
     const classroomConfigUserModes = settingsByClassroom[classroom_id]?.user_modes || [];
 
-    const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, classroomConfigUserModes, "activities");
+    const allVisibleUsers = filterVisibilityClassroomStudents({
+        users,
+        classroomId: classroom_id,
+        userModes: classroomConfigUserModes,
+        ruleId: "activities",
+    });
 
     // Get past instances directly from the store and add meeting info
     const pastsMeetings: ZoomMeetingPastInstance[] = pastInstances

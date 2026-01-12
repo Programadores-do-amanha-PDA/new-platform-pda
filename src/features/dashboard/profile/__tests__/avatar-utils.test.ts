@@ -3,6 +3,26 @@ import { Area } from "react-easy-crop";
 
 describe("avatar-utils", () => {
     /**
+     * Creates a mock HTMLImageElement with proper event handling and src property.
+     * 
+     * @returns A mocked HTMLImageElement instance
+     */
+    const createMockImage = (): HTMLImageElement => {
+        const mockImage = new EventTarget() as unknown as HTMLImageElement;
+        mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
+            if (event === "load") {
+                setTimeout(callback as EventListener, 0);
+            }
+        });
+        mockImage.setAttribute = jest.fn();
+        Object.defineProperty(mockImage, "src", {
+            writable: true,
+            value: "",
+        });
+        return mockImage;
+    };
+
+    /**
      * Mock setup for canvas API
      */
     beforeEach(() => {
@@ -23,14 +43,7 @@ describe("avatar-utils", () => {
         it("should successfully load image from valid URL", async () => {
             const url = "https://example.com/image.jpg";
 
-            const mockImage = new EventTarget() as unknown as HTMLImageElement;
-            mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
-                if (event === "load") {
-                    setTimeout(callback as EventListener, 0);
-                }
-            });
-            mockImage.setAttribute = jest.fn();
-            (mockImage as any).src = "";
+            const mockImage = createMockImage();
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
@@ -40,16 +53,9 @@ describe("avatar-utils", () => {
 
         it("should set crossOrigin attribute to anonymous", async () => {
             const url = "https://example.com/image.jpg";
+            const mockImage = createMockImage();
             const setAttributeSpy = jest.fn();
-
-            const mockImage = new EventTarget() as unknown as HTMLImageElement;
-            mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
-                if (event === "load") {
-                    setTimeout(callback as EventListener, 0);
-                }
-            });
             mockImage.setAttribute = setAttributeSpy;
-            (mockImage as any).src = "";
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
@@ -60,19 +66,12 @@ describe("avatar-utils", () => {
         it("should set correct src attribute", async () => {
             const url = "https://example.com/image.jpg";
 
-            const mockImage = new EventTarget() as unknown as HTMLImageElement;
-            mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
-                if (event === "load") {
-                    setTimeout(callback as EventListener, 0);
-                }
-            });
-            mockImage.setAttribute = jest.fn();
-            (mockImage as any).src = "";
+            const mockImage = createMockImage();
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
             await createImageFromUrl(url);
-            expect((mockImage as any).src).toBe(url);
+            expect(mockImage.src).toBe(url);
         });
     });
 
@@ -81,13 +80,7 @@ describe("avatar-utils", () => {
             const imageSrc = "https://example.com/image.jpg";
             const pixelCrop: Area = { x: 10, y: 10, width: 50, height: 50 };
 
-            const mockImage = new EventTarget() as unknown as HTMLImageElement;
-            mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
-                if (event === "load") {
-                    setTimeout(callback as EventListener, 0);
-                }
-            });
-            mockImage.setAttribute = jest.fn();
+            const mockImage = createMockImage();
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
@@ -101,13 +94,7 @@ describe("avatar-utils", () => {
 
             HTMLCanvasElement.prototype.getContext = jest.fn(() => null);
 
-            const mockImage = new EventTarget() as unknown as HTMLImageElement;
-            mockImage.addEventListener = jest.fn((event: string, callback: EventListener) => {
-                if (event === "load") {
-                    setTimeout(callback as EventListener, 0);
-                }
-            });
-            mockImage.setAttribute = jest.fn();
+            const mockImage = createMockImage();
 
             jest.spyOn(window, "Image").mockImplementation(() => mockImage);
 
@@ -133,7 +120,7 @@ describe("avatar-utils", () => {
             jest.spyOn(window, "FileReader").mockImplementation(() => {
                 setTimeout(() => {
                     if (mockFileReader.onload) {
-                        mockFileReader.onload.call(mockFileReader, new ProgressEvent("load"));
+                        mockFileReader.onload.call(mockFileReader, { target: mockFileReader } as ProgressEvent<FileReader>);
                     }
                 }, 0);
                 return mockFileReader;
@@ -159,7 +146,7 @@ describe("avatar-utils", () => {
             jest.spyOn(window, "FileReader").mockImplementation(() => {
                 setTimeout(() => {
                     if (mockReader.onload) {
-                        mockReader.onload.call(mockReader, new ProgressEvent("load"));
+                        mockReader.onload.call(mockReader, { target: mockReader } as ProgressEvent<FileReader>);
                     }
                 }, 0);
                 return mockReader;
@@ -187,7 +174,7 @@ describe("avatar-utils", () => {
             jest.spyOn(window, "FileReader").mockImplementation(() => {
                 setTimeout(() => {
                     if (mockReader.onload) {
-                        mockReader.onload.call(mockReader, new ProgressEvent("load"));
+                        mockReader.onload.call(mockReader, { target: mockReader } as ProgressEvent<FileReader>);
                     }
                 }, 0);
                 return mockReader;
@@ -213,7 +200,7 @@ describe("avatar-utils", () => {
             jest.spyOn(window, "FileReader").mockImplementation(() => {
                 setTimeout(() => {
                     if (mockReader.onload) {
-                        mockReader.onload.call(mockReader, new ProgressEvent("load"));
+                        mockReader.onload.call(mockReader, { target: mockReader } as ProgressEvent<FileReader>);
                     }
                 }, 0);
                 return mockReader;
@@ -239,7 +226,7 @@ describe("avatar-utils", () => {
             jest.spyOn(window, "FileReader").mockImplementation(() => {
                 setTimeout(() => {
                     if (mockReader.onload) {
-                        mockReader.onload.call(mockReader, new ProgressEvent("load"));
+                        mockReader.onload.call(mockReader, { target: mockReader } as ProgressEvent<FileReader>);
                     }
                 }, 0);
                 return mockReader;

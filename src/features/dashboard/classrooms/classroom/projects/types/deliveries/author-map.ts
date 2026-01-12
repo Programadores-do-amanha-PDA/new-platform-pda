@@ -1,4 +1,4 @@
-import { ClassroomProjectDelivery, ClassProjectCorrection } from "..";
+import { ClassroomProjectDelivery, ClassroomProjectCorrection } from "..";
 
 /**
  * Represents an author or squad in the project delivery system
@@ -7,17 +7,10 @@ import { ClassroomProjectDelivery, ClassProjectCorrection } from "..";
  * For group projects, this represents a squad with multiple members.
  */
 export interface AuthorMapEntryT {
-  /** Unique identifier for the author or squad */
   authorId: string;
-  
-  /** Array of member IDs for group projects (undefined for individual projects) */
   memberIds?: string[];
-  
-  /** All deliveries associated with this author or squad */
   deliveries: ClassroomProjectDelivery[];
-  
-  /** All corrections associated with this author's or squad's deliveries */
-  corrections: ClassProjectCorrection[];
+  corrections: ClassroomProjectCorrection[];
 }
 
 /**

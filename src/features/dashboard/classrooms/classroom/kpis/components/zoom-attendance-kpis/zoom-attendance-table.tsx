@@ -95,8 +95,6 @@ export const KPIsZoomAttendanceTable = ({ classroomId }: { classroomId: string }
             try {
                 if (!value.length || !key) throw new Error("no meetings found");
 
-                console.log(settingsByClassroom[classroomId], classroomClassTypes);
-
                 const currentClassType = classroomClassTypes.find((classType) => classType.id === key);
                 if (!currentClassType) throw new Error("no current classType");
 

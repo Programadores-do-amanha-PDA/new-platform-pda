@@ -80,7 +80,7 @@ The feature uses Zustand stores for state management:
 ### Core Types
 - `ClassroomProject`: Main project interface
 - `ClassroomProjectDelivery`: Project submission data
-- `ClassProjectCorrection`: Grading and feedback data
+- `ClassroomProjectCorrection`: Grading and feedback data
 
 ### Enums
 - `ClassroomProjectTypeT`: Project categories (mini_project, end_module_project, etc.)

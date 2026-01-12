@@ -1,10 +1,10 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
-import { ClassProjectCorrection } from "../types";
+import { ClassroomProjectCorrection } from "../types";
 
 export const createClassroomProjectCorrection = async (
-  correctionData: Omit<Partial<ClassProjectCorrection>, "id" | "created_at">
-): Promise<ClassProjectCorrection | null> => {
+  correctionData: Omit<Partial<ClassroomProjectCorrection>, "id" | "created_at">
+): Promise<ClassroomProjectCorrection | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -14,7 +14,7 @@ export const createClassroomProjectCorrection = async (
       .single();
 
     if (error) throw error;
-    return data as ClassProjectCorrection;
+    return data as ClassroomProjectCorrection;
   } catch (error) {
     console.error("Error creating classroom project correction:", error);
     return null;
@@ -23,7 +23,7 @@ export const createClassroomProjectCorrection = async (
 
 export const getAllCorrectionsByProjectId = async (
   projectId: string
-): Promise<ClassProjectCorrection[] | null> => {
+): Promise<ClassroomProjectCorrection[] | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -33,7 +33,7 @@ export const getAllCorrectionsByProjectId = async (
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as ClassProjectCorrection[];
+    return data as ClassroomProjectCorrection[];
   } catch (error) {
     console.error("Error fetching corrections by project ID:", error);
     return null;
@@ -42,7 +42,7 @@ export const getAllCorrectionsByProjectId = async (
 
 export const getAllCorrectionsByDeliveryId = async (
   deliveryId: string
-): Promise<ClassProjectCorrection[] | null> => {
+): Promise<ClassroomProjectCorrection[] | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -52,7 +52,7 @@ export const getAllCorrectionsByDeliveryId = async (
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as ClassProjectCorrection[];
+    return data as ClassroomProjectCorrection[];
   } catch (error) {
     console.error("Error fetching corrections by delivery ID:", error);
     return null;
@@ -61,7 +61,7 @@ export const getAllCorrectionsByDeliveryId = async (
 
 export const getAllCorrectionsByClassroomId = async (
   classroomId: string
-): Promise<ClassProjectCorrection[] | null> => {
+): Promise<ClassroomProjectCorrection[] | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -74,7 +74,7 @@ export const getAllCorrectionsByClassroomId = async (
       .order("created_at", { ascending: false });
 
     if (error) throw error;
-    return data as ClassProjectCorrection[];
+    return data as ClassroomProjectCorrection[];
   } catch (error) {
     console.error("Error fetching all classroom corrections:", error);
     return null;
@@ -83,7 +83,7 @@ export const getAllCorrectionsByClassroomId = async (
 
 export const getClassroomProjectCorrectionById = async (
   id: string
-): Promise<ClassProjectCorrection | null> => {
+): Promise<ClassroomProjectCorrection | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -93,7 +93,7 @@ export const getClassroomProjectCorrectionById = async (
       .single();
 
     if (error) throw error;
-    return data as ClassProjectCorrection;
+    return data as ClassroomProjectCorrection;
   } catch (error) {
     console.error("Error fetching classroom project correction:", error);
     return null;
@@ -102,8 +102,8 @@ export const getClassroomProjectCorrectionById = async (
 
 export const updateClassroomProjectCorrectionById = async (
   id: string,
-  correctionData: Partial<ClassProjectCorrection>
-): Promise<ClassProjectCorrection | null> => {
+  correctionData: Partial<ClassroomProjectCorrection>
+): Promise<ClassroomProjectCorrection | null> => {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -114,7 +114,7 @@ export const updateClassroomProjectCorrectionById = async (
       .single();
 
     if (error) throw error;
-    return data as ClassProjectCorrection;
+    return data as ClassroomProjectCorrection;
   } catch (error) {
     console.error("Error updating classroom project correction:", error);
     return null;

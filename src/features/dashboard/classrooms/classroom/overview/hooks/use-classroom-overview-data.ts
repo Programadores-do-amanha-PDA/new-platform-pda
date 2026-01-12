@@ -8,7 +8,7 @@ import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { ClassroomSetting, UserMode } from "../../settings";
 import { CoodeshAssessment } from "../../integrations/coodesh/types";
 import { ZoomMeetingPastInstance, ZoomMeeting } from "../../integrations/zoom/types";
-import { ClassroomProject, ClassroomProjectDelivery, ClassProjectCorrection } from "../../projects/types";
+import { ClassroomProject, ClassroomProjectDelivery, ClassroomProjectCorrection } from "../../projects/types";
 
 interface UseClassroomOverviewDataParams {
     readonly classroomId: string;
@@ -19,7 +19,7 @@ interface UseClassroomOverviewDataParams {
     readonly assessments: CoodeshAssessment[];
     readonly projects: ClassroomProject[];
     readonly classroomDeliveries: ClassroomProjectDelivery[];
-    readonly classroomCorrections: ClassProjectCorrection[];
+    readonly classroomCorrections: ClassroomProjectCorrection[];
     readonly pastInstances: ZoomMeetingPastInstance[];
     readonly meetings: ZoomMeeting[];
     readonly dateRange: { from: Date; to: Date } | null;
@@ -58,12 +58,12 @@ export const useClassroomOverviewData = (params: UseClassroomOverviewDataParams)
 
     return useMemo(() => {
         // Filter classroom students
-        const classroomStudents: AuthUserWithProfile[] = filterVisibilityClassroomStudents(
+        const classroomStudents: AuthUserWithProfile[] = filterVisibilityClassroomStudents({
             users,
             classroomId,
-            currentSettingUserModes,
-            "overview",
-        );
+            userModes: currentSettingUserModes,
+            ruleId: "overview",
+        });
 
         // Filter data by date range if provided
         const filteredPastInstances = dateRange

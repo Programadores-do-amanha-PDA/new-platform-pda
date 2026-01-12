@@ -1,12 +1,12 @@
 import { ClassroomProjectDelivery } from ".";
-import { ClassProjectCorrection } from "..";
+import { ClassroomProjectCorrection } from "..";
 
 export interface DeliveryStatusResultT {
   hasDelivery: boolean;
   hasCorrection: boolean;
   delivery?: ClassroomProjectDelivery;
-  correction?: ClassProjectCorrection;
-  originalCorrection?: ClassProjectCorrection; // For recovery cases, stores the original correction
+  correction?: ClassroomProjectCorrection;
+  originalCorrection?: ClassroomProjectCorrection; // For recovery cases, stores the original correction
   status:
     | "can-deliver"
     | "future"

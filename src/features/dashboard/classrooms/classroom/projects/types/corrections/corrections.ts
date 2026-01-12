@@ -4,7 +4,7 @@ export interface ClassroomProjectCorrectionRulesSelectedT {
   ruleNote: number;
 }
 
-export interface ClassProjectCorrection {
+export interface ClassroomProjectCorrection {
   id: string;
   classroom_id: string;
   project_id: string;

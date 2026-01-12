@@ -45,7 +45,7 @@ export default function AttendancePage() {
 
     const userModes = settingsByClassroom[classroom_id]?.user_modes || [];
 
-    const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, userModes, "attendance");
+    const allVisibleUsers = filterVisibilityClassroomStudents({users, classroomId: classroom_id, userModes, ruleId: "attendance"});
 
     const allAggregateInMetricUsers = filterMetricClassroomStudents({
         users,

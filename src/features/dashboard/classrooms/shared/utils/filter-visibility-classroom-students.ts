@@ -3,55 +3,58 @@ import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { UserMode, UserModeFeatureRule } from "../../classroom/settings";
 
 /**
- * Filters users by classroom ID and user mode presence requirement
+ * Filters classroom students based on their enrollment mode visibility rules.
  *
- * This function returns users who:
- * - Belong to the specified classroom
- * - Have a user mode that is marked as "must be present"
+ * This function determines which users should be visible in a classroom context by checking
+ * if their enrollment modes have the specified feature rule enabled. Users with null modes
+ * or modes that have the feature rule marked as visible will be included in the result.
  *
- * @param users - Array of User objects to filter (partial allowed for flexibility)
- * @param classroomId - The specific classroom ID to filter by
- * @param userModes - Array of user mode configurations from classroom settings
- * @returns Filtered array of complete User objects that meet the criteria
+ * @param params - The filtering parameters
+ * @param params.users - Array of partial user objects with profiles to filter
+ * @param params.classroomId - The ID of the classroom to filter enrollments for
+ * @param params.userModes - Array of user modes containing feature rules for visibility determination
+ * @param params.ruleId - The ID of the feature rule to check for visibility (from ADMIN_CLASSROOM_PAGES_KEYS)
+ *
+ * @returns An array of authenticated users with profiles that match the visibility criteria
  *
  * @example
- * ```typescript
- * const activeStudents = filterVisibilityClassroomStudents(
- *   allUsers,
- *   'classroom-123',
- *   userModesConfig
- * );
+ * ```ts
+ * const visibleStudents = filterVisibilityClassroomStudents({
+ *   users: allUsers,
+ *   classroomId: 'classroom-123',
+ *   userModes: availableModes,
+ *   ruleId: 'activities',
+ * });
  * ```
- *
- * @remarks
- * This function is useful for attendance systems, classroom management,
- * and scenarios where certain user modes require physical/online presence
  */
-export function filterVisibilityClassroomStudents(
-  users: Partial<AuthUserWithProfile>[],
-  classroomId: string,
-  userModes: UserMode[],
-  ruleId: (typeof ADMIN_CLASSROOM_PAGES_KEYS)[number]
-): AuthUserWithProfile[] {
-  const mustBeVisibleModeIds = new Set(
-    userModes
-      .filter((mode) => {
-        const modeFeatureRules = mode.featuresRules?.find(
-          (rule: UserModeFeatureRule) => rule.id === ruleId
-        );
-        return modeFeatureRules?.isVisible ?? false;
-      })
-      .map((mode) => mode.id)
-  );
+export function filterVisibilityClassroomStudents({
+    users,
+    classroomId,
+    userModes,
+    ruleId,
+}: {
+    users: Partial<AuthUserWithProfile>[];
+    classroomId: string;
+    userModes: UserMode[];
+    ruleId: (typeof ADMIN_CLASSROOM_PAGES_KEYS)[number];
+}): AuthUserWithProfile[] {
+    const mustBeVisibleModeIds = new Set(
+        userModes
+            .filter((mode) => {
+                const modeFeatureRules = mode.featuresRules?.find((rule: UserModeFeatureRule) => rule.id === ruleId);
+                return modeFeatureRules?.isVisible ?? false;
+            })
+            .map((mode) => mode.id),
+    );
 
-  return users.filter((user): user is AuthUserWithProfile =>
-    Boolean(
-      user.profile?.enrollments?.some(
-        (enrollment) =>
-          enrollment.classroom_id === classroomId &&
-          // enrollment mode should not exist and be in the presence-required set
-          (enrollment.mode === null || mustBeVisibleModeIds.has(enrollment.mode))
-      )
-    )
-  ) as AuthUserWithProfile[];
+    return users.filter((user): user is AuthUserWithProfile =>
+        Boolean(
+            user.profile?.enrollments?.some(
+                (enrollment) =>
+                    enrollment.classroom_id === classroomId &&
+                    // enrollment mode should not exist and be in the presence-required set
+                    (enrollment.mode === null || mustBeVisibleModeIds.has(enrollment.mode)),
+            ),
+        ),
+    ) as AuthUserWithProfile[];
 }

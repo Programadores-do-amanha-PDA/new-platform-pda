@@ -83,7 +83,7 @@ export function filterMetricClassroomStudents({
             ),
         ) as AuthUserWithProfile[];
     } catch (error) {
-        log.error({ err: error, operation: "filterMetricClassroomStudents" }, "Error filtering metric classroom students");
+        log.error({ err: error, data: { users, classroomId, userModes, ruleId }, operation: "filterMetricClassroomStudents" }, "Error filtering metric classroom students");
         return [];
     }
 }

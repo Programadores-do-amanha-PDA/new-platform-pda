@@ -1,5 +1,5 @@
 import {
-  ClassProjectCorrection,
+  ClassroomProjectCorrection,
   ClassroomProjectDelivery,
   ClassroomProject,
 } from "..";
@@ -7,7 +7,7 @@ import {
 export interface ModalSendCorrectionFeedbackEmailModalPropsT {
   open: boolean;
   deliveries: ClassroomProjectDelivery[];
-  corrections: ClassProjectCorrection[];
+  corrections: ClassroomProjectCorrection[];
   project: ClassroomProject;
   setClose: () => void;
 }

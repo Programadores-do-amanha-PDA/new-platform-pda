@@ -24,7 +24,7 @@ import { ProjectFeedbackInput } from "@/features/api/emails/project-feedback-ema
 import { DeliveryMembersDataTable } from "./delivery-members-data-table";
 import {
   ClassroomProjectDelivery,
-  ClassProjectCorrection,
+  ClassroomProjectCorrection,
   ModalSendCorrectionFeedbackEmailModalPropsT,
   DeliveryMemberT,
 } from "../../types";
@@ -56,7 +56,7 @@ export default function SendDeliveriesFeedbackEmailModal({
 
   const getDeliveryCorrection = (
     deliveryId: string
-  ): ClassProjectCorrection | undefined => {
+  ): ClassroomProjectCorrection | undefined => {
     return corrections.find(
       (correction) => correction.delivery_id === deliveryId
     );

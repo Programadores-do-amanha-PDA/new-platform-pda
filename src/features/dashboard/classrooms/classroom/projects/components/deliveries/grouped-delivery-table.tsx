@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-import { ClassroomProjectDelivery, ClassroomProjectTypeT, ClassProjectCorrection } from "../../types";
+import { ClassroomProjectDelivery, ClassroomProjectTypeT, ClassroomProjectCorrection } from "../../types";
 import { useClassroomProjectDeliveriesStore } from "../../stores/deliveries";
 import { cn } from "@/lib/utils";
 import { getFirstLastInitials } from "@/utils/get-first-last-initials";
@@ -32,7 +32,7 @@ export function GroupedDeliveryTable({
     projectType: ClassroomProjectTypeT;
     classroomId: string;
     projectId: string;
-    corrections?: ClassProjectCorrection[];
+    corrections?: ClassroomProjectCorrection[];
 }) {
     const [expandedUsers, setExpandedUsers] = React.useState<Set<string>>(new Set());
     const [searchTerm, setSearchTerm] = React.useState("");
@@ -120,7 +120,7 @@ export function GroupedDeliveryTable({
 
     const currentProject = projects.find((project) => project.id === projectId);
 
-    const getLatestCorrection = (deliveryId: string): ClassProjectCorrection | undefined => {
+    const getLatestCorrection = (deliveryId: string): ClassroomProjectCorrection | undefined => {
         const deliveryCorrections = corrections.filter((correction) => correction.delivery_id === deliveryId);
 
         if (deliveryCorrections.length === 0) return undefined;
@@ -268,7 +268,7 @@ export function GroupedDeliveryTable({
                                                     // Encontrar a correção mais recente de todas as entregas do grupo
                                                     const allCorrections = group.deliveries
                                                         .map((delivery) => getLatestCorrection(delivery.id))
-                                                        .filter(Boolean) as ClassProjectCorrection[];
+                                                        .filter(Boolean) as ClassroomProjectCorrection[];
 
                                                     if (allCorrections.length === 0) {
                                                         return <span className="text-muted-foreground text-sm">Pendente</span>;

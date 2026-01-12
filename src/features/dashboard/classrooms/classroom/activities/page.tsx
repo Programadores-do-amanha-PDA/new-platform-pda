@@ -23,7 +23,7 @@ export default function ClassroomActivitiesPage() {
         return <div>Turma não encontrada.</div>;
     }
 
-    const allVisibleUsers = filterVisibilityClassroomStudents(users, classroom_id, classroomSettingUserModes, "activities");
+    const allVisibleUsers = filterVisibilityClassroomStudents({users, classroomId: classroom_id, userModes: classroomSettingUserModes, ruleId: "activities"});
 
     const allAggregateInMetricUsers = filterMetricClassroomStudents({
         users,

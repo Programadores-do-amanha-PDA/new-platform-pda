@@ -38,7 +38,7 @@ import { useClassroomProjectCorrectionsStore } from "../../stores/corrections";
 import CorrectionRuleSelector from "./correction-rule-selector";
 import MemberListItem from "./member-list-item";
 import {
-  ClassProjectCorrection,
+  ClassroomProjectCorrection,
   ClassroomProjectCorrectionRulesSelectedT,
   CorrectionFormPropsT,
   CorrectionFormT,
@@ -188,7 +188,7 @@ const CorrectionForm = ({
 
   // Helper function to get only changed fields
   const getChangedFields = (
-    current: ClassProjectCorrection,
+    current: ClassroomProjectCorrection,
     newData: {
       final_note: string;
       final_considerations: string;
@@ -198,7 +198,7 @@ const CorrectionForm = ({
       next_itens: string[];
     }
   ) => {
-    const changes: Partial<ClassProjectCorrection> = {};
+    const changes: Partial<ClassroomProjectCorrection> = {};
 
     if (current.final_note !== newData.final_note) {
       changes.final_note = newData.final_note;

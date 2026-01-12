@@ -9,29 +9,29 @@ import {
   updateClassroomProjectCorrectionById,
   deleteCorrectionById,
 } from "@/features/dashboard/classrooms/classroom/projects/actions/corrections";
-import { ClassProjectCorrection } from "../types";
+import { ClassroomProjectCorrection } from "../types";
 
 interface CorrectionState {
-  corrections: Record<string, ClassProjectCorrection[]>;
+  corrections: Record<string, ClassroomProjectCorrection[]>;
   loading: boolean;
 }
 
 interface CorrectionActions {
-  setCorrections: (classroomId: string, corrections: ClassProjectCorrection[]) => void;
-  getCorrectionsForClassroom: (classroomId: string) => ClassProjectCorrection[];
+  setCorrections: (classroomId: string, corrections: ClassroomProjectCorrection[]) => void;
+  getCorrectionsForClassroom: (classroomId: string) => ClassroomProjectCorrection[];
   getAllCorrectionsByProjectId: (projectId: string) => Promise<boolean>;
   getAllCorrectionsByDeliveryId: (deliveryId: string, classroomId: string) => Promise<boolean>;
   getAllCorrectionsByClassroomId: (classroomId: string) => Promise<boolean>;
   createCorrection: (
     correctionData: Omit<
-      Partial<ClassProjectCorrection>,
+      Partial<ClassroomProjectCorrection>,
       "id" | "created_at"
     >,
     classroomId: string
   ) => Promise<boolean>;
   updateCorrection: (
     id: string,
-    correctionData: Partial<ClassProjectCorrection>,
+    correctionData: Partial<ClassroomProjectCorrection>,
     classroomId: string
   ) => Promise<boolean>;
   deleteCorrection: (id: string, classroomId: string) => Promise<boolean>;
@@ -88,7 +88,7 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
               acc[classroomId].push(correction);
             }
             return acc;
-          }, {} as Record<string, ClassProjectCorrection[]>);
+          }, {} as Record<string, ClassroomProjectCorrection[]>);
           
           // Merge with existing corrections
           set((state) => ({
@@ -96,7 +96,7 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
               const existing = state.corrections[classroomId] || [];
               acc[classroomId] = [...existing, ...correctionsByClassroom[classroomId]];
               return acc;
-            }, { ...state.corrections } as Record<string, ClassProjectCorrection[]>),
+            }, { ...state.corrections } as Record<string, ClassroomProjectCorrection[]>),
           }));
           return true;
         } catch (error) {

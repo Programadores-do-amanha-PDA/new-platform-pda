@@ -1,5 +1,5 @@
 import { ClassroomProject } from "./project";
-import { ClassProjectCorrection, ClassroomProjectDelivery } from "..";
+import { ClassroomProjectCorrection, ClassroomProjectDelivery } from "..";
 
 /**
  * Props interface for the ProjectCard component
@@ -7,9 +7,9 @@ import { ClassProjectCorrection, ClassroomProjectDelivery } from "..";
 export interface ProjectCardPropsT {
   /** The project data to display */
   project: ClassroomProject;
-  /** Whether to show expanded view with additional controls */
+  /** Whether the card should be displayed in expanded mode */
   expansive: boolean;
-  /** The classroom ID for delivery modal */
+  /** The unique identifier of the classroom */
   classroomId: string;
 }
 
@@ -17,11 +17,11 @@ export interface ProjectCardPropsT {
  * Props interface for project status components
  */
 export interface ProjectStatusPropsT {
-  /** The project to display status for */
+  /** The project data to display status for */
   project: ClassroomProject;
-  /** Current user ID */
+  /** Optional user ID to check delivery status */
   userId?: string;
-  /** Function to open delivery modal */
+  /** Callback function to open the delivery submission modal */
   onOpenDeliveryModal: () => void;
 }
 
@@ -29,9 +29,12 @@ export interface ProjectStatusPropsT {
  * Props interface for project admin controls
  */
 export interface ProjectAdminControlsPropsT {
+  /** The project data for admin management */
   project: ClassroomProject;
+  /** List of all deliveries submitted for this project */
   classroomDeliveries: ClassroomProjectDelivery[];
-  classroomCorrections: ClassProjectCorrection[];
+  /** List of all corrections made for this project */
+  classroomCorrections: ClassroomProjectCorrection[];
 }
 
 /**
@@ -49,9 +52,14 @@ export type ProjectCardVariantT =
   | "expired";
 
 export interface ProjectStatusRendererPropsT {
+  /** The project data to render status for */
   project: ClassroomProject;
+  /** The unique identifier of the classroom */
   classroomId: string;
+  /** List of all deliveries submitted for this project */
   classroomDeliveries: ClassroomProjectDelivery[];
-  classroomCorrections: ClassProjectCorrection[];
+  /** List of all corrections made for this project */
+  classroomCorrections: ClassroomProjectCorrection[];
+  /** Optional callback function to open delivery modal with specific delivery data */
   onOpenDeliveryModal?: (delivery: ClassroomProjectDelivery | null) => void;
 }

@@ -1,6 +1,6 @@
 import { Profile } from "@/features/dashboard/profile";
 import {
-  ClassProjectCorrection,
+  ClassroomProjectCorrection,
   ClassroomProjectDelivery,
   ClassroomProjectTypeT,
 } from "..";
@@ -8,7 +8,7 @@ import {
 export interface DeliveryListItemProps {
   delivery: ClassroomProjectDelivery;
   deliveryIndex: number;
-  correction: ClassProjectCorrection | undefined;
+  correction: ClassroomProjectCorrection | undefined;
   isSelected: boolean;
   onSelect: (delivery: ClassroomProjectDelivery) => void;
 }

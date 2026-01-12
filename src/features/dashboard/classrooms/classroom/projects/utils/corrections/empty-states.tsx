@@ -7,15 +7,37 @@ import {
 } from "lucide-react";
 import { isProjectActive, isProjectFuture } from "../projects/project-status";
 import {
-  ClassProjectCorrection,
+  ClassroomProjectCorrection,
   ClassroomProjectDelivery,
   ClassroomProject,
 } from "../../types";
 
-// Determine the current state for empty state display
+/**
+ * Determines the appropriate empty state configuration based on project deliveries and corrections status.
+ * 
+ * This function analyzes the current state of project deliveries and corrections to return
+ * the most relevant empty state message and icon for the UI.
+ * 
+ * @param allProjectDeliveries - Array of all project deliveries submitted by students
+ * @param allProjectCorrections - Array of all corrections made for the project deliveries
+ * @param currentProject - The current classroom project being evaluated
+ * 
+ * @returns An object containing:
+ * - `icon`: A React component representing the visual icon for the empty state
+ * - `title`: A string with the main title describing the current state
+ * - `description`: A detailed string explaining the current situation and possible actions
+ * 
+ * @remarks
+ * The function handles five distinct states:
+ * 1. No deliveries and project is active or future - Shows waiting message
+ * 2. Has deliveries but no corrections - Prompts to start correcting
+ * 3. Has some corrections but not all - Shows progress and encourages completion
+ * 4. All corrections completed - Congratulates and suggests sending emails
+ * 5. Fallback - No deliveries and project period ended
+ */
 export const getEmptyStateConfig = (
   allProjectDeliveries: ClassroomProjectDelivery[],
-  allProjectCorrections: ClassProjectCorrection[],
+  allProjectCorrections: ClassroomProjectCorrection[],
   currentProject: ClassroomProject
 ) => {
   const hasDeliveries = allProjectDeliveries?.length > 0;
