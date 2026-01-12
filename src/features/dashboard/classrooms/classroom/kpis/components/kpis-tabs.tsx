@@ -7,7 +7,7 @@ import EmptyState from "@/components/shared/empty-states/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KPIsZoomAttendanceTable } from "./zoom-attendance-kpis";
 import { KPIsZoomSatisfactionTable } from "./zoom-satisfaction-kpis";
-import { ProjectsKpisTable } from "./classroom-projects-kpis";
+import { ProjectsKPIsTable } from "./classroom-projects-kpis";
 
 export const KPIsTabs = () => {
     const { classroom_id } = useParams<{ classroom_id: string }>();
@@ -24,7 +24,7 @@ export const KPIsTabs = () => {
 
     return (
         <Tabs defaultValue="zoom-attendance" className="w-full h-full overflow-hidden">
-            <TabsList>
+            <TabsList className="**:font-semibold *:cursor-pointer *:hover:bg-background/50">
                 <TabsTrigger value="zoom-attendance">Presenças</TabsTrigger>
                 <TabsTrigger value="zoom-satisfaction">Satisfação</TabsTrigger>
                 <TabsTrigger value="classroom-projects">Projetos</TabsTrigger>
@@ -36,7 +36,7 @@ export const KPIsTabs = () => {
                 <KPIsZoomSatisfactionTable classroomId={classroom_id} />
             </TabsContent>
             <TabsContent value="classroom-projects" className="w-full h-full overflow-hidden">
-                <ProjectsKpisTable classroomId={classroom_id} />
+                <ProjectsKPIsTable classroomId={classroom_id} />
             </TabsContent>
         </Tabs>
     );
