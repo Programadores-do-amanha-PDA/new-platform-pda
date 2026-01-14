@@ -276,3 +276,18 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgb(from var(--primary) r g b / 0.7);
+    }
+    50% {
+      box-shadow: 0 0 0 12px rgb(from var(--primary) r g b / 0);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+}
