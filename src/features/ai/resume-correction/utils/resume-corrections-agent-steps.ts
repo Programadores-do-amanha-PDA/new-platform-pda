@@ -5,7 +5,7 @@ import { REVIEW_OUTPUT_SCHEMA, SUGGESTIONS_AND_KEY_POINTS_ENHANCEMENTS_OUTPUT_SC
 
 export const RESUME_CORRECTION_STEPS = {
     review: {
-        model: openRouter("tngtech/deepseek-r1t2-chimera:free"),
+        model: openRouter("xiaomi/mimo-v2-flash:free"),
         promptTemplate: REVIEW_RESUME_PROMPT,
         outputSchema: REVIEW_OUTPUT_SCHEMA,
     },

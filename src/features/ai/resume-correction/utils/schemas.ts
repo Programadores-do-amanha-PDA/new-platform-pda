@@ -3,7 +3,7 @@ import z from "zod";
 export const REVIEW_OUTPUT_SCHEMA = z.object({
     review: z.string(),
     keys_points: z.array(z.string()),
-    suggestions_points: z.array(z.string()).optional(),
+    suggestions_points: z.array(z.string()),
 });
 
 export const SUGGESTIONS_AND_KEY_POINTS_ENHANCEMENTS_OUTPUT_SCHEMA = z.object({

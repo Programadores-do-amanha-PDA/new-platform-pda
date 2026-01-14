@@ -14,6 +14,7 @@ export async function generateResumeCorrectionAsync({ resume }: { resume: string
     });
 
     console.log("Resume Review:", resumeReview);
+    return resumeReview;
 
     // // Perform quality check on copy
     // const { text: resumeKeyPointsEnhanced } = await generateText({
