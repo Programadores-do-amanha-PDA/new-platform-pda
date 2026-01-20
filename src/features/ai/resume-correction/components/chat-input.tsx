@@ -14,8 +14,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { generateResumeCorrectionAsync } from "../sequential-agent";
+import { generateResumeCorrectionAsync } from "../agent";
 import { useState } from "react";
+import { RESUME_CORRECTION_OUTPUT_SCHEMA, ResumeCorrectionOutput } from "../utils";
 
 const resumeCorrectionFormSchema = z.object({
     resumeFile: z
@@ -91,7 +92,7 @@ async function readerFileAsArrayBufferAsync(file: File): Promise<string | null> 
 }
 
 export function ChatInput() {
-    const [result, setResult] = useState<string | null>(null);
+    const [result, setResult] = useState<ResumeCorrectionOutput | null>(null);
     const form = useForm<ResumeCorrectionFormData>({
         resolver: zodResolver(resumeCorrectionFormSchema),
         defaultValues: {
@@ -124,12 +125,12 @@ export function ChatInput() {
     const onSubmit = async (data: ResumeCorrectionFormData) => {
         console.log("Submitted resume text:", data.resumeText);
 
-        const resumeReview = await generateResumeCorrectionAsync({ resume: data.resumeText! });
+        const resumeReview = await generateResumeCorrectionAsync({ resume: data.resumeText!, prompt: "" });
         setResult(resumeReview);
     };
 
     return (
-        <div className="w-full flex flex-col items-center justify-center gap-8">
+        <div className="w-full h-full flex flex-col items-center justify-center gap-8 overflow-y bg-red-50">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="w-lg p-6 space-y-4 border rounded-lg">
                     <section className="space-y-4 ">
@@ -204,6 +205,25 @@ export function ChatInput() {
                     </Button>
                 </form>
             </Form>
+            {result && (
+                <div className="w-lg p-6 space-y-4 border rounded-lg">
+                    <h2 className="text-2xl font-bold">Resultado da Correção do Currículo</h2>
+                    <section>
+                        <h3 className="text-xl font-semibold mb-2">Revisão Geral</h3>
+                        <p>{result.review}</p>
+                    </section>
+                    <section>
+                        <h3 className="text-xl font-semibold mb-2">Pontos Chave</h3>
+                        <ul className="list-disc list-inside space-y-2">
+                            {result.keys_points.map((point, index) => (
+                                <li key={index}>
+                                    <strong>{point.keys_point_title}:</strong> {point.keys_point_description}
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                </div>
+            )}
         </div>
     );
 }

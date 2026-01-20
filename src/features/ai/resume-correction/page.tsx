@@ -5,7 +5,7 @@ export default function ResumeCorrectionPage() {
     return (
         <main className="w-full h-full flex flex-1 overflow-hidden">
             <div className="flex flex-1 flex-col">
-                <div className="flex flex-1 flex-col items-center p-8 gap-10">
+                <div className="w-full h-full flex flex-1 flex-col items-center p-8 gap-10">
                     <div className="w-full max-w-2xl text-center">
                         <h1 className="mb-3 text-4xl font-bold tracking-tight">Bem vindo ao PdA Labs</h1>
                         <p className="text-muted-foreground">
