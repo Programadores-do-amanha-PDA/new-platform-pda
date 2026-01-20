@@ -41,12 +41,12 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
                 return;
             }
 
-            const result = await resendEmailSignupConfirmationToMultipleUsers(emails);
-            if (!result || !result.results) {
+            const {error, results} = await resendEmailSignupConfirmationToMultipleUsers({emails});
+            if (!results || error) {
                 throw new Error("Failed to send email verification emails");
             }
 
-            const { successful, failed, total } = result.results;
+            const { successful, failed, total } = results;
 
             if (failed.length === 0) {
                 toast.success(`Email de verificação enviado para ${successful} usuário(s) com sucesso!`);

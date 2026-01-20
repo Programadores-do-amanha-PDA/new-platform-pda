@@ -41,12 +41,12 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
                 return;
             }
 
-            const result = await sendPasswordResetToMultipleUsers(emails);
-            if (!result || !result.results) {
+            const { error, results } = await sendPasswordResetToMultipleUsers({ emails });
+            if (!results || error) {
                 throw new Error("Failed to send password reset emails");
             }
 
-            const { successful, failed, total } = result.results;
+            const { successful, failed, total } = results;
 
             if (failed.length === 0) {
                 toast.success(`Email de redefinição enviado para ${successful} usuário(s) com sucesso!`);
