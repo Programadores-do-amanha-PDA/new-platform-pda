@@ -5,29 +5,37 @@ import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { AuthError, AuthUser, Session } from "@supabase/supabase-js";
 
-type UpdateAuthUserResultT = { user: AuthUser; error: null } | { user: null; error: string };
-type SetSessionResultT = { session: Session; error: null } | { session: null; error: string };
+type UpdateAuthUserParams = {
+    updates: Partial<UserAuthLoginT>;
+};
+type UpdateAuthUserResult = { user: AuthUser; error: null } | { user: null; error: Error | AuthError };
+
+type SetSessionResult = { session: Session; error: null } | { session: null; error: Error | AuthError };
+
+type SetSessionParams = {
+    access_token: string;
+    refresh_token: string;
+};
 
 const log = logger.child({ module: "UserAuthActions" });
 
-
 /**
  * Updates the authenticated user's information in Supabase Auth.
- * 
+ *
  * @param options - The update options object
  * @param options.updates - Partial user data to update (e.g., email, password, user_metadata)
  * @returns A promise that resolves to an object containing either the updated user data or an error message
  * @returns The result object has two properties:
  *   - `user`: The updated Supabase user object, or null if an error occurred
- *   - `error`: An error message string if something went wrong, or null on success
+ *   - `error`: An error (Error or AuthError) object if something went wrong, or null on success
  * @throws Does not throw; errors are caught and returned in the result object
- * 
+ *
  * @example
  * const { error, user } = await updateAuthUser({
  *   updates: { email: 'newemail@example.com' }
  * });
  */
-export const updateAuthUser = async ({ updates }: { updates: Partial<UserAuthLoginT> }): Promise<UpdateAuthUserResultT> => {
+export const updateAuthUser = async ({ updates }: UpdateAuthUserParams): Promise<UpdateAuthUserResult> => {
     try {
         if (!updates) throw new Error("No updates provided");
 
@@ -43,24 +51,23 @@ export const updateAuthUser = async ({ updates }: { updates: Partial<UserAuthLog
         log.error({ err: error, updates, operation: "updateAuthUser" }, "Error updating auth user");
         return {
             user: null,
-            error: error instanceof Error ? error.message : error instanceof AuthError ? error.message : "unknown error",
+            error: error instanceof Error || error instanceof AuthError ? error : new Error("unknown error"),
         };
     }
 };
 
-
 /**
  * Sets a user session with the provided access and refresh tokens.
- * 
+ *
  * @param {Object} params - The session parameters
  * @param {string} params.access_token - The access token for authentication
  * @param {string} params.refresh_token - The refresh token for session refresh
- * @returns {Promise<SetSessionResultT>} A promise that resolves to an object containing either:
+ * @returns {Promise<SetSessionResult>} A promise that resolves to an object containing either:
  *   - `session`: The authenticated session object, or `null` if an error occurred
- *   - `error`: `null` if successful, or an error message string if an error occurred
- * 
+ *   - `error`: `null` if successful, or an Error (Error or AuthError) object if an error occurred
+ *
  * @throws Logs errors internally but does not throw; errors are returned in the result object
- * 
+ *
  * @example
  * const { error, session } = await setSession({
  *   access_token: "eyJhbG...",
@@ -70,10 +77,7 @@ export const updateAuthUser = async ({ updates }: { updates: Partial<UserAuthLog
 export const setSession = async ({
     access_token,
     refresh_token,
-}: {
-    access_token: string;
-    refresh_token: string;
-}): Promise<SetSessionResultT> => {
+}: SetSessionParams): Promise<SetSessionResult> => {
     try {
         if (!access_token) throw new Error("Access token not provided");
         if (!refresh_token) throw new Error("Refresh token not provided");
@@ -95,7 +99,7 @@ export const setSession = async ({
     } catch (error) {
         log.error({ err: error, operation: "setSession" }, "Error setting session");
         return {
-            error: error instanceof Error ? error.message : error instanceof AuthError ? error.message : "unknown error",
+            error: error instanceof Error || error instanceof AuthError ? error : new Error("unknown error"),
             session: null,
         };
     }
@@ -103,12 +107,12 @@ export const setSession = async ({
 
 /**
  * Signs out the currently authenticated user from Supabase.
- * 
+ *
  * @returns {Promise<boolean>} A promise that resolves to `true` if sign-out was successful,
  *                              or `false` if an error occurred during the sign-out process.
- * 
+ *
  * @throws Does not throw, but logs errors internally and returns `false` on failure.
- * 
+ *
  * @example
  * const success = await signOut();
  * if (success) {

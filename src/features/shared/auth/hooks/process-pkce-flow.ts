@@ -1,9 +1,12 @@
-import { Session, type EmailOtpType } from "@supabase/supabase-js";
+import { AuthError, Session, type EmailOtpType } from "@supabase/supabase-js";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { toast } from "sonner";
 
+import { logger } from "@/lib/logger";
 import { verifyOtp, setSession } from "../actions";
 import { OtpFlowParamsT, OtpFlowResultT } from "../types";
+
+const log = logger.child({ module: "ProcessOtpFlowHook" });
 
 /**
  * Processes OTP authentication flow by verifying token hash
@@ -24,55 +27,70 @@ import { OtpFlowParamsT, OtpFlowResultT } from "../types";
  * @param params - OTP flow parameters
  * @returns Promise with the flow result
  */
-export async function processOtpFlow(params: OtpFlowParamsT): Promise<OtpFlowResultT> {
-    const { tokenHash, type, router, updateAuthState, onSuccess, onError } = params;
-
+export async function processOtpFlow({
+    tokenHash,
+    type,
+    router,
+    updateAuthState,
+    onSuccess,
+    onError,
+}: OtpFlowParamsT): Promise<OtpFlowResultT> {
     try {
-        // Validate required token_hash parameter
         if (!tokenHash) {
             throw new Error("Token hash is missing");
         }
 
-        // Verify OTP token and get session
-        const session = await verifyOtpToken(tokenHash, type);
+        const { session, error } = await verifyOtpTokenAndSaveSessionOnServer({ tokenHash, type });
+        if (error) throw error;
+        if (!session) {
+            throw new Error("Failed to establish user session");
+        }
 
-        // Update application authentication state
         await updateAuthState({ session });
-
-        // Clean URL parameters for security
         cleanUrlParameters();
 
         // Determine redirect path and handle post-authentication
-        const redirectPath = await handlePostAuthentication(type, session, router);
+        const redirectPath = await handlePostAuthentication({ type, router });
 
         // Execute success callback if provided
         onSuccess?.(session, type);
-
-        // Show success feedback
-        toast.success("Authentication successful!");
+        toast.success("Autenticação realizada com sucesso!");
 
         return {
-            success: true,
             session,
             redirectPath,
+            error: null,
         };
     } catch (error) {
-        console.error("OTP flow error:", error);
-
-        const errorMessage = error instanceof Error ? error.message : "Authentication failed. Please try again.";
+        log.error({ err: error, operation: "processOtpFlow" }, "OTP flow error");
+        const errorMessage = error instanceof Error ? error.message : "Falha na autenticação. Por favor, tente novamente.";
 
         // Execute error callback if provided
         onError?.(error instanceof Error ? error : new Error(errorMessage));
-
-        // Show error feedback
         toast.error(errorMessage);
 
         return {
-            success: false,
+            session: null,
+            redirectPath: null,
             error: error instanceof Error ? error : new Error(errorMessage),
         };
     }
 }
+
+type VerifyOtpTokenAndSaveSessionOnServerParams = {
+    tokenHash: string;
+    type: string | null;
+};
+
+type VerifyOtpTokenAndSaveSessionOnServerResult =
+    | {
+          session: Session;
+          error: null;
+      }
+    | {
+          session: null;
+          error: Error | AuthError;
+      };
 
 /**
  * Verifies OTP token and returns user session using Supabase
@@ -82,36 +100,37 @@ export async function processOtpFlow(params: OtpFlowParamsT): Promise<OtpFlowRes
  * @returns User session object
  * @throws Error if token verification fails
  */
-async function verifyOtpToken(tokenHash: string, type: string | null) {
+const verifyOtpTokenAndSaveSessionOnServer = async ({
+    tokenHash,
+    type,
+}: VerifyOtpTokenAndSaveSessionOnServerParams): Promise<VerifyOtpTokenAndSaveSessionOnServerResult> => {
     try {
-        // Verify OTP token using Supabase's built-in method
-        const result = await verifyOtp({ tokenHash, type: type as EmailOtpType });
+        if (!tokenHash) throw new Error("Token hash is missing");
 
-        if (result.error) {
-            const errorMessage = result.error instanceof Error ? result.error.message : String(result.error);
-            throw new Error(`Token verification failed: ${errorMessage}`);
-        }
-
-        if (!result.session || !result.user) {
-            throw new Error("No session or user returned from token verification");
-        }
+        const { user, session, error } = await verifyOtp({ tokenHash, type: type as EmailOtpType });
+        if (error) throw new Error("Token verification failed");
+        if (!session) throw new Error("No session returned from token verification");
+        if (!user) throw new Error("No user returned from token verification");
 
         // Set session in server-side for middleware and server components
-        const serverSessionResult = await setSession({
-            access_token: result.session.access_token,
-            refresh_token: result.session.refresh_token,
+        const { session: serverSession, error: serverError } = await setSession({
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
         });
+        if (serverError) throw new Error("Failed to establish server session");
+        if (!serverSession) throw new Error("No server session returned");
 
-        if (serverSessionResult.error || !serverSessionResult.session) {
-            throw new Error("Failed to establish server session");
-        }
-
-        return serverSessionResult.session;
+        return { session: serverSession, error: null };
     } catch (error) {
-        console.error("Token verification error:", error);
-        throw error;
+        log.error({ err: error, operation: "verifyOtpTokenAndSaveSessionOnServer" }, "Error on token verification");
+        return { session: null, error: error instanceof Error ? error : new Error("Unknown error during token verification") };
     }
-}
+};
+
+type HandlePostAuthenticationParams = {
+    type: string | null;
+    router: AppRouterInstance;
+};
 
 /**
  * Handles post-authentication logic and determines redirect path
@@ -121,8 +140,8 @@ async function verifyOtpToken(tokenHash: string, type: string | null) {
  * @param router - Next.js router for navigation
  * @returns The path to redirect to
  */
-async function handlePostAuthentication(type: string | null, session: Session, router: AppRouterInstance): Promise<string> {
-    const redirectPath = getRedirectPath(type, session);
+async function handlePostAuthentication({ type, router }: HandlePostAuthenticationParams): Promise<string> {
+    const redirectPath = getRedirectPath({ type });
 
     // Use setTimeout to ensure state updates complete before navigation
     setTimeout(() => {
@@ -132,23 +151,22 @@ async function handlePostAuthentication(type: string | null, session: Session, r
     return redirectPath;
 }
 
+type GetRedirectPathParams = {
+    type: string | null;
+};
+
 /**
  * Determines appropriate redirect path based on authentication type and user state
  *
  * @param type - Type of authentication flow
- * @param session - User session object
  * @returns Path to redirect the user to
  */
-function getRedirectPath(type: string | null, session: Session): string {
+const getRedirectPath = ({ type }: GetRedirectPathParams): string => {
     switch (type) {
         case "recovery":
             return "/reset-password";
 
         case "signup":
-            // Check if user needs to complete profile
-            if (!session.user?.user_metadata?.profile_completed) {
-                return "/onboarding";
-            }
             return "/dashboard";
 
         case "invite":
@@ -169,17 +187,17 @@ function getRedirectPath(type: string | null, session: Session): string {
             }
             return "/dashboard";
     }
-}
+};
 
 /**
  * Cleans sensitive authentication parameters from URL
  * Prevents token leakage through browser history, referrer, etc.
  */
-function cleanUrlParameters(): void {
+const cleanUrlParameters = (): void => {
     if (typeof window !== "undefined") {
         window.history.replaceState({}, document.title, window.location.pathname);
     }
-}
+};
 
 /**
  * Hook for using OTP flow in React components
@@ -247,18 +265,20 @@ export function useOtpHandler() {
     };
 }
 
-/**
- * Utility to extract authentication parameters from URL
- *
- * @returns Object with tokenHash, type, and error information
- */
-export function getAuthParamsFromUrl(): {
+type GetAuthParamsFromUrlResult = {
     tokenHash: string | null;
     type: string | null;
     error: string | null;
     errorDescription: string | null;
     expiresAt: string | null;
-} {
+};
+
+/**
+ * Utility to extract authentication parameters from URL
+ *
+ * @returns Object with tokenHash, type, and error information
+ */
+export function getAuthParamsFromUrl(): GetAuthParamsFromUrlResult {
     if (typeof window === "undefined") {
         return {
             tokenHash: null,

@@ -10,10 +10,14 @@ export interface OtpFlowParamsT {
     onError?: (error: Error) => void;
 }
 
-export interface OtpFlowResultT {
-    success: boolean;
-    session?: Session;
-    user?: User;
-    redirectPath?: string;
-    error?: Error;
-}
+export type OtpFlowResultT =
+    | {
+          session: Session;
+          redirectPath: string;
+          error: null;
+      }
+    | {
+          session: null;
+          redirectPath: null;
+          error: Error;
+      };

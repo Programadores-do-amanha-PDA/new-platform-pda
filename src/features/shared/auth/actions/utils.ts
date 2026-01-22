@@ -1,7 +1,7 @@
 import createClient from "@/lib/supabase/client";
 import { AuthError, AuthUser, Session } from "@supabase/supabase-js";
 
-type GetAuthUserByJWTResultT =
+type GetAuthUserByJWTResult =
     | {
           readonly user: AuthUser;
           readonly error: null;
@@ -11,7 +11,7 @@ type GetAuthUserByJWTResultT =
           readonly error: string;
       };
 
-type SetSessionResultT =
+type SetSessionResult =
     | {
           readonly session: Session;
           readonly error: null;
@@ -29,7 +29,7 @@ type SetSessionResultT =
  * @param {Object} params - The parameters object
  * @param {string} params.jwt - The JWT token to validate and extract user data from
  *
- * @returns {Promise<GetAuthUserByJWTResultT>} A promise that resolves to an object containing:
+ * @returns {Promise<GetAuthUserByJWTResult>} A promise that resolves to an object containing:
  *   - `user`: The authenticated user object if successful, or null if an error occurs
  *   - `error`: An error message string if an error occurs, or null if successful
  *
@@ -38,7 +38,7 @@ type SetSessionResultT =
  * @example
  * const { error, user } = await getAuthUserByJWT({ jwt: "your_jwt_token" });
  */
-export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAuthUserByJWTResultT> => {
+export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAuthUserByJWTResult> => {
     try {
         if (!jwt) throw new Error("JWT not provided");
 
@@ -62,7 +62,7 @@ export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAut
  *
  * @async
  * @function
- * @returns {Promise<SetSessionResultT>} A promise that resolves to an object containing the session data
+ * @returns {Promise<SetSessionResult>} A promise that resolves to an object containing the session data
  * and any potential error. If no session is returned or an error occurs, the session will be `null`
  * and the error will contain the corresponding message.
  *
@@ -71,7 +71,7 @@ export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAut
  * @example
  * const {error, session} = await getSession();
  */
-export const getSession = async (): Promise<SetSessionResultT> => {
+export const getSession = async (): Promise<SetSessionResult> => {
     try {
         const supabase = await createClient();
         const {

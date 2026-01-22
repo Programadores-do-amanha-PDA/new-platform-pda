@@ -18,6 +18,10 @@ type SendEmailToMultipleUsersResult =
           readonly error: string;
       };
 
+type SendEmailToMultipleUsersParams = {
+    emails: string[];
+};
+
 const log = logger.child({ module: "AuthEmailsActions" });
 
 /**
@@ -83,9 +87,7 @@ export const requestPasswordResetByEmail = async ({ email }: { email: string }):
  */
 export const sendPasswordResetToMultipleUsers = async ({
     emails,
-}: {
-    emails: string[];
-}): Promise<SendEmailToMultipleUsersResult> => {
+}: SendEmailToMultipleUsersParams): Promise<SendEmailToMultipleUsersResult> => {
     try {
         if (!emails || emails.length === 0 || !Array.isArray(emails)) throw new Error("Emails not specified");
 
@@ -159,9 +161,7 @@ export const sendPasswordResetToMultipleUsers = async ({
  */
 export const resendEmailSignupConfirmationToMultipleUsers = async ({
     emails,
-}: {
-    emails: string[];
-}): Promise<SendEmailToMultipleUsersResult> => {
+}: SendEmailToMultipleUsersParams): Promise<SendEmailToMultipleUsersResult> => {
     try {
         if (!emails || emails.length === 0 || !Array.isArray(emails)) throw new Error("Emails not specified");
 
