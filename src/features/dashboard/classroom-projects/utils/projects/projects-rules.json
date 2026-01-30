@@ -126,5 +126,37 @@
             "Quase lá": "A SQUAD não consegue explicar o que foi feito; O README.md está vazio ou é o padrão do create-react-app",
             "Não entregue": "Não há como avaliar"
         }
+    },
+    "MP3": {
+        "HTML e Semântica": {
+            "Maravilhoso": "HTML5 impecável, acessível e totalmente semântico",
+            "Tudo OK": "Usa HTML5, mas com alguns deslizes de hierarquia",
+            "Quase lá": "Tags genéricas (div/span) para tudo; Sem estrutura clara",
+            "Não entregue": "Não há como avaliar"
+        },
+        "CSS e Layout": {
+            "Maravilhoso": "Design profissional, uso avançado de Grid/Flex e excelente UI",
+            "Tudo OK": "Layout funcional usando Flex/Grid, mas sem polimento visual",
+            "Quase lá": "Layout quebra em telas diferentes; Sem uso de Flex/Grid",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Responsividade": {
+            "Maravilhoso": "Mobile-First perfeito; Adaptação fluida em todas as resoluções",
+            "Tudo OK": "Funciona em mobile e desktop, mas com pequenos erros de ajuste",
+            "Quase lá": "Não é responsivo ou apresenta muitas falhas no mobile",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Integração com API": {
+            "Maravilhoso": "Integração total e robusta; Trata erros (ex: API offline) de forma elegante",
+            "Tudo OK": "Conecta com a API e realiza a maioria das funções (CRUD)",
+            "Quase lá": "Não consegue listar ou enviar dados para a API do M2",
+            "Não entregue": "Não há como avaliar"
+        },
+        "JS e DOM": {
+            "Maravilhoso": "Código JS limpo, organizado (funções claras) e performance otimizada.",
+            "Tudo OK": "Manipula o DOM corretamente para exibir os dados da API",
+            "Quase lá": "JS com muitos erros ou recarrega a página para qualquer ação",
+            "Não entregue": "Não há como avaliar"
+        }
     }
 }
