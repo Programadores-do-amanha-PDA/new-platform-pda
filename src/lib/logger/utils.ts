@@ -1,4 +1,4 @@
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { Profile } from "@/features/users/profile";
 import { MaskEmailProps } from "./types";
 import pino, { Logger, LoggerOptions } from "pino";
 
@@ -29,19 +29,17 @@ export const generateLoggerConfigByEnvironment = (): Logger => {
     return pino(generalConfig);
 };
 
-
 export const maskEmail = ({ email }: MaskEmailProps) => {
     const [local, domain] = email.split("@");
     return `${local.slice(0, 2)}***@${domain}`;
 };
 
 export const SECURITY_SERIALIZER = {
-    user: (user: AuthUserWithProfile) => ({
-        id: user.id,
-        username: user?.profile?.full_name,
-        email: user.email ? maskEmail({ email: user.email }) : undefined,
-        role: user.role,
-        lastLogin: user.last_sign_in_at,
+    user: (userProfile: Profile) => ({
+        id: userProfile.id,
+        username: userProfile?.full_name,
+        email: userProfile.email ? maskEmail({ email: userProfile.email }) : undefined,
+        lastLogin: userProfile.last_sign_in_at,
     }),
 
     request: (req: Request) => {
