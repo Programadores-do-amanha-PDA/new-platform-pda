@@ -1,3 +1,3 @@
 export * from "./actions";
-export * from "./store";
+export * from "./stores";
 export * from "./types";

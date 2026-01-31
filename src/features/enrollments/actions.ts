@@ -2,7 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
-import { Enrollment } from "@/features/dashboard/shared/enrollments";
+import { Enrollment } from "@/features/enrollments";
 
 const log = logger.child({ module: "enrollments." });
 
@@ -37,8 +37,8 @@ type DeleteEnrollmentsProps = {
 type DeleteEnrollmentsReturn = boolean;
 
 /**
- * Busca todas as inscrições de usuários em salas de aula.
- * @returns Array de inscrições ou null em caso de erro.
+ * Fetches every enrollment across classrooms.
+ * @returns Array of enrollments or null when an error occurs.
  */
 export const getAllEnrollments = async (): Promise<GetAllEnrollmentsResult> => {
     try {
@@ -58,9 +58,9 @@ export const getAllEnrollments = async (): Promise<GetAllEnrollmentsResult> => {
 };
 
 /**
- * Busca todas as inscrições de usuários em uma sala de aula específica.
- * @param classroom_id ID da sala de aula.
- * @returns Array de inscrições ou null em caso de erro.
+ * Fetches every enrollment tied to a given classroom.
+ * @param classroom_id Classroom identifier.
+ * @returns Array of enrollments or null when an error occurs.
  */
 export const getEnrollmentsByClassroomId = async ({
     classroom_id,
@@ -90,9 +90,9 @@ export const getEnrollmentsByClassroomId = async ({
 };
 
 /**
- * Busca todas as inscrições de um usuário em salas de aula.
- * @param userId ID do usuário.
- * @returns Array de inscrições ou null em caso de erro.
+ * Fetches every enrollment for a specific user.
+ * @param userId User identifier.
+ * @returns Array of enrollments or null when an error occurs.
  */
 export const getEnrollmentsByUserId = async ({
     userId,
@@ -119,9 +119,9 @@ export const getEnrollmentsByUserId = async ({
 };
 
 /**
- * Cria novas inscrições de usuários em salas de aula.
- * @param enrollments Array de inscrições a serem criadas.
- * @returns Array de inscrições criadas ou null em caso de erro.
+ * Creates new enrollments for users in classrooms.
+ * @param enrollments Array describing the enrollments to create.
+ * @returns Array of created enrollments or null when an error occurs.
  */
 export const createEnrollments = async ({ enrollments }: CreateEnrollmentsProps): Promise<CreateEnrollmentsResult> => {
     try {
@@ -148,11 +148,11 @@ export const createEnrollments = async ({ enrollments }: CreateEnrollmentsProps)
 };
 
 /**
- * Atualiza uma inscrição de um usuário em uma sala de aula.
- * @param classroomId ID da sala de aula.
- * @param shortId ID curto da inscrição.
- * @param updates Objeto contendo os campos a serem atualizados.
- * @returns Array com a inscrição atualizada ou null em caso de erro.
+ * Updates a user enrollment in a classroom.
+ * @param classroomId Classroom identifier.
+ * @param shortId Enrollment short identifier.
+ * @param updates Object describing the fields to update.
+ * @returns Array containing the updated enrollment or null when an error occurs.
  */
 export const updateEnrollment = async ({
     shortId,
@@ -189,10 +189,10 @@ export const updateEnrollment = async ({
 };
 
 /**
- * Remove inscrições de um usuário em salas de aula.
- * @param userId ID do usuário.
- * @param classroomIds Array de IDs das salas de aula.
- * @returns true se deletado com sucesso, false caso contrário.
+ * Removes enrollments for a user from specific classrooms.
+ * @param userId User identifier.
+ * @param classroomIds Classroom identifiers to delete.
+ * @returns True when deleted successfully, false otherwise.
  */
 export const removeEnrollments = async ({ userId, classroomIds }: DeleteEnrollmentsProps): Promise<DeleteEnrollmentsReturn> => {
     try {
