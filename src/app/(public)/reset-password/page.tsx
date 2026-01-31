@@ -1,1 +1,1 @@
-export { default } from "@/features/reset-password";
+export { default } from "@/features/auth/reset-password";

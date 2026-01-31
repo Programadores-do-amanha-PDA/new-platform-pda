@@ -1,13 +1,13 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Profile } from "@/features/users/profile";
 
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
 import { SidebarDataT, ClassroomT } from "@/types";
 import pathLabels from "@/utils/path-labels";
 
-export const generateSidebarConfig = (user: AuthUserWithProfile, classrooms: ClassroomT[]): SidebarDataT => {
+export const generateSidebarConfig = (userProfile: Profile, classrooms: ClassroomT[]): SidebarDataT => {
     return {
-        user,
+        userProfile,
         team: {
             name: "Estudante",
             logo: () => (

@@ -1,7 +1,7 @@
 "use client";
 
-import { useAuth } from "@/features/shared/auth";
-import { Role } from "@/types";
+import { useAuth } from "@/features/auth/shared";
+import { Role } from "@/features/auth/access-control/types";
 
 interface RoleGuardProps {
   role?: Role;

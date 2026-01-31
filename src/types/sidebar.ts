@@ -1,5 +1,5 @@
+import { Profile } from "@/features/users/profile";
 import { LucideIcon } from "lucide-react";
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
 
 export interface TeamInfoT {
   name: string;
@@ -30,7 +30,7 @@ export interface SidebarDataT {
   navMain?: SidebarNavItemT[];
   classRooms?: SidebarNavItemT[];
   projects?: ProjectItemT[];
-  user: AuthUserWithProfile;
+  userProfile: Profile;
 }
 
 export interface AppSidebarPropsT {

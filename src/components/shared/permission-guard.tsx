@@ -1,5 +1,5 @@
 "use client";
-import { usePermissions } from "@/hooks/use-permissions";
+import { usePermissions } from "@/features/auth/access-control/hooks";
 
 interface PermissionGuardProps {
   permission?: string;

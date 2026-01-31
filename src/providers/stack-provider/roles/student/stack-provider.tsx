@@ -1,12 +1,13 @@
 "use client";
 
-import { useUsersStore } from "@/features/dashboard/shared/users";
-import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
+import { useUsersStore } from "@/features/users/management";
+import { useEnrollmentsManagementStore } from "@/features/enrollments";
 import { useZoomMeetingStore } from "@/features/dashboard/classrooms/classroom/integrations/zoom/stores";
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/classroom/integrations/coodesh/stores/assessments";
 import { BaseStackProvider } from "../../shared/base-stack-provider";
 import { useClassroomProjectStore } from "@/features/dashboard/classrooms/classroom/projects/stores";
 import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
+import { RolesLabels } from "@/features/auth/access-control/types";
 
 interface StudentStackProviderProps {
     children: React.ReactNode;
@@ -19,7 +20,7 @@ export const StudentStackProvider = ({ children, loadInitialData = true }: Stude
     const projectStore = useClassroomProjectStore();
     const coodeshAssessmentStore = useCoodeshAssessmentStore();
     const zoomMeetingStore = useZoomMeetingStore();
-    const enrollmentsStore = useEnrollmentsStore();
+    const enrollmentsStore = useEnrollmentsManagementStore();
 
     const handleLoadData = async () => {
         await Promise.all([usersStore.fetchAllUsersWithProfiles({})]);
@@ -33,15 +34,15 @@ export const StudentStackProvider = ({ children, loadInitialData = true }: Stude
         ),
         zoomMeetings: new Map(zoomMeetingStore.meetings.map((meeting) => [meeting.id, meeting.topic])),
         enrollments: new Map(
-            Array.from(enrollmentsStore.enrollments.entries()).flatMap(([, enrollments]) =>
-                enrollments.map((enrollment) => [enrollment.short_id, enrollment.short_id]),
-            ),
+            Object.values(enrollmentsStore.enrollmentsByUserId)
+                .flat()
+                .map((enrollment) => [enrollment.short_id, enrollment.short_id]),
         ),
     });
 
     return (
         <BaseStackProvider
-            allowedRoles={["student"]}
+            allowedRoles={[RolesLabels.STUDENT]}
             loadInitialData={loadInitialData}
             onLoadData={handleLoadData}
             getFeaturesData={getFeaturesData}

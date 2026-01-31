@@ -5,10 +5,11 @@ import PageLoader from "@/components/shared/page-loader";
 import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
 
-import { ClassroomT, SidebarDataT, Role} from "@/types";
+import { ClassroomT, SidebarDataT } from "@/types";
+import { Role } from "@/features/auth/access-control/types";
 import pathLabels from "@/utils/path-labels";
 
-import { useAuth } from "@/features/shared/auth";
+import { useAuth } from "@/features/auth/shared";
 import { createSidebarConfig } from "./sidebar-config-factory";
 import { generatePathLabelsByFeaturesData } from "../utils";
 import NoAccessPage from "@/components/shared/empty-states/no-access-page";

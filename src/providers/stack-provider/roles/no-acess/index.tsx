@@ -1,21 +1,21 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { UserRole } from "@/features/auth/access-control/types";
 import { SidebarDataT } from "@/types";
-import { rolesLabelsOptions } from "@/utils";
+import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
+import { Profile } from "@/features/users/profile";
 
-export const generateNoAccessSidebarConfig = (user: AuthUserWithProfile): SidebarDataT => {
+export const generateNoAccessSidebarConfig = (userProfile: Profile, userRole?: UserRole | null): SidebarDataT => {
     const getUserRoleLabel = () => {
-        if (!user?.profile.user_role) {
+        if (!userRole) {
             return "Usuário";
         }
 
-        const userRole = user?.profile.user_role.role;
-        const roleOption = rolesLabelsOptions.find((option) => option.value === userRole);
+        const roleOption = rolesLabelsOptions.find((option) => option.value === userRole.role);
         return roleOption?.label || "Usuário";
     };
 
     return {
-        user,
+        userProfile,
         team: {
             name: getUserRoleLabel(),
             logo: () => (

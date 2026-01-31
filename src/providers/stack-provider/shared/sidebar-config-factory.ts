@@ -1,20 +1,21 @@
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
-import { ClassroomT, Role, SidebarDataT } from "@/types";
+import { ClassroomT, SidebarDataT } from "@/types";
+import { Role } from "@/features/auth/access-control/types";
 
 import { generateSidebarConfig as generateAdminConfig } from "../roles/admin/sidebar-config";
 import { generateSidebarConfig as generateEmployerConfig } from "../roles/employer/sidebar-config";
 import { generateSidebarConfig as generateStudentConfig } from "../roles/student/sidebar-config";
+import { Profile } from "@/features/users/profile";
 
 /**
  * Common interface for all sidebar configuration generators.
  * Normalizes different function signatures to provide consistent API.
  * 
- * @param user - Authenticated user with profile information
+ * @param userProfile - Authenticated user profile
  * @param classrooms - Optional array of classrooms (required for some roles)
  * @returns Sidebar configuration data structure
  */
 interface SidebarConfigGenerator {
-    (user: AuthUserWithProfile, classrooms?: ClassroomT[]): SidebarDataT;
+    (userProfile: Profile, classrooms?: ClassroomT[]): SidebarDataT;
 }
 
 /**
@@ -29,14 +30,14 @@ interface SidebarConfigGenerator {
  * - Guest: Minimal configuration for unauthenticated users
  */
 const SIDEBAR_CONFIG_GENERATORS: Record<Role, SidebarConfigGenerator> = {
-    admin: (user, classrooms) => generateAdminConfig(user, classrooms || []),
-    class_manager: (user) => ({ user, team: { name: "Jornada de Estudantes", logo: () => null }, navMain: [], projects: [] }),
-    employer: (user) => generateEmployerConfig(user),
-    teacher: (user) => ({ user, team: { name: "Facilitador", logo: () => null }, navMain: [], projects: [] }),
-    student: (user, classrooms) => generateStudentConfig(user, classrooms || []),
-    alumni: (user) => ({ user, team: { name: "Alumni", logo: () => null }, navMain: [], projects: [] }),
+    admin: (userProfile, classrooms) => generateAdminConfig(userProfile, classrooms || []),
+    class_manager: (userProfile) => ({ userProfile, team: { name: "Jornada de Estudantes", logo: () => null }, navMain: [], projects: [] }),
+    employer: (userProfile) => generateEmployerConfig(userProfile),
+    teacher: (userProfile) => ({ userProfile, team: { name: "Facilitador", logo: () => null }, navMain: [], projects: [] }),
+    student: (userProfile, classrooms) => generateStudentConfig(userProfile, classrooms || []),
+    alumni: (userProfile) => ({ userProfile, team: { name: "Alumni", logo: () => null }, navMain: [], projects: [] }),
     guest: () => ({
-        user: {} as AuthUserWithProfile,
+        userProfile: {} as Profile,
         team: { name: "Guest", logo: () => null },
         navMain: [],
         projects: [],
@@ -47,26 +48,26 @@ const SIDEBAR_CONFIG_GENERATORS: Record<Role, SidebarConfigGenerator> = {
  * Factory function that creates sidebar configuration based on user role.
  * Provides type-safe role-based sidebar generation with fallback handling.
  * 
- * @param user - Authenticated user with profile information
+ * @param userProfile - Authenticated user profile
  * @param userRole - User's role determining sidebar structure and permissions
  * @param classrooms - Optional array of classrooms (automatically handled based on role requirements)
  * @returns Complete sidebar configuration for the specified role
  * 
  * @example
  * ```typescript
- * const sidebarConfig = createSidebarConfig(user, 'admin', classrooms);
- * const employerConfig = createSidebarConfig(user, 'employer'); // No classrooms needed
+ * const sidebarConfig = createSidebarConfig(userProfile, 'admin', classrooms);
+ * const employerConfig = createSidebarConfig(userProfile, 'employer'); // No classrooms needed
  * ```
  */
-export const createSidebarConfig = (user: AuthUserWithProfile, userRole: Role, classrooms?: ClassroomT[]): SidebarDataT => {
+export const createSidebarConfig = (userProfile: Profile, userRole: Role, classrooms?: ClassroomT[]): SidebarDataT => {
     const generator = SIDEBAR_CONFIG_GENERATORS[userRole];
 
     if (!generator) {
         console.warn(`No sidebar config generator found for role: ${userRole}`);
-        return SIDEBAR_CONFIG_GENERATORS.guest(user);
+        return SIDEBAR_CONFIG_GENERATORS.guest(userProfile);
     }
 
-    return generator(user, classrooms);
+    return generator(userProfile, classrooms);
 };
 
 /**

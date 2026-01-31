@@ -1,4 +1,4 @@
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { User } from "@/features/users/profile";
 import { ZoomMeeting, ZoomMeetingPastInstance } from "../../integrations/zoom/types";
 import { SettingJustification, ClassTypesLimit } from "../../settings";
 import { AttendanceCalcResultT, CalculateUserAttendancePropsT } from "../types";
@@ -260,7 +260,7 @@ function findBestLimit(
 
 export function calculateClassPresence(
   meeting: ZoomMeeting | ZoomMeetingPastInstance,
-  users: Partial<AuthUserWithProfile>[]
+  users: Partial<User>[]
 ): number {
   if (!meeting.participants || meeting.participants.length === 0) {
     return 0;

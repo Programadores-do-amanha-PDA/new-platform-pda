@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, ReactNode } from "react";
 
-import { useAuth } from "@/features/shared/auth";
+import { useAuth } from "@/features/auth/shared";
 import PageLoader from "@/components/shared/page-loader";
 import { useActivityStore } from "@/features/dashboard/classrooms/classroom/activities";
 import {

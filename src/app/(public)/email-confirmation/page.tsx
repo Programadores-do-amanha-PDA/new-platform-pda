@@ -1,1 +1,1 @@
-export { default } from "@/features/email-confirmation/page";
+export { default } from "@/features/auth/email-confirmation/page";

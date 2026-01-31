@@ -6,15 +6,15 @@ import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
 import PageLoader from "@/components/shared/page-loader";
 import NoAccessPage from "@/components/shared/empty-states/no-access-page";
-import {useAuth} from "@/features/shared/auth";
+import { useAuth } from "@/features/auth/shared";
+import { useUserRoleStore } from "@/features/auth/access-control/stores";
 
-import { logger } from "@/lib/logger";
 import StackProvider from "./stack-provider";
 import pathLabels from "@/utils/path-labels";
 import { SidebarDataT } from "@/types/sidebar";
 import { generateNoAccessSidebarConfig } from "./stack-provider/roles/no-acess";
+import { useUserProfileStore } from "@/features/users/profile";
 
-const log = logger.child({ module: "RoleProvider" });
 
 interface RoleProviderProps {
     children: ReactNode;
@@ -23,10 +23,11 @@ interface RoleProviderProps {
 const RoleContext = createContext({});
 
 export const RoleProvider = ({ children }: RoleProviderProps) => {
-    const { user, userRole } = useAuth();
-    log.debug({ user, userRole }, "Rendering RoleProvider");
+    const { userRole } = useAuth();
+    const { profile } = useUserProfileStore();
+    const { userRole: userRoleData } = useUserRoleStore();
 
-    if (!user || !userRole) {
+    if (!profile || !userRole) {
         return (
             <div className="flex justify-center items-center w-screen h-screen">
                 <PageLoader />
@@ -39,7 +40,7 @@ export const RoleProvider = ({ children }: RoleProviderProps) => {
     }
 
     // Fallback para roles não reconhecidas
-    const sidebarData: SidebarDataT = generateNoAccessSidebarConfig(user);
+    const sidebarData: SidebarDataT = generateNoAccessSidebarConfig(profile, userRoleData);
     return (
         <>
             <AppSidebar data={sidebarData} />

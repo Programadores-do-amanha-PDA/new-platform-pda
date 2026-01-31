@@ -1,7 +1,7 @@
 "use client";
 import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useUsersStore } from "@/features/dashboard/shared/users/store";
+import { useUsersStore } from "@/features/users/management";
 
 import AttendanceTable from "./components/attendance-table";
 import { ZoomMeetingPastInstance } from "../integrations/zoom/types";
@@ -9,11 +9,13 @@ import { useZoomMeetingStore, useZoomMeetingPastInstanceStore } from "../integra
 import { ZoomPastMeetingAndPastInstanciesAttendance } from "./types";
 import { filterVisibilityClassroomStudents, filterMetricClassroomStudents } from "../../shared/utils";
 import { useClassroomSettingStore } from "../settings";
+import { useEnrollmentsManagementStore } from "@/features/enrollments";
 
 export default function AttendancePage() {
     const { classroom_id } = useParams<{ classroom_id: string }>();
 
     const { users } = useUsersStore();
+    const { enrollmentsByUserId } = useEnrollmentsManagementStore();
     const { meetings } = useZoomMeetingStore();
     const { pastInstances } = useZoomMeetingPastInstanceStore();
     const { settingsByClassroom } = useClassroomSettingStore();
@@ -45,13 +47,20 @@ export default function AttendancePage() {
 
     const userModes = settingsByClassroom[classroom_id]?.user_modes || [];
 
-    const allVisibleUsers = filterVisibilityClassroomStudents({users, classroomId: classroom_id, userModes, ruleId: "attendance"});
+    const allVisibleUsers = filterVisibilityClassroomStudents({
+        users,
+        classroomId: classroom_id,
+        userModes,
+        ruleId: "attendance",
+        enrollmentsByUserId,
+    });
 
     const allAggregateInMetricUsers = filterMetricClassroomStudents({
         users,
         classroomId: classroom_id,
         userModes,
         ruleId: "attendance",
+        enrollmentsByUserId,
     });
 
     return (

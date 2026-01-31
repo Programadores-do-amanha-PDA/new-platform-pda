@@ -1,11 +1,12 @@
 "use client";
 
-import { useEnrollmentsStore } from "@/features/dashboard/shared/enrollments";
-import { useUsersStore } from "@/features/dashboard/shared/users";
+import { useEnrollmentsManagementStore } from "@/features/enrollments";
+import { useUsersStore } from "@/features/users/management";
 import { useZoomMeetingStore } from "@/features/dashboard/classrooms/classroom/integrations/zoom/stores";
 import { useCoodeshAssessmentStore } from "@/features/dashboard/classrooms/classroom/integrations/coodesh/stores/assessments";
 import { useClassroomProjectStore } from "@/features/dashboard/classrooms/classroom/projects/stores";
 import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
+import { RolesLabels } from "@/features/auth/access-control/types";
 import { BaseStackProvider } from "../../shared/base-stack-provider";
 
 interface AdminStackProviderProps {
@@ -19,7 +20,7 @@ export const AdminStackProvider = ({ children, loadInitialData = true }: AdminSt
     const coodeshAssessmentStore = useCoodeshAssessmentStore();
     const zoomMeetingStore = useZoomMeetingStore();
     const usersStore = useUsersStore();
-    const enrollmentsStore = useEnrollmentsStore();
+    const enrollmentsStore = useEnrollmentsManagementStore();
 
     const handleLoadData = async () => {
         await Promise.all([
@@ -37,15 +38,15 @@ export const AdminStackProvider = ({ children, loadInitialData = true }: AdminSt
         ),
         zoomMeetings: new Map(zoomMeetingStore.meetings.map((meeting) => [meeting.id, meeting.topic])),
         enrollments: new Map(
-            Array.from(enrollmentsStore.enrollments.entries()).flatMap(([, enrollments]) =>
-                enrollments.map((enrollment) => [enrollment.short_id, enrollment.short_id]),
-            ),
+            Object.values(enrollmentsStore.enrollmentsByUserId)
+                .flat()
+                .map((enrollment) => [enrollment.short_id, enrollment.short_id]),
         ),
     });
 
     return (
         <BaseStackProvider
-            allowedRoles={["admin"]}
+            allowedRoles={[RolesLabels.ADMIN]}
             loadInitialData={loadInitialData}
             onLoadData={handleLoadData}
             getFeaturesData={getFeaturesData}

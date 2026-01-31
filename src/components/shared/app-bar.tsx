@@ -3,7 +3,7 @@ import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { useAuth } from "@/features/shared/auth";
+import { useUserProfileStore } from "@/features/users/profile";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -26,7 +26,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   const segments = path.split("/").filter(Boolean);
 
   const parts = segments.slice(1);
-  const { user } = useAuth();
+  const { profile } = useUserProfileStore();
 
   const breadcrumbItems = parts.reduce(
     (acc, part, index) => {
@@ -43,7 +43,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
     [
       {
         label: "Inicio",
-        title: `Olá ${user?.profile?.full_name.split(" ", 1)[0]} 👋🏿`,
+        title: `Olá ${profile?.full_name?.split(" ", 1)[0] || "usuário"} 👋🏿`,
         href: `/dashboard`,
       },
     ]

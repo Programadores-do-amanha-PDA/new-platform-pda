@@ -9,7 +9,7 @@ import {
     AttendanceCalcResultT,
     CalculateUserWeeklyAttendancePropsT,
 } from "../types";
-import { AuthUserWithProfile } from "@/features/dashboard/profile";
+import { User } from "@/features/users/profile";
 
 /**
  * Default configuration for attendance calculations
@@ -63,7 +63,7 @@ const DEFAULT_OPTIONS: Required<AttendanceCalculationOptionsT> = {
  */
 export function calculateWeeklyClassPresence(
     meetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
-    users: Partial<AuthUserWithProfile>[],
+    users: Partial<User>[],
     options: AttendanceCalculationOptionsT = {},
 ): WeeklyClassPresenceResultT {
     const config = { ...DEFAULT_OPTIONS, ...options };
@@ -89,8 +89,8 @@ export function calculateWeeklyClassPresence(
 /**
  * Filters users with valid email addresses for attendance tracking
  */
-function filterValidUsers(users: Partial<AuthUserWithProfile>[]): AuthUserWithProfile[] {
-    return users.filter((user): user is AuthUserWithProfile => !!user.email && typeof user.email === "string");
+function filterValidUsers(users: Partial<User>[]): User[] {
+    return users.filter((user): user is User => !!user.email && typeof user.email === "string");
 }
 
 /**
@@ -127,7 +127,7 @@ function groupMeetingsByWeek(
  */
 function calculateWeeklyPresenceDataT(
     weekGroups: Map<string, { weekStart: Date; meetings: (ZoomMeeting | ZoomMeetingPastInstance)[] }>,
-    users: AuthUserWithProfile[],
+    users: User[],
     config: Required<AttendanceCalculationOptionsT>,
 ): Record<string, WeeklyPresenceDataT> {
     const weeklyPresence: Record<string, WeeklyPresenceDataT> = {};
@@ -153,7 +153,7 @@ function calculateWeeklyPresenceDataT(
  */
 function calculatePresentUsersForWeek(
     weekMeetings: (ZoomMeeting | ZoomMeetingPastInstance)[],
-    users: AuthUserWithProfile[],
+    users: User[],
     currentClassType?: ClassTypes,
     availableJustifications?: SettingJustification[],
     shouldAggregateInMetric: boolean = true,
