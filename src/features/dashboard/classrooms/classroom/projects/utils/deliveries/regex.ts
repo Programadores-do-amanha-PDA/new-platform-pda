@@ -1,1 +1,0 @@
-export const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/
