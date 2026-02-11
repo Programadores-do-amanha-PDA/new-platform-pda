@@ -6,9 +6,9 @@ import { useCoodeshAssessmentStore } from "@/features/classroom-coodesh/stores/a
 import { useClassroomStore } from "@/features/classrooms/list/store";
 import { RolesLabels } from "@/features/auth/access-control/types";
 import { useClassroomProjectStore } from "@/features/classroom-projects/stores";
-import { useZoomMeetingStore } from "@/features/classroom-zoom/stores";
 
 import { BaseStackProvider } from "../../shared/base-stack-provider";
+import { useZoomMeetingStore } from "@/features/classroom-zoom/stores/meetings";
 
 interface StudentStackProviderProps {
     readonly children: React.ReactNode;

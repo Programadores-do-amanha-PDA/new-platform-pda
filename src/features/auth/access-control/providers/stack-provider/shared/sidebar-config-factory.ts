@@ -1,6 +1,5 @@
 "use client";
 
-import { Profile } from "@/features/users/profile";
 import { SidebarData } from "@/components/shared/sidebar/types";
 import { Role } from "@/features/auth/access-control/types";
 import { Classroom } from "@/features/classrooms/types";
@@ -8,6 +7,7 @@ import { Classroom } from "@/features/classrooms/types";
 import { generateSidebarConfig as generateAdminConfig } from "../roles/admin/sidebar-config";
 import { generateSidebarConfig as generateEmployerConfig } from "../roles/employer/sidebar-config";
 import { generateSidebarConfig as generateStudentConfig } from "../roles/student/sidebar-config";
+import { Profile } from "@/features/users/profile/types/profile";
 
 /**
  * Factory interface for generating sidebar configuration data for a given user context.

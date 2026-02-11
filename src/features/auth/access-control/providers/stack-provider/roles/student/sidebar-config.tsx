@@ -5,7 +5,7 @@ import { SidebarData } from "@/components/shared/sidebar/types";
 
 import pathLabels from "@/utils/path-labels";
 import { Classroom } from "@/features/classrooms/types";
-import { Profile } from "@/features/users/profile";
+import { Profile } from "@/features/users/profile/types/profile";
 
 export const generateSidebarConfig = (userProfile: Profile, classrooms: Classroom[]): SidebarData => {
     return {

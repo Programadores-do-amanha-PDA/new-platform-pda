@@ -3,15 +3,9 @@ import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 
 import { logger } from "@/lib/logger";
-import {
-    getAllRolePermissions,
-    getPermissionsByRole,
-    insertRolePermission,
-    deleteRolePermission,
-    deleteAllPermissionsForRole,
-} from "../../actions";
 import { Role, Permission, RolesLabels } from "../../types";
 import { PermissionsState, PermissionsActions } from "./types";
+import { getAllRolePermissionsAsync, getPermissionsByRoleAsync, insertRolePermissionAsync, deleteRolePermission, deleteAllPermissionsForRoleAsync } from "../../actions/role-permissions";
 
 const log = logger.child({ module: "PermissionsStore" });
 
@@ -24,24 +18,24 @@ const initialState: PermissionsState = {
 
 /**
  * Permissions store for managing role-based access control.
- * 
+ *
  * This store handles fetching, managing, and checking permissions across different user roles.
  * It provides methods to retrieve permissions, add/remove permissions from roles, and validate
  * role-permission relationships.
- * 
+ *
  * @returns {PermissionsState & PermissionsActions} The permissions store with state and actions
- * 
+ *
  * @example
  * ```typescript
  * const { fetchAllRolePermissions, roleHasPermission } = usePermissionsStore();
- * 
+ *
  * // Fetch all permissions
  * await fetchAllRolePermissions();
- * 
+ *
  * // Check if a role has a permission
  * const hasPermission = roleHasPermission({ role: 'ADMIN', permission: 'CREATE_USER' });
  * ```
- * 
+ *
  * @remarks
  * - Loading states are managed via `loading` for fetch operations and `operationLoading` for mutations
  * - User feedback is provided through toast notifications
@@ -61,7 +55,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                 try {
                     set({ loading: true });
 
-                    const allRolePermissions = await getAllRolePermissions();
+                    const allRolePermissions = await getAllRolePermissionsAsync();
                     if (!allRolePermissions) throw new Error("no get all role permissions response");
 
                     set({ allRolePermissions });
@@ -91,7 +85,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
 
                     set({ loading: true });
 
-                    const permissions = await getPermissionsByRole({ role });
+                    const permissions = await getPermissionsByRoleAsync({ role });
                     if (!permissions) throw new Error("no get permissions by role response");
 
                     set((state) => ({
@@ -133,7 +127,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                         RolesLabels.ALUMNI,
                     ] as const;
                     const rolePermissionsPromises = roles.map(async (role) => {
-                        const permissions = await getPermissionsByRole({ role });
+                        const permissions = await getPermissionsByRoleAsync({ role });
                         return { role, permissions: permissions || [] };
                     });
 
@@ -176,7 +170,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
 
                     set({ operationLoading: true });
 
-                    const result = await insertRolePermission({ role, permission });
+                    const result = await insertRolePermissionAsync({ role, permission });
                     if (!result) throw new Error("no insert role permission response");
 
                     // Update local state
@@ -257,7 +251,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
 
                     set({ operationLoading: true });
 
-                    const result = await deleteAllPermissionsForRole({ role });
+                    const result = await deleteAllPermissionsForRoleAsync({ role });
                     if (!result) throw new Error("no delete all permissions for role response");
 
                     // Update local state

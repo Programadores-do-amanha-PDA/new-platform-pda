@@ -6,13 +6,13 @@ import { jwtDecode } from "jwt-decode";
 import { Session } from "@supabase/supabase-js";
 
 import { logger } from "@/lib/logger";
-import { useUserProfileStore } from "@/features/users/profile/stores/profile-store/store";
-import { useUserRoleStore } from "@/features/auth/access-control/stores/user-role";
 import { useUserEnrollmentsStore } from "@/features/enrollments/stores";
 import { getAllCurrentUserDataByIdAsync } from "@/features/users/management/actions/full-user-data";
 import { getSession } from "./actions/utils";
 import { JwtPayloadT } from "./types/jwt";
 import { signOut as signOutAsync } from "./actions";
+import { useUserRoleStore } from "../access-control/stores/user-role/user-role";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 const log = logger.child({ module: "AuthStore" });
 

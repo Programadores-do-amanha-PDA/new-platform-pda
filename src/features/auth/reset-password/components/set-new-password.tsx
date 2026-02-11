@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth, getAuthErrorMessage } from "@/features/auth/shared";
 import { SetNewPasswordSchema } from "../types";
 import { setNewPasswordSchema } from "../utils";
+import { AuthError } from "@supabase/supabase-js";
 
 const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
 
@@ -53,11 +54,13 @@ export const SetNewPassword = () => {
             log.info({ user, formData, operation: "set_new_password" }, "Setting new password for user");
 
             const userUpdated = await updateUser({
-                password: formData.password,
+                updates: {
+                    password: formData.password,
+                },
             });
 
-            if (userUpdated && userUpdated.error && userUpdated.isAuthError) {
-                const errorMessage = getAuthErrorMessage({ errorCode: userUpdated.error }).error;
+            if (userUpdated.error instanceof AuthError) {
+                const errorMessage = getAuthErrorMessage({ errorCode: userUpdated.error.code! }).error;
                 setError("root", {
                     type: "manual",
                     message: errorMessage,

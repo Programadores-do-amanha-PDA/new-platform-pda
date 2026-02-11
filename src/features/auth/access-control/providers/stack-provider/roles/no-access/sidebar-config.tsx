@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { UserRole } from "@/features/auth/access-control/types";
 import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
-import { Profile } from "@/features/users/profile";
+import { Profile } from "@/features/users/profile/types/profile";
 
 export const generateNoAccessSidebarConfig = (userProfile: Profile, userRole?: UserRole | null): SidebarData => {
     const getUserRoleLabel = () => {

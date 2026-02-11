@@ -7,12 +7,12 @@ import { AppSidebar } from "@/components/shared/sidebar";
 import PageLoader from "@/components/shared/page-loader";
 import NoAccessPage from "@/components/shared/empty-states/no-access-page";
 import { useAuth } from "@/features/auth/shared";
-import { useUserRoleStore } from "@/features/auth/access-control/stores";
 
 import { generateNoAccessSidebarConfig } from "@/features/auth/access-control/providers/stack-provider/roles/no-access/sidebar-config";
 import pathLabels from "@/utils/path-labels";
 import { SidebarData } from "@/components/shared/sidebar/types";
-import { useUserProfileStore } from "@/features/users/profile";
+import { useUserRoleStore } from "../../stores/user-role/user-role";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 /**
  * Stack providers mapped by role with lazy loading for performance.

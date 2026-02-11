@@ -10,12 +10,12 @@ import NoAccessPage from "@/components/shared/empty-states/no-access-page";
 
 import pathLabels from "@/utils/path-labels";
 import { useAuth } from "@/features/auth/shared";
-import { useUserProfileStore } from "@/features/users/profile";
 import { Role } from "@/features/auth/access-control/types";
 import { Classroom } from "@/features/classrooms/types";
 
 import { createSidebarConfig } from "./sidebar-config-factory";
 import { generatePathLabelsByFeaturesData } from "../utils/generate-path-labels";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 interface BaseStackProviderProps {
     readonly children: React.ReactNode;

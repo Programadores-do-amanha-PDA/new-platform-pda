@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { Classroom } from "@/features/classrooms/types";
 import { ADMIN_CLASSROOM_PAGES_KEYS } from "@/features/classrooms/utils/constants";
-import { Profile } from "@/features/users/profile";
+import { Profile } from "@/features/users/profile/types/profile";
 
 import pathLabels from "@/utils/path-labels";
 

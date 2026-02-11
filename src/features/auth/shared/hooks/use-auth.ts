@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { useAuthStore } from "../store";
-import { useUserRoleStore } from "@/features/auth/access-control/stores";
 import { requestPasswordResetByEmail, updateAuthUser } from "../actions";
+import { useUserRoleStore } from "../../access-control/stores/user-role/user-role";
 
 /**
  * Custom hook for authentication logic and user session management.

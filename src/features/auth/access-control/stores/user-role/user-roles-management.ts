@@ -3,13 +3,14 @@ import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 
 import { logger } from "@/lib/logger";
+
+import { Role, UserRole } from "../../types";
 import {
-    getAllUserRoles,
-    insertUserRoleWithUserId,
-    updateUserRoleWithUserId,
-    deleteUserRoleWithUserId,
-} from "../../../actions";
-import { Role, UserRole } from "../../../types";
+    getAllUserRolesAsync,
+    insertUserRoleWithUserIdAsync,
+    updateUserRoleWithUserIdAsync,
+    deleteUserRoleWithUserIdAsync,
+} from "../../actions/user-role";
 
 const log = logger.child({ module: "UserRolesManagementStore" });
 
@@ -101,7 +102,7 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
             fetchAllUserRolesAsync: async () => {
                 try {
                     set({ isLoading: true });
-                    const userRoles = await getAllUserRoles();
+                    const userRoles = await getAllUserRolesAsync();
 
                     if (!userRoles) {
                         log.warn({ operation: "fetchAllUserRolesAsync" }, "No user roles returned from server");
@@ -170,7 +171,7 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         return false;
                     }
 
-                    const response = await insertUserRoleWithUserId({ userId, role });
+                    const response = await insertUserRoleWithUserIdAsync({ userId, role });
                     if (!response) throw new Error("no insert user role response");
 
                     // Update the local store
@@ -212,7 +213,7 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         return false;
                     }
 
-                    const responseData = await updateUserRoleWithUserId({ userId, newRole: role });
+                    const responseData = await updateUserRoleWithUserIdAsync({ userId, newRole: role });
                     if (!responseData) throw new Error("no update user role response");
 
                     // Update the local store
@@ -248,14 +249,12 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         return false;
                     }
 
-                    const responseData = await deleteUserRoleWithUserId({ userId });
+                    const responseData = await deleteUserRoleWithUserIdAsync({ userId });
                     if (!responseData) throw new Error("no delete user role response");
 
                     // Remove from local store using immutable pattern
                     const { usersRoles } = get();
-                    const updatedRoles = Object.fromEntries(
-                        Object.entries(usersRoles).filter(([key]) => key !== userId),
-                    );
+                    const updatedRoles = Object.fromEntries(Object.entries(usersRoles).filter(([key]) => key !== userId));
                     set({ usersRoles: updatedRoles });
 
                     toast.success("Role removed successfully!");

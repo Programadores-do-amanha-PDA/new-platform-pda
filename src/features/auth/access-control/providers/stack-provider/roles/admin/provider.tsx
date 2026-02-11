@@ -6,8 +6,8 @@ import { useCoodeshAssessmentStore } from "@/features/classroom-coodesh/stores/a
 import { useClassroomStore } from "@/features/classrooms/list/store";
 import { RolesLabels } from "@/features/auth/access-control/types";
 import { useClassroomProjectStore } from "@/features/classroom-projects/stores";
-import { useZoomMeetingStore } from "@/features/classroom-zoom/stores";
 import { BaseStackProvider } from "../../shared/base-stack-provider";
+import { useZoomMeetingStore } from "@/features/classroom-zoom/stores/meetings";
 
 interface AdminStackProviderProps {
     readonly children: React.ReactNode;
@@ -106,7 +106,7 @@ export const AdminStackProvider = ({ children, loadInitialData = true }: AdminSt
 
     const handleLoadData = async () => {
         await Promise.all([
-            classroomStore.getAllClassrooms(),
+            classroomStore.getAllClassroomsAsync(),
             usersStore.fetchAllUsersWithProfiles({}),
             enrollmentsStore.fetchAllEnrollments(),
         ]);

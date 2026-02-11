@@ -1,6 +1,6 @@
-import { useUserRoleStore } from "../stores/user-role";
 import { usePermissionsStore } from "../stores/permissions-store/store";
 import { useCallback } from "react";
+import { useUserRoleStore } from "../stores/user-role/user-role";
 
 /**
  * Custom hook that provides utilities for managing and checking user permissions based on their role.

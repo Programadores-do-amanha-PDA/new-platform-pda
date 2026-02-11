@@ -3,7 +3,7 @@
 import pathLabels from "@/utils/path-labels";
 import { SidebarData } from "@/components/shared/sidebar/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Profile } from "@/features/users/profile";
+import { Profile } from "@/features/users/profile/types/profile";
 
 export const generateSidebarConfig = (userProfile: Profile): SidebarData => {
     return {
