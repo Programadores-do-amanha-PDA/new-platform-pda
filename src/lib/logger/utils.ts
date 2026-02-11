@@ -1,4 +1,4 @@
-import { Profile } from "@/features/users/profile";
+import { Profile } from "@/features/users/profile/types/profile";
 import { MaskEmailProps } from "./types";
 import pino, { Logger, LoggerOptions } from "pino";
 
