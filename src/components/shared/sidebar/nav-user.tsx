@@ -14,21 +14,23 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
 
 import { useAuth } from "@/features/auth/shared";
-import { useUserProfileStore } from "@/features/users/profile";
 import { useUserEnrollmentsStore } from "@/features/enrollments";
 import { Badge } from "@/components/ui/badge";
 import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
 import { TooltipWrapper } from "../tooltip-wrapper";
 import { getFirstLastInitials } from "@/utils";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 const NavUser = () => {
     const router = useRouter();
     const { handleSignOut, user, userRole } = useAuth();
     const { profile } = useUserProfileStore();
-    const enrollments = useUserEnrollmentsStore((state) => state.enrollments);
+    const { enrollments } = useUserEnrollmentsStore();
     const { isMobile } = useSidebar();
 
     if (!user) return null;
+
+    console.log(profile?.full_name);
 
     return (
         <SidebarMenu className="flex w-full h-max">
@@ -71,7 +73,9 @@ const NavUser = () => {
                                     </section>
                                 </figure>
                                 <div className="flex flex-col p-2 px-4 pt-0 w-full text-sm text-left leading-tight bg-sidebar">
-                                    <span className="w-full font-black text-base truncate">{profile?.full_name}</span>
+                                    <span className="w-full font-black text-base truncate">
+                                        {profile?.full_name || "Usuário"}
+                                    </span>
                                     <TooltipWrapper title={user?.email || ""}>
                                         <p className="w-full text-xs truncate">{user?.email}</p>
                                     </TooltipWrapper>
@@ -86,7 +90,9 @@ const NavUser = () => {
                             Editar perfil
                         </DropdownMenuItem>
                         <DropdownMenuGroup className="bg-sidebar mx-2 py-1 rounded-lg! overflow-hidden">
-                            <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">Credencias</DropdownMenuLabel>
+                            <DropdownMenuLabel className="font-semibold text-muted-foreground text-xs">
+                                Credenciais
+                            </DropdownMenuLabel>
                             <DropdownMenuItem className="font-medium flex flex-wrap gap-1 bg-sidebar cursor-default hover:bg-sidebar!">
                                 <Badge variant="outline" className="bg-transparent font-semibold">
                                     {rolesLabelsOptions.find((role) => role.value === userRole)?.label}

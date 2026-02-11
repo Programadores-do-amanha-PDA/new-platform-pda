@@ -11,7 +11,7 @@ import NavMain from "./nav-main";
 import NavProjects from "./nav-projects";
 import NavUser from "./nav-user";
 
-import { AppSidebarPropsT } from "@/types/sidebar";
+import { AppSidebarPropsT } from "@/components/shared/sidebar/types";
 
 export default function AppSidebar({ ...props }: AppSidebarPropsT) {
   return (

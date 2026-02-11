@@ -177,7 +177,7 @@ export default function DateIntervalPaginationControl({
             </div>
             <Separator orientation="vertical" />
             <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                     <Button size="sm" variant="ghost" className="size-8 p-0 rounded-none">
                         <Cog className="h-4 w-4" />
                     </Button>

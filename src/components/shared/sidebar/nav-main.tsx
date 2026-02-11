@@ -17,7 +17,7 @@ import {
   SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
-import { SidebarNavItemT } from "@/types/sidebar";
+import { SidebarNavItemT } from "@/components/shared/sidebar/types";
 import { DynamicLucideIcon } from "../icons/dynamic-lucide-icon";
 
 export default function NavMain({

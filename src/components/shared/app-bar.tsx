@@ -3,7 +3,6 @@ import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { useUserProfileStore } from "@/features/users/profile";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { cn } from "@/lib/utils";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 interface AppBarProps {
   pathLabels: { [key: string]: string };

@@ -19,7 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-import { ProjectItemT } from "@/types/sidebar";
+import { ProjectItemT } from "@/components/shared/sidebar/types";
 
 export default function NavProjects({ projects }: { projects: ProjectItemT[] }) {
   const router = useRouter();

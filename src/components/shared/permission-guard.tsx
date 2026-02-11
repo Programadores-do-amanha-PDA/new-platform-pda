@@ -1,5 +1,5 @@
 "use client";
-import { usePermissions } from "@/features/auth/access-control/hooks";
+import { useUserPermissions } from "@/features/auth/access-control/hooks/use-user-permissions";
 
 interface PermissionGuardProps {
   permission?: string;
@@ -16,7 +16,7 @@ export default function PermissionGuard({
   fallback = null,
   children,
 }: PermissionGuardProps) {
-  const { hasPermission, hasAnyPermission, hasAllPermissions } = usePermissions();
+  const { hasPermission, hasAnyPermission, hasAllPermissions } = useUserPermissions();
 
   let hasAccess = false;
 
