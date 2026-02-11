@@ -17,7 +17,7 @@ import { LoaderCircle, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { ClassroomCombobox } from "./classroom-combobox";
 import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
-import { ClassroomT } from "@/types/classrooms";
+import { Classroom } from "@/features/classrooms/types";
 import { useUsersStore } from "@/features/users/management";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,9 +27,9 @@ import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
 import BadgeSelector from "@/components/shared/badge-selector";
 import { cn } from "@/lib/utils";
 import { Role } from "@/features/auth/access-control/types";
-import { User } from "@/features/users/profile";
 import { Enrollment, useEnrollmentsManagementStore } from "@/features/enrollments";
-import { useUserRolesManagementStore } from "@/features/auth/access-control/stores";
+import { useUserRolesManagementStore } from "@/features/auth/access-control/stores/user-role/user-roles-management";
+import { User } from "@supabase/supabase-js";
 
 interface UserData {
     name: string;
@@ -51,7 +51,7 @@ interface UserRow {
 
 type InsertManyUsersDialogProps = {
     excludeRoles?: Role[];
-    classrooms?: ClassroomT[];
+    classrooms?: Classroom[];
 };
 
 const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDialogProps) => {
@@ -164,7 +164,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                 if (!REGEX_FOR_EMAIL_VALIDATION.test(user.email)) throw "Invalid email";
                 if (!REGEX_FOR_PASSWORD_VALIDATION.test(user.password)) throw "Invalid password";
 
-                const data: Partial<User & { password: string }> = {
+                const data: Partial<User> & { password: string } = {
                     email: user.email,
                     password: user.password,
                     user_metadata: {

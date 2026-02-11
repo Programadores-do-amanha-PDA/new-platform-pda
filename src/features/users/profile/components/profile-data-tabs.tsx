@@ -16,10 +16,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 
 import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
 import { ProfileAvatarPicker } from "./profile-avatar-picker";
-import { Profile, ProfileFormSchemaT } from "../types";
-import { profileFormSchema, buildUserUpdateData, isValueChanged } from "../utils";
 import { updateAuthUser } from "@/features/auth/shared/actions";
-import { useUserRoleStore } from "@/features/auth";
+import { useUserRoleStore } from "@/features/auth/access-control/stores/user-role/user-role";
+import { Profile } from "../types/profile";
+import { ProfileFormSchemaT } from "../types/profile-form";
+import { buildUserUpdateData, isValueChanged } from "../utils/profile-form-utils";
+import { profileFormSchema } from "../utils/profile-validation";
 
 export interface ProfileDataTabsProps {
     readonly currentUser: Profile;
@@ -91,7 +93,7 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
         <div className="flex flex-col justify-between w-full">
             <Form {...form}>
                 <form onSubmit={handleSubmit(onSubmit)} className="gap-8 grid grid-cols-1 lg:grid-cols-2">
-                    <ProfileAvatarPicker user={currentUser} onUpdateUser={onUpdateUser} />
+                    <ProfileAvatarPicker userProfile={currentUser} onUpdateUser={onUpdateUser} />
                     <Separator className="col-span-1 lg:col-span-2" />
 
                     <FormField

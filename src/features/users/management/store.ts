@@ -1,23 +1,23 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
-import { AuthUser } from "@supabase/supabase-js";
 
 import { logger } from "@/lib/logger";
-import { getProfileById, Profile } from "@/features/users/profile";
 
 import { createUser, updateUser, deleteUser } from "./actions/users-admin";
 import { Role } from "@/features/auth/access-control/types";
 import { getAllUsersDataByRoleAsync } from "./actions/full-user-data";
 import { useEnrollmentsManagementStore } from "@/features/enrollments";
+import { ProfileWithRelations, AdminUserAttributes } from "./types/user";
+import { getProfileById } from "../profile/actions/profile";
 
 interface UsersState {
-    readonly users: Profile[];
+    readonly users: ProfileWithRelations[];
     readonly loading: boolean;
 }
 
 type SetUsersProps = {
-    readonly users: Profile[];
+    readonly users: ProfileWithRelations[];
 };
 
 type FetchAllUsersWithProfilesProps = {
@@ -25,12 +25,12 @@ type FetchAllUsersWithProfilesProps = {
 };
 
 type CreateNewUserProps = {
-    userData: Partial<AuthUser>;
+    userData: AdminUserAttributes;
 };
 
 type UpdateUserByIdProps = {
     id: string;
-    updates: Partial<AuthUser>;
+    updates: AdminUserAttributes;
 };
 
 type DeleteUserByIdProps = {
@@ -108,10 +108,9 @@ export const useUsersStore = create<UsersState & UsersActions>()(
             createNewUser: async ({ userData }: CreateNewUserProps) => {
                 try {
                     if (!userData) throw new Error("Invalid user data");
-                    const userDataWithPassword = userData as Partial<AuthUser> & { password?: string };
                     if (
                         !userData.email ||
-                        !userDataWithPassword.password ||
+                        !userData.password ||
                         !userData.user_metadata ||
                         !userData.user_metadata.full_name ||
                         !userData.user_metadata.user_email

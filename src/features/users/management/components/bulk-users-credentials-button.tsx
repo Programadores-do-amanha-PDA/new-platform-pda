@@ -26,14 +26,16 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { UsersCredentialsValuesT } from "@/features/api/emails/user-credentials/type";
 import axios from "axios";
-import { User } from "@/features/users/profile";
+import { useEnrollmentsManagementStore, Enrollment } from "@/features/enrollments";
+import { getFirstLastInitials } from "@/utils";
+import { Profile } from "../../profile/types/profile";
 
-interface UserWithStatus extends User {
+interface UserWithStatus extends Profile {
   status?: "success" | "error" | "skipped";
 }
 
 interface BulkUsersCredentialsButtonProps {
-  selectedUsers: User[];
+  selectedUsers: Profile[];
   onComplete?: () => void;
 }
 
@@ -45,6 +47,7 @@ export default function BulkUsersCredentialsButton({
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState<UserWithStatus[]>([]);
   const [stage, setStage] = useState<0 | 1>(0);
+  const { enrollmentsByUserId } = useEnrollmentsManagementStore();
 
   const handleSend = async () => {
     if (selectedUsers.length === 0) {
@@ -72,8 +75,8 @@ export default function BulkUsersCredentialsButton({
 
       try {
         // Skip if user has no classroom short_ids
-        const shortIds =
-          user.profile?.enrollments?.map((c) => c.short_id) || [];
+        const userEnrollments: Enrollment[] = enrollmentsByUserId[user.id] || [];
+        const shortIds = userEnrollments.map((e: Enrollment) => e.short_id);
         if (shortIds.length === 0) {
           setUsers((prev) =>
             prev.map((u, index) =>
@@ -88,7 +91,7 @@ export default function BulkUsersCredentialsButton({
           email: user.email,
           subject,
           values: {
-            to_name: user.profile?.full_name.split(" ")[0] || "Usuário",
+            to_name: user.full_name.split(" ")[0] || "Usuário",
             to_email: user.email,
             short_ids: shortIds,
           } as UsersCredentialsValuesT,
@@ -189,8 +192,7 @@ export default function BulkUsersCredentialsButton({
                   .filter((user) => user.email)
                   .map((user, index) => (
                     <div key={index} className="text-muted-foreground text-sm">
-                      • {user.profile?.full_name} (
-                      {user.email})
+                      • {user.full_name} ({user.email})
                     </div>
                   ))}
               </div>
@@ -221,21 +223,16 @@ export default function BulkUsersCredentialsButton({
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8">
                           <AvatarImage
-                            src={user.profile?.avatar_url || ""}
-                            alt={user.profile?.full_name}
+                            src={user.avatar_url || ""}
+                            alt={user.full_name}
                           />
                           <AvatarFallback>
-                            {user.profile?.full_name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .toUpperCase()
-                              .slice(0, 2)}
+                            {getFirstLastInitials(user.full_name)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {user.profile?.full_name || "Nome não informado"}
+                            {user.full_name || "Nome não informado"}
                           </span>
                           <span className="text-muted-foreground text-sm">
                             {user.email}
@@ -245,15 +242,17 @@ export default function BulkUsersCredentialsButton({
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {user.profile?.enrollments?.map((classroom, idx) => (
-                          <Badge
-                            key={idx}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {classroom.short_id}
-                          </Badge>
-                        )) || (
+                        {enrollmentsByUserId[user.id]?.length > 0 ? (
+                          enrollmentsByUserId[user.id].map((enrollment: Enrollment, idx: number) => (
+                            <Badge
+                              key={idx}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {enrollment.short_id}
+                            </Badge>
+                          ))
+                        ) : (
                           <span className="text-muted-foreground text-sm">
                             Nenhuma turma
                           </span>

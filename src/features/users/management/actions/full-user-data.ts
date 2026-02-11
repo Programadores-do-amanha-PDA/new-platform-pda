@@ -1,12 +1,13 @@
 "use server";
 
-import { AuthError, AuthUser } from "@supabase/supabase-js";
+import { AuthError } from "@supabase/supabase-js";
 
 import { logger } from "@/lib/logger";
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
-import { getAllProfiles, Profile } from "@/features/users/profile";
 import { Role, UserRole } from "@/features/auth/access-control/types";
 import { Enrollment } from "@/features/enrollments";
+import { ProfileWithRelations } from "../types/user";
+import { Profile } from "../../profile/types/profile";
 
 const log = logger.child({ module: "FullUserDataActions" });
 
@@ -103,8 +104,7 @@ export const getAllCurrentUserDataByIdAsync = async ({ userId }: GetFullUserData
 type GetAllUsersDataByRoleResult =
     | {
           data: {
-              profiles: Profile[];
-              usersRoles: (UserRole | null)[];
+              profiles: ProfileWithRelations[];
               enrollmentsByUserId: Record<string, Enrollment[]>;
           };
           error: null;
@@ -155,47 +155,56 @@ export const getAllUsersDataByRoleAsync = async ({ role }: { role?: Role } = {})
         if (profileError) throw profileError;
         if (!profileData) throw new Error("Profile not found");
 
-        const profiles: Profile[] = profileData.map((profile: Profile) => ({
-            id: profile.id,
-            email: profile.email,
-            email_confirmed_at: profile.email_confirmed_at,
-            phone: profile.phone,
-            full_name: profile.full_name,
-            bio: profile.bio,
-            avatar_url: profile.avatar_url,
-            created_at: profile.created_at,
-            last_sign_in_at: profile.last_sign_in_at,
-            updated_at: profile.updated_at,
-        }));
+        // Type for raw profile data from Supabase with relations
+        type RawProfileData = Profile & {
+            user_role?: UserRole | UserRole[] | null;
+            enrollments?: Enrollment[] | null;
+        };
 
-        const usersRoles: (UserRole | null)[] = profileData.map((profileData) => {
+        // Map to ProfileWithRelations keeping user_role and enrollments
+        const profiles: ProfileWithRelations[] = profileData.map((profileData: RawProfileData) => {
             const rawUserRole = Array.isArray(profileData.user_role) ? profileData.user_role[0] : profileData.user_role;
-            return rawUserRole
+            const userRole: UserRole | null = rawUserRole
                 ? {
                       id: rawUserRole.id,
                       role: rawUserRole.role,
                       user_id: rawUserRole.user_id,
                   }
                 : null;
-        });
 
-        const enrollmentsByUserId: Record<string, Enrollment[]> = Object.fromEntries(
-            profileData.map((profile) => [
-                profile.id,
-                profile.enrollments?.map((e: Enrollment) => ({
+            const enrollments: Enrollment[] =
+                profileData.enrollments?.map((e: Enrollment) => ({
                     user_id: e.user_id,
                     classroom_id: e.classroom_id,
                     short_id: e.short_id,
                     mode: e.mode,
                     created_at: e.created_at,
-                })) ?? [],
-            ])
+                })) ?? [];
+
+            return {
+                id: profileData.id,
+                email: profileData.email,
+                email_confirmed_at: profileData.email_confirmed_at,
+                phone: profileData.phone,
+                full_name: profileData.full_name,
+                bio: profileData.bio,
+                avatar_url: profileData.avatar_url,
+                created_at: profileData.created_at,
+                last_sign_in_at: profileData.last_sign_in_at,
+                updated_at: profileData.updated_at,
+                user_role: userRole,
+                enrollments,
+            };
+        });
+
+        // Keep enrollmentsByUserId for backward compatibility with enrollments store
+        const enrollmentsByUserId: Record<string, Enrollment[]> = Object.fromEntries(
+            profiles.map((profile) => [profile.id, profile.enrollments ?? []])
         );
 
         return {
             data: {
                 profiles,
-                usersRoles,
                 enrollmentsByUserId,
             },
             error: null,

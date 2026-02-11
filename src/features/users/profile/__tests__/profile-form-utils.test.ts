@@ -1,5 +1,6 @@
+import { Profile } from "../types/profile";
+import { ProfileFormSchemaT } from "../types/profile-form";
 import { buildUserUpdateData, isValueChanged } from "../utils/profile-form-utils";
-import { User, ProfileFormSchemaT } from "../types";
 
 /**
  * Test suite for profile-form-utils
@@ -9,23 +10,17 @@ describe("profile-form-utils", () => {
     /**
      * Mock data for tests
      */
-    const mockCurrentUser: User = {
+    const mockCurrentUser: Profile = {
         id: "user-123",
         email: "john@example.com",
-        user_metadata: {},
-        app_metadata: {},
-        aud: "authenticated",
-        created_at: "2024-01-01T00:00:00Z",
-        updated_at: "2024-01-01T00:00:00Z",
-        profile: {
-            id: "profile-123",
-            full_name: "John Doe",
-            bio: "Software Developer",
-            user_role: { id: 2, role: "admin" },
-            avatar_url: null,
-            created_at: new Date("2024-01-01T00:00:00Z"),
-            updated_at: new Date("2024-01-01T00:00:00Z"),
-        },
+        email_confirmed_at: new Date("2024-01-01T00:00:00Z"),
+        phone: null,
+        full_name: "John Doe",
+        bio: "Software Developer",
+        avatar_url: null,
+        created_at: new Date("2024-01-01T00:00:00Z"),
+        last_sign_in_at: null,
+        updated_at: new Date("2024-01-01T00:00:00Z"),
     };
 
     const mockFormData: ProfileFormSchemaT = {

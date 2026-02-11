@@ -1,18 +1,18 @@
-// Global imports
 import { UserAttributes, UserMetadata } from "@supabase/supabase-js";
+import { Profile } from "../types/profile";
+import { ProfileFormSchemaT } from "../types/profile-form";
 
-// Local imports
-import { User, ProfileFormSchemaT } from "../types";
 
 /**
- * Builds user data object for profile update
+ * Builds user data object for profile update.
+ * Updates auth.users which automatically syncs to profiles table via user_metadata.
  */
 export const buildUserUpdateData = ({
     formData,
     currentUser,
 }: {
     formData: ProfileFormSchemaT;
-    currentUser: User;
+    currentUser: Profile;
 }): Partial<UserAttributes & { password: string }> => {
     const userData: Partial<UserAttributes & { password: string }> = {};
 
@@ -26,11 +26,11 @@ export const buildUserUpdateData = ({
 
     const userMetadata: UserMetadata = {};
 
-    if (formData.fullName !== currentUser.profile?.full_name) {
+    if (formData.fullName !== currentUser.full_name) {
         userMetadata.full_name = formData.fullName;
     }
 
-    if (formData.bio && formData.bio !== currentUser.profile?.bio) {
+    if (formData.bio && formData.bio !== currentUser.bio) {
         userMetadata.bio = formData.bio;
     }
 

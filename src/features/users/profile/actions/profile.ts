@@ -3,20 +3,20 @@
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
 import { logger } from "@/lib/logger";
 
-import type {
-    CreateProfileProps,
-    CreateProfileResult,
-    DeleteProfileProps,
-    DeleteProfileResult,
+import { AuthError } from "@supabase/supabase-js";
+import { Profile } from "../types/profile";
+import {
     GetAllProfilesProps,
     GetAllProfilesResult,
     GetProfileByIdProps,
     GetProfileByIdResult,
-    Profile,
+    CreateProfileProps,
+    CreateProfileResult,
     UpdateProfileProps,
     UpdateProfileResult,
-} from "./types";
-import { AuthError } from "@supabase/supabase-js";
+    DeleteProfileProps,
+    DeleteProfileResult,
+} from "../types/profile-actions";
 
 const log = logger.child({ module: "ProfileActions" });
 

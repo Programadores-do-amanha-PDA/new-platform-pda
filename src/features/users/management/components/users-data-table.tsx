@@ -5,11 +5,11 @@ import UserModalData from "./user-modal-data";
 import BulkPasswordResetButton from "./bulk-password-reset-button";
 import BulkEmailVerificationButton from "./bulk-email-verification-button";
 import BulkUsersCredentialsButton from "./bulk-users-credentials-button";
-import { User } from "@/features/users/profile";
 import { Role } from "@/features/auth/access-control/types";
 import { useUsersStore } from "@/features/users/management";
-import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
+import { useClassroomStore } from "@/features/classrooms/list/store";
 import { useUsersColumns } from "../hooks/use-users-columns";
+import { ProfileWithRelations } from "../types/user";
 
 type UsersDataTableProps = {
     excludeRoles?: Role[];
@@ -27,7 +27,7 @@ const UsersDataTable = ({ loading, excludeRoles }: UsersDataTableProps) => {
         deleteUser,
     });
 
-    const headerOptions = (selectedUsers: User[], clearSelection?: () => void) => (
+    const headerOptions = (selectedUsers: ProfileWithRelations[], clearSelection?: () => void) => (
         <div className="flex gap-4">
             <BulkUsersCredentialsButton selectedUsers={selectedUsers} />
             <BulkEmailVerificationButton selectedUsers={selectedUsers} onComplete={clearSelection} />

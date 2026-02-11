@@ -17,13 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { User } from "@/features/users/profile";
+import { Profile } from "../../profile/types/profile";
 
 type DataTableProps = {
-    data: User[];
-    columns: ColumnDef<User>[];
+    data: Profile[];
+    columns: ColumnDef<Profile>[];
     loading: boolean;
-    headerRightOptions?: (selectedUsers: User[], clearSelection?: () => void) => React.ReactNode;
+    headerRightOptions?: (selectedUsers: Profile[], clearSelection?: () => void) => React.ReactNode;
 };
 
 export function DataTable({ data, columns, loading, headerRightOptions }: DataTableProps) {
@@ -60,7 +60,7 @@ export function DataTable({ data, columns, loading, headerRightOptions }: DataTa
     });
 
     // Get selected users
-    const selectedUsers = table.getFilteredSelectedRowModel().rows.map((row) => row.original) as User[];
+    const selectedUsers = table.getFilteredSelectedRowModel().rows.map((row) => row.original) as Profile[];
 
     // Function to clear selection
     const clearSelection = () => {

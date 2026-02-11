@@ -26,15 +26,15 @@ import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
 import { generateRandomPassword } from "@/utils/password-generator";
 import { ClassroomCombobox } from "./classroom-combobox";
 import { userFormSchema, newUserFormSchema, UserFormData, NewUserFormData } from "../schemas/user-form-schema";
-import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
+import { useClassroomStore } from "@/features/classrooms/list/store";
 import { cn } from "@/lib/utils";
 import { Enrollment, useEnrollmentsManagementStore } from "@/features/enrollments";
 import { Role } from "@/features/auth/access-control/types";
 
-import { useUserRolesManagementStore } from "@/features/auth/access-control/stores";
 import { useUsersStore } from "@/features/users/management";
 import { logger } from "@/lib/logger";
-import { Profile } from "../../profile";
+import { useUserRolesManagementStore } from "@/features/auth/access-control/stores/user-role/user-roles-management";
+import { Profile } from "../../profile/types/profile";
 
 const log = logger.child({ module: "user-sheet-data" });
 
@@ -50,8 +50,8 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
 
     const { classrooms } = useClassroomStore();
     const { createNewUser, updateUser } = useUsersStore();
-    const { usersRoles ,addUserRole, updateUserRole, deleteUserRole } = useUserRolesManagementStore();
-    const { createNewEnrollments, removeEnrollmentsByUserAndClassrooms, enrollmentsByUserId} = useEnrollmentsManagementStore();
+    const { usersRoles, addUserRole, updateUserRole, deleteUserRole } = useUserRolesManagementStore();
+    const { createNewEnrollments, removeEnrollmentsByUserAndClassrooms, enrollmentsByUserId } = useEnrollmentsManagementStore();
 
     const form = useForm({
         resolver: zodResolver(mode === "new" ? newUserFormSchema : userFormSchema),
@@ -89,7 +89,7 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
                 enrollments: [],
             });
         }
-    }, [mode, isOpen, currentUser, reset, classrooms]);
+    }, [mode, isOpen, currentUser, reset, classrooms, enrollmentsByUserId, usersRoles]);
 
     const handleOpenChange = (open: boolean) => {
         setIsOpen(open);
@@ -234,7 +234,8 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
 
             // Handle enrollments updates
             if (classrooms && classrooms.length > 0 && createNewEnrollments && removeEnrollmentsByUserAndClassrooms) {
-                const currentClassrooms = enrollmentsByUserId[currentUser.id]?.map((enrollment) => enrollment.classroom_id) || [];
+                const currentClassrooms =
+                    enrollmentsByUserId[currentUser.id]?.map((enrollment) => enrollment.classroom_id) || [];
 
                 if (currentClassrooms.length === 0 && data.enrollments.length > 0) {
                     const enrollmentsData: Omit<Enrollment, "short_id" | "mode">[] = data.enrollments.map((uc) => ({

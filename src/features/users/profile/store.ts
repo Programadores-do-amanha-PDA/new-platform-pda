@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 import { logger } from "@/lib/logger";
-import { Profile } from "../../types";
-import { createProfile, deleteProfile, getProfileById, updateProfile } from "../../actions";
+import { getProfileById, createProfile, updateProfile, deleteProfile } from "./actions/profile";
+import { Profile } from "./types/profile";
 
 interface UserProfileState {
     profile: Profile | null;
@@ -87,11 +87,11 @@ export const useUserProfileStore = create<UserProfileState & UserProfileActions>
                 if (!id) throw new Error("id is required");
                 set({ loading: true });
 
-                const { profile, error } = await getProfileById({ id });
+                const { data, error } = await getProfileById({ id });
                 if (error) throw error;
-                if (!profile) throw new Error("Profile not found");
+                if (!data || !data.profile) throw new Error("Profile not found");
 
-                set({ profile });
+                set({ profile: data.profile });
                 return true;
             } catch (error) {
                 log.error({ err: error, id, operation: "fetchUserProfileByIdAsync" }, "Failed to fetch user profile");
@@ -106,13 +106,13 @@ export const useUserProfileStore = create<UserProfileState & UserProfileActions>
             try {
                 set({ loading: true });
 
-                const { profile, error } = await createProfile({
+                const { data, error } = await createProfile({
                     profileData,
                 });
                 if (error) throw error;
-                if (!profile) throw new Error("Failed to create profile");
+                if (!data || !data.profile) throw new Error("Failed to create profile");
 
-                set({ profile });
+                set({ profile: data.profile });
                 return true;
             } catch (error) {
                 log.error({ err: error, profileData, operation: "createUserProfileAsync" }, "Failed to create user profile");
@@ -126,11 +126,11 @@ export const useUserProfileStore = create<UserProfileState & UserProfileActions>
             try {
                 set({ loading: true });
 
-                const { profile, error } = await updateProfile({ id, updates });
+                const { data, error } = await updateProfile({ id, updates });
                 if (error) throw error;
-                if (!profile) throw new Error("Failed to update profile");
+                if (!data || !data.profile) throw new Error("Failed to update profile");
 
-                set({ profile });
+                set({ profile: data.profile });
                 return true;
             } catch (error) {
                 log.error({ err: error, id, updates, operation: "updateUserProfileAsync" }, "Failed to update user profile");

@@ -6,18 +6,17 @@ import { ChangeEvent, useState } from "react";
 import { Area, Point } from "react-easy-crop";
 import { toast } from "sonner";
 
-// UI Components
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-// Local imports
-import { ProfileAvatarCropper } from ".";
-import { ProfileAvatarPickerPropsT } from "../types";
-import { getCroppedImageBlob, fileToBase64 } from "../utils";
-import { deleteUserAvatar, updateUserAvatar, uploadUserAvatar } from "@/actions/profile-avatar";
+
+import { deleteUserAvatar, updateUserAvatar, uploadUserAvatar } from "@/features/users/profile/actions/profile-avatar";
 import { getFirstLastInitials } from "@/utils/get-first-last-initials";
+import { ProfileAvatarPickerPropsT } from "../types/profile-avatar-picker";
+import { getCroppedImageBlob, fileToBase64 } from "../utils/avatar-utils";
+import { ProfileAvatarCropper } from "./profile-avatar-cropper";
 
 export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatarPickerPropsT): React.JSX.Element => {
     const [newProfileImage, setNewProfileImage] = useState<string>("");

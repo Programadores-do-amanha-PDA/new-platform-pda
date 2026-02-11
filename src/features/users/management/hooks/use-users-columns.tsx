@@ -20,14 +20,15 @@ import { TooltipWrapper } from "@/components/shared/tooltip-wrapper";
 
 import { UserMetadata } from "@supabase/supabase-js";
 import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
-import { User, Profile } from "@/features/users/profile";
 import { Role } from "@/features/auth/access-control/types";
-import { ClassroomT } from "@/types/classrooms";
+import { Classroom } from "@/features/classrooms/types";
+import { ProfileWithRelations } from "../types/user";
 import UserModalData from "../components/user-modal-data";
+import { Profile } from "../../profile/types/profile";
 
 interface UseUsersColumnsProps {
     readonly excludeRoles?: Role[];
-    readonly classrooms?: ClassroomT[];
+    readonly classrooms?: Classroom[];
     readonly deleteUser: (params: { id: string }) => void;
 }
 
@@ -52,7 +53,7 @@ interface UseUsersColumnsProps {
  * - `allColumns`: All columns combined for use in the table.
  */
 export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUsersColumnsProps) {
-    const defaultColumns: ColumnDef<User>[] = useMemo(() => {
+    const defaultColumns: ColumnDef<ProfileWithRelations>[] = useMemo(() => {
         return [
             {
                 id: "select",
@@ -129,26 +130,26 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                     );
                 },
                 cell: ({ row }) => {
-                    const user = row.original as User;
+                    const user = row.original as Profile;
                     return (
                         <div className="flex flex-col w-full truncate lowercase">
-                            <p className="font-bold text-sm capitalize">{user.profile.full_name}</p>
+                            <p className="font-bold text-sm capitalize">{user.full_name}</p>
                             <p>{user.email}</p>
                         </div>
                     );
                 },
                 sortingFn: (rowA, rowB) => {
-                    const nameA = rowA.original?.profile?.full_name?.toLowerCase() || "";
-                    const nameB = rowB.original?.profile?.full_name?.toLowerCase() || "";
+                    const nameA = rowA.original?.full_name?.toLowerCase() || "";
+                    const nameB = rowB.original?.full_name?.toLowerCase() || "";
                     return nameA?.localeCompare(nameB);
                 },
                 filterFn: (row, id, filterValue) => {
-                    const user = row.original as User;
+                    const user = row.original as Profile;
                     const userEmail = user?.email || "";
                     const searchTerm = filterValue.toLowerCase();
 
                     return (
-                        user.profile.full_name.toLowerCase().includes(searchTerm) ||
+                        user.full_name.toLowerCase().includes(searchTerm) ||
                         userEmail.toLowerCase().includes(searchTerm)
                     );
                 },
@@ -333,7 +334,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
         ];
     }, []);
 
-    const actionsColumns: ColumnDef<User>[] = useMemo(() => {
+    const actionsColumns: ColumnDef<ProfileWithRelations>[] = useMemo(() => {
         return [
             {
                 id: "actions",
@@ -369,7 +370,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
         ];
     }, [deleteUser, excludeRoles]);
 
-    const classroomColumns: ColumnDef<User>[] = useMemo(() => {
+    const classroomColumns: ColumnDef<ProfileWithRelations>[] = useMemo(() => {
         if (!classrooms || classrooms.length === 0) {
             return [];
         }

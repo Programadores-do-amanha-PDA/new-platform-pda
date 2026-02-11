@@ -1,7 +1,7 @@
 "use client";
 
 import UsersDataTable from "./components/users-data-table";
-import { useClassroomStore } from "@/features/dashboard/classrooms/home-page/store";
+import { useClassroomStore } from "@/features/classrooms/list/store";
 import { useUsersStore } from "@/features/users/management";
 import { useEnrollmentsManagementStore } from "@/features/enrollments";
 

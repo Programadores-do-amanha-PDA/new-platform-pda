@@ -14,7 +14,7 @@ import { sendPasswordResetToMultipleUsers } from "@/features/auth/shared/actions
 import { Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Profile } from "../../profile";
+import { Profile } from "../../profile/types/profile";
 
 interface BulkPasswordResetButtonProps {
     selectedUsers: Profile[];
