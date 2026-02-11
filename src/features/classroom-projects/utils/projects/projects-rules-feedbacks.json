@@ -1,0 +1,130 @@
+{
+    "MP1": {
+        "Funcionalidades": {
+            "Maravilhoso": "Estou absolutamente impressionado com o seu sistema! É verdadeiramente maravilhoso ver como todas as funcionalidades estão operando perfeitamente. A interface demonstra ser intuitiva e amigável, e fiquei especialmente satisfeito com as funcionalidades extras implementadas, como a edição e remoção de estudantes. A persistência de dados em arquivo JSON adiciona um nível de sofisticação ao projeto. Este trabalho reflete um domínio excepcional dos conceitos abordados e uma dedicação admirável ao desenvolvimento de software de qualidade. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns pelo trabalho realizado! Todas as funcionalidades obrigatórias foram implementadas com sucesso. O sistema de menu está funcional, o cadastro opera corretamente, a busca responde adequadamente e os cálculos estão precisos. Você construiu uma base sólida que demonstra compreensão clara dos conceitos fundamentais do projeto. Continue desenvolvendo suas habilidades com essa mesma dedicação. ٩(˘◡˘)۶",
+            "Quase lá": "Observo que o projeto ainda apresenta desafios importantes a serem superados. O programa não está executando adequadamente ou as funcionalidades básicas não foram implementadas conforme esperado. É fundamental garantir que o sistema de menu esteja funcional e que o cadastro opere corretamente. Recomendo revisar cuidadosamente a estrutura do código e as implementações das funcionalidades principais. Com ajustes focados nestes pontos, o projeto poderá atingir os objetivos propostos. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Estrutura de Dados": {
+            "Maravilhoso": "Excepcional! A estrutura de dados implementada demonstra organização e eficiência notáveis. O uso apropriado de destructuring e spread operator evidencia um domínio avançado de JavaScript moderno. As validações implementadas são robustas e o tratamento de casos extremos mostra uma visão madura do desenvolvimento de software. Esta abordagem reflete não apenas conhecimento técnico, mas também uma compreensão profunda das melhores práticas de programação. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bem! A utilização de arrays de objetos foi realizada de forma correta, resultando em uma estrutura de dados adequada para os requisitos do projeto. As validações básicas estão presentes e funcionais, garantindo a integridade dos dados. Este trabalho demonstra uma boa compreensão dos conceitos fundamentais de estruturas de dados em JavaScript. ٩(˘◡˘)۶",
+            "Quase lá": "A estrutura de dados do projeto necessita de aprimoramentos significativos. É essencial utilizar arrays e objetos de forma adequada para organizar as informações do sistema de maneira eficiente. Além disso, a implementação de validações é crucial para garantir a integridade e consistência dos dados. Recomendo revisar os conceitos de estruturas de dados e aplicar as validações necessárias para tornar o código mais robusto e confiável. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Métodos de Array": {
+            "Maravilhoso": "Impressionante! O uso de métodos funcionais está absolutamente exemplar. O código apresenta alta expressividade e legibilidade, características essenciais de um código bem estruturado. O uso avançado de reduce para cálculos complexos e a combinação eficiente de múltiplos métodos (map, filter, find, reduce) demonstram não apenas conhecimento técnico sólido, mas também uma compreensão profunda dos paradigmas de programação funcional. Este é o padrão de qualidade esperado em desenvolvimento profissional. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Excelente trabalho! Você utilizou adequadamente pelo menos três métodos funcionais diferentes (map, filter, find ou reduce), e as implementações estão corretas. Cada método foi aplicado de forma apropriada ao seu propósito, tornando o código mais limpo e expressivo. Isso demonstra que você compreendeu bem os conceitos de programação funcional e suas aplicações práticas em JavaScript moderno. ٩(˘◡˘)۶",
+            "Quase lá": "O projeto ainda utiliza predominantemente loops tradicionais onde métodos funcionais seriam mais apropriados. Para atender aos requisitos deste trabalho, é fundamental aplicar métodos como map, filter, find e reduce. Esses métodos tornam o código mais declarativo e expressivo, características valorizadas no JavaScript moderno. Recomendo estudar a aplicação de cada um desses métodos e refatorar o código para incorporá-los adequadamente. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Organização do Código": {
+            "Maravilhoso": "Excepcional! O código está estruturado de maneira exemplar. A separação de responsabilidades é clara e bem definida, a documentação está adequada e os princípios de código limpo foram aplicados consistentemente. A modularização em arquivos separados demonstra maturidade no desenvolvimento e facilita significativamente a manutenção e escalabilidade do projeto. Este nível de organização reflete profissionalismo e atenção aos detalhes. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns pela organização demonstrada! O código está bem estruturado em funções, com nomenclatura descritiva para variáveis e funções que facilitam a compreensão do fluxo lógico. Os comentários explicativos nos pontos-chave agregam valor à documentação do código, e a estrutura lógica geral está clara. Esta organização torna o projeto significativamente mais fácil de compreender e manter. ٩(˘◡˘)۶",
+            "Quase lá": "A organização do código necessita de melhorias substanciais. No estado atual, há falta de separação adequada em funções, e a nomenclatura das variáveis poderia ser mais descritiva e autoexplicativa. Comentários explicativos também contribuiriam para a compreensão do código. Recomendo refatorar o código aplicando princípios de modularização, escolhendo nomes mais significativos para variáveis e funções, e adicionando documentação nos pontos-chave. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        }
+    },
+    "P1": {
+        "Funcionalidades": {
+            "Maravilhoso": "Impressionante! O sistema está operando de forma excepcional. Todas as funcionalidades demonstram funcionamento perfeito, a interface de terminal está clara e bastante intuitiva. As funcionalidades extras implementadas são relevantes ao tema escolhido e agregam valor significativo ao projeto. Este trabalho evidencia não apenas habilidade técnica, mas também criatividade e uma compreensão abrangente dos requisitos propostos. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns pelo trabalho desenvolvido! Todas as funcionalidades obrigatórias foram implementadas adequadamente: o CRUD está funcional, o sistema de busca opera corretamente e a lógica de negócio principal está implementada. O menu do terminal apresenta-se funcional e acessível. Você construiu uma aplicação sólida que atende aos requisitos estabelecidos para o projeto. ٩(˘◡˘)۶",
+            "Quase lá": "O projeto apresenta desafios significativos que precisam ser endereçados. O programa não está executando corretamente ou apresenta erros que impedem seu funcionamento adequado. As operações básicas de CRUD ou a lógica de negócio principal ainda não foram implementadas de forma satisfatória. É fundamental revisar a estrutura do código, identificar os pontos críticos de erro e implementar as funcionalidades essenciais de forma funcional. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Estrutura (POO)": {
+            "Maravilhoso": "Excepcional! A estrutura de classes demonstra coesão notável e organização exemplar. A aplicação dos conceitos de encapsulamento está em alto nível, evidenciando compreensão profunda dos princípios de Programação Orientada a Objetos. As validações implementadas são robustas e o tratamento de casos extremos demonstra pensamento crítico e visão profissional do desenvolvimento de software. A arquitetura escolhida é escalável e sustentável. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bem! As Classes foram utilizadas apropriadamente para modelar as entidades do sistema, e a classe principal orquestra adequadamente as operações. Os métodos estão bem definidos e encapsulados em suas respectivas classes, demonstrando uma separação de responsabilidades apropriada. Este trabalho mostra uma compreensão sólida dos fundamentos de Programação Orientada a Objetos. ٩(˘◡˘)۶",
+            "Quase lá": "A estrutura do projeto necessita de melhorias significativas em relação aos conceitos de POO. As Classes não foram utilizadas ou sua aplicação não está adequada aos princípios de orientação a objetos. A lógica de negócio encontra-se dispersa e não devidamente encapsulada nas classes apropriadas. Recomendo revisar os conceitos fundamentais de POO, especialmente encapsulamento, responsabilidade única e organização de métodos, para reestruturar o código de forma mais coesa. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Organização do Código": {
+            "Maravilhoso": "Excepcional! O código está estruturado de maneira exemplar, com separação de responsabilidades clara e bem definida. A documentação fornecida no README.md é completa e informativa, explicando adequadamente o projeto e os procedimentos para execução. Esta atenção ao detalhe demonstra profissionalismo e consideração pela manutenibilidade do código e experiência de outros desenvolvedores que possam trabalhar no projeto. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Excelente organização! O código está apropriadamente estruturado em módulos através de arquivos separados. A nomenclatura de variáveis e métodos é descritiva e facilita a compreensão do código. Os comentários explicativos nos pontos-chave contribuem para a documentação e manutenibilidade. Esta organização eleva significativamente a qualidade e o aspecto profissional do projeto. ٩(˘◡˘)۶",
+            "Quase lá": "A organização do projeto necessita de aprimoramentos substanciais. Atualmente, todo o código está concentrado em um único arquivo, dificultando a manutenção e compreensão. A nomenclatura de variáveis e métodos poderia ser mais descritiva, e comentários explicativos estão ausentes. Recomendo separar o código em módulos lógicos, adotar nomenclatura mais expressiva e adicionar documentação apropriada para tornar o projeto mais profissional e sustentável. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Versionamento": {
+            "Maravilhoso": "Excepcional! O histórico de commits está muito bem estruturado, com mensagens claras e descritivas que documentam adequadamente a evolução do desenvolvimento. O README.md é informativo e bem elaborado. O uso de branches para desenvolver funcionalidades separadamente demonstra aplicação de práticas profissionais de desenvolvimento colaborativo. Este nível de organização no versionamento reflete maturidade no uso de ferramentas de controle de versão. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bem! O projeto está adequadamente hospedado em repositório no GitHub e o histórico de commits evidencia que todos os membros do grupo contribuíram ativamente. Esta colaboração visível no histórico demonstra trabalho em equipe efetivo e uso apropriado das ferramentas de versionamento. ٩(˘◡˘)۶",
+            "Quase lá": "O uso do versionamento necessita de melhorias substanciais. O repositório não foi utilizado de forma adequada ou o histórico de commits não reflete trabalho colaborativo (observa-se contribuição concentrada em um único membro). É fundamental que todos os integrantes do grupo participem ativamente através de commits regulares. O versionamento adequado é essencial não apenas para a avaliação, mas também para o desenvolvimento de habilidades profissionais de trabalho colaborativo. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        }
+    },
+    "MP2": {
+        "Funcionalidade (API CRUD)": {
+            "Maravilhoso": "Impressionante! Sua API está impecável. Todos os endpoints respondem perfeitamente com os status codes corretos e o tratamento de casos extremos demonstra um nível profissional de desenvolvimento. A robustez da sua implementação é digna de nota! (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bom! Você implementou todas as operações do CRUD com sucesso. Os endpoints GET, POST, PUT e DELETE estão funcionais e a manipulação de dados ocorre como esperado. Um trabalho sólido e consistente. ٩(˘◡˘)۶",
+            "Quase lá": "A API precisa de atenção. Os endpoints principais não estão funcionando como deveriam ou estão incompletos. É crucial garantir que as operações básicas de CRUD estejam operacionais para que a API tenha utilidade. Vamos revisar isso? (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Arquitetura (MVC)": {
+            "Maravilhoso": "Excepcional! A organização do seu projeto é um exemplo a ser seguido. A separação entre Rotas, Controllers e Models está claríssima, facilitando muito a manutenção e escalabilidade. Você domina a arquitetura MVC! (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns pela organização! O projeto segue o padrão MVC corretamente, com uma boa separação entre a definição das rotas e a lógica de negócio nos controladores. Isso demonstra boas práticas de engenharia de software. ٩(˘◡˘)۶",
+            "Quase lá": "A arquitetura do projeto precisa ser revista. A lógica está muito concentrada e não segue o padrão MVC esperado. Separar responsabilidades é fundamental para um código limpo e profissional. Tente modularizar mais seu código. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Persistência de Dados (Sequelize)": {
+            "Maravilhoso": "Brilhante! O uso do Sequelize está avançado e eficiente. Models e Migrations estão perfeitos, e a integração com o banco de dados é fluida. Você demonstrou grande competência no uso do ORM. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Ótimo trabalho! A conexão com o banco de dados via Sequelize está funcionando bem. Models e Migrations foram criados corretamente e os dados estão persistindo como esperado. ٩(˘◡˘)۶",
+            "Quase lá": "A persistência de dados precisa de ajustes. O Sequelize não foi implementado corretamente ou a conexão com o banco não está efetiva. O uso de um ORM é parte essencial deste projeto, então revise essa configuração. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Boas Práticas (Middleware e .env)": {
+            "Maravilhoso": "Excelente! Você seguiu as boas práticas à risca. O uso de variáveis de ambiente e middlewares customizados mostra que você se preocupa com segurança e organização do código. Um diferencial importante! (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bem! O uso do .env para dados sensíveis e a implementação de middlewares essenciais mostram que você está atento às boas práticas de desenvolvimento backend. ٩(˘◡˘)۶",
+            "Quase lá": "Atenção às boas práticas! Expor dados sensíveis no código ou não usar middlewares básicos compromete a segurança e a qualidade da aplicação. É importante corrigir esses pontos. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        }
+    },
+    "P2": {
+        "Problematização & Tema": {
+            "Maravilhoso": "Uau! Além de resolver o problema central com maestria, você foi além com o Desafio Extra. A solução está completa e muito bem pensada. Parabéns pela dedicação e criatividade! (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns! A API atende bem ao tema proposto e resolve o problema central. As entidades e relacionamentos principais funcionam corretamente, entregando o valor esperado. ٩(˘◡˘)۶",
+            "Quase lá": "O projeto ainda não resolve satisfatoriamente o problema central do tema. As entidades básicas precisam ser melhor implementadas para que a solução faça sentido. Foque no core do problema. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Arquitetura & Código (JS)": {
+            "Maravilhoso": "Código limpo e arquitetura impecável! A aplicação de princípios SOLID e o tratamento de erros demonstram um nível de senioridade. É um prazer ler um código tão bem estruturado. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bom! O código segue a arquitetura MVC e a camada de serviço está presente. A organização das pastas facilita o entendimento e a manutenção do projeto. ٩(˘◡˘)۶",
+            "Quase lá": "A organização do código precisa melhorar. A falta de separação de responsabilidades e a lógica misturada dificultam a manutenção. Tente estruturar melhor seu projeto seguindo os padrões aprendidos. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Banco de Dados & ORM (Sequelize)": {
+            "Maravilhoso": "Excelente domínio do Sequelize! O uso de Soft Delete, Seeders e agregações mostra que você explorou a ferramenta a fundo. O banco de dados está muito bem gerenciado. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Trabalho sólido! O Sequelize está sendo usado corretamente para o CRUD e os relacionamentos. As migrations garantem a estrutura do banco. Tudo funcionando como deve. ٩(˘◡˘)۶",
+            "Quase lá": "O uso do banco de dados precisa de revisão. O ORM não está sendo aproveitado corretamente ou os relacionamentos não estão funcionais. É vital corrigir a camada de dados. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Autenticação & Autorização (JWT)": {
+            "Maravilhoso": "Segurança de alto nível! A implementação de JWT com autorização e roles (se aplicável) está perfeita. Você garantiu que apenas usuários autorizados acessem os recursos certos. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bem! A autenticação com JWT está funcional e as senhas estão protegidas com hash. As rotas privadas estão devidamente guardadas. Segurança básica garantida! ٩(˘◡˘)۶",
+            "Quase lá": "A segurança é crítica! A falta de rotas de autenticação funcionais ou senhas em texto puro são problemas graves. Priorize a correção da autenticação e proteção das rotas. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Validação & Tratamento de Erros": {
+            "Maravilhoso": "Impecável! As validações são robustas e as mensagens de erro são amigáveis e úteis. A API é resiliente e não quebra facilmente. Experiência de uso excelente para quem consome a API. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Bom trabalho! O uso de validadores (como Zod) e um tratamento de erros centralizado garantem que a API seja confiável e previsível. ٩(˘◡˘)۶",
+            "Quase lá": "A API está frágil. A falta de validação e tratamento de erros faz com que ela quebre com dados inválidos. É importante blindar sua aplicação contra inputs incorretos. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Documentação (Swagger)": {
+            "Maravilhoso": "Documentação perfeita! O Swagger está completo, detalhando inclusive a autenticação. Qualquer desenvolvedor conseguiria consumir sua API sem dificuldades graças a essa documentação. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Muito bom! O Swagger documenta os endpoints e schemas, facilitando o entendimento da API. Documentação é essencial e você fez o dever de casa. ٩(˘◡˘)۶",
+            "Quase lá": "Faltou documentação. Sem o Swagger ou com ele inacessível, fica difícil saber como usar sua API. A documentação é parte da entrega. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Deploy (Hospedagem)": {
+            "Maravilhoso": "Tudo no ar e funcionando perfeitamente! API e banco de dados na nuvem, com variáveis de ambiente configuradas. O projeto está pronto para o mundo! (っ◔◡◔)っ ❤",
+            "Tudo OK": "Parabéns pelo deploy! A API está acessível publicamente e funcionando em produção. Colocar o projeto no ar é uma grande conquista. ٩(˘◡˘)۶",
+            "Quase lá": "O deploy não funcionou como esperado. O link está offline ou com erros. É importante garantir que o projeto funcione fora do ambiente local. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        },
+        "Apresentação & README.md": {
+            "Maravilhoso": "Apresentação brilhante! Domínio técnico evidente e um README completíssimo. Vocês venderam muito bem o peixe e a documentação está profissional. (っ◔◡◔)っ ❤",
+            "Tudo OK": "Boa apresentação! O grupo explicou bem o projeto e o README contém as instruções necessárias. A comunicação foi clara e objetiva. ٩(˘◡˘)۶",
+            "Quase lá": "A apresentação precisa de mais preparo. A explicação foi confusa ou o README está incompleto. Saber comunicar o que foi feito é tão importante quanto codar. (◑_◑)",
+            "Não entregue": "Infelizmente, não houve entrega de projeto, motivo pelo qual não foi possível realizar a avaliação. (╥﹏╥)"
+        }
+    }
+}
