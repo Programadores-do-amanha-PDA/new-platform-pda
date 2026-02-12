@@ -134,7 +134,7 @@ const BaseStackProvider = ({
 const AdminStackProvider = ({ children }) => {
     const classroomStore = useClassroomStore();
     const handleLoadData = async () => {
-        await classroomStore.getAllClassrooms();
+        await classroomStore.getAllClassroomsAsync();
     };
 
     const getFeaturesData = () => ({

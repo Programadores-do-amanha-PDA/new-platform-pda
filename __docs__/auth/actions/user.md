@@ -24,7 +24,7 @@ Updates the authenticated user's information in Supabase Auth. Allows modifying 
 
 **Parameters**:
 
-- `updates: Partial<UserAuthLoginT>` - Partial user data to update. Supported fields:
+- `updates: Partial<UserAuthLogin>` - Partial user data to update. Supported fields:
     - `email: string` - New email address
     - `password: string` - New password
     - `data: Record<string, any>` - Custom user metadata
@@ -369,7 +369,7 @@ log.warn({ operation: "signOut" }, "User signed out");
 - **@supabase/supabase-js**: Auth client types
 - **@/lib/supabase/server**: Server-side Supabase client
 - **@/lib/logger**: Application logger
-- **@/features/dashboard/shared/users-management/types**: User type definitions
+- **@/features/users/management/types**: User type definitions
 
 ---
 

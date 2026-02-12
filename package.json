@@ -8,6 +8,7 @@
     "start": "next start | pino-pretty",
     "test": "jest",
     "test:watch": "jest --watch",
+    "test:low-coverage": "jest --runInBand",
     "test:coverage": "jest --coverage",
     "lint": "next lint",
     "lint:eslint": "eslint . --ext .ts,.tsx,.js,.jsx",

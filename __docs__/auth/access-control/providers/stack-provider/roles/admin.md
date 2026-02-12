@@ -39,7 +39,7 @@ export const AdminStackProvider = (props: AdminStackProviderProps) => JSX.Elemen
 
 | Data              | Store                           | Method                          | Purpose                       |
 | ----------------- | ------------------------------- | ------------------------------- | ----------------------------- |
-| **Classrooms**    | `useClassroomStore`             | `getAllClassrooms()`            | Classroom list and management |
+| **Classrooms**    | `useClassroomStore`             | `getAllClassroomsAsync()`            | Classroom list and management |
 | **Users**         | `useUsersStore`                 | `fetchAllUsersWithProfiles({})` | User profiles and management  |
 | **Enrollments**   | `useEnrollmentsManagementStore` | `fetchAllEnrollments()`         | Student enrollments tracking  |
 | **Projects**      | `useClassroomProjectStore`      | (auto-loaded)                   | Classroom projects            |
@@ -54,7 +54,7 @@ AdminStackProvider Mount
 useEffect Trigger
         ↓
 Promise.all([
-    classroomStore.getAllClassrooms(),
+    classroomStore.getAllClassroomsAsync(),
     usersStore.fetchAllUsersWithProfiles({}),
     enrollmentsStore.fetchAllEnrollments()
 ])
@@ -191,7 +191,7 @@ Admin users get access to:
 
 ```typescript
 const classroomStore = useClassroomStore();
-await classroomStore.getAllClassrooms(); // Fetch all classrooms
+await classroomStore.getAllClassroomsAsync(); // Fetch all classrooms
 const classrooms = classroomStore.classrooms; // Access loaded data
 ```
 

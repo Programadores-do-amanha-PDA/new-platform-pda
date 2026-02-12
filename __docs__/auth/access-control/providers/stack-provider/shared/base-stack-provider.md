@@ -98,7 +98,7 @@ export const AdminStackProvider = ({ children, loadInitialData = true }) => {
 
   const handleLoadData = async () => {
     await Promise.all([
-      classroomStore.getAllClassrooms(),
+      classroomStore.getAllClassroomsAsync(),
       usersStore.fetchAllUsersWithProfiles({}),
       enrollmentsStore.fetchAllEnrollments(),
     ]);
