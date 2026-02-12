@@ -30,8 +30,6 @@ const NavUser = () => {
 
     if (!user) return null;
 
-    console.log(profile?.full_name);
-
     return (
         <SidebarMenu className="flex w-full h-max">
             <SidebarMenuItem className="flex w-full h-max">
