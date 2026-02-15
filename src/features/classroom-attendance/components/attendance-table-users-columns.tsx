@@ -66,7 +66,7 @@ export const usersColumns: ColumnDef<Profile>[] = [
             const nameB = rowB.original?.full_name?.toLowerCase() || "";
             return nameA?.localeCompare(nameB);
         },
-        filterFn: (row, id, filterValue) => {
+        filterFn: (row, filterValue) => {
             const user = row.original as Profile;
             const userEmail = user.email || "";
             const searchTerm = filterValue.toLowerCase();
