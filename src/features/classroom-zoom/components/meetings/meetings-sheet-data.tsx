@@ -104,7 +104,7 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
 
     return (
         <Sheet onOpenChange={setOpenModal} open={openModal}>
-            <SheetTrigger>
+            <SheetTrigger asChild>
                 <Button className="justify-start items-start px-4! w-max font-semibold cursor-pointer">
                     Adicionar Reunião
                 </Button>

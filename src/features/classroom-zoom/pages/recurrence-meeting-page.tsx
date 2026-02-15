@@ -678,7 +678,7 @@ export default function ZoomRecurrenceMeetingPage({
               </Button>
 
               <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
                     className="border-l-0 rounded-l-none cursor-pointer"

@@ -188,7 +188,6 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
 
                     loadingToastId = toast.loading(`Processando ${pastInstancesData.length} instâncias passadas...`);
 
-                    console.log("pastInstancesData", pastInstancesData.length);
                     // Upsert instances, preserving user data like justifications
                     const upsertedPastInstances = await upsertMultiplePastInstances(
                         classroomId,
@@ -329,11 +328,6 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     toast.dismiss(loadingToast);
                     toast.success("Dados buscados na API do Zoom!");
 
-                    console.log("Fetched new data from Zoom API:", {
-                        newParticipants,
-                        newPollResults,
-                    });
-
                     // Check if there's any new data to update
                     const hasNewParticipants = newParticipants && newParticipants.length > 0;
                     const hasNewPollResults = newPollResults && newPollResults.length > 0;
@@ -368,11 +362,6 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
 
                     //  Update the instance on Supabase
                     loadingToastId = toast.loading("Atualizando os dados da instância...");
-                    console.log({
-                        participants: newParticipants,
-                        poll_results: newPollResults,
-                        synchronized_at: new Date().toISOString(),
-                    });
                     const updatedPastInstance = await updatePastInstanceById(instanceId, {
                         participants: newParticipants,
                         poll_results: newPollResults,

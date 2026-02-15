@@ -316,7 +316,7 @@ export default function ZoomPastMeetingPage({ currentMeeting }: { currentMeeting
                             Atualizar dados
                         </Button>
                         <DropdownMenu>
-                            <DropdownMenuTrigger>
+                            <DropdownMenuTrigger asChild>
                                 <Button variant="outline" type="submit" className="border-l-0 rounded-l-none">
                                     <ChevronDownIcon />
                                 </Button>
