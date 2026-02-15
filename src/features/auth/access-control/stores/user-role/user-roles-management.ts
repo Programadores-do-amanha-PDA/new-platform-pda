@@ -162,12 +162,12 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                 try {
                     if (!userId) {
                         log.warn({ operation: "addUserRole" }, "User ID is required");
-                        toast.error("User ID is required.");
+                        toast.error("O ID do usuário é obrigatório.");
                         return false;
                     }
                     if (!role) {
                         log.warn({ operation: "addUserRole" }, "Role is required");
-                        toast.error("Role is required.");
+                        toast.error("O cargo é obrigatório.");
                         return false;
                     }
 
@@ -183,13 +183,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         },
                     });
 
-                    toast.success("Role added successfully!");
+                    toast.success("Cargo adicionado com sucesso!");
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, role, operation: "addUserRole" }, "Error adding user role");
                     }
-                    toast.error("Failed to add role to user.");
+                    toast.error("Falha ao adicionar o cargo ao usuário.");
                     return false;
                 }
             },
@@ -204,12 +204,12 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                 try {
                     if (!userId) {
                         log.warn({ operation: "updateUserRole" }, "User ID is required");
-                        toast.error("User ID is required.");
+                        toast.error("O ID do usuário é obrigatório.");
                         return false;
                     }
                     if (!role) {
                         log.warn({ operation: "updateUserRole" }, "Role is required");
-                        toast.error("Role is required.");
+                        toast.error("O cargo é obrigatório.");
                         return false;
                     }
 
@@ -225,13 +225,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         },
                     });
 
-                    toast.success("Role updated successfully!");
+                    toast.success("Cargo atualizado com sucesso!");
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, role, operation: "updateUserRole" }, "Error updating user role");
                     }
-                    toast.error("Failed to update user role.");
+                    toast.error("Falha ao atualizar o cargo do usuário.");
                     return false;
                 }
             },
@@ -257,13 +257,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                     const updatedRoles = Object.fromEntries(Object.entries(usersRoles).filter(([key]) => key !== userId));
                     set({ usersRoles: updatedRoles });
 
-                    toast.success("Role removed successfully!");
+                    toast.success("Cargo removido com sucesso!");
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, operation: "deleteUserRole" }, "Error deleting user role");
                     }
-                    toast.error("Failed to remove user role.");
+                    toast.error("Falha ao remover o cargo do usuário.");
                     return false;
                 }
             },
