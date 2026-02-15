@@ -101,8 +101,8 @@ export default function ActivitiesTable({
             <div className="flex justify-between items-center">
                 <Input
                     placeholder="Procurando por alguém?"
-                    value={(table.getColumn("profile")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) => table.getColumn("profile")?.setFilterValue(event.target.value)}
+                    value={(table.getColumn("full_name")?.getFilterValue() as string) ?? ""}
+                    onChange={(event) => table.getColumn("full_name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
                 <div className="flex justify-between gap-4">
@@ -116,7 +116,7 @@ export default function ActivitiesTable({
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id} className="p-0! border-0! max-w-[155px]! h-max">
                                 {headerGroup.headers.map((header) => {
-                                    const isUserColumn = header.id === "profile";
+                                    const isUserColumn = header.id === "full_name";
                                     return (
                                         <TableHead
                                             key={header.id}
@@ -143,7 +143,7 @@ export default function ActivitiesTable({
                                     className="group/row border-0! w-full max-w-[155px]!"
                                 >
                                     {row.getVisibleCells().map((cell) => {
-                                        const isUserColumn = cell.column.id === "profile";
+                                        const isUserColumn = cell.column.id === "full_name";
 
                                         return (
                                             <TableCell

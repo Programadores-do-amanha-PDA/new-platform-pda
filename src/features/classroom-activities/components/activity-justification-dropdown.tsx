@@ -113,7 +113,7 @@ export function ActivityJustificationDropdown({
 
     return (
         <DropdownMenu modal={false}>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="ml-auto">
                     <Pen className="stroke-muted-foreground size-3" />
                 </Button>

@@ -42,7 +42,7 @@ export function useActivityColumns({
                             })}
                         </p>
                         <DropdownMenu>
-                            <DropdownMenuTrigger>
+                            <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
                                     <MoreHorizontal className="size-4" />
                                 </Button>
