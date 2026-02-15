@@ -16,8 +16,7 @@ export default function PermissionGuard({
   fallback = null,
   children,
 }: PermissionGuardProps) {
-  const { hasPermission, hasAnyPermission, hasAllPermissions, permissions: userPermissions } = useUserPermissions();
-  console.log(userPermissions, permission);
+  const { hasPermission, hasAnyPermission, hasAllPermissions } = useUserPermissions();
 
   let hasAccess = false;
 

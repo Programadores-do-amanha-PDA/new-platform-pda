@@ -121,10 +121,10 @@ export default function DateIntervalPaginationControl({
         }
     };
 
-    const getDisplayTitle = (): JSX.Element | string => {
+    const DisplayTitle = (): JSX.Element => {
         if (intervalType === "modules" && selectedModule && selectedModule !== "manual") {
             const moduleData = modules.find((m) => m.id === selectedModule);
-            return moduleData?.title || "Módulo";
+            return <p className="p-2 truncate max-w-52">{moduleData?.title || "Módulo"}</p>;
         }
 
         if ((dateRange?.from && dateRange?.to) || dateRange?.from) {
@@ -137,13 +137,13 @@ export default function DateIntervalPaginationControl({
             );
         }
 
-        return "Selecione período";
+        return <p className="p-2 truncate">Selecione período</p>;
     };
 
     const showNavigationControls: boolean = intervalType === "manual";
 
     return (
-        <div className="flex h-8 items-center border rounded-lg overflow-hidden">
+        <div className="flex h-9 items-center border rounded-lg overflow-hidden">
             <div className="flex items-center">
                 {showNavigationControls && (
                     <Button
@@ -157,7 +157,7 @@ export default function DateIntervalPaginationControl({
                     </Button>
                 )}
 
-                <span className="text-sm font-semibold w-max min-w-10 text-center">{getDisplayTitle()}</span>
+                <DisplayTitle />
 
                 {showNavigationControls && (
                     <Button
