@@ -88,6 +88,7 @@ export const useProjectsKPIsData = ({ classroomId }: UseProjectsKPIsDataParams):
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [userModesKey]);
 
+
     const classroomModules = useMemo(() => {
         const modules = classroomSettings?.modules;
         if (!modules || modules.length === 0) return [];

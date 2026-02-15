@@ -55,7 +55,6 @@ export const useProjectsKPIsColumns = ({
     rowsMinimized,
     handleSetModulesMinimized,
 }: UseProjectsKPIsColumnsProps) => {
-    console.log("useProjectsKPIsColumns", Date.now());
     /**
      * Index column definition with KPI rule labels.
      * This column is static and never changes.

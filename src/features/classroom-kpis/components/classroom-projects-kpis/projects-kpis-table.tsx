@@ -4,16 +4,7 @@ import { useProjectsKPIsColumns, useProjectsKPIsData } from "./hooks";
 import { PROJECTS_KPIS_RULES_LABELS } from "./utils";
 import { DefaultDataTable } from "@/components/shared/custom-data-table/default-data-table";
 
-/**
- * Props for the ProjectsKPIsTable component.
- *
- * @interface ProjectsKPIsTableProps
- */
 interface ProjectsKPIsTableProps {
-    /**
-     * The unique identifier of the classroom for which to display project KPIs.
-     * Used to fetch relevant module and project statistics data.
-     */
     readonly classroomId: string;
 }
 
@@ -54,5 +45,5 @@ export const ProjectsKPIsTable = ({ classroomId }: ProjectsKPIsTableProps) => {
         handleSetModulesMinimized,
     });
 
-    return <DefaultDataTable data={PROJECTS_KPIS_RULES_LABELS} columns={columns} />;
+    return <DefaultDataTable data={PROJECTS_KPIS_RULES_LABELS} columns={columns} searchColumnId="label" />;
 };

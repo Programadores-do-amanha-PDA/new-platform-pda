@@ -6,8 +6,8 @@ import { FolderX } from "lucide-react";
 import EmptyState from "@/components/shared/empty-states/empty-state";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KPIsZoomSatisfactionTable } from "./zoom-satisfaction-kpis";
-import { ProjectsKPIsTable } from "./classroom-projects-kpis";
 import { KPIsZoomAttendanceTable } from "./zoom-attendance-kpis/zoom-attendance-table";
+import { ProjectsKPIsTable } from "./classroom-projects-kpis/projects-kpis-table";
 
 export const KPIsTabs = () => {
     const { classroom_id } = useParams<{ classroom_id: string }>();
