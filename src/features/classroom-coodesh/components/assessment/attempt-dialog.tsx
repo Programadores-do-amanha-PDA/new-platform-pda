@@ -295,7 +295,7 @@ const AttemptDialog = ({
                         </TableCell>
                         <TableCell className="max-w-xs">
                           <Dialog>
-                            <DialogTrigger>
+                            <DialogTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="icon"

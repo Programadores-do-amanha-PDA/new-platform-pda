@@ -258,7 +258,7 @@ export function AttemptsDataTable({
         return (
           <div className="flex justify-center items-center p-2 border-b w-full h-full">
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-0 w-8 h-8">
                   <span className="sr-only">Open menu</span>
                   <MoreHorizontal />
@@ -369,7 +369,7 @@ export function AttemptsDataTable({
               updateAssessment={updateAssessment}
             />
             <DropdownMenu>
-              <DropdownMenuTrigger>
+              <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-0 w-8 h-8">
                   <span className="sr-only">Abrir menu</span>
                   <MoreHorizontal />

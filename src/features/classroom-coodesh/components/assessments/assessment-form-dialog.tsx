@@ -136,7 +136,7 @@ const AssessmentFormDialog = ({
 
   return (
     <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button className="font-semibold" variant={"outline"}>
           {currentAssessment ? "Editar Avaliação" : "Criar Avaliação"}
         </Button>

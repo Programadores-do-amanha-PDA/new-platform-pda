@@ -145,7 +145,7 @@ const InsertAssessmentAttempts = ({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <Button>
           <Upload className="size-5" />
           Carregar arquivos de respostas
