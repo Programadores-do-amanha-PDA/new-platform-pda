@@ -64,7 +64,6 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
     const classroomModules = settingsByClassroom[project.classroom_id].modules || [];
     const projectModule = classroomModules.find((module) => module.id === project.module)?.title || `M${project.module}`;
     const deliveryAuthor = currentDelivery?.id ? classroomUsers.find((u) => u.id === currentDelivery.user_id) : profile;
-    console.log(deliveryAuthor);
 
     // Reset form when modal opens or populate with current delivery data
     useEffect(() => {

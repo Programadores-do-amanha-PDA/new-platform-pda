@@ -74,7 +74,7 @@ export function MemberSelectionCombobox({
             <div className="space-y-2 w-full">
                 {label && <Label className="font-medium text-sm">{label}</Label>}
                 <Popover open={open} onOpenChange={setOpen} modal={true}>
-                    <PopoverTrigger>
+                    <PopoverTrigger asChild>
                         <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between w-full">
                             {selectedUsers.length === 0
                                 ? placeholder

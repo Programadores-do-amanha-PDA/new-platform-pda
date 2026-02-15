@@ -410,7 +410,7 @@ export function GroupedDeliveryTable({
                                                                         </TableCell>
                                                                         <TableCell>
                                                                             <DropdownMenu>
-                                                                                <DropdownMenuTrigger>
+                                                                                <DropdownMenuTrigger asChild>
                                                                                     <Button
                                                                                         variant="ghost"
                                                                                         className="p-0 w-8 h-8"
