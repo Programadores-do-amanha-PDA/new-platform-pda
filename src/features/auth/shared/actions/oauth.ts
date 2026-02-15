@@ -1,6 +1,7 @@
 import { AuthError, EmailOtpType, Session, User } from "@supabase/supabase-js";
 import createClient from "@/lib/supabase/client";
 import { logger } from "@/lib/logger";
+import { serializeError } from "../utils";
 
 type VerifyOtpResults =
     | {
@@ -56,7 +57,7 @@ export const verifyOtp = async ({ tokenHash, type }: VerifyOtpParams): Promise<V
             error: null,
         };
     } catch (error) {
-        log.error({ err: error, operation: "verifyOtp" }, "Error verifying OTP");
+        log.error({ err: serializeError(error), operation: "verifyOtp" }, "Error verifying OTP");
         return {
             user: null,
             session: null,

@@ -65,7 +65,8 @@ export const useUserPermissions = () => {
     const hasPermission = useCallback(
         ({ permission }: { readonly permission: string }): boolean => {
             if (!userRole) return false;
-            return roleHasPermission({ role: userRole, permission });
+            const result = roleHasPermission({ role: userRole, permission });
+            return result;
         },
         [userRole, roleHasPermission],
     );

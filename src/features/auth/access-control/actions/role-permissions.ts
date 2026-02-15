@@ -3,6 +3,7 @@
 import { logger } from "@/lib/logger";
 import { getSupabaseClient } from "@/lib/supabase";
 import { RolePermission, Role, Permission } from "../types";
+import { serializeError } from "../../shared/utils";
 
 type GetAllRolePermissionsAsyncResult = RolePermission[] | null;
 interface GetPermissionsByRoleAsyncProps {
@@ -54,7 +55,7 @@ export const getAllRolePermissionsAsync = async (): Promise<GetAllRolePermission
 
         return rolesPermissions;
     } catch (error) {
-        log.error({ err: error, operation: "getAllRolePermissionsAsync" }, "Error on get all role permissions");
+        log.error({ err: serializeError(error), operation: "getAllRolePermissionsAsync" }, "Error on get all role permissions");
 
         return null;
     }
@@ -107,7 +108,7 @@ export const getPermissionsByRoleAsync = async ({
 
         return permissions;
     } catch (error) {
-        log.error({ err: error, role, operation: "getPermissionsByRoleAsync" }, "Error on get permissions by role");
+        log.error({ err: serializeError(error), role, operation: "getPermissionsByRoleAsync" }, "Error on get permissions by role");
 
         return null;
     }

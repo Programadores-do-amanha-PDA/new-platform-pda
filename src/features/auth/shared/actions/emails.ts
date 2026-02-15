@@ -3,6 +3,7 @@
 import { logger } from "@/lib/logger";
 import { getSupabaseAdminClient, getSupabaseClient } from "@/lib/supabase";
 import { REGEX_FOR_EMAIL_VALIDATION } from "@/utils/regex";
+import { serializeError } from "../utils";
 
 type SendEmailToMultipleUsersResult =
     | {
@@ -23,7 +24,6 @@ type SendEmailToMultipleUsersParams = {
 };
 
 const log = logger.child({ module: "AuthEmailsActions" });
-
 /**
  * Requests a password reset email for a user.
  *
@@ -60,7 +60,7 @@ export const requestPasswordResetByEmail = async ({ email }: { email: string }):
 
         return true;
     } catch (error) {
-        log.error({ err: error, email, operation: "requestPasswordResetByEmail" }, "Error requesting password reset");
+        log.error({ err: serializeError(error), email, operation: "requestPasswordResetByEmail" }, "Error requesting password reset");
         return false;
     }
 };
@@ -116,7 +116,7 @@ export const sendPasswordResetToMultipleUsers = async ({
                     await new Promise((resolve) => setTimeout(resolve, 100));
                 }
             } catch (error) {
-                log.error({ err: error, email, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset");
+                log.error({ err: serializeError(error), email, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset");
                 failed.push(email);
             }
         }
@@ -130,7 +130,7 @@ export const sendPasswordResetToMultipleUsers = async ({
             },
         };
     } catch (error) {
-        log.error({ err: error, emails, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset emails");
+        log.error({ err: serializeError(error), emails, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset emails");
         return {
             results: null,
             error: error instanceof Error ? error.message : "Unknown error",

@@ -1,5 +1,33 @@
-import createClient from "@/lib/supabase/client";
+"use client";
+
 import { AuthError, AuthUser, Session } from "@supabase/supabase-js";
+import { logger } from "@/lib/logger";
+import createClient from "@/lib/supabase/client";
+
+const log = logger.child({ module: "AuthUtils" });
+
+/**
+ * Serializes an error object into a plain object for safe logging.
+ * Prevents serialization errors when crossing Server/Client boundaries.
+ *
+ * @param error - The error to serialize
+ * @returns A plain object with error details
+ */
+const serializeError = (error: unknown) => {
+    if (error instanceof Error || error instanceof AuthError) {
+        return {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+        };
+    }
+    
+    if (typeof error === "string") {
+        return { message: error };
+    }
+    
+    return { message: "unknown error" };
+};
 
 type GetAuthUserByJWTResult =
     | {
@@ -52,7 +80,7 @@ export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAut
         if (!user) throw "user not found";
         return { user, error: null };
     } catch (error) {
-        console.error("Error fetching auth user:", error);
+        log.error({ err: serializeError(error), operation: "getAuthUserByJWT" }, "Error fetching auth user");
         return { user: null, error: error instanceof Error || error instanceof AuthError ? error.message : "unknown error" };
     }
 };
@@ -74,16 +102,19 @@ export const getAuthUserByJWT = async ({ jwt }: { jwt: string }): Promise<GetAut
 export const getSession = async (): Promise<SetSessionResult> => {
     try {
         const supabase = await createClient();
+        if (!supabase) throw new Error("Supabase client not initialized");
+
         const {
             data: { session },
             error,
         } = await supabase.auth.getSession();
         if (error) throw error;
+
         if (!session) throw new Error("No session returned");
 
         return { session, error: null };
     } catch (error) {
-        console.error("Error fetching session:", error);
+        log.error({ err: serializeError(error), operation: "getSession" }, "Error fetching session");
         return {
             session: null,
             error: error instanceof Error || error instanceof AuthError ? error.message : "unknown error",

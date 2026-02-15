@@ -285,7 +285,9 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
              */
             getRolePermissions: ({ role }) => {
                 const { rolePermissions } = get();
-                return rolePermissions[role] || [];
+                const permissions = rolePermissions[role] || [];
+
+                return permissions;
             },
 
             /**

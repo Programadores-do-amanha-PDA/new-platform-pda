@@ -6,6 +6,7 @@ import { getSupabaseClient } from "@/lib/supabase/client-manager";
 
 import { JwtPayloadT } from "@/features/auth/shared/types/jwt";
 import { Role, UserRole } from "../types";
+import { serializeError } from "../../shared/utils";
 
 interface InsertUserRoleWithUserIdAsyncParameters {
     userId: string;
@@ -25,6 +26,7 @@ interface DeleteUserRoleWithUserIdAsyncParameters {
 type DeleteUserRoleWithUserIdAsyncResult = boolean;
 
 const log = logger.child({ module: "user-role.actions" });
+
 
 /**
  * Inserts a new role assignment for a specific user.
@@ -77,7 +79,7 @@ export const insertUserRoleWithUserIdAsync = async ({
 
         return data;
     } catch (error) {
-        log.error({ err: error, userId, role, operation: "insertUserRoleWithUserIdAsync" }, "Failed to insert user role");
+        log.error({ err: serializeError(error), userId, role, operation: "insertUserRoleWithUserIdAsync" }, "Failed to insert user role");
 
         return null;
     }
@@ -113,7 +115,7 @@ export const getAllUserRolesAsync = async (): Promise<GetAllUserRolesAsyncResult
 
         return data;
     } catch (error) {
-        log.error({ err: error, operation: "getAllUserRolesAsync" }, "Failed to fetch all user roles");
+        log.error({ err: serializeError(error), operation: "getAllUserRolesAsync" }, "Failed to fetch all user roles");
 
         return null;
     }
@@ -157,7 +159,7 @@ export const getUserRoleAsync = async (): Promise<GetUserRoleAsyncResult> => {
 
         return userRole;
     } catch (error) {
-        log.error({ err: error, operation: "getUserRoleAsync" }, "Failed to get user role from session");
+        log.error({ err: serializeError(error), operation: "getUserRoleAsync" }, "Failed to get user role from session");
 
         return null;
     }
@@ -215,7 +217,7 @@ export const updateUserRoleWithUserIdAsync = async ({
 
         return data;
     } catch (error) {
-        log.error({ err: error, userId, newRole, operation: "updateUserRoleWithUserIdAsync" }, "Failed to update user role");
+        log.error({ err: serializeError(error), userId, newRole, operation: "updateUserRoleWithUserIdAsync" }, "Failed to update user role");
 
         return null;
     }
@@ -261,7 +263,7 @@ export const deleteUserRoleWithUserIdAsync = async ({
 
         return true;
     } catch (error) {
-        log.error({ err: error, userId, operation: "deleteUserRoleWithUserIdAsync" }, "Failed to delete user role");
+        log.error({ err: serializeError(error), userId, operation: "deleteUserRoleWithUserIdAsync" }, "Failed to delete user role");
 
         return false;
     }

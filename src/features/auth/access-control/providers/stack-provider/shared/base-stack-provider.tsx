@@ -12,6 +12,7 @@ import pathLabels from "@/utils/path-labels";
 import { useAuth } from "@/features/auth/shared";
 import { Role } from "@/features/auth/access-control/types";
 import { Classroom } from "@/features/classrooms/types";
+import { usePermissionsStore } from "@/features/auth/access-control/stores/permissions-store/store";
 
 import { createSidebarConfig } from "./sidebar-config-factory";
 import { generatePathLabelsByFeaturesData } from "../utils/generate-path-labels";
@@ -107,19 +108,25 @@ export const BaseStackProvider = ({
     const [loading, setLoading] = useState(false);
     const { userRole } = useAuth();
     const { profile } = useUserProfileStore();
+    const { fetchPermissionsForAllRoles } = usePermissionsStore();
 
     /**
      * Effect to load initial data when component mounts or dependencies change.
      * Only executes if user is authenticated and has appropriate role.
+     * Also loads all role permissions from Supabase.
      */
     useEffect(() => {
         const fetchInitialData = async () => {
             if (!loadInitialData || !profile || !userRole || !allowedRoles.includes(userRole)) return;
-            if (!onLoadData) return;
 
             setLoading(true);
             try {
-                await onLoadData();
+                // Load permissions for all roles first, then other data in parallel
+                await fetchPermissionsForAllRoles();
+                
+                if (onLoadData) {
+                    await onLoadData();
+                }
             } catch (error) {
                 console.error("Error loading initial data:", error);
             } finally {

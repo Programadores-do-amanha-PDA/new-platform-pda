@@ -5,6 +5,7 @@ import { getSupabaseClient } from "@/lib/supabase/client-manager";
 import { logger } from "@/lib/logger";
 import { Session } from "@supabase/supabase-js";
 import { signInSchema } from "./utils";
+import { serializeError } from "../shared/utils";
 
 const log = logger.child({ module: "sign-in/actions" });
 
@@ -43,7 +44,7 @@ export async function signInWithEmailAndPassword({
         ) {
             return { error: true, confirmation: true };
         } else {
-            log.debug({ err: error, email, password }, "Attempt to sign in with unconfirmed email");
+            log.debug({ err: serializeError(error), email, password }, "Attempt to sign in with unconfirmed email");
             return { error: true, confirmation: false };
         }
     }

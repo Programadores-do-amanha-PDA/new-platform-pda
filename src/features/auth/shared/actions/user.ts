@@ -2,7 +2,7 @@
 
 import { UserAuthLogin } from "@/features/users/management/types";
 import { logger } from "@/lib/logger";
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseClient } from "@/lib/supabase";
 import { AuthError, AuthUser, Session } from "@supabase/supabase-js";
 
 type UpdateAuthUserParams = {
@@ -18,6 +18,29 @@ type SetSessionParams = {
 };
 
 const log = logger.child({ module: "UserAuthActions" });
+
+/**
+ * Serializes an error object into a plain object for safe logging.
+ * Prevents serialization errors when crossing Server/Client boundaries.
+ *
+ * @param error - The error to serialize
+ * @returns A plain object with error details
+ */
+const serializeError = (error: unknown) => {
+    if (error instanceof Error || error instanceof AuthError) {
+        return {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+        };
+    }
+
+    if (typeof error === "string") {
+        return { message: error };
+    }
+
+    return { message: "unknown error" };
+};
 
 /**
  * Updates the authenticated user's information in Supabase Auth.
@@ -39,7 +62,7 @@ export const updateAuthUser = async ({ updates }: UpdateAuthUserParams): Promise
     try {
         if (!updates) throw new Error("No updates provided");
 
-        const supabase = await createClient();
+        const supabase = await getSupabaseClient();
         if (!supabase) throw new Error("Supabase client not initialized");
 
         const { data, error } = await supabase.auth.updateUser({ ...updates });
@@ -48,7 +71,7 @@ export const updateAuthUser = async ({ updates }: UpdateAuthUserParams): Promise
 
         return { user: data.user, error: null };
     } catch (error) {
-        log.error({ err: error, updates, operation: "updateAuthUser" }, "Error updating auth user");
+        log.error({ err: serializeError(error), updates, operation: "updateAuthUser" }, "Error updating auth user");
         return {
             user: null,
             error: error instanceof Error || error instanceof AuthError ? error : new Error("unknown error"),
@@ -74,15 +97,12 @@ export const updateAuthUser = async ({ updates }: UpdateAuthUserParams): Promise
  *   refresh_token: "eyJhbG..."
  * });
  */
-export const setSession = async ({
-    access_token,
-    refresh_token,
-}: SetSessionParams): Promise<SetSessionResult> => {
+export const setSession = async ({ access_token, refresh_token }: SetSessionParams): Promise<SetSessionResult> => {
     try {
         if (!access_token) throw new Error("Access token not provided");
         if (!refresh_token) throw new Error("Refresh token not provided");
 
-        const supabase = await createClient();
+        const supabase = await getSupabaseClient();
         if (!supabase) throw new Error("Supabase client not initialized");
 
         const {
@@ -97,7 +117,7 @@ export const setSession = async ({
 
         return { session, error: null };
     } catch (error) {
-        log.error({ err: error, operation: "setSession" }, "Error setting session");
+        log.error({ err: serializeError(error), operation: "setSession" }, "Error setting session");
         return {
             error: error instanceof Error || error instanceof AuthError ? error : new Error("unknown error"),
             session: null,
@@ -123,7 +143,7 @@ export const setSession = async ({
  */
 export const signOut = async (): Promise<boolean> => {
     try {
-        const supabase = await createClient();
+        const supabase = await getSupabaseClient();
         if (!supabase) throw new Error("Supabase client not initialized");
 
         const { error } = await supabase.auth.signOut();
@@ -131,7 +151,7 @@ export const signOut = async (): Promise<boolean> => {
 
         return true;
     } catch (error) {
-        log.error({ err: error, operation: "signOut" }, "Error signing out");
+        log.error({ err: serializeError(error), operation: "signOut" }, "Error signing out");
         return false;
     }
 };
