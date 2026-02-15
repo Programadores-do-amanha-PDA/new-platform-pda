@@ -230,7 +230,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button variant={"secondary"}>Inserir via CSV</Button>
             </DialogTrigger>
             <DialogContent className="w-max! max-w-[85vw]! overflow-hidden">

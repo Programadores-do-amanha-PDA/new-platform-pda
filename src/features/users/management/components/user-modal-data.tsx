@@ -310,7 +310,7 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
 
     return (
         <Dialog onOpenChange={handleOpenChange} open={isOpen}>
-            <DialogTrigger className="w-full!">
+            <DialogTrigger asChild>
                 <Button
                     variant={mode === "new" ? "default" : "ghost"}
                     className={cn(
@@ -318,6 +318,7 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
                         mode === "new"
                             ? "px-4! w-max items-start justify-start font-semibold"
                             : "px-2! w-full! h-max items-start justify-start text-start",
+                        mode === "edit" && "w-full!",
                     )}
                 >
                     {mode === "new" ? "Adicionar usuário" : "Editar usuário"}

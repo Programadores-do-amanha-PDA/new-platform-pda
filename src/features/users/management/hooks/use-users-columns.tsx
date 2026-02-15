@@ -32,7 +32,6 @@ interface UseUsersColumnsProps {
     readonly deleteUser: (params: { id: string }) => void;
 }
 
-
 /**
  * Custom React hook that generates column definitions for a users table in the dashboard.
  *
@@ -71,14 +70,13 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                     <div className="flex justify-center items-center w-full">
                         <Avatar className="group relative">
                             <AvatarFallback>
-                                {row
-                                    .getValue<Profile>("profile")
-                                    .full_name.split(" ")
+                                {row.original.full_name
+                                    .split(" ")
                                     .filter((word, i) => i < 2)
                                     .map((word) => word[0].toUpperCase())
                                     .join("") || "U"}
                             </AvatarFallback>
-                            <AvatarImage src={row.getValue<Profile>("profile").avatar_url || ""} />
+                            <AvatarImage src={row.original.avatar_url || ""} />
                             <div
                                 className={cn(
                                     "hidden top-0 right-0 bottom-0 left-0 absolute group-hover:flex justify-center items-center bg-black/55 m-auto rounded-full",
@@ -148,10 +146,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                     const userEmail = user?.email || "";
                     const searchTerm = filterValue.toLowerCase();
 
-                    return (
-                        user.full_name.toLowerCase().includes(searchTerm) ||
-                        userEmail.toLowerCase().includes(searchTerm)
-                    );
+                    return user.full_name.toLowerCase().includes(searchTerm) || userEmail.toLowerCase().includes(searchTerm);
                 },
             },
             {
@@ -343,7 +338,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                     const user = row.original;
                     return (
                         <DropdownMenu>
-                            <DropdownMenuTrigger>
+                            <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="p-0 w-8 h-8">
                                     <span className="sr-only">Abrir Menu</span>
                                     <MoreHorizontal />
