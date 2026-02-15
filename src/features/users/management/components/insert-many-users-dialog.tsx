@@ -236,18 +236,18 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
             <DialogContent className="w-max! max-w-[85vw]! overflow-hidden">
                 <DialogHeader>
                     <DialogTitle>Inserir usuários via CSV</DialogTitle>
-                    <DialogDescription>
-                        {stage === 0 && (
-                            <>
+                    {stage === 0 && (
+                        <>
+                            <DialogDescription>
                                 Selecione um arquivo csv para carregar os dados dos usuários
-                                <p>
-                                    O arquivo deve conter as colunas: <b>Nome</b>, <b>Email</b>
-                                </p>
-                            </>
-                        )}
-                        {stage === 1 && "Revise os dados dos usuários a serem inseridos"}
-                        {stage === 2 && "Resultados das inserções"}
-                    </DialogDescription>
+                            </DialogDescription>
+                            <DialogDescription>
+                                O arquivo deve conter as colunas: <b>Nome</b>, <b>Email</b>
+                            </DialogDescription>
+                        </>
+                    )}
+                    {stage === 1 && <DialogDescription>Revise os dados dos usuários a serem inseridos</DialogDescription>}
+                    {stage === 2 && <DialogDescription>Resultados das inserções</DialogDescription>}
                 </DialogHeader>
 
                 {stage === 0 ? (

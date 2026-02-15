@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,72 @@ import { Classroom } from "@/features/classrooms/types";
 import { ProfileWithRelations } from "../types/user";
 import UserModalData from "../components/user-modal-data";
 import { Profile } from "../../profile/types/profile";
+
+interface UseUsersColumnsProps {
+    readonly excludeRoles?: Role[];
+    readonly classrooms?: Classroom[];
+    readonly deleteUser: (params: { id: string }) => void;
+}
+
+/**
+ * Actions cell component for user table rows.
+ * Extracted to a separate component to properly use React hooks for state management.
+ */
+function UserActionsCell({ 
+    user, 
+    excludeRoles, 
+    deleteUser 
+}: { 
+    user: ProfileWithRelations; 
+    excludeRoles?: Role[]; 
+    deleteUser: (params: { id: string }) => void;
+}) {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+
+    return (
+        <>
+            <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="p-0 w-8 h-8">
+                        <span className="sr-only">Abrir Menu</span>
+                        <MoreHorizontal />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuLabel className="font-bold">Ações</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <Button
+                        variant="ghost"
+                        className="justify-start items-start px-2! w-full! h-max text-start cursor-pointer"
+                        onClick={() => {
+                            setDropdownOpen(false);
+                            setEditDialogOpen(true);
+                        }}
+                    >
+                        Editar usuário
+                    </Button>
+                    {user.id && (
+                        <Button
+                            variant="ghost"
+                            className="justify-start items-start px-2! w-full h-max text-start cursor-pointer"
+                            onClick={() => user.id && deleteUser({ id: user.id })}
+                        >
+                            Deletar
+                        </Button>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
+            <UserModalData 
+                mode="edit" 
+                currentUser={user} 
+                excludeRoles={excludeRoles}
+                open={editDialogOpen}
+                onOpenChange={setEditDialogOpen}
+            />
+        </>
+    );
+}
 
 interface UseUsersColumnsProps {
     readonly excludeRoles?: Role[];
@@ -334,33 +400,13 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
             {
                 id: "actions",
                 enableHiding: false,
-                cell: ({ row }) => {
-                    const user = row.original;
-                    return (
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="p-0 w-8 h-8">
-                                    <span className="sr-only">Abrir Menu</span>
-                                    <MoreHorizontal />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel className="font-bold">Ações</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <UserModalData mode="edit" currentUser={user} excludeRoles={excludeRoles} />
-                                {user.id && (
-                                    <Button
-                                        variant="ghost"
-                                        className="justify-start items-start px-2! w-full h-max text-start cursor-pointer"
-                                        onClick={() => user.id && deleteUser({ id: user.id })}
-                                    >
-                                        Deletar
-                                    </Button>
-                                )}
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    );
-                },
+                cell: ({ row }) => (
+                    <UserActionsCell 
+                        user={row.original} 
+                        excludeRoles={excludeRoles} 
+                        deleteUser={deleteUser}
+                    />
+                ),
             },
         ];
     }, [deleteUser, excludeRoles]);

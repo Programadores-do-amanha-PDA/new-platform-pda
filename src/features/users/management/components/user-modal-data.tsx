@@ -35,6 +35,7 @@ import { useUsersStore } from "@/features/users/management";
 import { logger } from "@/lib/logger";
 import { useUserRolesManagementStore } from "@/features/auth/access-control/stores/user-role/user-roles-management";
 import { Profile } from "../../profile/types/profile";
+import { ProfileWithRelations } from "../types/user";
 
 const log = logger.child({ module: "user-sheet-data" });
 
@@ -42,10 +43,14 @@ type UserModalDataProps = {
     mode: "new" | "edit";
     currentUser?: Partial<Profile>;
     excludeRoles?: Role[];
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 };
 
-const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) => {
-    const [isOpen, setIsOpen] = useState(false);
+const UserModalData = ({ mode, currentUser, excludeRoles, open: controlledOpen, onOpenChange }: UserModalDataProps) => {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const isOpen = isControlled ? controlledOpen : internalOpen;
     const [loading, setLoading] = useState(false);
 
     const { classrooms } = useClassroomStore();
@@ -74,7 +79,9 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
                 fullName: currentUser?.full_name || "",
                 email: currentUser.email || "",
                 password: "",
-                userRole: usersRoles[currentUser.id as string] || "",
+                userRole: usersRoles[currentUser.id as string] 
+                    || (currentUser as ProfileWithRelations).user_role?.role 
+                    || "",
                 enrollments:
                     classrooms && classrooms.length > 0
                         ? enrollmentsByUserId[currentUser.id as string]?.map((enrollment) => enrollment.classroom_id) || []
@@ -92,7 +99,10 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
     }, [mode, isOpen, currentUser, reset, classrooms, enrollmentsByUserId, usersRoles]);
 
     const handleOpenChange = (open: boolean) => {
-        setIsOpen(open);
+        if (!isControlled) {
+            setInternalOpen(open);
+        }
+        onOpenChange?.(open);
         if (!open) {
             form.clearErrors();
         }
@@ -219,7 +229,9 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
             }
 
             // Handle role updates
-            const currentUserRole = usersRoles[currentUser.id as string] || "";
+            const currentUserRole = usersRoles[currentUser.id as string] 
+                || (currentUser as ProfileWithRelations).user_role?.role 
+                || "";
 
             if (!currentUserRole && data.userRole) {
                 const roleSuccess = await addUserRole({ userId, role: data.userRole as Role });
@@ -310,20 +322,22 @@ const UserModalData = ({ mode, currentUser, excludeRoles }: UserModalDataProps) 
 
     return (
         <Dialog onOpenChange={handleOpenChange} open={isOpen}>
-            <DialogTrigger asChild>
-                <Button
-                    variant={mode === "new" ? "default" : "ghost"}
-                    className={cn(
-                        "cursor-pointer",
-                        mode === "new"
-                            ? "px-4! w-max items-start justify-start font-semibold"
-                            : "px-2! w-full! h-max items-start justify-start text-start",
-                        mode === "edit" && "w-full!",
-                    )}
-                >
-                    {mode === "new" ? "Adicionar usuário" : "Editar usuário"}
-                </Button>
-            </DialogTrigger>
+            {!isControlled && (
+                <DialogTrigger asChild>
+                    <Button
+                        variant={mode === "new" ? "default" : "ghost"}
+                        className={cn(
+                            "cursor-pointer",
+                            mode === "new"
+                                ? "px-4! w-max items-start justify-start font-semibold"
+                                : "px-2! w-full! h-max items-start justify-start text-start",
+                            mode === "edit" && "w-full!",
+                        )}
+                    >
+                        {mode === "new" ? "Adicionar usuário" : "Editar usuário"}
+                    </Button>
+                </DialogTrigger>
+            )}
             <DialogContent className="w-full sm:max-w-[45vw]">
                 <DialogHeader>
                     <DialogTitle>{mode === "new" ? "Criar Novo Usuário" : "Editar Dados do Usuário"}</DialogTitle>

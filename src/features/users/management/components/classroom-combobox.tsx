@@ -25,7 +25,7 @@ export function ClassroomCombobox({
 
     return (
         <Popover modal={true}>
-            <PopoverTrigger>
+            <PopoverTrigger asChild>
                 {value.length > 0 ? (
                     <Button
                         type="button"
@@ -33,10 +33,10 @@ export function ClassroomCombobox({
                         size="icon"
                         className="w-max! flex items-center justify-center py-1! h-max! px-2!"
                     >
-                        <p key={value[0]} className="font-semibold flex gap-1 text-xs">
+                        <span key={value[0]} className="font-semibold flex gap-1 text-xs">
                             {itens.find((item) => item.value === value[0])?.label}
-                            <p className="font-semibold text-muted-foreground">{value.length > 1 && ` +${value.length - 1}`}</p>
-                        </p>
+                            <span className="font-semibold text-muted-foreground">{value.length > 1 && ` +${value.length - 1}`}</span>
+                        </span>
 
                         <ChevronDown className="size-3.5! text-muted-foreground" />
                     </Button>
