@@ -32,6 +32,23 @@ export function filterVisibilityClassroomStudents({
     ruleId,
     enrollmentsByUserId,
 }: FilterVisibilityClassroomStudentsParams): Profile[] {
+    // Early return for empty/invalid data - these are valid states
+    if (!users || users.length === 0) {
+        return [];
+    }
+
+    if (!userModes || userModes.length === 0) {
+        return [];
+    }
+
+    if (!enrollmentsByUserId || Object.keys(enrollmentsByUserId).length === 0) {
+        return [];
+    }
+
+    if (!classroomId || !ruleId) {
+        return [];
+    }
+
     const mustBeVisibleModeIds = new Set(
         userModes
             .filter((mode) => {

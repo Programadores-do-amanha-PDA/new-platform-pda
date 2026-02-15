@@ -31,8 +31,8 @@ export function ColumnVisibilityDropdown<TData>({
 }: ColumnVisibilityDropdownProps<TData>) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <Button variant="outline" className="ml-auto">
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">
           Visualização
           <ChevronDown className="ml-2 h-4 w-4" />
         </Button>

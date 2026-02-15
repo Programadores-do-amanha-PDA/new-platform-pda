@@ -43,28 +43,26 @@ export function filterMetricClassroomStudents({
     enrollmentsByUserId
 }: FilterMetricClassroomStudentsProps): Profile[] {
     try {
-        if (!users) {
-            throw new Error("users parameter is required.");
-        }
-
-        if (users.length === 0) {
-            throw new Error("users array is empty.");
-        }
-
-        if (!userModes) {
-            throw new Error("userModes parameter is required.");
-        }
-
-        if (userModes.length === 0) {
-            throw new Error("userModes array is empty.");
+        // Validate required parameters
+        if (!classroomId) {
+            throw new Error("classroomId is required.");
         }
 
         if (!ruleId) {
             throw new Error("ruleId is required.");
         }
 
-        if (!classroomId) {
-            throw new Error("classroomId is required.");
+        // Early return for empty arrays - these are valid states, not errors
+        if (!users || users.length === 0) {
+            return [];
+        }
+
+        if (!userModes || userModes.length === 0) {
+            return [];
+        }
+
+        if (!enrollmentsByUserId || Object.keys(enrollmentsByUserId).length === 0) {
+            return [];
         }
         const aggregateInMetricModeIds = new Set(
             userModes
@@ -86,7 +84,15 @@ export function filterMetricClassroomStudents({
             ),
         ) as Profile[];
     } catch (error) {
-        log.error({ err: error, data: { users, classroomId, userModes, ruleId, enrollmentsByUserId }, operation: "filterMetricClassroomStudents" }, "Error filtering metric classroom students");
+        log.error({ 
+            err: error, 
+            classroomId, 
+            ruleId,
+            usersCount: users?.length ?? 0,
+            userModesCount: userModes?.length ?? 0,
+            enrollmentsByUserIdCount: Object.keys(enrollmentsByUserId ?? {}).length,
+            operation: "filterMetricClassroomStudents" 
+        }, "Error filtering metric classroom students");
         return [];
     }
 }
