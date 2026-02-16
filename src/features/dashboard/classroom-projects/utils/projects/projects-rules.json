@@ -158,5 +158,43 @@
             "Quase lá": "JS com muitos erros ou recarrega a página para qualquer ação",
             "Não entregue": "Não há como avaliar"
         }
+    },
+    "P3": {
+        "HTML e Semântica": {
+            "Maravilhoso": "HTML5 impecável, acessível e totalmente semântico; Boa organização de seções e formulários",
+            "Tudo OK": "Usa HTML5, mas com alguns deslizes de hierarquia ou uso inadequado de tags semânticas",
+            "Quase lá": "Tags genéricas (div/span) para tudo; Sem estrutura clara; Formulários mal estruturados",
+            "Não entregue": "Não há como avaliar"
+        },
+        "CSS e Layout": {
+            "Maravilhoso": "Design profissional e criativo; Uso avançado de Grid/Flex; Excelente experiência visual (UI/UX)",
+            "Tudo OK": "Layout funcional usando Flex/Grid, mas sem polimento visual; Interface básica porém utilizável",
+            "Quase lá": "Layout quebra em telas diferentes; Sem uso de Flex/Grid; Design confuso ou desorganizado",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Responsividade": {
+            "Maravilhoso": "Mobile-First perfeito. Adaptação fluida em todas as resoluções (mobile, tablet, desktop)",
+            "Tudo OK": "Funciona em mobile e desktop, mas com pequenos erros de ajuste ou espaçamento",
+            "Quase lá": "Não é responsivo ou apresenta muitas falhas no mobile",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Integração com API": {
+            "Maravilhoso": "Integração total e robusta; Trata erros de forma elegante (mensagens claras, loading states, fallbacks)",
+            "Tudo OK": "Conecta com a API e exibe os dados principais; Tratamento básico de erros (ex: Pokémon não encontrado)",
+            "Quase lá": "Não consegue buscar ou exibir dados da PokeAPI; Erros não tratados fazem a aplicação quebrar",
+            "Não entregue": "Não há como avaliar"
+        },
+        "JS e Lógica de Batalha": {
+            "Maravilhoso": "Código JS limpo, bem organizado (funções claras, nomes descritivos); Performance otimizada e sem bugs",
+            "Tudo OK": "Lógica funcional: calcula base stats corretamente e determina vencedor; Código funciona mas pode ser melhorado",
+            "Quase lá": "JS com muitos erros ou lógica de batalha incorreta; Cálculo de base stats errado ou não funciona",
+            "Não entregue": "Não há como avaliar"
+        },
+        "Manipulação do DOM e UX": {
+            "Maravilhoso": "Experiência fluida e interativa; Feedbacks visuais (loading, animações); Modal profissional e intuitiva",
+            "Tudo OK": "Atualiza o DOM dinamicamente; Modal funcional com resultado da batalha; Experiência utilizável",
+            "Quase lá": "Recarrega a página para atualizar dados; Modal mal implementada ou ausente; Experiência confusa",
+            "Não entregue": "Não há como avaliar"
+        }
     }
 }
