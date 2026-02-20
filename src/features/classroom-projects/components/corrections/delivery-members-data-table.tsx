@@ -24,12 +24,14 @@ import { getFirstLastInitials } from "@/utils/get-first-last-initials";
 import { cn } from "@/lib/utils";
 import { DeliveryMembersDataTablePropsT, DeliveryMemberT } from "../../types/deliveries/delivery-members-data-table";
 
+const EMPTY_EMAILS_SENT: string[] = [];
+
 export function DeliveryMembersDataTable({
     members,
     selectedMembers,
     onMemberSelect,
     onSelectAll,
-    emailsSent = [],
+    emailsSent = EMPTY_EMAILS_SENT,
     showStatus = false,
     disableSelection = false,
 }: DeliveryMembersDataTablePropsT) {

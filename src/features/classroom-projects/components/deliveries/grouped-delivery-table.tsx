@@ -24,12 +24,14 @@ import { ClassroomProjectType } from "../../types/projects/project";
 import { ClassroomProjectCorrection } from "../../types/corrections/corrections";
 import { ClassroomProjectDelivery } from "../../types/deliveries/delivery";
 
+const EMPTY_CORRECTIONS: ClassroomProjectCorrection[] = [];
+
 export function GroupedDeliveryTable({
     deliveries,
     projectType,
     classroomId,
     projectId,
-    corrections = [],
+    corrections = EMPTY_CORRECTIONS,
 }: {
     deliveries: ClassroomProjectDelivery[];
     projectType: ClassroomProjectType;
