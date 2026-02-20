@@ -2,7 +2,6 @@
 
 import { ReactNode, Suspense, lazy, useMemo } from "react";
 
-import AppBar from "@/components/shared/app-bar";
 import { AppSidebar } from "@/components/shared/sidebar";
 import PageLoader from "@/components/shared/page-loader";
 import NoAccessPage from "@/components/shared/empty-states/no-access-page";
@@ -13,6 +12,7 @@ import pathLabels from "@/utils/path-labels";
 import { SidebarData } from "@/components/shared/sidebar/types";
 import { useUserRoleStore } from "../../stores/user-role/user-role";
 import { useUserProfileStore } from "@/features/users/profile/store";
+import { AppBar } from "@/components/shared/app-bar";
 
 /**
  * Stack providers mapped by role with lazy loading for performance.

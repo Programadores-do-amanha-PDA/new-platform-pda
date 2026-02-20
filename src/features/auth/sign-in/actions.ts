@@ -1,6 +1,5 @@
 "use server";
 
-import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
 import { getSupabaseClient } from "@/lib/supabase/client-manager";
 import { logger } from "@/lib/logger";
 import { Session } from "@supabase/supabase-js";

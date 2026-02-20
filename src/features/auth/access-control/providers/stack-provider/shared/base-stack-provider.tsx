@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 
 import { AppSidebar } from "@/components/shared/sidebar";
 import { SidebarData } from "@/components/shared/sidebar/types";
-import AppBar from "@/components/shared/app-bar";
 import PageLoader from "@/components/shared/page-loader";
 import NoAccessPage from "@/components/shared/empty-states/no-access-page";
 
@@ -17,6 +16,7 @@ import { usePermissionsStore } from "@/features/auth/access-control/stores/permi
 import { createSidebarConfig } from "./sidebar-config-factory";
 import { generatePathLabelsByFeaturesData } from "../utils/generate-path-labels";
 import { useUserProfileStore } from "@/features/users/profile/store";
+import { AppBar } from "@/components/shared/app-bar";
 
 interface BaseStackProviderProps {
     readonly children: React.ReactNode;

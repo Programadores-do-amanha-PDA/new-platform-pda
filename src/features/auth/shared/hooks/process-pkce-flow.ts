@@ -182,7 +182,7 @@ const getRedirectPath = ({ type }: GetRedirectPathParams): string => {
         case "email_change":
             return "/dashboard?message=email_updated";
 
-        default:
+        default: {
             // Default redirect based on user role or previous page
             const previousPath = sessionStorage.getItem("previous_path");
             if (previousPath && previousPath.startsWith("/")) {
@@ -190,6 +190,7 @@ const getRedirectPath = ({ type }: GetRedirectPathParams): string => {
                 return previousPath;
             }
             return "/dashboard";
+        }
     }
 };
 
