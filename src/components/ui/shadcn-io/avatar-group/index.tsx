@@ -104,7 +104,7 @@ function AvatarStackItem({ children, index, size, className }: AvatarStackItemPr
     <div
       className={cn(
         'size-full shrink-0 overflow-hidden rounded-full',
-        '[&_[data-slot="avatar"]]:size-full',
+        '*:data-[slot="avatar"]:size-full',
         className
       )}
       style={{
