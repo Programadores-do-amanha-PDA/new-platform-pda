@@ -18,10 +18,10 @@ import { cn } from "@/lib/utils";
 import { useUserProfileStore } from "@/features/users/profile/store";
 
 interface AppBarProps {
-  pathLabels: { [key: string]: string };
+  readonly pathLabels: { [key: string]: string };
 }
 
-const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
+export const AppBar = ({ pathLabels }: Readonly<AppBarProps>) => {
   const path = usePathname();
   const segments = path.split("/").filter(Boolean);
 
@@ -94,4 +94,3 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   );
 };
 
-export default AppBar;

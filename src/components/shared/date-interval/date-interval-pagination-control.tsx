@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type JSX } from "react";
+import React, { useEffect, useState, type Dispatch, type SetStateAction, type JSX } from "react";
 import { ChevronLeft, ChevronRight, Cog, Check } from "lucide-react";
 import { DateRange } from "react-day-picker";
 
@@ -20,6 +20,7 @@ import {
 
 import DateIntervalPicker from "./date-interval-picker";
 import { DateIntervalPaginationControlPropsT, DefaultIntervalTypeT } from "./types";
+import type { ClassModules } from "@/features/classrooms/settings";
 import {
     getCurrentModule,
     calculatePreviousInterval,
@@ -29,35 +30,91 @@ import {
     getCurrentWeekRange,
 } from "./utils";
 
+interface DisplayTitleProps {
+    readonly intervalType: DefaultIntervalTypeT | undefined;
+    readonly selectedModule: string | undefined;
+    readonly modules: ClassModules[];
+    readonly dateRange: DateRange | undefined;
+    readonly handleDatePickerChange: Dispatch<SetStateAction<DateRange | undefined>>;
+}
+
+function DisplayTitle({
+    intervalType,
+    selectedModule,
+    modules,
+    dateRange,
+    handleDatePickerChange,
+}: Readonly<DisplayTitleProps>): JSX.Element {
+    if (intervalType === "modules" && selectedModule && selectedModule !== "manual") {
+        const moduleData = modules.find((m) => m.id === selectedModule);
+        return <p className="p-2 truncate max-w-52">{moduleData?.title || "Módulo"}</p>;
+    }
+
+    if ((dateRange?.from && dateRange?.to) || dateRange?.from) {
+        return (
+            <DateIntervalPicker
+                date={dateRange}
+                setDate={handleDatePickerChange}
+                buttonClassName="h-8 w-max border-0! shadow-none! rounded-none! border-x!"
+            />
+        );
+    }
+
+    return <p className="p-2 truncate">Selecione período</p>;
+}
+
 export default function DateIntervalPaginationControl({
     onDateRangeChange,
     modules = [],
     defaultInterval = "manual",
 }: DateIntervalPaginationControlPropsT): JSX.Element {
-    const [selectedModule, setSelectedModule] = useState<string>();
-    const [intervalType, setIntervalType] = useState<DefaultIntervalTypeT>();
-    const [dateRange, setDateRange] = useState<DateRange | undefined>();
+    /**
+     * Compound state object to batch multiple setState calls and prevent cascading renders.
+     */
+    const [state, setState] = useState<{
+        readonly selectedModule: string | undefined;
+        readonly intervalType: DefaultIntervalTypeT | undefined;
+        readonly dateRange: DateRange | undefined;
+    }>(() => {
+        // Initialize state synchronously based on props
+        let selectedModuleValue: string | undefined;
+        let intervalTypeValue: DefaultIntervalTypeT | undefined;
 
-    // Initialize with current module if defaultInterval is "modules"
-    useEffect((): void => {
         if (defaultInterval === "modules" && modules.length > 0) {
             const currentModuleId = getCurrentModule(modules);
             if (currentModuleId !== "manual") {
-                setSelectedModule(currentModuleId);
-                setIntervalType("modules");
+                selectedModuleValue = currentModuleId;
+                intervalTypeValue = "modules";
             } else {
-                // If no current module, use manual mode with current week
-                setSelectedModule("manual");
-                setIntervalType("manual");
+                selectedModuleValue = "manual";
+                intervalTypeValue = "manual";
             }
         } else {
-            setSelectedModule("manual");
-            setIntervalType("manual");
+            selectedModuleValue = "manual";
+            intervalTypeValue = "manual";
         }
 
-        setDateRange(getInitialDateRange(defaultInterval, modules));
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+        return {
+            selectedModule: selectedModuleValue,
+            intervalType: intervalTypeValue,
+            dateRange: getInitialDateRange(defaultInterval, modules),
+        };
+    });
+
+    const { selectedModule, intervalType, dateRange } = state;
+
+    // Setter helpers for cleaner code
+    const setSelectedModule = (value: string | undefined): void => {
+        setState((prev) => ({ ...prev, selectedModule: value }));
+    };
+
+    const setIntervalType = (value: DefaultIntervalTypeT | undefined): void => {
+        setState((prev) => ({ ...prev, intervalType: value }));
+    };
+
+    const setDateRange = (value: DateRange | undefined): void => {
+        setState((prev) => ({ ...prev, dateRange: value }));
+    };
 
     // Notify date range changes
     useEffect((): void => {
@@ -67,8 +124,7 @@ export default function DateIntervalPaginationControl({
                 to: dateRange.to,
             });
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [dateRange]);
+    }, [dateRange, onDateRangeChange]);
 
     const handlePreviousInterval = (): void => {
         const previousInterval = calculatePreviousInterval(dateRange);
@@ -121,25 +177,6 @@ export default function DateIntervalPaginationControl({
         }
     };
 
-    const DisplayTitle = (): JSX.Element => {
-        if (intervalType === "modules" && selectedModule && selectedModule !== "manual") {
-            const moduleData = modules.find((m) => m.id === selectedModule);
-            return <p className="p-2 truncate max-w-52">{moduleData?.title || "Módulo"}</p>;
-        }
-
-        if ((dateRange?.from && dateRange?.to) || dateRange?.from) {
-            return (
-                <DateIntervalPicker
-                    date={dateRange}
-                    setDate={handleDatePickerChange}
-                    buttonClassName="h-8 w-max border-0! shadow-none! rounded-none! border-x!"
-                />
-            );
-        }
-
-        return <p className="p-2 truncate">Selecione período</p>;
-    };
-
     const showNavigationControls: boolean = intervalType === "manual";
 
     return (
@@ -157,7 +194,13 @@ export default function DateIntervalPaginationControl({
                     </Button>
                 )}
 
-                <DisplayTitle />
+                <DisplayTitle
+                    intervalType={intervalType}
+                    selectedModule={selectedModule}
+                    modules={modules}
+                    dateRange={dateRange}
+                    handleDatePickerChange={handleDatePickerChange}
+                />
 
                 {showNavigationControls && (
                     <Button
