@@ -58,8 +58,8 @@ const CustomTooltip = ({
       <div className="bg-background p-4 rounded-lg shadow-lg border">
         <p className="font-semibold mb-2">{participantName}</p>
         <div className="flex flex-col gap-1">
-          {payload.map((item: TooltipPayloadItem, index: number) => (
-            <div key={index} className="flex items-center gap-2">
+          {payload.map((item: TooltipPayloadItem) => (
+            <div key={item.name} className="flex items-center gap-2">
               <span
                 className="w-3 h-3 rounded-full"
                 style={{ backgroundColor: item.color }}

@@ -31,8 +31,6 @@ export const getAttendanceAccumulator = ({
                 return accumulator;
             }
 
-            let presencePercentage = 0;
-
             if (meetingClassType.presence_calc_type === "byWeeklyMeetings") {
                 const weeklyMeetingsOfSameType = meetings.filter((m) => m.class_type === meeting.class_type);
                 const weeklyKey = `${meeting.class_type}`;
@@ -42,20 +40,25 @@ export const getAttendanceAccumulator = ({
                 }
 
                 processedWeeklyMeetings.add(weeklyKey);
-                presencePercentage = calculateWeeklyClassPresence(
+                const presencePercentage = calculateWeeklyClassPresence(
                     weeklyMeetingsOfSameType,
                     allAggregateInMetricUsers,
                 ).overallPresence;
+
+                return {
+                    totalPresencePercentage: accumulator.totalPresencePercentage + presencePercentage,
+                    count: accumulator.count + 1,
+                };
             } else if (meetingClassType.presence_calc_type === "bySingleMeeting") {
-                presencePercentage = calculateClassPresence(meeting, allAggregateInMetricUsers);
-            } else {
-                return accumulator;
+                const presencePercentage = calculateClassPresence(meeting, allAggregateInMetricUsers);
+
+                return {
+                    totalPresencePercentage: accumulator.totalPresencePercentage + presencePercentage,
+                    count: accumulator.count + 1,
+                };
             }
 
-            return {
-                totalPresencePercentage: accumulator.totalPresencePercentage + presencePercentage,
-                count: accumulator.count + 1,
-            };
+            return accumulator;
         },
         { totalPresencePercentage: 0, count: 0 } as AttendanceAccumulatorT,
     );

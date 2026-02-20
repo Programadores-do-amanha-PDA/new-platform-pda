@@ -45,16 +45,21 @@ export const calculatingProjectDeliveredPercentageByClassroomUsers = ({
     const allUsersIdsByDeliveries = new Set(deliveries.map((delivery) => delivery.user_id));
     const allMembersIdsByDeliveries = new Set(deliveries.map((delivery) => delivery.members_id).flat());
 
-    let deliveredCount = 0;
+    const deliveredCount =
+        project.project_type === "mini_project"
+            ? users.filter((user) => allUsersIdsByDeliveries.has(user.id)).length
+            : project.project_type === "end_module_english_project" || project.project_type === "end_module_project"
+              ? users.filter((user) => allUsersIdsByDeliveries.has(user.id)).length +
+                users.filter((user) => allMembersIdsByDeliveries.has(user.id)).length
+              : (() => {
+                  log.warn(
+                      { projectId: project.id, projectType: project.project_type },
+                      "Unknown project type",
+                  );
+                  return null;
+              })();
 
-    if (project.project_type === "mini_project") {
-        deliveredCount = users.filter((user) => allUsersIdsByDeliveries.has(user.id)).length;
-    } else if (project.project_type === "end_module_english_project" || project.project_type === "end_module_project") {
-        deliveredCount =
-            users.filter((user) => allUsersIdsByDeliveries.has(user.id)).length +
-            users.filter((user) => allMembersIdsByDeliveries.has(user.id)).length;
-    } else {
-        log.warn({ projectId: project.id, projectType: project.project_type }, "Unknown project type");
+    if (deliveredCount === null) {
         return null;
     }
 

@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { isWithinInterval } from "date-fns";
-import { DateRange } from "react-day-picker";
+import { useState, useMemo } from "react";
 
 import {
     ColumnFiltersState,
@@ -47,7 +45,7 @@ export default function AttendanceTable({
     }, [currentConfig]);
 
     // Create dynamic columns for meetings using custom hook
-    const {meetingColumns, handleDateRangeChange} = useAttendanceColumns({
+    const { meetingColumns, handleDateRangeChange } = useAttendanceColumns({
         allAggregateInMetricUsers,
         currentConfig,
         meetings,

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 import { getCoodeshAssessmentsByAPI } from "../api/assessments";
-import { CoodeshAssessmentPayload, CoodeshAssessmentsList } from "../types";
+import { CoodeshAssessmentPayload } from "../types";
 
 interface CoodeshAPIAssessmentState {
     apiAssessments: CoodeshAssessmentPayload[];
