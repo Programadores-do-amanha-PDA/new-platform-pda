@@ -1,5 +1,3 @@
-"use client";
-
 import { Suspense } from "react";
 import Image from "next/image";
 import BinaryGrid from "@/components/shared/binary-grid";
