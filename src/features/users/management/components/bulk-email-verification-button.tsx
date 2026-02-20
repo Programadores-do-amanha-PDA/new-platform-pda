@@ -95,8 +95,8 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
                         <div className="space-y-1 max-h-32 overflow-y-auto">
                             {selectedUsers
                                 .filter((user) => user.email)
-                                .map((user, index) => (
-                                    <div key={index} className="text-muted-foreground text-sm">
+                                .map((user) => (
+                                    <div key={user.id} className="text-muted-foreground text-sm">
                                         • {user?.full_name} ({user.email})
                                     </div>
                                 ))}

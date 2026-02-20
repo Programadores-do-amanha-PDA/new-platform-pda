@@ -2,7 +2,7 @@
 
 // Global imports
 import { Camera, Trash } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useReducer } from "react";
 import { Area, Point } from "react-easy-crop";
 import { toast } from "sonner";
 
@@ -18,18 +18,57 @@ import { ProfileAvatarPickerPropsT } from "../types/profile-avatar-picker";
 import { getCroppedImageBlob, fileToBase64 } from "../utils/avatar-utils";
 import { ProfileAvatarCropper } from "./profile-avatar-cropper";
 
+type AvatarPickerState = {
+    newProfileImage: string;
+    croppedProfileImage: File | null;
+    isCropperOpen: boolean;
+    crop: Point;
+    scale: number;
+    loading: boolean;
+};
+
+type AvatarPickerAction =
+    | { type: "SET_NEW_IMAGE"; payload: string }
+    | { type: "SET_CROPPED_IMAGE"; payload: File | null }
+    | { type: "SET_CROP"; payload: Point }
+    | { type: "SET_SCALE"; payload: number }
+    | { type: "SET_LOADING"; payload: boolean }
+    | { type: "RESET_CROPPER" };
+
+const initialState: AvatarPickerState = {
+    newProfileImage: "",
+    croppedProfileImage: null,
+    isCropperOpen: false,
+    crop: { x: 0, y: 0 },
+    scale: 1,
+    loading: false,
+};
+
+function avatarPickerReducer(state: AvatarPickerState, action: AvatarPickerAction): AvatarPickerState {
+    switch (action.type) {
+        case "SET_NEW_IMAGE":
+            return { ...state, newProfileImage: action.payload, isCropperOpen: true };
+        case "SET_CROPPED_IMAGE":
+            return { ...state, croppedProfileImage: action.payload };
+        case "SET_CROP":
+            return { ...state, crop: action.payload };
+        case "SET_SCALE":
+            return { ...state, scale: action.payload };
+        case "SET_LOADING":
+            return { ...state, loading: action.payload };
+        case "RESET_CROPPER":
+            return { ...state, isCropperOpen: false, croppedProfileImage: null, newProfileImage: "" };
+        default:
+            return state;
+    }
+}
+
 export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatarPickerPropsT): React.JSX.Element => {
-    const [newProfileImage, setNewProfileImage] = useState<string>("");
-    const [croppedProfileImage, setCroppedProfileImage] = useState<File | null>(null);
-    const [isCropperOpen, setIsCropperOpen] = useState<boolean>(false);
-    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
-    const [scale, setScale] = useState<number>(1);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [state, dispatch] = useReducer(avatarPickerReducer, initialState);
+    const { newProfileImage, croppedProfileImage, isCropperOpen, crop, scale, loading } = state;
 
     const handleCloseCropper = (): void => {
-        setIsCropperOpen(false);
-        setCroppedProfileImage(null);
-        setNewProfileImage("");
+        dispatch({ type: "RESET_CROPPER" });
     };
 
     const handleCreateProfileImage = (e: ChangeEvent<HTMLInputElement>): void => {
@@ -39,8 +78,7 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
             const reader = new FileReader();
             reader.onload = (event): void => {
                 const imageDataUrl = event.target?.result as string;
-                setNewProfileImage(imageDataUrl);
-                setIsCropperOpen(true);
+                dispatch({ type: "SET_NEW_IMAGE", payload: imageDataUrl });
             };
 
             reader.readAsDataURL(imageFile);
@@ -54,7 +92,7 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
                 const file = new File([blob], "cropped-image.png", {
                     type: "image/png",
                 });
-                setCroppedProfileImage(file);
+                dispatch({ type: "SET_CROPPED_IMAGE", payload: file });
             }
         } catch (error) {
             console.error("Error cropping image:", error);
@@ -63,7 +101,7 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
     };
 
     const handleUploadAvatar = async (): Promise<void> => {
-        setLoading(true);
+        dispatch({ type: "SET_LOADING", payload: true });
         try {
             const userId = userProfile?.id;
             if (!croppedProfileImage || !userId) {
@@ -87,13 +125,13 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
                 error instanceof Error ? error.message : "Erro ao salvar a imagem. Tente novamente mais tarde!";
             toast.error(errorMessage);
         } finally {
-            setLoading(false);
+            dispatch({ type: "SET_LOADING", payload: false });
             handleCloseCropper();
         }
     };
 
     const handleDeleteAvatar = async (): Promise<void> => {
-        setLoading(true);
+        dispatch({ type: "SET_LOADING", payload: true });
         try {
             if (!userProfile.id) {
                 throw new Error("ID do usuário é obrigatório");
@@ -113,7 +151,7 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
                 error instanceof Error ? error.message : "Erro ao remover a imagem. Tente novamente mais tarde!";
             toast.error(errorMessage);
         } finally {
-            setLoading(false);
+            dispatch({ type: "SET_LOADING", payload: false });
         }
     };
 
@@ -178,9 +216,9 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
                 loading={loading}
                 src={newProfileImage}
                 crop={crop}
-                onCropChange={setCrop}
+                onCropChange={(point) => dispatch({ type: "SET_CROP", payload: point })}
                 zoom={scale}
-                onZoomChange={setScale}
+                onZoomChange={(zoom) => dispatch({ type: "SET_SCALE", payload: zoom })}
                 onCropComplete={onCropComplete}
                 handleUploadAvatar={handleUploadAvatar}
             />

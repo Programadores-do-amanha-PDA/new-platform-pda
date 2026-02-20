@@ -111,7 +111,7 @@ export function DataTable({ data, columns, loading, headerRightOptions }: DataTa
                             [...Array(3)].map((_, rowIndex) => (
                                 <TableRow key={rowIndex}>
                                     {columns.map((_, i) => (
-                                        <TableCell key={i} className="h-12 text-center">
+                                        <TableCell key={`skeleton-col-${i}`} className="h-12 text-center">
                                             <Skeleton className="w-full h-11" />
                                         </TableCell>
                                     ))}

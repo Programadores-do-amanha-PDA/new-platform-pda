@@ -190,8 +190,8 @@ export default function BulkUsersCredentialsButton({
               <div className="space-y-1 max-h-32 overflow-y-auto">
                 {selectedUsers
                   .filter((user) => user.email)
-                  .map((user, index) => (
-                    <div key={index} className="text-muted-foreground text-sm">
+                  .map((user) => (
+                    <div key={user.id} className="text-muted-foreground text-sm">
                       • {user.full_name} ({user.email})
                     </div>
                   ))}
@@ -210,9 +210,9 @@ export default function BulkUsersCredentialsButton({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users.map((user, index) => (
+                {users.map((user) => (
                   <TableRow
-                    key={index}
+                    key={user.id}
                     className={cn(
                       user.status === "success" && "bg-green-100",
                       user.status === "error" && "bg-red-100",
@@ -243,9 +243,9 @@ export default function BulkUsersCredentialsButton({
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {enrollmentsByUserId[user.id]?.length > 0 ? (
-                          enrollmentsByUserId[user.id].map((enrollment: Enrollment, idx: number) => (
+                          enrollmentsByUserId[user.id].map((enrollment: Enrollment) => (
                             <Badge
-                              key={idx}
+                              key={`${enrollment.user_id}-${enrollment.classroom_id}`}
                               variant="secondary"
                               className="text-xs"
                             >

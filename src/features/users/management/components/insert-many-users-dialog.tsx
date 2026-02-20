@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import React, { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import generatePassword from "generate-password";
 
@@ -238,9 +238,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                     <DialogTitle>Inserir usuários via CSV</DialogTitle>
                     {stage === 0 && (
                         <>
-                            <DialogDescription>
-                                Selecione um arquivo csv para carregar os dados dos usuários
-                            </DialogDescription>
+                            <DialogDescription>Selecione um arquivo csv para carregar os dados dos usuários</DialogDescription>
                             <DialogDescription>
                                 O arquivo deve conter as colunas: <b>Nome</b>, <b>Email</b>
                             </DialogDescription>
@@ -351,7 +349,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                                 {users &&
                                     users.map((user, index) =>
                                         user.status === "success" ? (
-                                            <TableRow key={index} className={"bg-green-100!"}>
+                                            <TableRow key={user.email} className={"bg-green-100!"}>
                                                 <TableCell>{user.name}</TableCell>
                                                 <TableCell>{user.email}</TableCell>
                                                 <TableCell>{user.password}</TableCell>
@@ -378,7 +376,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                                             </TableRow>
                                         ) : (
                                             <TableRow
-                                                key={index}
+                                                key={user.email}
                                                 className={
                                                     user.status === "error"
                                                         ? "bg-red-100!"
@@ -438,9 +436,9 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                                                 <TableCell className="p-0!">
                                                     <div className="flex justify-center items-center p-2 border-r w-36 max-w-36 h-14!">
                                                         {user.userRoles?.length ? (
-                                                            user?.userRoles?.map((r, i) => (
+                                                            user?.userRoles?.map((r) => (
                                                                 <Badge
-                                                                    key={i}
+                                                                    key={r}
                                                                     variant="secondary"
                                                                     className="flex justify-between gap-2 cursor-pointer!"
                                                                     onClick={() =>
