@@ -8,6 +8,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useId,
   useRef,
   useState,
 } from "react";
@@ -35,6 +36,7 @@ type TagsContextType = {
   onOpenChange: (open: boolean) => void;
   width?: number;
   setWidth?: (width: number) => void;
+  contentId: string;
 };
 
 const TagsContext = createContext<TagsContextType>({
@@ -44,6 +46,7 @@ const TagsContext = createContext<TagsContextType>({
   onOpenChange: () => {},
   width: undefined,
   setWidth: undefined,
+  contentId: "",
 });
 
 const useTagsContext = () => {
@@ -76,6 +79,7 @@ export const Tags = ({
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const [width, setWidth] = useState<number>();
   const ref = useRef<HTMLDivElement>(null);
+  const contentId = useId();
 
   const open = controlledOpen ?? uncontrolledOpen;
   const onOpenChange = controlledOnOpenChange ?? setUncontrolledOpen;
@@ -98,7 +102,7 @@ export const Tags = ({
 
   return (
     <TagsContext.Provider
-      value={{ value, setValue, open, onOpenChange, width, setWidth }}
+      value={{ value, setValue, open, onOpenChange, width, setWidth, contentId }}
     >
       <Popover onOpenChange={onOpenChange} open={open}>
         <div className={cn("relative w-full", className)} ref={ref}>
@@ -115,19 +119,25 @@ export const TagsTrigger = ({
   className,
   children,
   ...props
-}: TagsTriggerProps) => (
-  <PopoverTrigger asChild>
-    <Button
-      className={cn("h-auto w-full justify-between p-2", className)}
-      // biome-ignore lint/a11y/useSemanticElements: "Required"
-      role="combobox"
-      variant="outline"
-      {...props}
-    >
-      <div className="flex flex-wrap items-center gap-1">{children}</div>
-    </Button>
-  </PopoverTrigger>
-);
+}: TagsTriggerProps) => {
+  const { open, contentId } = useTagsContext();
+
+  return (
+    <PopoverTrigger asChild>
+      <Button
+        className={cn("h-auto w-full justify-between p-2", className)}
+        // biome-ignore lint/a11y/useSemanticElements: "Required"
+        role="combobox"
+        variant="outline"
+        aria-expanded={open}
+        aria-controls={contentId}
+        {...props}
+      >
+        <div className="flex flex-wrap items-center gap-1">{children}</div>
+      </Button>
+    </PopoverTrigger>
+  );
+};
 
 export type TagsValueProps = ComponentProps<typeof Badge>;
 
@@ -167,10 +177,11 @@ export const TagsContent = ({
   children,
   ...props
 }: TagsContentProps) => {
-  const { width } = useTagsContext();
+  const { width, contentId } = useTagsContext();
 
   return (
     <PopoverContent
+      id={contentId}
       className={cn("p-0", className)}
       style={{ width }}
       {...props}

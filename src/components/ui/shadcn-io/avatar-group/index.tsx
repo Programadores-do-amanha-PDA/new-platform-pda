@@ -129,7 +129,7 @@ function AvatarGroupTooltip(props: AvatarGroupTooltipProps) {
 type AvatarGroupVariant = 'motion' | 'css' | 'stack';
 
 type AvatarGroupProps = Omit<React.ComponentProps<'div'>, 'translate'> & {
-  children: React.ReactElement<any>[];
+  children: React.ReactElement<Record<string, unknown>>[];
   variant?: AvatarGroupVariant;
   transition?: Transition;
   invertOverlap?: boolean;
@@ -171,7 +171,7 @@ function AvatarGroup({
           }
           return (
             <AvatarStackItem
-              key={index}
+              key={`avatar-stack-${index}`}
               index={index}
               size={size}
               className={className}
@@ -204,7 +204,7 @@ function AvatarGroup({
           if (variant === 'motion') {
             return (
               <AvatarMotionContainer
-                key={index}
+                key={`avatar-motion-${index}`}
                 zIndex={zIndex}
                 translate={translate}
                 transition={transition}
@@ -217,7 +217,7 @@ function AvatarGroup({
           
           return (
             <AvatarCSSContainer
-              key={index}
+              key={`avatar-css-${index}`}
               zIndex={zIndex}
               tooltipProps={tooltipProps}
             >
