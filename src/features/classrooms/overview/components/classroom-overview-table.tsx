@@ -12,9 +12,11 @@ interface ClassroomOverviewTableProps {
   onUserModeChange?: (studentId: string, userModeId: string) => void;
 }
 
+const EMPTY_MODULES: ClassModules[] = [];
+
 export function ClassroomOverviewTable({
   data,
-  modules = [],
+  modules = EMPTY_MODULES,
   onDateRangeChange,
   onUserModeChange,
 }: ClassroomOverviewTableProps) {

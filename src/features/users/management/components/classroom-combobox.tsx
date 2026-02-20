@@ -5,10 +5,12 @@ import { cn } from "@/lib/utils";
 import { Check, ChevronDown, Plus } from "lucide-react";
 import { useState } from "react";
 
+const EMPTY_VALUE: string[] = [];
+
 export function ClassroomCombobox({
     placeholder = "Buscar turma...",
     itens,
-    value = [],
+    value = EMPTY_VALUE,
     onChange,
 }: {
     placeholder?: string;
