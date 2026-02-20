@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,15 @@ const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeeting }) => {
     const [loading, setLoading] = useState(false);
 
     const { accounts } = useZoomAccountStore();
+
+    /**
+     * Determines if the meeting is upcoming (not yet started).
+     * Computed once and memoized to avoid calling impure `Date.now()` during render.
+     */
+    const isUpcomingMeeting = useMemo(() => {
+        if (!meeting.start_time) return false;
+        return new Date(meeting.start_time).getTime() >= new Date().getTime();
+    }, [meeting.start_time]);
 
     const handleRefresh = async () => {
         setLoading(true);
@@ -52,7 +61,7 @@ const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeeting }) => {
                     Duração:
                     <p className="font-bold">{meeting.duration} minutos</p>
                 </p>
-                {meeting.start_time && new Date(meeting.start_time).getTime() >= Date.now() && (
+                {isUpcomingMeeting && (
                     <>
                         <p className="flex gap-1 h-4 text-gray-500 text-sm">
                             ID da Reunião: <p className="font-bold">{meeting.id}</p>
@@ -62,7 +71,7 @@ const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeeting }) => {
                         </p>
                     </>
                 )}
-                {meeting.start_time && new Date(meeting.start_time).getTime() >= Date.now() && (
+                {isUpcomingMeeting && (
                     <a
                         href={meeting.join_url}
                         className="font-semibold text-primary-foreground text-sm underline"
@@ -74,7 +83,7 @@ const ZoomMeetingCard = ({ meeting }: { meeting: ZoomMeeting }) => {
                 )}
             </div>
 
-            {meeting.start_time && new Date(meeting.start_time).getTime() >= new Date().getTime() ? (
+            {isUpcomingMeeting ? (
                 !meeting.is_visible_on_schedule ? (
                     <Button className="font-semibold" disabled={loading}>
                         <CalendarPlus className="size-5" />

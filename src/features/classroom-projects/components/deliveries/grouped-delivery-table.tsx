@@ -376,7 +376,7 @@ export function GroupedDeliveryTable({
                                                                                 <div className="flex flex-wrap gap-1">
                                                                                     {delivery.links.map((link, index) => (
                                                                                         <Badge
-                                                                                            key={index}
+                                                                                            key={link}
                                                                                             variant="outline"
                                                                                             className="text-xs"
                                                                                         >

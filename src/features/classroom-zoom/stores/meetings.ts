@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { toast } from "sonner";
 
-
 import {
     getAllZoomMeetingsByClassroomId,
     getZoomMeetingById,
@@ -10,7 +9,14 @@ import {
     updateZoomMeetingById,
     deleteZoomMeetingById,
 } from "../actions/meetings";
-import { ZoomMeetingState, ZoomMeetingActions, ZoomMeetingWithPastInstancies, ZoomMeetingOccurrenceT, ZoomMeeting, ZoomMeetingActionsMeetingPickT } from "../types/meetings";
+import {
+    ZoomMeetingState,
+    ZoomMeetingActions,
+    ZoomMeetingWithPastInstancies,
+    ZoomMeetingOccurrenceT,
+    ZoomMeeting,
+    ZoomMeetingActionsMeetingPickT,
+} from "../types/meetings";
 import { validateZoomAccount, calculateVisibility, validateMeeting } from "../utils/meeting-store-utils";
 import { RECURRING_MEETING_TYPES, NON_RECURRING_MEETING_TYPES } from "../utils/meeting-utils";
 import { useZoomAPIStore } from "./api";
@@ -372,7 +378,7 @@ export const useZoomMeetingStore = create<ZoomMeetingState & ZoomMeetingActions>
                             await currentState.processNewPastInstances(meeting, account, past_instances);
                         }
                         // Update existing (and new fetched by API) instances with fresh data
-                        else if (instanciesUpdateMode === "existing" || "all") {
+                        else if (instanciesUpdateMode === "existing" || instanciesUpdateMode === "all") {
                             await currentState.updateExistingPastInstances(meeting.id!, account, past_instances);
                         }
                     }

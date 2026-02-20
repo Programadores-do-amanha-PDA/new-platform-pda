@@ -190,6 +190,6 @@ export async function getAccessToken(
         return tokenData.access_token;
     } catch (error) {
         log.error({ err: error }, "Error on oauth getting access token");
-        throw new Error("error  on Zoom authentication");
+        throw new Error("Error on Zoom authentication", { cause: error });
     }
 }

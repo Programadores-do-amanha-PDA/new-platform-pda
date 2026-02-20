@@ -302,14 +302,14 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                             selectedDelivery.members_id.length > 0 ? (
                                                 selectedDelivery?.members !== null && selectedDelivery.members?.length > 0 ? (
                                                     selectedDelivery?.members.map((m, i) => (
-                                                        <li key={i} className="flex-col p-2 first:border-t-0 w-full h-max">
+                                                        <li key={`member-${m}-${i}`} className="flex-col p-2 first:border-t-0 w-full h-max">
                                                             <p className="text-sm">{m}</p>
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    selectedDelivery?.members_id.map((m, i) => (
+                                                    selectedDelivery?.members_id.map((m) => (
                                                         <MemberListItem
-                                                            key={`delivery_member_${i}`}
+                                                            key={`delivery_member_${m}`}
                                                             memberId={m}
                                                             classroomUsers={classroomUsers}
                                                         />
@@ -326,14 +326,14 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                             selectedDelivery.members_id.length > 0 ? (
                                                 selectedDelivery?.members !== null && selectedDelivery.members?.length > 0 ? (
                                                     selectedDelivery?.members.map((m, i) => (
-                                                        <li key={i} className="flex-col p-2 first:border-t-0 w-full h-max">
+                                                        <li key={`member-${m}-${i}`} className="flex-col p-2 first:border-t-0 w-full h-max">
                                                             <p className="text-sm">{m}</p>
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    [selectedDelivery.user_id, ...selectedDelivery?.members_id].map((m, i) => (
+                                                    [selectedDelivery.user_id, ...(selectedDelivery?.members_id ?? [])].map((m) => (
                                                         <MemberListItem
-                                                            key={`delivery_member_${i}`}
+                                                            key={`delivery_member_${m}`}
                                                             memberId={m}
                                                             classroomUsers={classroomUsers}
                                                         />
@@ -352,7 +352,7 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                         <p className="font-bold text-base">Links</p>
                                         <ul className="flex flex-col items-center gap-1 px-2 py-6 w-full h-full overflow-x-hidden overflow-y-auto text-base">
                                             {selectedDelivery?.links.map((l, i) => (
-                                                <li key={i} className="p-2 w-full h-max list-decimal">
+                                                <li key={`link-${i}`} className="p-2 w-full h-max list-decimal">
                                                     <a
                                                         className="text-sm"
                                                         href={l.trim()}
@@ -606,8 +606,8 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                 <AccordionTrigger className="font-bold text-base">Mensagens Automáticas</AccordionTrigger>
                                 <AccordionContent className="overflow-hidden">
                                     <ul className="flex gap-4 pb-6 w-full overflow-x-auto">
-                                        {rulesSelected.map((item, i) => (
-                                            <Item key={i} variant="outline" className="min-w-xs h-max">
+                                        {rulesSelected.map((item) => (
+                                            <Item key={`${item.ruleL}-${item.rule}`} variant="outline" className="min-w-xs h-max">
                                                 <ItemContent>
                                                     <ItemHeader>
                                                         <ItemTitle className="font-semibold text-base">{item.ruleL}</ItemTitle>

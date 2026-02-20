@@ -390,7 +390,7 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
                                     <div className="flex flex-col space-y-2 w-full overflow-hidden">
                                         {links.map((link, index) => (
                                             <div
-                                                key={index}
+                                                key={link.url}
                                                 className="flex justify-between items-center p-2 border rounded-lg w-full truncate"
                                             >
                                                 <p className="mr-2 text-sm">{link.url}</p>

@@ -28,14 +28,14 @@ const CorrectionRuleSelector = ({
 
     return (
         <Accordion type="multiple" className="w-full rounded-xl border *:px-2">
-            {rulesLabels.map((ruleLabel, index) => {
+            {rulesLabels.map((ruleLabel) => {
                 // Buscar as regras específicas para esta categoria
                 const categoryRules = projectData[ruleLabel];
 
                 if (!categoryRules) {
                     console.error(`Categoria ${ruleLabel} não encontrada no projeto ${projectRulesId}`);
                     return (
-                        <AccordionItem key={index} value={`item-${index}`}>
+                        <AccordionItem key={ruleLabel} value={ruleLabel}>
                             <AccordionTrigger className="text-base font-bold">
                                 {ruleLabel} / Categoria não encontrada
                             </AccordionTrigger>
@@ -53,7 +53,7 @@ const CorrectionRuleSelector = ({
                 const selectedNote = selectedRule ? selectedRule.ruleNote : "Não selecionado";
 
                 return (
-                    <AccordionItem key={index} value={`item-${index}`}>
+                    <AccordionItem key={ruleLabel} value={ruleLabel}>
                         <AccordionTrigger className="text-base font-bold">
                             {ruleLabel} / {selectedNote}
                         </AccordionTrigger>

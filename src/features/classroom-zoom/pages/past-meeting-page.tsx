@@ -360,7 +360,7 @@ export default function ZoomPastMeetingPage({ currentMeeting }: { currentMeeting
                         </TabsContent>
                     )}
 
-                    {currentPollResults.length && (
+                    {currentPollResults.length > 0 && (
                         <TabsContent value="completed" className="w-full h-full overflow-hidden">
                             <MeetingDataTable columns={meetingPollResultsColumns} data={currentPollResults} />
                         </TabsContent>

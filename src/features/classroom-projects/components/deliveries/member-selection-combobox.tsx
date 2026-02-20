@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { Check, ChevronDown, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export function MemberSelectionCombobox({
 }: MemberSelectionComboboxProps) {
     const [open, setOpen] = useState(false);
     const [inputValue, setInputValue] = useState("");
+    const popoverContentId = useId();
 
     // Filter out current user from available options
     const availableUsers = users.filter((user) => user.id !== currentUserId);
@@ -75,7 +76,7 @@ export function MemberSelectionCombobox({
                 {label && <Label className="font-medium text-sm">{label}</Label>}
                 <Popover open={open} onOpenChange={setOpen} modal={true}>
                     <PopoverTrigger asChild>
-                        <Button variant="outline" role="combobox" aria-expanded={open} className="justify-between w-full">
+                        <Button variant="outline" role="combobox" aria-expanded={open} aria-controls={popoverContentId} className="justify-between w-full">
                             {selectedUsers.length === 0
                                 ? placeholder
                                 : `${selectedUsers.length} membro${
@@ -84,7 +85,7 @@ export function MemberSelectionCombobox({
                             <ChevronDown className="opacity-50 ml-2 w-4 h-4 shrink-0" />
                         </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="p-0 w-full" align="start">
+                    <PopoverContent id={popoverContentId} className="p-0 w-full" align="start">
                         <Command shouldFilter={false}>
                             <CommandInput
                                 placeholder="Buscar por nome ou email..."

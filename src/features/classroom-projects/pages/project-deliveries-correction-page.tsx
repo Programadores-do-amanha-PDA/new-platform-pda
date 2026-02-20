@@ -25,6 +25,25 @@ import RenderSquadMembers from "../components/deliveries/render-squad-members";
 import { useEnrollmentsManagementStore } from "@/features/enrollments";
 import { ClassroomProjectDelivery, GroupedDelivery } from "../types/deliveries/delivery";
 
+type GroupStatusT = "sent" | "corrected" | "partial" | "pending";
+
+interface StatusIconProps {
+    readonly status: GroupStatusT;
+}
+
+const StatusIcon = ({ status }: Readonly<StatusIconProps>) => {
+    switch (status) {
+        case "sent":
+            return <Mail className="stroke-2 stroke-blue-600 size-4" />;
+        case "corrected":
+            return <Wand className="stroke-2 stroke-green-600 size-4" />;
+        case "partial":
+            return <Clock className="stroke-2 stroke-amber-400 size-4" />;
+        default:
+            return <Clock className="stroke-2 stroke-amber-400 size-4" />;
+    }
+};
+
 export default function ProjectDeliveriesCorrectionPage() {
     const { classroom_id, project_id } = useParams<{
         classroom_id: string;
@@ -161,7 +180,7 @@ export default function ProjectDeliveriesCorrectionPage() {
     };
 
     // Função para obter o status geral de um grupo
-    const getGroupStatus = (group: GroupedDelivery) => {
+    const getGroupStatus = (group: GroupedDelivery): GroupStatusT => {
         const groupCorrections = group.deliveries
             .map((delivery) => allProjectCorrections.find((correction) => correction.delivery_id === delivery.id))
             .filter(Boolean);
@@ -171,20 +190,6 @@ export default function ProjectDeliveriesCorrectionPage() {
             return groupCorrections.every((correction) => correction?.has_feedback_sent) ? "sent" : "corrected";
         }
         return "partial";
-    };
-
-    // Função para renderizar ícone de status
-    const renderStatusIcon = (status: string) => {
-        switch (status) {
-            case "sent":
-                return <Mail className="stroke-2 stroke-blue-600 size-4" />;
-            case "corrected":
-                return <Wand className="stroke-2 stroke-green-600 size-4" />;
-            case "partial":
-                return <Clock className="stroke-2 stroke-amber-400 size-4" />;
-            default:
-                return <Clock className="stroke-2 stroke-amber-400 size-4" />;
-        }
     };
 
     // Scroll to selected group when selectedGroup changes
@@ -313,7 +318,7 @@ export default function ProjectDeliveriesCorrectionPage() {
                                                     </>
                                                 )}
                                             </div>
-                                            {renderStatusIcon(groupStatus)}
+                                            <StatusIcon status={groupStatus} />
                                         </div>
 
                                         {currentProject.project_type !== "mini_project" && group.squadMembers && (

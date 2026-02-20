@@ -140,8 +140,8 @@ const createColumns = (
                 return (
                     <div className="flex justify-start items-center p-2 border-r border-b w-full h-full">
                         {membersProfiles.length > 0 ? (
-                            membersProfiles.map((member, index) => (
-                                <Badge key={index} variant="outline" className="mr-2">
+                            membersProfiles.map((member) => (
+                                <Badge key={member.id} variant="outline" className="mr-2">
                                     {member.email || "Membro desconhecido"}
                                 </Badge>
                             ))
