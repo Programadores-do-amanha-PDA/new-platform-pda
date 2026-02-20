@@ -1,17 +1,17 @@
 /**
  * Valida endereços de email.
- * 
+ *
  * Padrão aceito:
  * - Suporta domínios com pontos e subdomínios
  * - Aceita nomes com pontos, hífens e números
  * - Valida extensões de domínio
  */
 export const REGEX_FOR_EMAIL_VALIDATION =
-  /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 /**
  * Valida senhas com requisitos de segurança.
- * 
+ *
  * Requisitos:
  * - Mínimo 7 caracteres
  * - Pelo menos uma letra minúscula
@@ -20,11 +20,11 @@ export const REGEX_FOR_EMAIL_VALIDATION =
  * - Pelo menos um caractere especial: !@#$%^&*()_+=[]{}|;:'",.<>?/~`-
  */
 export const REGEX_FOR_PASSWORD_VALIDATION =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-])[A-Za-z\d!@#$%^&*()_+=[\]{}|;:'",.<>?/~`-]{7,}$/;
 
 /**
  * Valida nomes completos.
- * 
+ *
  * Requisitos:
  * - Primeira parte com mínimo 4 caracteres
  * - Mínimo 2 partes obrigatório (ex: John Doe)

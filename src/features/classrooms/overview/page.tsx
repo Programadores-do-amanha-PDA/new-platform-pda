@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
 
 import { ClassroomOverviewTable } from "./components/classroom-overview-table";
@@ -32,10 +32,10 @@ export default function ClassroomAttendancePage() {
     const { meetings } = useZoomMeetingStore();
 
     const currentSetting: ClassroomSetting = settingsByClassroom[classroom_id];
-    const currentSettingUserModes = useMemo(() => currentSetting?.user_modes || [], [currentSetting]);
-    const modules = useMemo(() => currentSetting?.modules || [], [currentSetting?.modules]);
-    const classroomDeliveries = useMemo(() => deliveries[classroom_id] || [], [deliveries, classroom_id]);
-    const classroomCorrections = useMemo(() => corrections[classroom_id] || [], [corrections, classroom_id]);
+    const currentSettingUserModes = currentSetting?.user_modes || [];
+    const modules = currentSetting?.modules || [];
+    const classroomDeliveries = deliveries[classroom_id] || [];
+    const classroomCorrections = corrections[classroom_id] || [];
 
     // Use the custom hook to process classroom overview data
     const data = useClassroomOverviewData({
