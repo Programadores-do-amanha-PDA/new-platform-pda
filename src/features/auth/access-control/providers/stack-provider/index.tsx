@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, Suspense, lazy, useMemo } from "react";
+import { ReactNode, Suspense, lazy } from "react";
 
 import { AppSidebar } from "@/components/shared/sidebar";
 import PageLoader from "@/components/shared/page-loader";
@@ -81,10 +81,7 @@ export const StackProvider = ({ children }: StackProviderProps) => {
     const { profile } = useUserProfileStore();
     const { userRole: userRoleData } = useUserRoleStore();
 
-    // Memoize the actual role value to prevent unnecessary re-renders
-    const resolvedRole = useMemo(() => {
-        return typeof userRole === "string" ? userRole : userRoleData?.role;
-    }, [userRole, userRoleData?.role]);
+    const resolvedRole = typeof userRole === "string" ? userRole : userRoleData?.role;
 
     // Show loading state while user data is being fetched
     if (!profile || !user) {

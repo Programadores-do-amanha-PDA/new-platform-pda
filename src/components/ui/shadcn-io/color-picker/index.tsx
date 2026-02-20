@@ -11,7 +11,6 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useReducer,
   useRef,
   useState,
@@ -185,11 +184,9 @@ export const ColorPickerSelection = memo(
     const [positionY, setPositionY] = useState(0);
     const { hue, setSaturation, setLightness } = useColorPicker();
 
-    const backgroundGradient = useMemo(() => {
-      return `linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,0)),
+    const backgroundGradient = `linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,0)),
             linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0)),
             hsl(${hue}, 100%, 50%)`;
-    }, [hue]);
 
     const handlePointerMove = useCallback(
       (event: PointerEvent) => {
