@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useReducer } from "react";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
 
@@ -19,81 +19,128 @@ import FileUploadStage from "./file-upload-stage";
 import DataReviewStage from "./data-review-stage";
 import { CoodeshAssessment, CoodeshAttemptParticipantData } from "../../types";
 
+interface InsertAttemptsState {
+  readonly open: boolean;
+  readonly stage: 0 | 1;
+  readonly loading: boolean;
+  readonly resultsCsv: string | null;
+  readonly integrityCsv: string | null;
+  readonly actionPlansCsv: string | null;
+  readonly participantData: CoodeshAttemptParticipantData[];
+}
+
+type InsertAttemptsAction =
+  | { type: "OPEN_DIALOG" }
+  | { type: "CLOSE_DIALOG" }
+  | { type: "SET_RESULTS_CSV"; payload: string | null }
+  | { type: "SET_INTEGRITY_CSV"; payload: string | null }
+  | { type: "SET_ACTION_PLANS_CSV"; payload: string | null }
+  | { type: "ADVANCE_TO_REVIEW"; payload: CoodeshAttemptParticipantData[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "BACK_TO_FILE_SELECTION" };
+
+const initialState: InsertAttemptsState = {
+  open: false,
+  stage: 0,
+  loading: false,
+  resultsCsv: null,
+  integrityCsv: null,
+  actionPlansCsv: null,
+  participantData: [],
+};
+
+function insertAttemptsReducer(
+  state: InsertAttemptsState,
+  action: InsertAttemptsAction,
+): InsertAttemptsState {
+  switch (action.type) {
+    case "OPEN_DIALOG":
+      return { ...state, open: true };
+    case "CLOSE_DIALOG":
+      return initialState;
+    case "SET_RESULTS_CSV":
+      return { ...state, resultsCsv: action.payload };
+    case "SET_INTEGRITY_CSV":
+      return { ...state, integrityCsv: action.payload };
+    case "SET_ACTION_PLANS_CSV":
+      return { ...state, actionPlansCsv: action.payload };
+    case "ADVANCE_TO_REVIEW":
+      return { ...state, participantData: action.payload, stage: 1 };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "BACK_TO_FILE_SELECTION":
+      return {
+        ...state,
+        participantData: [],
+        resultsCsv: null,
+        integrityCsv: null,
+        actionPlansCsv: null,
+        stage: 0,
+      };
+    default:
+      return state;
+  }
+}
+
+interface InsertAssessmentAttemptsProps {
+  readonly assessment: CoodeshAssessment | undefined;
+  readonly updateAssessment: (
+    assessment: CoodeshAssessment,
+    assessmentData: Partial<CoodeshAssessment>,
+  ) => Promise<boolean>;
+}
+
 const InsertAssessmentAttempts = ({
   assessment,
   updateAssessment,
-}: {
-  assessment: CoodeshAssessment | undefined;
-  updateAssessment: (
-    assessment: CoodeshAssessment,
-    assessmentData: Partial<CoodeshAssessment>
-  ) => Promise<boolean>;
-}) => {
-  const [open, setOpen] = useState(false);
-  const [stage, setStage] = useState<0 | 1>(0);
-  const [loading, setLoading] = useState(false);
+}: Readonly<InsertAssessmentAttemptsProps>) => {
+  const [state, dispatch] = useReducer(insertAttemptsReducer, initialState);
+  const { open, stage, loading, resultsCsv, integrityCsv, actionPlansCsv, participantData } = state;
 
-  const [resultsCsv, setResultsCsv] = useState<string | null>(null);
-  const [integrityCsv, setIntegrityCsv] = useState<string | null>(null);
-  const [actionPlansCsv, setActionPlansCsv] = useState<string | null>(null);
-
-  const [participantData, setParticipantData] = useState<CoodeshAttemptParticipantData[]>(
-    []
-  );
+  const handleOpenChange = (isOpen: boolean) => {
+    dispatch({ type: isOpen ? "OPEN_DIALOG" : "CLOSE_DIALOG" });
+  };
 
   const handleExtractParticipantData = () => {
     if (!resultsCsv || integrityCsv === null || actionPlansCsv === null) {
       toast.error("Selecione todos os arquivos necessários.");
-      setStage(0);
-
       return;
     }
 
     const formattedParticipantsData = formatParticipantsData(
       resultsCsv,
       integrityCsv,
-      actionPlansCsv
+      actionPlansCsv,
     );
-    setParticipantData(formattedParticipantsData);
+    dispatch({ type: "ADVANCE_TO_REVIEW", payload: formattedParticipantsData });
     toast.success("Dados dos participantes extraídos com sucesso.");
-    setStage(1);
   };
 
   const handleSubmit = async () => {
-    setLoading(true);
+    dispatch({ type: "SET_LOADING", payload: true });
     try {
       if (!assessment?.id) throw new Error("CoodeshAssessmentPayload ID is missing.");
       if (!participantData) throw new Error("Participant data is missing.");
 
-      // Get the existing participant data from the assessment
       const existingParticipants = assessment.participants_data || [];
 
-      // Merge the existing data with the new data
       const mergedParticipants = participantData.map((newParticipant) => {
         const existingParticipant = existingParticipants.find(
-          (existing) => existing.email === newParticipant.email
+          (existing) => existing.email === newParticipant.email,
         );
 
-        // If the participant already exists, merge the data
         if (existingParticipant) {
           return {
             ...existingParticipant,
-            results: [
-              ...existingParticipant.results,
-              ...newParticipant.results,
-            ],
+            results: [...existingParticipant.results, ...newParticipant.results],
             integrityEvents: [
               ...existingParticipant.integrityEvents,
               ...newParticipant.integrityEvents,
             ],
-            actionPlans: [
-              ...existingParticipant.actionPlans,
-              ...newParticipant.actionPlans,
-            ],
+            actionPlans: [...existingParticipant.actionPlans, ...newParticipant.actionPlans],
           };
         }
 
-        // If the participant is new, add them to the list
         return newParticipant;
       });
 
@@ -101,46 +148,24 @@ const InsertAssessmentAttempts = ({
         ...mergedParticipants,
         ...existingParticipants.filter(
           (existing) =>
-            !participantData.some(
-              (newParticipant) => newParticipant.email === existing.email
-            )
+            !participantData.some((newParticipant) => newParticipant.email === existing.email),
         ),
       ];
 
-      await updateAssessment(assessment, {
-        participants_data: finalParticipants,
-      });
+      await updateAssessment(assessment, { participants_data: finalParticipants });
 
       toast.success("Dados dos participantes inseridos com sucesso.");
-      setLoading(false);
-      handleOpenChange(false);
+      dispatch({ type: "CLOSE_DIALOG" });
     } catch {
       toast.error(
-        "Erro ao inserir dados dos participantes. Tente novamente mais tarde!"
+        "Erro ao inserir dados dos participantes. Tente novamente mais tarde!",
       );
-      setLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   };
 
   const handleBackToFileSelection = () => {
-    setParticipantData([]);
-    setResultsCsv(null);
-    setIntegrityCsv(null);
-    setActionPlansCsv(null);
-    setStage(0);
-  };
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setResultsCsv(null);
-      setIntegrityCsv(null);
-      setActionPlansCsv(null);
-      setParticipantData([]);
-      setStage(0);
-      setLoading(false);
-    }
-
-    setOpen(open);
+    dispatch({ type: "BACK_TO_FILE_SELECTION" });
   };
 
   return (
@@ -174,9 +199,9 @@ const InsertAssessmentAttempts = ({
             resultsCsv={resultsCsv}
             integrityCsv={integrityCsv}
             actionPlansCsv={actionPlansCsv}
-            setResultsCsv={setResultsCsv}
-            setIntegrityCsv={setIntegrityCsv}
-            setActionPlansCsv={setActionPlansCsv}
+            setResultsCsv={(csv) => dispatch({ type: "SET_RESULTS_CSV", payload: csv })}
+            setIntegrityCsv={(csv) => dispatch({ type: "SET_INTEGRITY_CSV", payload: csv })}
+            setActionPlansCsv={(csv) => dispatch({ type: "SET_ACTION_PLANS_CSV", payload: csv })}
             onExtractData={handleExtractParticipantData}
           />
         ) : (
@@ -193,3 +218,4 @@ const InsertAssessmentAttempts = ({
 };
 
 export default InsertAssessmentAttempts;
+
