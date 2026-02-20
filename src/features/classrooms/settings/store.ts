@@ -179,6 +179,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                     if (!isSettingDeleted) throw new Error("no delete setting response");
 
                     set((prev) => {
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         const { [settingToDelete.classroom_id]: _, ...remainingSettingsByClassroom } = prev.settingsByClassroom;
                         return { settingsByClassroom: remainingSettingsByClassroom };
                     });
