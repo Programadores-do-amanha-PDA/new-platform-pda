@@ -33,8 +33,8 @@ const BadgeSelector = ({
           <SelectLabel>{label}</SelectLabel>
           {items
             .filter((role) => !excludeItens?.includes(role.value))
-            .map((item, i) => (
-              <SelectItem key={i} value={item.value}>
+            .map((item) => (
+              <SelectItem key={item.value} value={item.value}>
                 {item.label}
               </SelectItem>
             ))}

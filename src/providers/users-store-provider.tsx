@@ -2,8 +2,8 @@
 import { useEffect } from "react";
 
 import PageLoader from "@/components/shared/page-loader";
-import { useUsersStore } from "@/features/dashboard/shared/users/store";
-import { Role } from "@/types";
+import { useUsersStore } from "@/features/users/management";
+import { Role } from "@/features/auth/access-control/types";
 
 
 interface UsersStoreProviderProps {

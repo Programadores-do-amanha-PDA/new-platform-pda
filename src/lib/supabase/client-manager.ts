@@ -10,15 +10,11 @@ let supabaseAdminCache: Awaited<ReturnType<typeof createClientAdmin>> | null = n
  * Prevents creating multiple unnecessary instances
  * @returns {Promise<Awaited<ReturnType<typeof createClient>>>} Supabase client instance
  */
-export const getSupabaseClient = async () => {
-    try {
-        if (!supabaseClientCache) {
-            supabaseClientCache = await createClient();
-        }
-        return supabaseClientCache;
-    } catch (error) {
-        throw error;
+export const getSupabaseClient = async (): Promise<Awaited<ReturnType<typeof createClient>>> => {
+    if (!supabaseClientCache) {
+        supabaseClientCache = await createClient();
     }
+    return supabaseClientCache;
 };
 
 /**
@@ -26,15 +22,11 @@ export const getSupabaseClient = async () => {
  * Prevents creating multiple unnecessary instances
  * @returns {Promise<Awaited<ReturnType<typeof createClientAdmin>>>} Supabase admin client instance
  */
-export const getSupabaseAdminClient = async () => {
-    try {
-        if (!supabaseAdminCache) {
-            supabaseAdminCache = await createClientAdmin();
-        }
-        return supabaseAdminCache;
-    } catch (error) {
-        throw error;
+export const getSupabaseAdminClient = async (): Promise<Awaited<ReturnType<typeof createClientAdmin>>> => {
+    if (!supabaseAdminCache) {
+        supabaseAdminCache = await createClientAdmin();
     }
+    return supabaseAdminCache;
 };
 
 /**
@@ -42,7 +34,7 @@ export const getSupabaseAdminClient = async () => {
  * Useful for testing or resetting state
  * @returns {Promise<void>}
  */
-export const clearSupabaseCache = async () => {
+export const clearSupabaseCache = async (): Promise<void> => {
     supabaseClientCache = null;
     supabaseAdminCache = null;
 };

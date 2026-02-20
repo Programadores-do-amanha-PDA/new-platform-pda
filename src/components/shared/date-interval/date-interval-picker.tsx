@@ -38,7 +38,7 @@ const DateIntervalPicker: React.FC<DateIntervalPickerProps> = ({
   return (
     <div className={cn("grid gap-2", className)} {...props}>
       <Popover modal={true}>
-        <PopoverTrigger>
+        <PopoverTrigger asChild>
           <Button
             type="button"
             variant="outline"
@@ -50,7 +50,6 @@ const DateIntervalPicker: React.FC<DateIntervalPickerProps> = ({
               buttonClassName
             )}
             aria-label="Selecionar intervalo de datas"
-            aria-expanded={false}
           >
             <CalendarIcon className="mr-2 h-4 w-4" aria-hidden="true" />
             <span>{formatDateRange(date)}</span>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 
-import { AuthStoreProvider } from "@/features/shared/auth";
+import { AuthStoreProvider } from "@/features/auth/shared";
 import "@/styles/globals.css";
 
 const IBMPlexSans = IBM_Plex_Sans({

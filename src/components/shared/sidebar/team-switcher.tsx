@@ -8,7 +8,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import { TeamInfoT } from "@/types/sidebar";
+import { TeamInfoT } from "@/components/shared/sidebar/types";
 
 export default function TeamSwitcher({ team }: { team: TeamInfoT }) {
   const router = useRouter();

@@ -11,7 +11,7 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
+  useReducer,
   useRef,
   useState,
 } from "react";
@@ -25,6 +25,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+
+interface ColorPickerState {
+  hue: number;
+  saturation: number;
+  lightness: number;
+  alpha: number;
+  mode: string;
+}
+
+type ColorPickerAction =
+  | { type: "SET_HUE"; payload: number }
+  | { type: "SET_SATURATION"; payload: number }
+  | { type: "SET_LIGHTNESS"; payload: number }
+  | { type: "SET_ALPHA"; payload: number }
+  | { type: "SET_MODE"; payload: string }
+  | { type: "SET_FROM_VALUE"; payload: { r: number; g: number; b: number; a: number } };
+
+function colorPickerReducer(
+  state: ColorPickerState,
+  action: ColorPickerAction
+): ColorPickerState {
+  switch (action.type) {
+    case "SET_HUE":
+      return { ...state, hue: action.payload };
+    case "SET_SATURATION":
+      return { ...state, saturation: action.payload };
+    case "SET_LIGHTNESS":
+      return { ...state, lightness: action.payload };
+    case "SET_ALPHA":
+      return { ...state, alpha: action.payload };
+    case "SET_MODE":
+      return { ...state, mode: action.payload };
+    case "SET_FROM_VALUE":
+      return {
+        ...state,
+        hue: action.payload.r,
+        saturation: action.payload.g,
+        lightness: action.payload.b,
+        alpha: action.payload.a,
+      };
+    default:
+      return state;
+  }
+}
 
 interface ColorPickerContextValue {
   hue: number;
@@ -69,29 +113,31 @@ export const ColorPicker = ({
   const selectedColor = Color(value);
   const defaultColor = Color(defaultValue);
 
-  const [hue, setHue] = useState(
-    selectedColor.hue() || defaultColor.hue() || 0
-  );
-  const [saturation, setSaturation] = useState(
-    selectedColor.saturationl() || defaultColor.saturationl() || 100
-  );
-  const [lightness, setLightness] = useState(
-    selectedColor.lightness() || defaultColor.lightness() || 50
-  );
-  const [alpha, setAlpha] = useState(
-    selectedColor.alpha() * 100 || defaultColor.alpha() * 100
-  );
-  const [mode, setMode] = useState("hex");
+  const [state, dispatch] = useReducer(colorPickerReducer, {
+    hue: selectedColor.hue() || defaultColor.hue() || 0,
+    saturation: selectedColor.saturationl() || defaultColor.saturationl() || 100,
+    lightness: selectedColor.lightness() || defaultColor.lightness() || 50,
+    alpha: selectedColor.alpha() * 100 || defaultColor.alpha() * 100,
+    mode: "hex",
+  });
+
+  const { hue, saturation, lightness, alpha, mode } = state;
+
+  const setHue = useCallback((payload: number) => dispatch({ type: "SET_HUE", payload }), []);
+  const setSaturation = useCallback((payload: number) => dispatch({ type: "SET_SATURATION", payload }), []);
+  const setLightness = useCallback((payload: number) => dispatch({ type: "SET_LIGHTNESS", payload }), []);
+  const setAlpha = useCallback((payload: number) => dispatch({ type: "SET_ALPHA", payload }), []);
+  const setMode = useCallback((payload: string) => dispatch({ type: "SET_MODE", payload }), []);
 
   // Update color when controlled value changes
   useEffect(() => {
     if (value) {
       const color = Color.rgb(value).rgb().object();
 
-      setHue(color.r);
-      setSaturation(color.g);
-      setLightness(color.b);
-      setAlpha(color.a);
+      dispatch({
+        type: "SET_FROM_VALUE",
+        payload: { r: color.r, g: color.g, b: color.b, a: color.a },
+      });
     }
   }, [value]);
 
@@ -138,11 +184,9 @@ export const ColorPickerSelection = memo(
     const [positionY, setPositionY] = useState(0);
     const { hue, setSaturation, setLightness } = useColorPicker();
 
-    const backgroundGradient = useMemo(() => {
-      return `linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,0)),
+    const backgroundGradient = `linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,0)),
             linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0)),
             hsl(${hue}, 100%, 50%)`;
-    }, [hue]);
 
     const handlePointerMove = useCallback(
       (event: PointerEvent) => {
@@ -404,7 +448,7 @@ export const ColorPickerFormat = ({
               index && "rounded-l-none",
               className
             )}
-            key={index}
+            key={`rgb-${index}`}
             readOnly
             type="text"
             value={value}
@@ -455,7 +499,7 @@ export const ColorPickerFormat = ({
               index && "rounded-l-none",
               className
             )}
-            key={index}
+            key={`hsl-${index}`}
             readOnly
             type="text"
             value={value}

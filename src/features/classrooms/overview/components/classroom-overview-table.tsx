@@ -1,0 +1,36 @@
+"use client";
+
+import { ClassroomOverviewData } from "@/features/classrooms/overview/types";
+import { DataTable } from "./data-table";
+import { createColumns } from "./columns";
+import { ClassModules } from "../../settings";
+
+interface ClassroomOverviewTableProps {
+  data: ClassroomOverviewData;
+  modules?: ClassModules[];
+  onDateRangeChange?: (dateRange: { from: Date; to: Date }) => void;
+  onUserModeChange?: (studentId: string, userModeId: string) => void;
+}
+
+const EMPTY_MODULES: ClassModules[] = [];
+
+export function ClassroomOverviewTable({
+  data,
+  modules = EMPTY_MODULES,
+  onDateRangeChange,
+  onUserModeChange,
+}: ClassroomOverviewTableProps) {
+  const columns = createColumns(data, onUserModeChange);
+
+  return (
+    <div className="flex flex-col gap-4 h-full">
+      <DataTable
+        columns={columns}
+        data={data.students}
+        fullData={data}
+        onDateRangeChange={onDateRangeChange}
+        modules={modules}
+      />
+    </div>
+  );
+}

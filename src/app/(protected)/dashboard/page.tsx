@@ -1,6 +1,6 @@
 "use client";
-import AdminHomePage from "@/features/dashboard/home-page/admin/page";
-import { useAuth } from "@/features/shared/auth";
+import AdminHomePage from "@/features/dashboard-home/admin/page";
+import { useAuth } from "@/features/auth/shared";
 
 const Page = () => {
   const { user, userRole } = useAuth();

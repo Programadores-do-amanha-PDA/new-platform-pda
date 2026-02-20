@@ -1,6 +1,6 @@
 import { DateRange } from "react-day-picker";
 import { Locale } from "date-fns";
-import { ClassModules } from "@/features/dashboard/classrooms/classroom/settings";
+import { ClassModules } from "@/features/classrooms/settings";
 
 /**
  * Props interface for the DateIntervalPicker component

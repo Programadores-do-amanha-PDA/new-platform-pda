@@ -3,7 +3,6 @@ import { Fragment } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { useAuth } from "@/features/shared/auth";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
@@ -16,17 +15,18 @@ import {
 } from "@/components/ui/breadcrumb";
 
 import { cn } from "@/lib/utils";
+import { useUserProfileStore } from "@/features/users/profile/store";
 
 interface AppBarProps {
-  pathLabels: { [key: string]: string };
+  readonly pathLabels: { [key: string]: string };
 }
 
-const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
+export const AppBar = ({ pathLabels }: Readonly<AppBarProps>) => {
   const path = usePathname();
   const segments = path.split("/").filter(Boolean);
 
   const parts = segments.slice(1);
-  const { user } = useAuth();
+  const { profile } = useUserProfileStore();
 
   const breadcrumbItems = parts.reduce(
     (acc, part, index) => {
@@ -43,7 +43,7 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
     [
       {
         label: "Inicio",
-        title: `Olá ${user?.profile?.full_name.split(" ", 1)[0]} 👋🏿`,
+        title: `Olá ${profile?.full_name?.split(" ", 1)[0] || "usuário"} 👋🏿`,
         href: `/dashboard`,
       },
     ]
@@ -94,4 +94,3 @@ const AppBar: React.FC<AppBarProps> = ({ pathLabels }) => {
   );
 };
 
-export default AppBar;

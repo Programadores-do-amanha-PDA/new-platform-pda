@@ -1,0 +1,22 @@
+export interface ClassroomProjectCorrectionRulesSelected {
+  rule: string;
+  ruleL: string;
+  ruleNote: number;
+}
+
+export interface ClassroomProjectCorrection {
+  id: string;
+  classroom_id: string;
+  project_id: string;
+  delivery_id: string;
+  rules_selected: ClassroomProjectCorrectionRulesSelected[];
+  improvements_itens: string[];
+  hits_itens: string[];
+  next_itens: string[];
+  final_considerations: string;
+  final_note: string;
+  teacher_email: string;
+  teacher_id: string;
+  has_feedback_sent?: boolean;
+  created_at: string;
+}
