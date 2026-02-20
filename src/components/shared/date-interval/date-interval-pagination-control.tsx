@@ -63,9 +63,11 @@ function DisplayTitle({
     return <p className="p-2 truncate">Selecione período</p>;
 }
 
+const EMPTY_MODULES: ClassModules[] = [];
+
 export default function DateIntervalPaginationControl({
     onDateRangeChange,
-    modules = [],
+    modules = EMPTY_MODULES,
     defaultInterval = "manual",
 }: DateIntervalPaginationControlPropsT): JSX.Element {
     /**
