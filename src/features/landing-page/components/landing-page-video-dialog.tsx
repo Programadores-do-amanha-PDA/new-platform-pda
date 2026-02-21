@@ -17,11 +17,10 @@ export const LandingPageVideoDialog = () => {
                     className="w-full aspect-video h-auto rounded-lg"
                     src="https://www.youtube.com/embed/I5FkKeaT-2c?si=OQMELJSjOe-x0M1k"
                     title="Conheça a Programadores do Amanhã"
-                    frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"
                     allowFullScreen
-                ></iframe>
+                />
             </DialogContent>
         </Dialog>
     );

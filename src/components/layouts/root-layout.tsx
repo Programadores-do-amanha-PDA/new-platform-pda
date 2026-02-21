@@ -35,7 +35,9 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="pt-BR" className="flex w-full h-full">
-            <body className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} ${delaGothicOne.variable} antialiased`}>
+            <body
+                className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} ${delaGothicOne.variable} antialiased`}
+            >
                 <AuthStoreProvider>
                     <main className="flex w-full h-full overflow-hidden">{children}</main>
                 </AuthStoreProvider>

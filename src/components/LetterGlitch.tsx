@@ -1,5 +1,31 @@
 import { useRef, useEffect } from 'react';
 
+/**
+ * A React component that renders an animated glitch effect with randomly changing characters and colors on a canvas.
+ * 
+ * @component
+ * @example
+ * return (
+ *   <LetterGlitch
+ *     glitchColors={['#2b4539', '#61dca3', '#61b3dc']}
+ *     glitchSpeed={50}
+ *     centerVignette={false}
+ *     outerVignette={true}
+ *     smooth={true}
+ *     characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+ *   />
+ * )
+ * 
+ * @param {Object} props - The component props
+ * @param {string[]} [props.glitchColors=['#2b4539', '#61dca3', '#61b3dc']] - Array of hex color codes used for the glitch character colors
+ * @param {number} [props.glitchSpeed=50] - Time in milliseconds between character and color updates
+ * @param {boolean} [props.centerVignette=false] - Whether to display a center vignette gradient overlay
+ * @param {boolean} [props.outerVignette=true] - Whether to display an outer vignette gradient overlay
+ * @param {boolean} [props.smooth=true] - Whether to smooth color transitions between glitch updates
+ * @param {string} [props.characters='ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'] - String of characters to randomly select from for the glitch effect
+ * 
+ * @returns {JSX.Element} A canvas-based animated glitch effect with optional vignette overlays
+ */
 const LetterGlitch = ({
   glitchColors = ['#2b4539', '#61dca3', '#61b3dc'],
   glitchSpeed = 50,

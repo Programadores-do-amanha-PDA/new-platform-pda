@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
 import { useState, useEffect } from "react";
@@ -48,8 +48,10 @@ function CardRotate({ children, onSendToBack, sensitivity, disableDrag = false }
     );
 }
 
-function randomRotationNumber() {
-    return Math.random() * 10 - 5;
+function getDeterministicRotation(cardId: number) {
+    const seed = Math.sin(cardId * 12.9898) * 43758.5453;
+    const normalized = seed - Math.floor(seed);
+    return normalized * 10 - 5;
 }
 
 interface StackProps {
@@ -59,12 +61,32 @@ interface StackProps {
     cards?: React.ReactNode[];
     animationConfig?: { stiffness: number; damping: number };
     autoplay?: boolean;
-    autoplayDelay?: number;
+    readonly autoplayDelay?: number;
     pauseOnHover?: boolean;
     mobileClickOnly?: boolean;
     mobileBreakpoint?: number;
 }
 
+/**
+ * A component that renders a stack of draggable cards with animation support.
+ * Cards can be rotated, scaled, and reordered with smooth spring animations.
+ *
+ * @component
+ * @param {Object} props - The component props
+ * @param {boolean} [props.randomRotation=false] - Whether to apply deterministic random rotation to cards
+ * @param {number} [props.sensitivity=200] - Drag sensitivity for card interactions
+ * @param {React.ReactNode[]} [props.cards=[]] - Array of card content to render
+ * @param {Object} [props.animationConfig={stiffness: 260, damping: 20}] - Spring animation configuration
+ * @param {number} props.animationConfig.stiffness - Spring stiffness value for animations
+ * @param {number} props.animationConfig.damping - Spring damping value for animations
+ * @param {boolean} [props.sendToBackOnClick=false] - Whether clicking a card sends it to the back of the stack
+ * @param {boolean} [props.autoplay=false] - Whether to automatically rotate cards
+ * @param {number} [props.autoplayDelay=3000] - Delay in milliseconds between autoplay rotations
+ * @param {boolean} [props.pauseOnHover=false] - Whether to pause autoplay when hovering over the stack
+ * @param {boolean} [props.mobileClickOnly=false] - Whether to disable drag on mobile and allow click-only interactions
+ * @param {number} [props.mobileBreakpoint=768] - Pixel width threshold for mobile detection
+ * @returns {React.ReactElement} A perspective-transformed container with animated draggable cards
+ */
 export default function Stack({
     randomRotation = false,
     sensitivity = 200,
@@ -128,7 +150,7 @@ export default function Stack({
             onMouseLeave={() => pauseOnHover && setIsPaused(false)}
         >
             {stack.map((card, index) => {
-                const randomRotate = randomRotation ? randomRotationNumber() : 0;
+                const randomRotate = randomRotation ? getDeterministicRotation(card.id) : 0;
                 return (
                     <CardRotate
                         key={card.id}
@@ -139,6 +161,7 @@ export default function Stack({
                         <motion.div
                             className="rounded-2xl overflow-hidden w-full h-full"
                             onClick={() => shouldEnableClick && sendToBack(card.id)}
+                            suppressHydrationWarning
                             animate={{
                                 rotateZ: (stack.length - index - 1) * 4 + randomRotate,
                                 scale: 1 + index * 0.06 - stack.length * 0.06,

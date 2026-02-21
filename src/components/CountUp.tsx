@@ -2,18 +2,41 @@ import { useInView, useMotionValue, useSpring } from 'motion/react';
 import { useCallback, useEffect, useRef } from 'react';
 
 interface CountUpProps {
-  to: number;
-  from?: number;
-  direction?: 'up' | 'down';
-  delay?: number;
-  duration?: number;
-  className?: string;
-  startWhen?: boolean;
-  separator?: string;
-  onStart?: () => void;
-  onEnd?: () => void;
+  readonly to: number;
+  readonly from?: number;
+  readonly direction?: 'up' | 'down';
+  readonly delay?: number;
+  readonly duration?: number;
+  readonly className?: string;
+  readonly startWhen?: boolean;
+  readonly separator?: string;
+  readonly onStart?: () => void;
+  readonly onEnd?: () => void;
 }
 
+/**
+ * CountUp Component
+ * 
+ * Animates a numeric value from one number to another using spring physics.
+ * The animation triggers when the component enters the viewport.
+ * 
+ * @component
+ * @example
+ * <CountUp to={100} from={0} duration={2} />
+ * 
+ * @param {Object} props - The component props
+ * @param {number} props.to - The target number to count up/down to
+ * @param {number} [props.from=0] - The starting number
+ * @param {'up' | 'down'} [props.direction='up'] - Count direction
+ * @param {number} [props.delay=0] - Delay before animation starts in seconds
+ * @param {number} [props.duration=2] - Animation duration in seconds
+ * @param {string} [props.className=''] - CSS class name for the span element
+ * @param {boolean} [props.startWhen=true] - Whether to start animation when in view
+ * @param {string} [props.separator=''] - Thousands separator character (e.g., '.' or ',')
+ * @param {() => void} [props.onStart] - Callback fired when animation starts
+ * @param {() => void} [props.onEnd] - Callback fired when animation ends
+ * @returns {JSX.Element} A span element displaying the animated count
+ */
 export default function CountUp({
   to,
   from = 0,
