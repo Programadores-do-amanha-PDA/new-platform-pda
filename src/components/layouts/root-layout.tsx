@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono, Dela_Gothic_One } from "next/font/google";
-import { Toaster } from "sonner";
+import { Toaster } from "sileo";
 
 import { AuthStoreProvider } from "@/features/auth/shared";
 import "@/styles/globals.css";
@@ -41,7 +41,7 @@ export default function RootLayout({
                 <AuthStoreProvider>
                     <main className="flex w-full h-full overflow-hidden">{children}</main>
                 </AuthStoreProvider>
-                <Toaster closeButton={true} expand richColors visibleToasts={9} />
+                <Toaster />
             </body>
         </html>
     );

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Color, { ColorLike } from "color";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Info, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 
+import { logger } from "@/lib/logger";
 import { useClassroomSettingStore } from "../../store";
 import { ClassTypes, ClassTypesFormData } from "../../types";
 import { ClassTypesSchema } from "../../utils/class-types-schemas";
@@ -27,6 +28,8 @@ interface ClassTypeFormDialogProps {
     onSuccess?: () => void;
     trigger?: React.ReactNode;
 }
+
+const log = logger.child({ module: "ClassTypeFormDialog" });
 
 export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuccess, trigger }: ClassTypeFormDialogProps) => {
     const [open, setOpen] = useState(false);
@@ -196,7 +199,10 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
             // Get current classroom config
             const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
             if (!currentConfig) {
-                toast.error("Configuração não encontrada!");
+                sileo.error({
+                    title: "Erro ao salvar tipo de aula",
+                    description: "A configuração da turma não foi encontrada!",
+                });
                 return;
             }
 
@@ -244,15 +250,26 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
             });
 
             if (result) {
-                toast.success(isEditing ? "Tipo de aula atualizado com sucesso!" : "Tipo de aula criado com sucesso!");
+                sileo.success({
+                    title: isEditing ? "Tipo atualizado com sucesso!" : "Tipo criado com sucesso!",
+                    description: isEditing
+                        ? "O tipo de aula foi atualizado com sucesso!"
+                        : "O tipo de aula foi criado com sucesso!",
+                });
                 onSuccess?.();
                 handleOpenChange(false);
             } else {
-                toast.error("Erro ao salvar tipo de aula");
+                sileo.error({
+                    title: "Erro ao salvar tipo de aula",
+                    description: "Ocorreu um erro ao salvar o tipo de aula.",
+                });
             }
         } catch (error) {
-            console.error("Error saving class type:", error);
-            toast.error("Erro ao salvar tipo de aula");
+            log.error({ err: error, operation: "saveClassType" }, "Error saving class type");
+            sileo.error({
+                title: "Erro ao salvar tipo de aula",
+                description: "Ocorreu um erro ao salvar o tipo de aula.",
+            });
         } finally {
             setIsSubmitting(false);
         }
