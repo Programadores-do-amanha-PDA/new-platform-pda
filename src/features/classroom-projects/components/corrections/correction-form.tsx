@@ -301,16 +301,19 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                             {(selectedDelivery?.members !== null && selectedDelivery.members?.length > 0) ||
                                             selectedDelivery.members_id.length > 0 ? (
                                                 selectedDelivery?.members !== null && selectedDelivery.members?.length > 0 ? (
-                                                    selectedDelivery?.members.map((m, i) => (
-                                                        <li key={`member-${m}-${i}`} className="flex-col p-2 first:border-t-0 w-full h-max">
-                                                            <p className="text-sm">{m}</p>
+                                                    selectedDelivery?.members.map((member) => (
+                                                        <li
+                                                            key={`member-${member}`}
+                                                            className="flex-col p-2 first:border-t-0 w-full h-max"
+                                                        >
+                                                            <p className="text-sm">{member}</p>
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    selectedDelivery?.members_id.map((m) => (
+                                                    selectedDelivery?.members_id.map((memberId) => (
                                                         <MemberListItem
-                                                            key={`delivery_member_${m}`}
-                                                            memberId={m}
+                                                            key={`delivery_member_${memberId}`}
+                                                            memberId={memberId}
                                                             classroomUsers={classroomUsers}
                                                         />
                                                     ))
@@ -325,19 +328,24 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                             {(selectedDelivery?.members !== null && selectedDelivery.members?.length > 0) ||
                                             selectedDelivery.members_id.length > 0 ? (
                                                 selectedDelivery?.members !== null && selectedDelivery.members?.length > 0 ? (
-                                                    selectedDelivery?.members.map((m, i) => (
-                                                        <li key={`member-${m}-${i}`} className="flex-col p-2 first:border-t-0 w-full h-max">
-                                                            <p className="text-sm">{m}</p>
+                                                    selectedDelivery?.members.map((memberEmail) => (
+                                                        <li
+                                                            key={`member-${memberEmail}`}
+                                                            className="flex-col p-2 first:border-t-0 w-full h-max"
+                                                        >
+                                                            <p className="text-sm">{memberEmail}</p>
                                                         </li>
                                                     ))
                                                 ) : (
-                                                    [selectedDelivery.user_id, ...(selectedDelivery?.members_id ?? [])].map((m) => (
-                                                        <MemberListItem
-                                                            key={`delivery_member_${m}`}
-                                                            memberId={m}
-                                                            classroomUsers={classroomUsers}
-                                                        />
-                                                    ))
+                                                    [selectedDelivery.user_id, ...(selectedDelivery?.members_id ?? [])].map(
+                                                        (memberId) => (
+                                                            <MemberListItem
+                                                                key={`delivery_member_${memberId}`}
+                                                                memberId={memberId}
+                                                                classroomUsers={classroomUsers}
+                                                            />
+                                                        ),
+                                                    )
                                                 )
                                             ) : (
                                                 <div>Nenhum membro encontrado</div>
@@ -351,15 +359,15 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                     <div className="flex flex-col w-full h-max">
                                         <p className="font-bold text-base">Links</p>
                                         <ul className="flex flex-col items-center gap-1 px-2 py-6 w-full h-full overflow-x-hidden overflow-y-auto text-base">
-                                            {selectedDelivery?.links.map((l, i) => (
+                                            {selectedDelivery?.links.map((link, i) => (
                                                 <li key={`link-${i}`} className="p-2 w-full h-max list-decimal">
                                                     <a
                                                         className="text-sm"
-                                                        href={l.trim()}
+                                                        href={link.trim()}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
-                                                        {l}
+                                                        {link}
                                                     </a>
                                                 </li>
                                             ))}
@@ -607,7 +615,11 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                                 <AccordionContent className="overflow-hidden">
                                     <ul className="flex gap-4 pb-6 w-full overflow-x-auto">
                                         {rulesSelected.map((item) => (
-                                            <Item key={`${item.ruleL}-${item.rule}`} variant="outline" className="min-w-xs h-max">
+                                            <Item
+                                                key={`${item.ruleL}-${item.rule}`}
+                                                variant="outline"
+                                                className="min-w-xs h-max"
+                                            >
                                                 <ItemContent>
                                                     <ItemHeader>
                                                         <ItemTitle className="font-semibold text-base">{item.ruleL}</ItemTitle>

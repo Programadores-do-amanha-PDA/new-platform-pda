@@ -29,6 +29,7 @@ import { useClassroomSettingStore } from "@/features/classrooms/settings";
 import { Profile } from "@/features/users/profile/types/profile";
 import { ZoomMeeting } from "@/features/classroom-zoom/types/meetings";
 import { ZoomMeetingPastInstance } from "@/features/classroom-zoom/types/past-instances";
+import { getFirstLastInitials } from "@/utils";
 
 interface PollResultsTableProps {
     allVisibleUsers: Profile[];
@@ -76,13 +77,7 @@ export const usersColumns: ColumnDef<Profile>[] = [
             return (
                 <div className="flex flex-row justify-start items-center gap-2 bg-background group-hover/row:bg-muted/50! px-2 border-r border-b w-full min-h-[57px]">
                     <Avatar>
-                        <AvatarFallback>
-                            {user.full_name
-                                .split(" ")
-                                .filter((_, i) => i < 2)
-                                .map((word) => word[0].toUpperCase())
-                                .join("") || "U"}
-                        </AvatarFallback>
+                        <AvatarFallback>{getFirstLastInitials(user.full_name) || "US"}</AvatarFallback>
                         <AvatarImage src={user.avatar_url || ""} />
                     </Avatar>
                     <div className="flex flex-col justify-center w-full truncate lowercase">

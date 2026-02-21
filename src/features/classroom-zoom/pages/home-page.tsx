@@ -70,11 +70,20 @@ export default function ZoomHomePage() {
                     };
                 }) || [];
 
+        const seenMeetings = new Set<string>();
+
         return [...pastInstanciesData, ...pastMeetingsData]
             .flat()
-            .filter(
-                (i, index, arr) => arr.findIndex((item) => item.account_id === i.account_id && item.date === i.date) === index,
-            )
+            .filter((meeting) => {
+                const meetingKey = `${meeting.account_id ?? ""}::${meeting.date ?? ""}`;
+
+                if (seenMeetings.has(meetingKey)) {
+                    return false;
+                }
+
+                seenMeetings.add(meetingKey);
+                return true;
+            })
             .sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
     };
 

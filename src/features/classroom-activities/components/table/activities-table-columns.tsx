@@ -6,6 +6,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Profile } from "@/features/users/profile/types/profile";
+import { getFirstLastInitials } from "@/utils";
 
 export const usersColumns: ColumnDef<Profile>[] = [
     {
@@ -43,13 +44,7 @@ export const usersColumns: ColumnDef<Profile>[] = [
             return (
                 <div className="flex flex-row justify-start items-center gap-2 bg-background group-hover/row:bg-muted/50! px-2 border-r border-b w-full h-[57px]">
                     <Avatar>
-                        <AvatarFallback>
-                            {user.full_name
-                                .split(" ")
-                                .filter((_, i) => i < 2)
-                                .map((word) => word[0].toUpperCase())
-                                .join("") || "U"}
-                        </AvatarFallback>
+                        <AvatarFallback>{getFirstLastInitials(user.full_name) || "US"}</AvatarFallback>
                         <AvatarImage src={user.avatar_url || ""} />
                     </Avatar>
                     <div className="flex flex-col justify-center w-full truncate lowercase">

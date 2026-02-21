@@ -139,8 +139,8 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
                                 </SelectItem>
                                 <SelectGroup>
                                     <SelectLabel>Contas Zoom</SelectLabel>
-                                    {classroomZoomAccounts.map((account, i) => (
-                                        <SelectItem key={`zoom-account-key-${i}`} value={account.id}>
+                                    {classroomZoomAccounts.map((account) => (
+                                        <SelectItem key={`zoom-account-key-${account.id}`} value={account.id}>
                                             {account.me?.display_name || account.me?.email}
                                         </SelectItem>
                                     ))}
@@ -153,7 +153,7 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
                         <ul className="flex flex-col gap-4 p-2 h-full overflow-y-auto">
                             {filteredMeetings.map((meeting: ZoomMeeting) => (
                                 <MeetingsSheetDataItem
-                                    key={meeting.uuid}
+                                    key={`zoom-meeting-key-${meeting.uuid}`}
                                     meeting={meeting}
                                     isAddingMeeting={isAddingMeeting}
                                     handleAddMeeting={handleAddMeeting}
