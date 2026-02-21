@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ColumnDef } from "@tanstack/react-table";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import {
     ArrowDown,
     ArrowUp,
@@ -17,7 +17,6 @@ import {
     RotateCw,
     Siren,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -30,8 +29,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
+import { cn } from "@/lib/utils";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import PastInstancieDialog from "../components/meetings/meeting/past-instancie-dialog";
 import { useZoomAccountStore } from "../stores/accounts";
@@ -40,10 +40,10 @@ import { useZoomMeetingPastInstanceStore } from "../stores/past-instances";
 import { ZoomMeetingOccurrenceT, ZoomMeeting, ZoomMeetingParticipant } from "../types/meetings";
 import { ZoomMeetingPastInstance } from "../types/past-instances";
 
-type MeetingOccurrence = ZoomMeetingOccurrenceT & {
+interface MeetingOccurrence extends ZoomMeetingOccurrenceT {
     topic: string | undefined;
     meeting_id: string | null;
-};
+}
 
 type MeetingPastInstance = ZoomMeetingPastInstance & {
     topic: string | undefined;
@@ -507,7 +507,10 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
 
             await refreshAndAddOnlyNewPastInstances(currentMeeting, account);
         } catch {
-            toast.error("Erro ao atualizar a reunião!");
+            sileo.error({
+                title: "Erro ao atualizar a reunião",
+                description: "Ocorreu um erro ao atualizar a reunião. Tente novamente mais tarde.",
+            });
         } finally {
             setIsRefreshingNewMeetingData(false);
         }
@@ -524,7 +527,10 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
 
             await refreshAndUpdateMeeting(currentMeeting, account);
         } catch {
-            toast.error("Erro ao atualizar a reunião!");
+            sileo.error({
+                title: "Erro ao atualizar a reunião",
+                description: "Ocorreu um erro ao atualizar a reunião. Tente novamente mais tarde.",
+            });
         } finally {
             setIsRefreshingAllMeetingData(false);
         }
@@ -534,7 +540,10 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
         () => async (instanceId: string, uuid: string) => {
             const account = accounts.find((account) => account.id === currentMeeting.account_id);
             if (!account) {
-                toast.error("Conta não encontrada!");
+                sileo.error({
+                    title: "Conta não encontrada",
+                    description: "Não foi possível encontrar a conta associada à reunião.",
+                });
                 return;
             }
 
@@ -546,7 +555,13 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
     const handleOpenDialog = useMemo(
         () => (instancieId: string) => {
             const instancie = pastInstances.find((p) => p.id === instancieId);
-            if (!instancie) return toast.error("Instância não encontrada!");
+            if (!instancie) {
+                sileo.error({
+                    title: "Instância não encontrada",
+                    description: "Não foi possível encontrar a instância associada à reunião.",
+                });
+                return;
+            }
             setSelectedInstancie(instancie);
             setIsDialogOpen(true);
         },

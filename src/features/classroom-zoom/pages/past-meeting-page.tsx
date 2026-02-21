@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDownIcon, FolderX, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -222,7 +222,10 @@ export default function ZoomPastMeetingPage({ currentMeeting }: { currentMeeting
 
             setIsUpdating(false);
         } catch {
-            toast.error("Erro ao atualizar a reunião!");
+            sileo.error({
+                title: "Erro ao atualizar a reunião",
+                description: "Ocorreu um erro ao atualizar a reunião. Tente novamente mais tarde.",
+            });
             setIsUpdating(false);
         }
     };

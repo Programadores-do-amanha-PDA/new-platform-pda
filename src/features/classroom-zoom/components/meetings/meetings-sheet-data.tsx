@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { ArrowUpLeft, LoaderCircle, Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -97,8 +98,15 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
         setIsAddingMeeting(meeting.id);
         const account = classroomZoomAccounts.find((account) => account.id === meeting.account_id);
         if (!account) return;
-        toast.info("Pegando informações da reunião...");
-        await createMeeting(account, meeting);
+
+        await sileo.promise(createMeeting(account, meeting), {
+            loading: { title: "Pegando informações da reunião..." },
+            success: { title: "Reunião adicionada!", description: "A reunião foi adicionada com sucesso." },
+            error: {
+                title: "Erro ao adicionar reunião",
+                description: "Ocorreu um erro ao adicionar a reunião. Tente novamente mais tarde.",
+            },
+        });
         setIsAddingMeeting(null);
     };
 
