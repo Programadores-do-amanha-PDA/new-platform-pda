@@ -16,7 +16,7 @@ export const generateSidebarConfig = (userProfile: Profile, classrooms: Classroo
             name: "Administrador",
             logo: () => (
                 <Avatar className="size-8">
-                    <AvatarImage src="/assets/logos/symbol-white-background.png" />
+                    <AvatarImage src="/logos/symbol-white-background.png" />
                     <AvatarFallback>PdA</AvatarFallback>
                 </Avatar>
             ),

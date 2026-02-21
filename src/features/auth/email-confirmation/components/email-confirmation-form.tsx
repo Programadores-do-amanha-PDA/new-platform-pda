@@ -19,7 +19,7 @@ import { resendEmailSignupConfirmation } from "../actions";
 import { EmailConfirmationFormSchema } from "../types";
 import { emailConfirmationSchema } from "../utils";
 
-const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
+const SYMBOL_PATH = "/logos/symbol-white-background.png";
 
 export const EmailConfirmationForm = () => {
     const searchParams = useSearchParams();

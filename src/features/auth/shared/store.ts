@@ -197,7 +197,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 useUserProfileStore.getState().reset();
                 useUserRoleStore.getState().reset();
                 useUserEnrollmentsStore.getState().reset();
-                set(initialState);
+                set({ ...initialState, loading: false });
             },
         }),
         { name: "AuthStore" },

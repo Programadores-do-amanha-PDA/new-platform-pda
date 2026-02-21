@@ -23,7 +23,7 @@ export const generateNoAccessSidebarConfig = (userProfile: Profile, userRole?: U
             name: getUserRoleLabel(),
             logo: () => (
                 <Avatar className="size-8">
-                    <AvatarImage src="/assets/logos/symbol-white-background.png" />
+                    <AvatarImage src="/logos/symbol-white-background.png" />
                     <AvatarFallback>PdA</AvatarFallback>
                 </Avatar>
             ),

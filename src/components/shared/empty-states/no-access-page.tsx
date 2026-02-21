@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 
-const  NO_ACCESS_IMAGE_PATH = "/assets/images/empty/no-access.png";
+const  NO_ACCESS_IMAGE_PATH = "/empty/no-access.png";
 
 const NoAccessPage = () => {
   return (

@@ -46,7 +46,7 @@ type SetSessionResult =
       }
     | {
           readonly session: null;
-          readonly error: string;
+          readonly error: string | null;
       };
 
 /**
@@ -110,11 +110,13 @@ export const getSession = async (): Promise<SetSessionResult> => {
         } = await supabase.auth.getSession();
         if (error) throw error;
 
-        if (!session) throw new Error("No session returned");
+        if (!session) {
+            return { session: null, error: null };
+        }
 
         return { session, error: null };
     } catch (error) {
-        log.error({ err: serializeError(error), operation: "getSession" }, "Error fetching session");
+        log.warn({ err: serializeError(error), operation: "getSession" }, "Error fetching session");
         return {
             session: null,
             error: error instanceof Error || error instanceof AuthError ? error.message : "unknown error",
