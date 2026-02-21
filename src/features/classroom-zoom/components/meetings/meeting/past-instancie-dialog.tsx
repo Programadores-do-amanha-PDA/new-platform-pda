@@ -264,7 +264,7 @@ function ParticipantsTable({ data }: ParticipantsTableProps) {
     });
 
     return (
-        <div className="flex border rounded-lg w-full h-full !overflow-hidden">
+        <div className="flex border rounded-lg w-full h-full overflow-hidden!">
             <Table>
                 <TableHeader className="top-0 z-10 sticky bg-muted p-0!">
                     {table.getHeaderGroups().map((headerGroup) => (
@@ -393,7 +393,7 @@ const PastInstancieDialog = ({
 
     return (
         <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent className="flex flex-col p-0 w-max !min-w-[50vw] !max-w-[90vw] h-full !min-h-[50vh] !max-h-[90vh] overflow-hidden">
+            <DialogContent className="flex flex-col p-0 w-max min-w-[50vw]! max-w-[90vw]! h-full min-h-[50vh]! max-h-[90vh]! overflow-hidden">
                 <DialogHeader className="p-6 pt-12">
                     <div className="flex justify-between items-center">
                         <DialogTitle>

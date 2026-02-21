@@ -18,13 +18,16 @@ export default function AuthStoreProvider({ children }: { children: React.ReactN
         fetchSession();
     }, []);
 
+    /** Public routes that should not redirect authenticated users. */
+    const isPublicLanding = path === "/";
+
     useEffect(() => {
         if (!loading && !session && path.startsWith("/dashboard")) {
             redirect("/sign-in");
-        } else if (!loading && session && !path.startsWith("/dashboard")) {
+        } else if (!loading && session && !path.startsWith("/dashboard") && !isPublicLanding) {
             redirect("/dashboard");
         }
-    }, [loading, session, path]);
+    }, [loading, session, path, isPublicLanding]);
 
     if (loading) {
         return <PageLoader />;

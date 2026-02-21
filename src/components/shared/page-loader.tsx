@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
+const SYMBOL_PATH = "/logos/symbol-white-background.png";
 
 const PageLoader = () => {
     return (

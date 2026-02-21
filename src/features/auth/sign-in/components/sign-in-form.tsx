@@ -22,7 +22,7 @@ interface SignInFormSchema {
     password: string;
 }
 
-const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
+const SYMBOL_PATH = "/logos/symbol-white-background.png";
 
 export const SignInForm = () => {
     const router = useRouter();

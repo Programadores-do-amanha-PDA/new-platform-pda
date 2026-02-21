@@ -20,7 +20,7 @@ import { SetNewPasswordSchema } from "../types";
 import { setNewPasswordSchema } from "../utils";
 import { AuthError } from "@supabase/supabase-js";
 
-const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
+const SYMBOL_PATH = "/logos/symbol-white-background.png";
 
 const log = logger.child({ module: "SetNewPassword" });
 

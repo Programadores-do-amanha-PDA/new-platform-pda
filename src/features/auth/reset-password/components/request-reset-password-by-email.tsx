@@ -22,7 +22,7 @@ import { requestResetPasswordByEmailSchema } from "../utils";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ module: "RequestResetPasswordForm" });
-const SYMBOL_PATH = "/assets/logos/symbol-white-background.png";
+const SYMBOL_PATH = "/logos/symbol-white-background.png";
 
 export const RequestResetPasswordByEmail = () => {
     const { handleRequestResetPassword } = useAuth();
