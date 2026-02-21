@@ -1,33 +1,36 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Trash2, Link as LinkIcon, Loader2, CheckCircle, AlertCircleIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-
-import { MemberSelectionCombobox } from "../deliveries/member-selection-combobox";
-import { useUsersStore } from "@/features/users/management";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useClassroomProjectDeliveriesStore } from "../../stores/deliveries";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { urlRegex } from "../../utils/deliveries/regex";
+
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useUsersStore } from "@/features/users/management";
+import { useUserProfileStore } from "@/features/users/profile/store";
 import { useEnrollmentsManagementStore } from "@/features/enrollments";
 import { useClassroomSettingStore } from "@/features/classrooms/settings";
-import { useUserProfileStore } from "@/features/users/profile/store";
-import { ClassroomProjectDelivery } from "../../types/deliveries/delivery";
-import { ClassroomProject } from "../../types/projects/project";
+import { MemberSelectionCombobox } from "../deliveries/member-selection-combobox";
+import { useClassroomProjectDeliveriesStore } from "../../stores/deliveries";
+import { urlRegex } from "../../utils/deliveries/regex";
 import { projectTypesLabels } from "../../utils/projects";
+import { ClassroomProject } from "../../types/projects/project";
+import { ClassroomProjectDelivery } from "../../types/deliveries/delivery";
 
-type LinkType = {
+const log = logger.child({ module: "ProjectDeliveryModal" });
+
+interface LinkType {
     url: string;
-};
+}
 
 interface ProjectDeliveryModalProps {
     project: ClassroomProject;
@@ -37,6 +40,44 @@ interface ProjectDeliveryModalProps {
     currentDelivery?: ClassroomProjectDelivery;
 }
 
+/**
+ * A modal component for managing project deliveries in a classroom setting.
+ *
+ * Handles both creation and updating of project deliveries, with support for:
+ * - Squad member selection (for team-based projects)
+ * - Project link attachments with URL validation
+ * - Optional observations/notes
+ * - Bilingual support (Portuguese/English)
+ * - Mobile-responsive dialog layout
+ *
+ * @component
+ * @param {ProjectDeliveryModalProps} props - Component props
+ * @param {Project} props.project - The project to deliver
+ * @param {string} props.classroomId - The classroom identifier
+ * @param {boolean} props.isOpen - Controls modal visibility
+ * @param {() => void} props.onClose - Callback to close the modal
+ * @param {Delivery | undefined} props.currentDelivery - Existing delivery for editing (undefined for new deliveries)
+ *
+ * @returns {ReactNode} A Dialog component containing the delivery form or success message
+ *
+ * @remarks
+ * - For end module projects, at least one team member selection is mandatory
+ * - All deliveries require at least one project link
+ * - Only the assigned delivery author can submit/update the delivery
+ * - Success state displays a confirmation message before closing
+ * - Form state resets when modal opens or when currentDelivery changes
+ *
+ * @example
+ * ```tsx
+ * <ProjectDeliveryModal
+ *   project={projectData}
+ *   classroomId="cls_123"
+ *   isOpen={isModalOpen}
+ *   onClose={() => setIsModalOpen(false)}
+ *   currentDelivery={existingDelivery}
+ * />
+ * ```
+ */
 const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDelivery }: ProjectDeliveryModalProps) => {
     const { profile } = useUserProfileStore();
     const { createDelivery, updateDelivery } = useClassroomProjectDeliveriesStore();
@@ -88,16 +129,27 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
         if (urlRegex.test(url)) {
             setLinks([...links, { url: url }]);
             setUrl("");
-            toast.success("Link anexado com sucesso!");
+            sileo.success({
+                title: "Link anexado com sucesso!",
+                description: `O link "${url}" foi anexado com sucesso!`,
+                position: "top-right",
+            });
         } else {
-            toast.error("Link inválido! Por favor, insira um link válido!");
+            sileo.error({
+                title: "Link inválido!",
+                description: "Por favor, insira um link válido!",
+                position: "top-right",
+            });
         }
     };
 
     const handleRemoveLink = (index: number) => {
         if (index < links.length) {
             setLinks(links.filter((_, i) => i !== index));
-            toast.success("Link removido com sucesso!");
+            sileo.success({
+                title: "Link removido com sucesso!",
+                position: "top-right",
+            });
         }
     };
 
@@ -113,20 +165,31 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
 
         // Validations
         if (project.project_type === "end_module_project" && !currentDelivery) {
-            toast.error("Selecione sua Squad!");
+            sileo.error({
+                title: "Selecione sua Squad!",
+                position: "top-right",
+            });
             scrollToRef(squadRef);
             return;
         }
 
         // Para projetos finais, pelo menos um membro é obrigatório
         if (project.project_type === "end_module_project" && selectedMemberIds.length === 0) {
-            toast.error("Selecione pelo menos um membro da equipe!");
+            sileo.error({
+                title: "Erro ao selecionar membros!",
+                description: "Por favor, selecione pelo menos um membro da equipe.",
+                position: "top-right",
+            });
             scrollToRef(membersRef);
             return;
         }
 
         if (links.length === 0) {
-            toast.error("Adicione pelo menos um Link!");
+            sileo.error({
+                title: "Erro ao adicionar links!",
+                description: "Por favor, anexe pelo menos um link do seu projeto para realizar a entrega.",
+                position: "top-right",
+            });
             scrollToRef(linksRef);
             return;
         }
@@ -157,8 +220,15 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
                 setIsProjectDelivered(true);
             }
         } catch (error) {
-            console.error(`Error ${currentDelivery ? "updating" : "creating"} delivery:`, error);
-            toast.error(`Erro ao ${currentDelivery ? "atualizar" : "criar"} entrega. Tente novamente.`);
+            log.error(
+                { err: error, operation: currentDelivery ? "update_project_delivery" : "create_project_delivery" },
+                "Error submitting project delivery",
+            );
+            sileo.error({
+                title: "Erro ao entregar projeto!",
+                description: `Erro ao ${currentDelivery ? "atualizar" : "criar"} entrega`,
+                position: "top-right",
+            });
         } finally {
             setIsLoading(false);
         }

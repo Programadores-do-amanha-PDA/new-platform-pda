@@ -6,9 +6,8 @@ import { LoaderCircle, Pen, Plus, AlertCircle } from "lucide-react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateRange } from "react-day-picker";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 
-// Local imports
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,6 +20,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+import { logger } from "@/lib/logger";
 import { DateTimeRangePicker } from "@/components/shared/date-time-range-picker";
 import ProjectModuleSelect from "./project-module-select";
 import ProjectTypeSelect from "./project-type-select";
@@ -29,6 +30,8 @@ import { useClassroomProjectStore } from "../../stores";
 import { ClassroomProjectModuleT, ClassroomProjectType } from "../../types/projects/project";
 import { ProjectDialogPropsT, ProjectFormSchemaT } from "../../types/projects/project-dialog";
 import { createProjectSchema, getDefaultFormValues, getResetFormValues, handleProjectSubmission } from "../../utils/projects";
+
+const log = logger.child({ module: "ProjectDialog" });
 
 /**
  * ProjectDialog component for creating and editing classroom projects
@@ -71,9 +74,12 @@ const ProjectDialog = ({ classroom_id, currentProject }: ProjectDialogPropsT): J
             await handleProjectSubmission(formData, classroom_id, currentProject, createProject, updateProject);
             handleOpenChange(false);
         } catch (error) {
-            // Error is already handled in handleProjectSubmission with toast
+            // Error is already handled in handleProjectSubmission with sileo
             // Additional client-side validation errors can be handled here
-            console.error("Form submission error:", error);
+            log.error(
+                { err: error, operation: currentProject?.id ? "update_project" : "create_project" },
+                "Error submitting project form",
+            );
         } finally {
             setLoading(false);
         }
@@ -84,14 +90,19 @@ const ProjectDialog = ({ classroom_id, currentProject }: ProjectDialogPropsT): J
      * @param errors - Form validation errors from react-hook-form
      */
     const handleFormError = (errors: FieldErrors<ProjectFormSchemaT>): void => {
-        console.error("Form validation errors:", errors);
-
-        // Display a general validation error toast if there are multiple errors
+        log.warn({ errors, operation: "project_form_validation" }, "Project form validation errors");
         const errorCount = Object.keys(errors).length;
+
         if (errorCount > 1) {
-            toast.error(`Por favor, corrija os ${errorCount} erros no formulário.`);
+            sileo.error({
+                title: "Erros no formulário",
+                description: `Por favor, corrija os ${errorCount} erros no formulário.`,
+            });
         } else if (errorCount === 1) {
-            toast.error("Por favor, corrija o erro no formulário.");
+            sileo.error({
+                title: "Erro no formulário",
+                description: "Por favor, corrija o erro no formulário.",
+            });
         }
     };
 

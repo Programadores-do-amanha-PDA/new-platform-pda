@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { LoaderCircle } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Label } from "@/components/ui/label";
 import { Item, ItemContent, ItemDescription, ItemHeader, ItemTitle } from "@/components/ui/item";
 
+import { logger } from "@/lib/logger";
 import { useAuth } from "@/features/auth/shared";
 import { useClassroomProjectCorrectionsStore } from "../../stores/corrections";
 import CorrectionRuleSelector from "./correction-rule-selector";
@@ -25,6 +26,8 @@ import { correctionFormSchema } from "../../utils/corrections";
 import { PROJECTS_RULES, PROJECTS_RULES_FEEDBACKS } from "../../utils/projects";
 import { CorrectionFormPropsT, CorrectionFormT } from "../../types/corrections/correction-form";
 import { ClassroomProjectCorrection, ClassroomProjectCorrectionRulesSelected } from "../../types/corrections/corrections";
+
+const log = logger.child({ module: "CorrectionForm" });
 
 const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }: CorrectionFormPropsT) => {
     const [loading, setLoading] = useState(false);
@@ -189,7 +192,11 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
 
     const onSubmit = async (data: CorrectionFormT) => {
         if (data.rulesSelected.length !== rulesLabels.length) {
-            toast.error(`É preciso selecionar uma regra de cada Métrica! (${data.rulesSelected.length}/${rulesLabels.length})`);
+            sileo.error({
+                title: "Erro ao salvar correção",
+                description: `É preciso selecionar uma regra de cada Métrica! (${data.rulesSelected.length}/${rulesLabels.length})`,
+                position: "top-right",
+            });
             return;
         }
 
@@ -222,8 +229,12 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                         selectedDelivery.classroom_id,
                     );
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao salvar correção");
+                    log.error({ err: error, operation: "create_correction" }, "Error creating correction");
+                    sileo.error({
+                        title: "Erro ao salvar correção",
+                        description: "Ocorreu um erro ao processar a solicitação. Tente novamente mais tarde!",
+                        position: "top-right",
+                    });
                 } finally {
                     setLoading(false);
                 }
@@ -237,11 +248,19 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                 if (Object.keys(changedFields).length > 0) {
                     await updateCorrection(currentCorrection.id, changedFields, selectedDelivery?.classroom_id || classroomId);
                 } else {
-                    toast.info("Nenhuma alteração detectada");
+                    sileo.info({
+                        title: "Nenhuma alteração detectada",
+                        description: "Não foram feitas alterações na correção.",
+                        position: "top-right",
+                    });
                 }
             } catch (error) {
-                console.error(error);
-                toast.error("Erro ao atualizar correção");
+                log.error({ err: error, operation: "update_correction" }, "Error updating correction");
+                sileo.error({
+                    title: "Erro ao atualizar correção",
+                    description: "Ocorreu um erro ao processar a solicitação. Tente novamente mais tarde!",
+                    position: "top-right",
+                });
             } finally {
                 setLoading(false);
             }
