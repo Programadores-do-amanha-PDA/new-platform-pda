@@ -4,28 +4,30 @@
 import { Camera, Trash } from "lucide-react";
 import { ChangeEvent, useReducer } from "react";
 import { Area, Point } from "react-easy-crop";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-
 import { deleteUserAvatar, updateUserAvatar, uploadUserAvatar } from "@/features/users/profile/actions/profile-avatar";
 import { getFirstLastInitials } from "@/utils/get-first-last-initials";
 import { ProfileAvatarPickerPropsT } from "../types/profile-avatar-picker";
 import { getCroppedImageBlob, fileToBase64 } from "../utils/avatar-utils";
 import { ProfileAvatarCropper } from "./profile-avatar-cropper";
+import { logger } from "@/lib/logger";
 
-type AvatarPickerState = {
+interface AvatarPickerState {
     newProfileImage: string;
     croppedProfileImage: File | null;
     isCropperOpen: boolean;
     crop: Point;
     scale: number;
     loading: boolean;
-};
+}
+
+const log = logger.child({ module: "ProfileAvatarPicker" });
 
 type AvatarPickerAction =
     | { type: "SET_NEW_IMAGE"; payload: string }
@@ -95,8 +97,12 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
                 dispatch({ type: "SET_CROPPED_IMAGE", payload: file });
             }
         } catch (error) {
-            console.error("Error cropping image:", error);
-            toast.error("Erro ao processar a imagem. Tente novamente.");
+            log.error({ err: error, operation: "crop_image" }, "Error cropping image");
+            sileo.error({
+                title: "Erro ao processar a imagem",
+                description: "Tente novamente.",
+                position: "top-right",
+            });
         }
     };
 
@@ -112,18 +118,27 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
 
             if (userProfile?.avatar_url) {
                 await updateUserAvatar(userId, base64Image);
-                toast.success("Imagem de perfil atualizada com sucesso!");
+                sileo.success({
+                    title: "Imagem de perfil atualizada com sucesso!",
+                    position: "top-right",
+                });
             } else {
                 await uploadUserAvatar(userId, base64Image);
-                toast.success("Imagem de perfil adicionada com sucesso!");
+                sileo.success({
+                    title: "Imagem de perfil adicionada com sucesso!",
+                    position: "top-right",
+                });
             }
 
             onUpdateUser();
         } catch (error) {
-            console.error("Error uploading avatar:", error);
+            log.error({ err: error, operation: "upload_avatar" }, "Error uploading avatar");
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao salvar a imagem. Tente novamente mais tarde!";
-            toast.error(errorMessage);
+            sileo.error({
+                title: errorMessage,
+                position: "top-right",
+            });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
             handleCloseCropper();
@@ -144,12 +159,18 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
             }
 
             onUpdateUser();
-            toast.success("Imagem de perfil removida com sucesso!");
+            sileo.success({
+                title: "Imagem de perfil removida com sucesso!",
+                position: "top-right",
+            });
         } catch (error) {
-            console.error("Error deleting avatar:", error);
+            log.error({ err: error, operation: "delete_avatar" }, "Error deleting avatar");
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao remover a imagem. Tente novamente mais tarde!";
-            toast.error(errorMessage);
+            sileo.error({
+                title: errorMessage,
+                position: "top-right",
+            });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
         }

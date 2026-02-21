@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Color, { ColorLike } from "color";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -15,6 +15,7 @@ import ColorPickerDropdown from "@/components/shared/color-picker-dropdown";
 import { useClassroomSettingStore } from "../../store";
 import { SettingJustification } from "../../types";
 import { JustificationFormData, JustificationFormSchema } from "../../utils/justification-form-schema";
+import { logger } from "@/lib/logger";
 
 interface JustificationFormDialogProps {
     configId: string;
@@ -22,6 +23,8 @@ interface JustificationFormDialogProps {
     trigger?: React.ReactNode;
     onClose?: () => void;
 }
+
+const log = logger.child({ module: "JustificationFormDialog" });
 
 export const JustificationFormDialog = ({ configId, currentJustification, trigger, onClose }: JustificationFormDialogProps) => {
     const [open, setOpen] = useState(false);
@@ -95,7 +98,10 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
             const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
 
             if (!currentConfig) {
-                toast.error("Configuração não encontrada!");
+                sileo.error({
+                    title: "Erro ao salvar justificativa",
+                    description: "A configuração não foi encontrada!",
+                });
                 setLoading(false);
                 return;
             }
@@ -134,13 +140,22 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
 
             if (success) {
                 handleClose();
-                toast.success(isEditing ? "Justificativa atualizada com sucesso!" : "Justificativa criada com sucesso!");
+                sileo.success({
+                    title: isEditing ? "Justificativa atualizada" : "Justificativa criada",
+                    description: isEditing ? "Justificativa atualizada com sucesso!" : "Justificativa criada com sucesso!",
+                });
             } else {
-                toast.error("Erro ao salvar justificativa!");
+                sileo.error({
+                    title: "Erro ao salvar justificativa",
+                    description: "Ocorreu um erro ao salvar a justificativa!",
+                });
             }
         } catch (error) {
-            console.error("Error saving justification:", error);
-            toast.error("Erro ao salvar justificativa!");
+            log.error({ err: error, operation: "saveJustification" }, "Error saving justification");
+            sileo.error({
+                title: "Erro ao salvar justificativa",
+                description: "Ocorreu um erro ao salvar a justificativa!",
+            });
         } finally {
             setLoading(false);
         }
@@ -236,4 +251,3 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
         </Dialog>
     );
 };
-

@@ -13,13 +13,16 @@ import {
 import { sendPasswordResetToMultipleUsers } from "@/features/auth/shared/actions";
 import { Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { Profile } from "../../profile/types/profile";
+import { logger } from "@/lib/logger";
 
 interface BulkPasswordResetButtonProps {
     selectedUsers: Profile[];
     onComplete?: () => void;
 }
+
+const log = logger.child({ module: "BulkPasswordResetButton" });
 
 export default function BulkPasswordResetButton({ selectedUsers, onComplete }: BulkPasswordResetButtonProps) {
     const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +30,10 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
 
     const handleSendPasswordReset = async () => {
         if (selectedUsers.length === 0) {
-            toast.error("Nenhum usuário selecionado");
+            sileo.error({
+                title: "Nenhum usuário selecionado",
+                description: "Por favor, selecione pelo menos um usuário para enviar o email de redefinição de senha.",
+            });
             return;
         }
 
@@ -37,7 +43,10 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
             const emails = selectedUsers.map((user) => user.email).filter(Boolean) as string[];
 
             if (emails.length === 0) {
-                toast.error("Nenhum email válido encontrado nos usuários selecionados");
+                sileo.error({
+                    title: "Nenhum email válido encontrado",
+                    description: "Nenhum email válido encontrado nos usuários selecionados",
+                });
                 return;
             }
 
@@ -49,16 +58,25 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
             const { successful, failed, total } = results;
 
             if (failed.length === 0) {
-                toast.success(`Email de redefinição enviado para ${successful} usuário(s) com sucesso!`);
+                sileo.success({
+                    title: "Email de redefinição enviado",
+                    description: `Email de redefinição enviado para ${successful} usuário(s) com sucesso!`,
+                });
             } else {
-                toast.warning(`${successful} emails enviados com sucesso, ${failed} falharam de ${total} total`);
+                sileo.warning({
+                    title: "Erro ao enviar emails de redefinição",
+                    description: `${successful} emails enviados com sucesso, ${failed} falharam de ${total} total`,
+                });
             }
 
             setIsOpen(false);
             onComplete?.();
         } catch (error) {
-            console.error("Error sending password reset emails:", error);
-            toast.error("Erro inesperado ao enviar emails de redefinição");
+            log.error({ err: error, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset emails");
+            sileo.error({
+                title: "Erro inesperado",
+                description: "Erro inesperado ao enviar emails de redefinição",
+            });
         } finally {
             setIsLoading(false);
         }

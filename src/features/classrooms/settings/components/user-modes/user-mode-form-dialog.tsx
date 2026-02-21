@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, type JSX } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import { ColorLike } from "color";
 import { Eye, EyeOff, Percent, Slash } from "lucide-react";
 
@@ -22,8 +22,16 @@ import pathLabels from "@/utils/path-labels";
 import { useClassroomSettingStore } from "../../store";
 import { UserModeFormDialogProps } from "../../types";
 import { getAllFeaturesRules } from "../../utils/feature-rules";
-import { getDefaultUserModeFormValues, processColorValue, createUserModeFromFormData, updateUserModesArray } from "../../utils/user-mode-form-utils";
+import {
+    getDefaultUserModeFormValues,
+    processColorValue,
+    createUserModeFromFormData,
+    updateUserModesArray,
+} from "../../utils/user-mode-form-utils";
 import { UserModeFormSchemaT, UserModeFormSchema } from "../../utils/user-mode-validation";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ module: "UserModeFormDialog" });
 
 /**
  * UserModeFormDialog component for creating and editing user modes
@@ -90,7 +98,10 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
             const currentConfig = Object.values(settingsByClassroom)?.find((config) => config.id === configId);
 
             if (!currentConfig) {
-                toast.error("Configuração não encontrada!");
+                sileo.error({
+                    title: "Erro ao salvar modo de usuário",
+                    description: "A configuração não foi encontrada!",
+                });
                 return;
             }
 
@@ -107,13 +118,22 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
 
             if (success) {
                 handleOpenChange(false);
-                toast.success(isEditing ? "Modo de usuário atualizado com sucesso!" : "Modo de usuário criado com sucesso!");
+                sileo.success({
+                    title: isEditing ? "Modo de usuário atualizado" : "Modo de usuário criado",
+                    description: isEditing ? "Modo de usuário atualizado com sucesso!" : "Modo de usuário criado com sucesso!",
+                });
             } else {
-                toast.error("Erro ao salvar modo de usuário!");
+                sileo.error({
+                    title: "Erro ao salvar modo de usuário",
+                    description: "Ocorreu um erro ao salvar o modo de usuário!",
+                });
             }
         } catch (error) {
-            console.error("Error saving user mode:", error);
-            toast.error("Erro ao salvar modo de usuário!");
+            log.error({ err: error, operation: "saveUserMode" }, "Error saving user mode");
+            sileo.error({
+                title: "Erro ao salvar modo de usuário",
+                description: "Ocorreu um erro ao salvar o modo de usuário!",
+            });
         } finally {
             setLoading(false);
         }
