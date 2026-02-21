@@ -35,7 +35,7 @@
   --sidebar-border: oklch(0.9067 0 0);
   --sidebar-ring: oklch(0.6793 0.1389 91.8660);
   --destructive-foreground: oklch(1.0000 0 0);
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-IBM-plex-sans), "IBM Plex Sans", sans-serif;
   --font-serif: serif;
   --font-mono: Roboto Mono, monospace;
   --shadow-color: #000000;
@@ -91,7 +91,7 @@
   --sidebar-ring: oklch(0.8806 0.1836 103.7865);
   --destructive-foreground: oklch(1.0000 0 0);
   --radius: 0.975rem;
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-IBM-plex-sans), "IBM Plex Sans", sans-serif;
   --font-serif: serif;
   --font-mono: Roboto Mono, monospace;
   --shadow-color: #000000;
@@ -182,7 +182,7 @@
 
 @layer utilities {
   body {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: var(--font-IBM-plex-sans), "IBM Plex Sans", sans-serif;
   }
 }
 
@@ -226,9 +226,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: Inter, sans-serif;
+  --font-sans: var(--font-IBM-plex-sans), "IBM Plex Sans", sans-serif;
   --font-mono: Roboto Mono, monospace;
   --font-serif: serif;
+  --font-dela-gothic: var(--font-dela-gothic), sans-serif;
   --radius: 0.975rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
