@@ -1,27 +1,9 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono, Dela_Gothic_One } from "next/font/google";
 import { Toaster } from "sileo";
 
-import { AuthStoreProvider } from "@/features/auth/shared";
+import { IBMPlexSans, IBMPlexMono, delaGothicOne } from "@/utils/fonts";
 import "@/styles/globals.css";
-
-const IBMPlexSans = IBM_Plex_Sans({
-    subsets: ["latin"],
-    variable: "--font-IBM-plex-sans",
-    weight: ["100", "200", "300", "400", "500", "600", "700"],
-});
-
-const IBMPlexMono = IBM_Plex_Mono({
-    subsets: ["latin"],
-    variable: "--font-IBM-plex-mono",
-    weight: ["100", "200", "300", "400", "500", "600", "700"],
-});
-
-const delaGothicOne = Dela_Gothic_One({
-    subsets: ["latin"],
-    variable: "--font-dela-gothic",
-    weight: "400",
-});
+import { AuthStoreProvider } from "@/features/auth/shared";
 
 export const metadata: Metadata = {
     title: "Plataforma PdA",
