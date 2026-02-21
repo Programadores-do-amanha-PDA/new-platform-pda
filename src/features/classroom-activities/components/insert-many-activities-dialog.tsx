@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import { Upload } from "lucide-react";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,11 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                     console.error("Error in parsing file:", error);
                     setStage(0);
                     setStudents([]);
-                    toast.error("Erro ao processar arquivo CSV");
+                    sileo.error({
+                        title: "Erro ao processar CSV",
+                        description: "Ocorreu um erro ao processar o arquivo CSV. Verifique o formato e tente novamente.",
+                        position: "top-right",
+                    });
                 },
             });
         } else {
@@ -84,7 +88,11 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                         status: "success",
                     })),
                 );
-                toast.success(`Atividade criada com ${students.length} participantes!`);
+                sileo.success({
+                    title: "Atividade criada com sucesso!",
+                    description: `Atividade criada com ${students.length} participantes!`,
+                    position: "top-right",
+                });
             } else {
                 throw new Error("Failed to create activity");
             }
@@ -96,7 +104,11 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                     status: "error",
                 })),
             );
-            toast.error("Erro ao criar atividade! Tente novamente mais tarde.");
+            sileo.error({
+                title: "Erro ao criar atividade",
+                description: "Ocorreu um erro ao criar a atividade. Tente novamente mais tarde.",
+                position: "top-right",
+            });
         }
 
         setLoading(false);
