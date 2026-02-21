@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { sileo } from "sileo";
 import Link from "next/link";
 import Image from "next/image";
 import { Loader2, ArrowLeft, Mail, Clock } from "lucide-react";
@@ -64,10 +64,18 @@ export const RequestResetPasswordByEmail = () => {
 
             startCooldown(formData.email);
             setIsPasswordResetRequested(true);
-            toast.success("Solicitação enviada com sucesso!");
+            sileo.success({
+                title: "Solicitação enviada com sucesso!",
+                description: `Verifique seu e-mail para ${formData.email}.`,
+                position: "top-right",
+            });
         } catch (error) {
             log.error({ err: error, operation: "request_reset_password" }, "Error requesting password reset");
-            toast.error("Erro ao enviar solicitação. Tente novamente.");
+            sileo.error({
+                title: "Erro ao enviar solicitação",
+                description: "Tente novamente mais tarde.",
+                position: "top-right",
+            });
         } finally {
             setIsRequesting(false);
         }
