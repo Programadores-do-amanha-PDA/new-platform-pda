@@ -6,8 +6,8 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { LandingPageVideoDialog } from "./landing-page-video-dialog";
-import { TriangleWithoutPointSvg } from "../../../../public/assets/triangle-without-point-svg";
-import { TriangleSvg } from "../../../../public/assets/triangle-svg";
+import { TriangleWithoutPointSvg } from "@/components/icons/triangle-without-point-svg";
+import { TriangleSvg } from "@/components/icons/triangle-svg";
 
 
 function FloatingIcon({
