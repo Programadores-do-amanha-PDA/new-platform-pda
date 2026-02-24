@@ -16,15 +16,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="pt-BR" className="flex w-full h-full">
-            <body
-                className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} ${delaGothicOne.variable} antialiased`}
-            >
-                <AuthStoreProvider>
-                    <main className="flex w-full h-full overflow-hidden">{children}</main>
-                </AuthStoreProvider>
-                <Toaster />
-            </body>
-        </html>
+        <body
+            className={`w-full h-full flex ${IBMPlexSans.variable} ${IBMPlexMono.variable} ${delaGothicOne.variable} antialiased`}
+        >
+            <AuthStoreProvider>
+                <main className="flex w-full h-full overflow-hidden">{children}</main>
+            </AuthStoreProvider>
+            <Toaster />
+        </body>
     );
 }
