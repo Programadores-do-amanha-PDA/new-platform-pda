@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,49 +29,39 @@ export default function CreateAccountDialog({ classroom_id }: { classroom_id: st
         client_secret: "",
     });
 
-    const { createAccount } = useZoomAccountStore();
+    const { createZoomAccount } = useZoomAccountStore();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
-        try {
-            const { account_id, client_id, client_secret } = accountData;
+        const { account_id, client_id, client_secret } = accountData;
 
-            if (!account_id || !client_id || !client_secret || !classroom_id) {
-                sileo.error({ title: "Erro ao criar conta", description: "Por favor, preencha todos os campos." });
-                return;
-            }
-
-            sileo.info({
-                title: "Salvando informações de conta...",
-                description: "Aguarde enquanto as informações da conta são salvas.",
+        if (!account_id || !client_id || !client_secret || !classroom_id) {
+            toast.error({
+                title: "Erro!",
+                description: "Ocorreu um erro ao criar a conta. Por favor, preencha todos os campos.",
             });
-            const account = await createAccount({
-                classroom_id,
-                account_id,
-                client_id,
-                client_secret,
-            });
-
-            if (!account) throw new Error("no account created");
-
-            sileo.success({ title: "Conta criada!", description: "A conta foi criada com sucesso." });
-            setOpen(false);
-            setAccountData({
-                account_id: "",
-                client_id: "",
-                client_secret: "",
-            });
-        } catch (error) {
-            console.error(error);
-            sileo.error({
-                title: "Erro ao criar conta",
-                description: "Ocorreu um erro ao criar a conta. Tente novamente mais tarde.",
-            });
-        } finally {
-            setLoading(false);
+            return;
         }
+
+        const account = await createZoomAccount({
+            classroom_id,
+            account_id,
+            client_id,
+            client_secret,
+        });
+
+        if (!account) throw new Error("no account created");
+
+        setOpen(false);
+        setAccountData({
+            account_id: "",
+            client_id: "",
+            client_secret: "",
+        });
+
+        setLoading(false);
     };
 
     const handleSetOpen = (v: boolean) => {

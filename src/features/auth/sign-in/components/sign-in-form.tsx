@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -47,10 +47,9 @@ export const SignInForm = () => {
             const response = await signInWithEmailAndPassword(data);
 
             if (response.error && response.confirmation) {
-                sileo.error({
+                toast.error({
                     title: "Confirme seu email",
                     description: "Para continuar, confirme seu email clicando no link que enviamos para sua caixa de entrada.",
-                    position: "top-right",
                 });
                 router.push(`/email-confirmation?email=${encodeURIComponent(data.email)}`);
                 return;
@@ -62,10 +61,9 @@ export const SignInForm = () => {
                     type: "manual",
                     message: response.message || "Credenciais inválidas",
                 });
-                sileo.error({
+                toast.error({
                     title: "Erro de autenticação",
                     description: "Credenciais inválidas. Verifique seu email e senha e tente novamente.",
-                    position: "top-right",
                 });
                 return;
             }
@@ -73,9 +71,8 @@ export const SignInForm = () => {
             // Login bem-sucedido
             if (!response.error && response.data?.session) {
                 updateAuthState({ session: response.data.session });
-                sileo.success({
+                toast.success({
                     title: "Login realizado com sucesso!",
-                    position: "top-right",
                 });
                 router.push("/dashboard");
                 return;
@@ -87,10 +84,9 @@ export const SignInForm = () => {
             console.error("Erro no login:", error);
             const errorMessage = error instanceof Error ? error.message : "Verifique se suas credenciais estão corretas.";
 
-            sileo.error({
+            toast.error({
                 title: "Erro ao fazer login",
                 description: errorMessage,
-                position: "top-right",
             });
         }
     };

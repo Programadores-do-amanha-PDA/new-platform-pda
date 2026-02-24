@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Color, { ColorLike } from "color";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -98,7 +98,7 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
             const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
 
             if (!currentConfig) {
-                sileo.error({
+                toast.error({
                     title: "Erro ao salvar justificativa",
                     description: "A configuração não foi encontrada!",
                 });
@@ -140,19 +140,19 @@ export const JustificationFormDialog = ({ configId, currentJustification, trigge
 
             if (success) {
                 handleClose();
-                sileo.success({
+                toast.success({
                     title: isEditing ? "Justificativa atualizada" : "Justificativa criada",
                     description: isEditing ? "Justificativa atualizada com sucesso!" : "Justificativa criada com sucesso!",
                 });
             } else {
-                sileo.error({
+                toast.error({
                     title: "Erro ao salvar justificativa",
                     description: "Ocorreu um erro ao salvar a justificativa!",
                 });
             }
         } catch (error) {
             log.error({ err: error, operation: "saveJustification" }, "Error saving justification");
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar justificativa",
                 description: "Ocorreu um erro ao salvar a justificativa!",
             });

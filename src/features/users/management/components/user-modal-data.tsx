@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -123,26 +123,23 @@ const UserModalData = ({ mode, currentUser, excludeRoles, open: controlledOpen, 
     const handleGeneratePassword = () => {
         const newPassword = generateRandomPassword();
         setValue("password", newPassword);
-        sileo.success({
+        toast.success({
             title: "Senha gerada com sucesso!",
             description: "Uma nova senha segura foi gerada automaticamente.",
-            position: "top-right",
         });
     };
 
     const showSuccessToast = (message: string, description?: string) => {
-        sileo.success({
+        toast.success({
             title: message,
             description,
-            position: "top-right",
         });
     };
 
     const showErrorToast = (message: string, description?: string) => {
-        sileo.error({
+        toast.error({
             title: message,
             description,
-            position: "top-right",
         });
     };
 

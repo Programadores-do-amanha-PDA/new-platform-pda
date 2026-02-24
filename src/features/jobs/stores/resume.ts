@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ResumeT } from "@/types/resume";
 import {
   createUserResume,
@@ -50,7 +50,10 @@ export const useResumeStore = create<ResumeState & ResumeActions>()(
           return true;
         } catch (error) {
           console.error("Error fetching resumes:", error);
-          toast.error("Failed to load resumes. Please try again later.");
+          toast.error({
+            title: "Erro ao carregar currículos",
+            description: "Ocorreu um erro ao carregar os currículos. Tente novamente mais tarde!",
+          });
           return false;
         } finally {
           set({ loading: false });
@@ -67,6 +70,10 @@ export const useResumeStore = create<ResumeState & ResumeActions>()(
           return true;
         } catch (error) {
           console.error("Error fetching user resume:", error);
+          toast.error({
+            title: "Erro ao buscar currículo",
+            description: "Ocorreu um erro ao buscar o currículo do usuário. Tente novamente mais tarde!",
+          });
           return false;
         } finally {
           set({ loading: false });
@@ -82,11 +89,17 @@ export const useResumeStore = create<ResumeState & ResumeActions>()(
           });
           if (!response) throw "Failed to create resume";
           set({ resumes: [...get().resumes, response] });
-          toast.success("Resume created successfully");
+          toast.success({
+            title: "Currículo criado com sucesso",
+            description: "O currículo foi criado com sucesso!",
+          });
           return true;
         } catch (error) {
           console.error("Error creating resume:", error);
-          toast.error("Failed to create resume. Please try again.");
+          toast.error({
+            title: "Erro ao criar currículo",
+            description: "Ocorreu um erro ao criar o currículo. Tente novamente mais tarde!",
+          });
           return false;
         }
       },
@@ -103,11 +116,17 @@ export const useResumeStore = create<ResumeState & ResumeActions>()(
               resume.id === id ? { ...resume, ...response } : resume
             ),
           });
-          toast.success("Resume updated successfully");
+          toast.success({
+            title: "Currículo atualizado com sucesso",
+            description: "O currículo foi atualizado com sucesso!",
+          });
           return true;
         } catch (error) {
           console.error("Error updating resume:", error);
-          toast.error("Failed to update resume. Please try again.");
+          toast.error({
+            title: "Erro ao atualizar currículo",
+            description: "Ocorreu um erro ao atualizar o currículo. Tente novamente mais tarde!",
+          });
           return false;
         }
       },
@@ -117,11 +136,17 @@ export const useResumeStore = create<ResumeState & ResumeActions>()(
           const success = await deleteUserResumeById(id);
           if (!success) throw "Failed to delete resume";
           set({ resumes: get().resumes.filter((resume) => resume.id !== id) });
-          toast.success("Resume deleted successfully");
+          toast.success({
+            title: "Currículo deletado com sucesso",
+            description: "O currículo foi deletado com sucesso!",
+          });
           return true;
         } catch (error) {
           console.error("Error deleting resume:", error);
-          toast.error("Failed to delete resume. Please try again.");
+          toast.error({
+            title: "Erro ao deletar currículo",
+            description: "Ocorreu um erro ao deletar o currículo. Tente novamente mais tarde!",
+          });
           return false;
         }
       },

@@ -1,6 +1,6 @@
 import { AuthError, Session, type EmailOtpType } from "@supabase/supabase-js";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { logger } from "@/lib/logger";
 import { OtpFlowParamsT, OtpFlowResultT } from "../types/otp-flow";
@@ -55,7 +55,7 @@ export async function processOtpFlow({
 
         // Execute success callback if provided
         onSuccess?.(session, type);
-        toast.success("Autenticação realizada com sucesso!");
+        toast.success({ title: "Autenticação realizada com sucesso!" });
 
         return {
             session,
@@ -71,7 +71,7 @@ export async function processOtpFlow({
 
         // Execute error callback if provided
         onError?.(error instanceof Error || error instanceof AuthError ? error : new Error(errorMessage));
-        toast.error(errorMessage);
+        toast.error({ title: "Erro!", description: errorMessage });
 
         return {
             session: null,
@@ -238,14 +238,14 @@ export function useOtpHandler() {
 
         // Handle expired tokens
         if (expiresAt && isTokenExpired(expiresAt)) {
-            toast.error("Token expirado! Tente realizar o login novamente.");
+            toast.error({ title: "Erro!", description: "Token expirado! Tente realizar o login novamente." });
             return true;
         }
 
         // Handle OAuth errors from provider
         if (error) {
             const message = errorDescription || `Erro de autenticação: ${error}`;
-            toast.error(message);
+            toast.error({ title: "Erro!", description: message });
             return true;
         }
 

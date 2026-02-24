@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -95,10 +95,9 @@ const AssessmentFormDialog = ({ currentAssessment, classroomId, onSubmit }: Asse
             handleSetModalOpen(false);
         } catch (error) {
             console.error(error);
-            sileo.error({
-                title: `Erro ao ${currentAssessment ? "editar" : "criar"} a avaliação`,
-                description: "Ocorreu um erro ao processar a solicitação. Tente novamente mais tarde!",
-                position: "top-right",
+            toast.error({
+                title: "Erro ao processar avaliação",
+                description: `Ocorreu um Erro ao ${currentAssessment ? "editar" : "criar"} a avaliação. Tente novamente mais tarde!`,
             });
         } finally {
             setLoading(false);

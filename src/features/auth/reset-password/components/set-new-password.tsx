@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Loader2, AlertCircleIcon, Lock } from "lucide-react";
 
 import { logger } from "@/lib/logger";
@@ -65,10 +65,9 @@ export const SetNewPassword = () => {
                     type: "manual",
                     message: errorMessage,
                 });
-                sileo.error({
+                toast.error({
                     title: "Erro ao redefinir a senha",
                     description: errorMessage,
-                    position: "top-right",
                 });
                 return;
             }
@@ -77,17 +76,15 @@ export const SetNewPassword = () => {
                 throw new Error("Failed to update user password");
             }
 
-            sileo.success({
+            toast.success({
                 title: "Senha redefinida com sucesso!",
-                position: "top-right",
             });
             router.push("/sign-in");
         } catch (error) {
             log.error({ err: error, operation: "set_new_password" }, "Error setting new password");
-            sileo.error({
+            toast.error({
                 title: "Erro ao redefinir a senha",
                 description: "Ocorreu um erro ao redefinir a senha. Tente novamente.",
-                position: "top-right",
             });
         }
     };

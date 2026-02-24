@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducer } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Upload } from "lucide-react";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -87,20 +87,18 @@ const InsertAssessmentAttempts = ({ assessment, updateAssessment }: Readonly<Ins
 
     const handleExtractParticipantData = () => {
         if (!resultsCsv || integrityCsv === null || actionPlansCsv === null) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao extrair dados",
                 description: "Selecione todos os arquivos necessários.",
-                position: "top-right",
             });
             return;
         }
 
         const formattedParticipantsData = formatParticipantsData(resultsCsv, integrityCsv, actionPlansCsv);
         dispatch({ type: "ADVANCE_TO_REVIEW", payload: formattedParticipantsData });
-        sileo.success({
+        toast.success({
             title: "Extração concluída",
             description: "Os dados dos participantes foram extraídos com sucesso.",
-            position: "top-right",
         });
     };
 
@@ -136,18 +134,16 @@ const InsertAssessmentAttempts = ({ assessment, updateAssessment }: Readonly<Ins
 
             await updateAssessment(assessment, { participants_data: finalParticipants });
 
-            sileo.success({
+            toast.success({
                 title: "Dados inseridos com sucesso",
                 description: "Os dados dos participantes foram inseridos com sucesso.",
-                position: "top-right",
             });
 
             dispatch({ type: "CLOSE_DIALOG" });
         } catch {
-            sileo.error({
+            toast.error({
                 title: "Erro ao inserir dados",
                 description: "Ocorreu um erro ao inserir os dados dos participantes. Tente novamente mais tarde!",
-                position: "top-right",
             });
             dispatch({ type: "SET_LOADING", payload: false });
         }

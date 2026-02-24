@@ -13,7 +13,7 @@ import {
 import { sendPasswordResetToMultipleUsers } from "@/features/auth/shared/actions";
 import { Mail, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Profile } from "../../profile/types/profile";
 import { logger } from "@/lib/logger";
 
@@ -30,7 +30,7 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
 
     const handleSendPasswordReset = async () => {
         if (selectedUsers.length === 0) {
-            sileo.error({
+            toast.error({
                 title: "Nenhum usuário selecionado",
                 description: "Por favor, selecione pelo menos um usuário para enviar o email de redefinição de senha.",
             });
@@ -43,7 +43,7 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
             const emails = selectedUsers.map((user) => user.email).filter(Boolean) as string[];
 
             if (emails.length === 0) {
-                sileo.error({
+                toast.error({
                     title: "Nenhum email válido encontrado",
                     description: "Nenhum email válido encontrado nos usuários selecionados",
                 });
@@ -58,12 +58,12 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
             const { successful, failed, total } = results;
 
             if (failed.length === 0) {
-                sileo.success({
+                toast.success({
                     title: "Email de redefinição enviado",
                     description: `Email de redefinição enviado para ${successful} usuário(s) com sucesso!`,
                 });
             } else {
-                sileo.warning({
+                toast.info({
                     title: "Erro ao enviar emails de redefinição",
                     description: `${successful} emails enviados com sucesso, ${failed} falharam de ${total} total`,
                 });
@@ -73,7 +73,7 @@ export default function BulkPasswordResetButton({ selectedUsers, onComplete }: B
             onComplete?.();
         } catch (error) {
             log.error({ err: error, operation: "sendPasswordResetToMultipleUsers" }, "Error sending password reset emails");
-            sileo.error({
+            toast.error({
                 title: "Erro inesperado",
                 description: "Erro inesperado ao enviar emails de redefinição",
             });

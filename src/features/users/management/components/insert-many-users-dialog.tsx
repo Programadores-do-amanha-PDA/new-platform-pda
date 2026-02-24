@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import generatePassword from "generate-password";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import {
@@ -200,7 +200,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                 console.error("Error", error);
                 switch (error) {
                     case "role assign error":
-                        sileo.error({
+                        toast.error({
                             title: "Erro ao atribuir o cargo!",
                             description: `O usuário ${user.email} foi criado, mas ocorreu um erro ao atribuir o cargo. Tente atribuir o cargo manualmente!`,
                         });
@@ -210,7 +210,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                         break;
 
                     default:
-                        sileo.error({
+                        toast.error({
                             title: "Erro ao criar usuário!",
                             description: `Ocorreu um erro ao criar o usuário ${user.email}. Tente novamente mais tarde.`,
                         });

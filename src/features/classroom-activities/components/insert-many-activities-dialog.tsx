@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import { Upload } from "lucide-react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,13 @@ import InsertManyActivitiesCsvUploadSection from "./insert-many-activities-csv-u
 import { getStageDescription, getTodayDate, parseStudentsFromRows } from "./insert-many-activities-dialog.helpers";
 import { ActivityRow, DialogStage, StudentData } from "./insert-many-activities-dialog.types";
 import InsertManyActivitiesParticipantsTable from "./insert-many-activities-participants-table";
+import { logger } from "@/lib/logger";
 
 interface InsertManyActivitiesDialogProps {
     readonly classroomId: string;
 }
+
+const log = logger.child({ feature: "InsertManyActivitiesDialog" });
 
 const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActivitiesDialogProps>) => {
     const [open, setOpen] = useState(false);
@@ -42,7 +45,7 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                 skipEmptyLines: true,
                 complete: (results) => {
                     if (results.errors.length > 0) {
-                        console.error("Parsing errors:", results.errors);
+                        log.error({ errors: results.errors }, "Parsing errors");
                         setStudents([]);
                         return;
                     }
@@ -52,13 +55,12 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                     setStage(1);
                 },
                 error: (error: Error) => {
-                    console.error("Error in parsing file:", error);
+                    log.error({ err: error }, "Error parsing CSV file");
                     setStage(0);
                     setStudents([]);
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao processar CSV",
                         description: "Ocorreu um erro ao processar o arquivo CSV. Verifique o formato e tente novamente.",
-                        position: "top-right",
                     });
                 },
             });
@@ -79,7 +81,14 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
         };
 
         try {
-            const success = await createMultipleActivities({ activitiesData: [activityToCreate] });
+            const success = await toast.promise(createMultipleActivities({ activitiesData: [activityToCreate] }), {
+                loading: { title: "Criando atividade..." },
+                success: { title: "Atividade criada com sucesso!" },
+                error: {
+                    title: "Erro ao criar atividade",
+                    description: "Ocorreu um erro ao criar a atividade. Tente novamente mais tarde.",
+                },
+            });
 
             if (success) {
                 setStudents((prevStudents) =>
@@ -88,27 +97,17 @@ const InsertManyActivitiesDialog = ({ classroomId }: Readonly<InsertManyActiviti
                         status: "success",
                     })),
                 );
-                sileo.success({
-                    title: "Atividade criada com sucesso!",
-                    description: `Atividade criada com ${students.length} participantes!`,
-                    position: "top-right",
-                });
             } else {
                 throw new Error("Failed to create activity");
             }
         } catch (error) {
-            console.error("Error creating activity:", error);
+            log.error({ err: error }, "Error creating activity");
             setStudents((prevStudents) =>
                 prevStudents.map((student) => ({
                     ...student,
                     status: "error",
                 })),
             );
-            sileo.error({
-                title: "Erro ao criar atividade",
-                description: "Ocorreu um erro ao criar a atividade. Tente novamente mais tarde.",
-                position: "top-right",
-            });
         }
 
         setLoading(false);

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 import { getAllProjectsByClassroomId, createClassroomProject, updateClassroomProjectById, deleteProjectById } from "../actions";
 import { ClassroomProject } from "../types/projects/project";
@@ -44,7 +44,7 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     return true;
                 } catch (error) {
                     log.error({ err: error, operation: "get_all_projects_by_classroom_id" }, "Error fetching projects");
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao carregar projetos",
                         description: "Ocorreu um erro ao carregar os projetos. Tente novamente mais tarde.",
                     });
@@ -64,11 +64,11 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     set({
                         projects: [...get().projects, projectCreated],
                     });
-                    sileo.success({ title: "Projeto criado!", description: "O projeto foi criado com sucesso." });
+                    toast.success({ title: "Projeto criado!", description: "O projeto foi criado com sucesso." });
                     return true;
                 } catch (error) {
                     log.error({ err: error, operation: "create_project" }, "Error creating project");
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao criar projeto",
                         description: "Ocorreu um erro ao criar o projeto. Tente novamente mais tarde.",
                     });
@@ -88,11 +88,11 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                             project.id === updatedProject.id ? updatedProject : project,
                         ),
                     });
-                    sileo.success({ title: "Projeto atualizado!", description: "O projeto foi atualizado com sucesso." });
+                    toast.success({ title: "Projeto atualizado!", description: "O projeto foi atualizado com sucesso." });
                     return true;
                 } catch (error) {
                     log.error({ err: error, operation: "update_project" }, "Error updating project");
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao atualizar projeto",
                         description: "Erro ao atualizar projeto. Tente novamente mais tarde.",
                     });
@@ -108,11 +108,11 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     set({
                         projects: get().projects.filter((project) => project.id !== id),
                     });
-                    sileo.success({ title: "Projeto deletado!", description: "O projeto foi deletado com sucesso." });
+                    toast.success({ title: "Projeto deletado!", description: "O projeto foi deletado com sucesso." });
                     return true;
                 } catch (error) {
                     log.error({ err: error, operation: "delete_project" }, "Error deleting project");
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao deletar projeto",
                         description: "Ocorreu um erro ao deletar o projeto. Tente novamente mais tarde.",
                     });

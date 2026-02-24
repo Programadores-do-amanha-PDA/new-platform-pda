@@ -3,7 +3,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
@@ -58,9 +58,9 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
             const userData = buildUserUpdateData({ formData: data, currentUser });
 
             if (Object.keys(userData).length === 0) {
-                sileo.info({
-                    title: "Nenhuma alteração foi feita.",
-                    position: "top-right",
+                toast.info({
+                    title: "Nenhuma alteração foi feita",
+                    description: "Nenhuma alteração foi feita nos dados do usuário.",
                 });
                 return;
             }
@@ -71,16 +71,15 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
                 throw new Error("Falha ao atualizar dados do usuário");
             }
 
-            sileo.success({
-                title: "Sucesso ao editar seus dados!",
-                position: "top-right",
+            toast.success({
+                title: "Sucesso ao editar seus dados",
+                description: "Os dados do usuário foram atualizados com sucesso!",
             });
 
             if (isValueChanged({ currentValue: data.email, newValue: currentUser.email })) {
-                sileo.info({
+                toast.info({
                     title: "Alteração de email pendente",
                     description: "Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!",
-                    position: "top-right",
                 });
             }
 
@@ -91,10 +90,7 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao atualizar seus dados! Tente novamente mais tarde.";
 
-            sileo.error({
-                title: errorMessage,
-                position: "top-right",
-            });
+            toast.error({ title: "Erro ao atualizar perfil", description: errorMessage });
             setError("root", {
                 type: "manual",
                 message: errorMessage,

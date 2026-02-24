@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, type JSX } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { ColorLike } from "color";
 import { Eye, EyeOff, Percent, Slash } from "lucide-react";
 
@@ -98,7 +98,7 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
             const currentConfig = Object.values(settingsByClassroom)?.find((config) => config.id === configId);
 
             if (!currentConfig) {
-                sileo.error({
+                toast.error({
                     title: "Erro ao salvar modo de usuário",
                     description: "A configuração não foi encontrada!",
                 });
@@ -118,19 +118,19 @@ export const UserModeFormDialog = ({ configId, currentUserMode, trigger, onClose
 
             if (success) {
                 handleOpenChange(false);
-                sileo.success({
+                toast.success({
                     title: isEditing ? "Modo de usuário atualizado" : "Modo de usuário criado",
                     description: isEditing ? "Modo de usuário atualizado com sucesso!" : "Modo de usuário criado com sucesso!",
                 });
             } else {
-                sileo.error({
+                toast.error({
                     title: "Erro ao salvar modo de usuário",
                     description: "Ocorreu um erro ao salvar o modo de usuário!",
                 });
             }
         } catch (error) {
             log.error({ err: error, operation: "saveUserMode" }, "Error saving user mode");
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar modo de usuário",
                 description: "Ocorreu um erro ao salvar o modo de usuário!",
             });

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import {
     createEnrollments,
@@ -46,11 +46,7 @@ interface EnrollmentsManagementActions {
      * Replaces the enrollments map indexed by userId.
      * @param enrollmentsByUserId Record containing the enrollments per userId.
      */
-    setEnrollmentsByUserId: ({
-        enrollmentsByUserId,
-    }: {
-        readonly enrollmentsByUserId: Record<string, Enrollment[]>;
-    }) => void;
+    setEnrollmentsByUserId: ({ enrollmentsByUserId }: { readonly enrollmentsByUserId: Record<string, Enrollment[]> }) => void;
 
     /**
      * Returns every enrollment filtered by classroom_id.
@@ -107,7 +103,6 @@ const initialState: EnrollmentsManagementState = {
     enrollmentsByUserId: {},
     loading: false,
 };
-
 
 /**
  * Zustand store for managing enrollments state and actions in the application.
@@ -170,7 +165,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                     if (error instanceof Error) {
                         log.warn({ err: error, operation: "fetchAllEnrollments" }, "Error fetching all enrollments");
                     }
-                    toast.error("Erro ao buscar inscrições!");
+                    toast.error({
+                        title: "Erro ao buscar inscrições",
+                        description: "Ocorreu um erro ao buscar as inscrições!",
+                    });
 
                     return false;
                 } finally {
@@ -216,7 +214,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                             "Error fetching enrollments by classroom id",
                         );
                     }
-                    toast.error("Erro ao buscar inscrições da turma!");
+                    toast.error({
+                        title: "Erro ao buscar inscrições da turma",
+                        description: "Ocorreu um erro ao buscar as inscrições da turma!",
+                    });
 
                     return false;
                 } finally {
@@ -250,7 +251,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                             "Error fetching enrollments by user id",
                         );
                     }
-                    toast.error("Erro ao buscar inscrições do usuário!");
+                    toast.error({
+                        title: "Erro ao buscar inscrições do usuário",
+                        description: "Ocorreu um erro ao buscar as inscrições do usuário!",
+                    });
 
                     return false;
                 } finally {
@@ -280,7 +284,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
             createNewEnrollments: async ({ enrollments }) => {
                 try {
                     if (!enrollments.length) {
-                        toast.error("Nenhum usuário selecionado para vincular à turma!");
+                        toast.error({
+                            title: "Nenhum usuário selecionado",
+                            description: "Nenhum usuário selecionado para vincular à turma!",
+                        });
                         throw new Error("empty enrollments array");
                     }
 
@@ -302,7 +309,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                         return { enrollmentsByUserId: updatedEnrollments };
                     });
 
-                    toast.success(`${response.length} vínculo(s) criado(s) com sucesso!`);
+                    toast.success({
+                        title: "Vínculos criados com sucesso",
+                        description: `${response.length} vínculo(s) criado(s) com sucesso!`,
+                    });
 
                     return true;
                 } catch (error) {
@@ -312,7 +322,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                             "Error creating new enrollments",
                         );
                     }
-                    toast.error("Erro ao vincular usuários à turma!");
+                    toast.error({
+                        title: "Erro ao vincular usuários à turma",
+                        description: "Ocorreu um erro ao vincular os usuários à turma!",
+                    });
 
                     return false;
                 }
@@ -344,7 +357,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
 
                         return { enrollmentsByUserId: updatedEnrollments };
                     });
-                    toast.success("Inscrição atualizada com sucesso!");
+                    toast.success({
+                        title: "Inscrição atualizada com sucesso",
+                        description: "A inscrição foi atualizada com sucesso!",
+                    });
 
                     return true;
                 } catch (error) {
@@ -354,7 +370,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                             "Error updating enrollment",
                         );
                     }
-                    toast.error("Erro ao atualizar inscrição!");
+                    toast.error({
+                        title: "Erro ao atualizar inscrição",
+                        description: "Ocorreu um erro ao atualizar a inscrição!",
+                    });
 
                     return false;
                 }
@@ -374,13 +393,14 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                         const updatedEnrollments = { ...state.enrollmentsByUserId };
                         const userEnrollments = updatedEnrollments[userId] || [];
 
-                        updatedEnrollments[userId] = userEnrollments.filter(
-                            (e) => !classroomIds.includes(e.classroom_id),
-                        );
+                        updatedEnrollments[userId] = userEnrollments.filter((e) => !classroomIds.includes(e.classroom_id));
 
                         return { enrollmentsByUserId: updatedEnrollments };
                     });
-                    toast.success("Vínculo usuário-turma removido com sucesso!");
+                    toast.success({
+                        title: "Vínculo usuário-turma removido com sucesso",
+                        description: "O vínculo usuário-turma foi removido com sucesso!",
+                    });
 
                     return true;
                 } catch (error) {
@@ -390,7 +410,10 @@ export const useEnrollmentsManagementStore = create<EnrollmentsManagementState &
                             "Error removing enrollments",
                         );
                     }
-                    toast.error("Erro ao remover vínculo usuário-turma!");
+                    toast.error({
+                        title: "Erro ao remover vínculo usuário-turma",
+                        description: "Ocorreu um erro ao remover o vínculo usuário-turma!",
+                    });
 
                     return false;
                 }

@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-
+import { useState } from "react";
 import { useActivityStore } from "../store";
 import { ClassActivity } from "../types";
 
@@ -17,90 +15,76 @@ interface UseActivityJustificationProps {
  * @returns State values and async handlers for participation and justification actions.
  */
 export const useActivityJustification = ({ currentActivity, currentUserEmail }: UseActivityJustificationProps) => {
-    const [justification, setJustification] = useState<string>("");
+    const currentJustification = currentActivity.justifications?.find((j) => j.user_email === currentUserEmail);
+    const [justification, setJustification] = useState<string>(() => {
+        if (currentJustification) {
+            return currentJustification.message || "";
+        }
+        return "";
+    });
     const [loading, setLoading] = useState<boolean>(false);
     const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
     const [participationLoading, setParticipationLoading] = useState<boolean>(false);
 
     const { updateActivityById } = useActivityStore();
 
-    const currentJustification = currentActivity.justifications?.find((j) => j.user_email === currentUserEmail);
     const hasParticipated = currentActivity.participants_email?.includes(currentUserEmail) ?? false;
-
-    useEffect(() => {
-        if (currentJustification) {
-            setJustification(currentJustification.message || "");
-        }
-    }, [currentActivity, currentJustification]);
 
     const handleAddJustification = async () => {
         setLoading(true);
-        try {
-            const existingJustifications = currentActivity.justifications || [];
-            const updatedJustifications = currentJustification
-                ? existingJustifications.map((j) => (j.user_email === currentUserEmail ? { ...j, message: justification } : j))
-                : [
-                      ...existingJustifications,
-                      {
-                          user_email: currentUserEmail,
-                          message: justification,
-                      },
-                  ];
 
-            await updateActivityById({
-                id: currentActivity.id,
-                updates: {
-                    justifications: updatedJustifications,
-                },
-            });
+        const existingJustifications = currentActivity.justifications || [];
+        const updatedJustifications = currentJustification
+            ? existingJustifications.map((existJustification) =>
+                  existJustification.user_email === currentUserEmail
+                      ? { ...existJustification, message: justification }
+                      : existJustification,
+              )
+            : [
+                  ...existingJustifications,
+                  {
+                      user_email: currentUserEmail,
+                      message: justification,
+                  },
+              ];
 
-            toast.success("Justificativa salva com sucesso!");
-        } catch {
-            toast.error("Erro ao salvar justificativa!");
-        } finally {
-            setLoading(false);
-        }
+        await updateActivityById({
+            id: currentActivity.id,
+            updates: {
+                justifications: updatedJustifications,
+            },
+        });
+
+        setLoading(false);
     };
 
     const handleDeleteJustification = async () => {
         setDeleteLoading(true);
-        try {
-            await updateActivityById({
-                id: currentActivity.id,
-                updates: {
-                    justifications: currentActivity?.justifications?.filter((j) => j.user_email !== currentUserEmail) || [],
-                },
-            });
-            setJustification("");
-            toast.success("Justificativa removida com sucesso!");
-        } catch {
-            toast.error("Erro ao remover justificativa!");
-        } finally {
-            setDeleteLoading(false);
-        }
+        await updateActivityById({
+            id: currentActivity.id,
+            updates: {
+                justifications: currentActivity?.justifications?.filter((j) => j.user_email !== currentUserEmail) || [],
+            },
+        });
+        setJustification("");
+        setDeleteLoading(false);
     };
 
     const handleToggleParticipation = async () => {
         setParticipationLoading(true);
-        try {
-            const currentParticipants = currentActivity.participants_email || [];
-            const updatedParticipants = hasParticipated
-                ? currentParticipants.filter((email) => email !== currentUserEmail)
-                : [...currentParticipants, currentUserEmail];
+        const currentParticipants = currentActivity.participants_email || [];
+        const updatedParticipants = hasParticipated
+            ? currentParticipants.filter((email) => email !== currentUserEmail)
+            : [...currentParticipants, currentUserEmail];
 
-            await updateActivityById({
-                id: currentActivity.id,
-                updates: {
-                    participants_email: updatedParticipants,
-                },
-            });
+        await updateActivityById({
+            id: currentActivity.id,
+            updates: {
+                participants_email: updatedParticipants,
+            },
+        });
 
-            toast.success(hasParticipated ? "Participação removida com sucesso!" : "Participação adicionada com sucesso!");
-        } catch {
-            toast.error("Erro ao atualizar participação!");
-        } finally {
-            setParticipationLoading(false);
-        }
+        setParticipationLoading(false);
     };
 
     return {

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import {
     getAllJobApplications,
@@ -48,7 +48,10 @@ export const useJobApplicationStore = create<JobApplicationState & IJobApplicati
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao buscar as candidaturas. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao buscar as candidaturas",
+                        description: "Ocorreu um erro ao buscar as candidaturas. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -68,7 +71,10 @@ export const useJobApplicationStore = create<JobApplicationState & IJobApplicati
                     return true;
                 } catch (error) {
                     console.error("Error fetching job applications:", error);
-                    toast.error("Erro ao buscar as candidaturas. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao buscar as candidaturas",
+                        description: "Ocorreu um erro ao buscar as candidaturas. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -87,11 +93,17 @@ export const useJobApplicationStore = create<JobApplicationState & IJobApplicati
                     if (!application) throw new Error("Failed to create job application");
 
                     set({ applications: [...get().applications, application] });
-                    toast.success("Candidatura criada com sucesso!");
+                    toast.success({
+                        title: "Candidatura criada com sucesso",
+                        description: "A candidatura foi criada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error creating application:", error);
-                    toast.error("Erro ao declarar a candidatura! Tente recarregar a página!");
+                    toast.error({
+                        title: "Erro ao declarar a candidatura",
+                        description: "Ocorreu um erro ao declarar a candidatura! Tente recarregar a página!",
+                    });
                     return false;
                 }
             },
@@ -119,11 +131,17 @@ export const useJobApplicationStore = create<JobApplicationState & IJobApplicati
                         applications: get().applications.map((app) => (app.id === applicationId ? updatedApplication : app)),
                     });
 
-                    toast.success("Status da candidatura foi atualizado com sucesso!");
+                    toast.success({
+                        title: "Status da candidatura atualizado com sucesso",
+                        description: "O status da candidatura foi atualizado com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error updating application status:", error);
-                    toast.error("Erro ao atualizar o status da candidatura!");
+                    toast.error({
+                        title: "Erro ao atualizar o status da candidatura",
+                        description: "Ocorreu um erro ao atualizar o status da candidatura!",
+                    });
                     return false;
                 }
             },
@@ -142,11 +160,17 @@ export const useJobApplicationStore = create<JobApplicationState & IJobApplicati
                         applications: get().applications.filter((app) => app.id !== applicationId),
                     });
 
-                    toast.success("Candidatura deletada com sucesso!");
+                    toast.success({
+                        title: "Candidatura deletada com sucesso",
+                        description: "A candidatura foi deletada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error deleting application:", error);
-                    toast.error("Erro ao deletar a candidatura!");
+                    toast.error({
+                        title: "Erro ao deletar a candidatura",
+                        description: "Ocorreu um erro ao deletar a candidatura!",
+                    });
                     return false;
                 }
             },

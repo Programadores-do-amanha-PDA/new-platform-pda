@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
 
 import {
     getAllZoomAccountsByClassroomId,
@@ -11,6 +10,7 @@ import {
 } from "../actions/accounts";
 import { ZoomAccountT } from "../types/accounts";
 import { useZoomAPIStore } from "./api";
+import { logger } from "@/lib/logger";
 
 interface ZoomAccountState {
     accounts: ZoomAccountT[];
@@ -18,12 +18,12 @@ interface ZoomAccountState {
 }
 
 interface ZoomAccountActions {
-    setAccounts: (accounts: ZoomAccountT[]) => void;
-    getAllAccounts: (classroomId: string) => Promise<boolean>;
-    getAccountById: (accountId: string) => Promise<ZoomAccountT | boolean>;
-    createAccount: (accountData: Partial<ZoomAccountT>) => Promise<string | boolean>;
-    updateAccount: (accountId: string, updates: Partial<ZoomAccountT>) => Promise<boolean>;
-    deleteAccount: (accountId: string) => Promise<boolean>;
+    setZoomAccounts: (accounts: ZoomAccountT[]) => void;
+    getAllZoomAccounts: (classroomId: string) => Promise<boolean>;
+    getZoomAccountById: (accountId: string) => Promise<ZoomAccountT | boolean>;
+    createZoomAccount: (accountData: Partial<ZoomAccountT>) => Promise<string | boolean>;
+    updateZoomAccount: (accountId: string, updates: Partial<ZoomAccountT>) => Promise<boolean>;
+    deleteZoomAccount: (accountId: string) => Promise<boolean>;
     reset: () => void;
 }
 
@@ -32,14 +32,16 @@ const initialState: ZoomAccountState = {
     loading: false,
 };
 
+const log = logger.child({ module: "ZoomAccountStore" });
+
 export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>()(
     devtools(
         (set, get) => ({
             ...initialState,
 
-            setAccounts: (accounts) => set({ accounts }),
+            setZoomAccounts: (accounts) => set({ accounts }),
 
-            getAllAccounts: async (classroomId) => {
+            getAllZoomAccounts: async (classroomId) => {
                 try {
                     set({ loading: true });
                     const accountsResponse = await getAllZoomAccountsByClassroomId(classroomId);
@@ -47,28 +49,28 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                     set({ accounts: accountsResponse });
                     return true;
                 } catch (error) {
-                    console.error(error);
+                    log.error({ err: error, operation: "getAllZoomAccounts" }, "Error fetching zoom accounts by classroom ID");
                     return false;
                 } finally {
                     set({ loading: false });
                 }
             },
 
-            getAccountById: async (accountId) => {
+            getZoomAccountById: async (accountId) => {
                 try {
                     set({ loading: true });
                     const accountResponse = await getZoomAccountById(accountId);
                     if (!accountResponse) throw "No account response";
                     return accountResponse;
                 } catch (error) {
-                    console.error(error);
+                    log.error({ err: error, operation: "getZoomAccountById" }, "Error fetching zoom account by ID");
                     return false;
                 } finally {
                     set({ loading: false });
                 }
             },
 
-            createAccount: async (accountData) => {
+            createZoomAccount: async (accountData) => {
                 try {
                     if (
                         !accountData.classroom_id ||
@@ -77,11 +79,8 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                         !accountData.client_id ||
                         !accountData.client_secret
                     ) {
-                        toast.error("Dados obrigatórios da conta estão faltando!");
-                        throw new Error("Missing required account data");
+                        return false;
                     }
-
-                    toast.info("Verificando as credenciais da conta...");
 
                     const me = await useZoomAPIStore.getState().getZoomMeAccountDataByAPI(
                         {
@@ -94,9 +93,7 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                         true, // forçar renovação do token
                     );
                     if (!me) throw new Error("no me data");
-                    toast.success("Credenciais verificadas com sucesso!");
 
-                    toast.info("Salvando as credencias da conta...");
                     const newAccount: ZoomAccountT = await createZoomAccountByClassroomId({
                         ...accountData,
                         me,
@@ -104,16 +101,14 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                     if (!newAccount) throw new Error("No account create response");
 
                     set({ accounts: [newAccount, ...get().accounts] });
-                    toast.success(`Conta "${newAccount?.me?.first_name}" salva com sucesso!`);
                     return newAccount.id;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao criar nova conta!");
+                    log.error({ err: error, operation: "create_zoom_account" }, "Error creating zoom account");
                     return false;
                 }
             },
 
-            updateAccount: async (accountId, updates) => {
+            updateZoomAccount: async (accountId, updates) => {
                 try {
                     if (!accountId || !updates) {
                         throw new Error("ID and updates fields are required");
@@ -124,16 +119,14 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                     set({
                         accounts: get().accounts.map((account) => (account.id === accountId ? updatedAccount : account)),
                     });
-                    toast.success("Conta atualizada com sucesso!");
                     return true;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao atualizar a conta!");
+                    log.error({ err: error, operation: "update_zoom_account" }, "Error updating zoom account");
                     return false;
                 }
             },
 
-            deleteAccount: async (accountId) => {
+            deleteZoomAccount: async (accountId) => {
                 try {
                     if (!accountId) throw new Error("Account ID is required to delete");
                     const response = await deleteZoomAccountById(accountId);
@@ -142,11 +135,9 @@ export const useZoomAccountStore = create<ZoomAccountState & ZoomAccountActions>
                     set({
                         accounts: get().accounts.filter((account) => account.id !== accountId),
                     });
-                    toast.success("Conta deletada com sucesso!");
                     return true;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao deletar conta. Tente novamente mais tarde!");
+                    log.error(error);
                     return false;
                 }
             },

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import {
     getAllDeliveriesByProjectId,
@@ -99,7 +99,10 @@ export const useClassroomProjectDeliveriesStore = create<DeliveryState & Deliver
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao carregar entregas. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao carregar entregas. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -126,7 +129,10 @@ export const useClassroomProjectDeliveriesStore = create<DeliveryState & Deliver
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao carregar entregas. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao carregar entregas. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -158,11 +164,17 @@ export const useClassroomProjectDeliveriesStore = create<DeliveryState & Deliver
                             },
                         }));
                     }
-                    toast.success("Entrega criada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Entrega criada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao criar entrega. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao criar entrega. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -189,11 +201,17 @@ export const useClassroomProjectDeliveriesStore = create<DeliveryState & Deliver
                             ),
                         },
                     }));
-                    toast.success("Entrega atualizada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Entrega atualizada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error updating delivery:", error);
-                    toast.error("Erro ao atualizar entrega. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao atualizar entrega. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -213,11 +231,17 @@ export const useClassroomProjectDeliveriesStore = create<DeliveryState & Deliver
                             [classroomId]: currentDeliveries.filter((delivery) => delivery.id !== id),
                         },
                     }));
-                    toast.success("Entrega deletada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Entrega deletada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error deleting delivery:", error);
-                    toast.error("Erro ao deletar entrega. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao deletar entrega. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },

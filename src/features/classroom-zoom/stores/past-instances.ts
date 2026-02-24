@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -17,11 +17,14 @@ import {
 import { ZoomAccountT } from "../types/accounts";
 import { ZoomMeetingPastInstanceState, ZoomMeetingPastInstanceActions } from "../types/past-instances";
 import { useZoomAPIStore } from "./api";
+import { logger } from "@/lib/logger";
 
 const initialState: ZoomMeetingPastInstanceState = {
     pastInstances: [],
     loading: false,
 };
+
+const log = logger.child({ store: "ZoomMeetingPastInstanceStore" });
 
 export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceState & ZoomMeetingPastInstanceActions>()(
     devtools(
@@ -38,7 +41,10 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     set({ pastInstances: pastInstancesResponse });
                     return true;
                 } catch (error) {
-                    console.error("Error fetching past instances by classroom:", error);
+                    log.error(
+                        { err: error, operation: "getAllPastInstancesByClassroom" },
+                        "Error fetching past instances by classroom",
+                    );
                     return false;
                 } finally {
                     set({ loading: false });
@@ -53,7 +59,10 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     set({ pastInstances: pastInstancesResponse });
                     return true;
                 } catch (error) {
-                    console.error("Error fetching past instances by meeting:", error);
+                    log.error(
+                        { err: error, operation: "getAllPastInstancesByMeeting" },
+                        "Error fetching past instances by meeting",
+                    );
                     return false;
                 } finally {
                     set({ loading: false });
@@ -67,7 +76,10 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     if (!pastInstancesResponse) throw "no past instances response";
                     return pastInstancesResponse;
                 } catch (error) {
-                    console.error("Error fetching past instances by meeting ID:", error);
+                    log.error(
+                        { err: error, operation: "getPastInstancesByMeetingId" },
+                        "Error fetching past instances by meeting ID",
+                    );
                     return false;
                 }
             },
@@ -79,7 +91,7 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     if (!pastInstanceResponse) throw "no past instance response";
                     return pastInstanceResponse;
                 } catch (error) {
-                    console.error("Error fetching past instance by ID:", error);
+                    log.error({ err: error, operation: "getPastInstanceById" }, "Error fetching past instance by ID");
                     return false;
                 } finally {
                     set({ loading: false });
@@ -93,7 +105,7 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     if (!pastInstanceResponse) throw "no past instance response";
                     return pastInstanceResponse;
                 } catch (error) {
-                    console.error("Error fetching past instance by UUID:", error);
+                    log.error({ err: error, operation: "getPastInstanceByUuid" }, "Error fetching past instance by UUID");
                     return false;
                 } finally {
                     set({ loading: false });
@@ -103,7 +115,7 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
             createPastInstance: async (pastInstanceData) => {
                 try {
                     if (!pastInstanceData.classroom_id || !pastInstanceData.meeting_id || !pastInstanceData.uuid) {
-                        toast.error("Dados obrigatórios da instância passada estão faltando!");
+                        toast.error({ title: "Erro!", description: "Dados obrigatórios da instância passada estão faltando!" });
                         throw new Error("Missing required fields: classroom_id, meeting_id, or uuid");
                     }
 
@@ -111,65 +123,68 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     if (!newPastInstance) throw new Error("no past instance create response");
 
                     set({ pastInstances: [newPastInstance, ...get().pastInstances] });
-                    toast.success("Instância passada criada com sucesso!");
+                    toast.success({ title: "Sucesso!", description: "Instância passada criada com sucesso!" });
                     return true;
                 } catch (error) {
-                    console.error("Error creating past instance:", error);
-                    toast.error("Erro ao criar nova instância passada!");
+                    log.error({ err: error, operation: "createPastInstance" }, "Error creating past instance");
+                    toast.error({ title: "Erro!", description: "Erro ao criar nova instância passada!" });
                     return false;
                 }
             },
 
             createMultiplePastInstances: async (pastInstancesData) => {
-                let loadingToastId: string | number | undefined;
                 try {
                     if (!pastInstancesData || pastInstancesData.length === 0) {
-                        toast.error("Nenhuma instância passada foi fornecida!");
+                        toast.error({ title: "Erro!", description: "Nenhuma instância passada foi fornecida!" });
                         throw new Error("No past instances data provided");
                     }
 
                     // Validar se todos os itens têm os campos obrigatórios
                     for (const pastInstanceData of pastInstancesData) {
                         if (!pastInstanceData.classroom_id || !pastInstanceData.meeting_id || !pastInstanceData.uuid) {
-                            toast.error("Dados obrigatórios estão faltando em uma ou mais instâncias!");
+                            toast.error({
+                                title: "Erro!",
+                                description: "Dados obrigatórios estão faltando em uma ou mais instâncias!",
+                            });
                             throw new Error(
                                 "Missing required fields: classroom_id, meeting_id, or uuid in one or more instances",
                             );
                         }
                     }
 
-                    loadingToastId = toast.loading(`Criando ${pastInstancesData.length} instâncias passadas...`);
-
-                    const newPastInstances = await createMultiplePastInstances(pastInstancesData);
+                    const newPastInstances = await toast.promise(createMultiplePastInstances(pastInstancesData), {
+                        loading: { title: `Criando ${pastInstancesData.length} instâncias passadas...` },
+                        success: {
+                            title: "Sucesso!",
+                            description: `${pastInstancesData.length} instâncias passadas criadas com sucesso!`,
+                        },
+                        error: { title: "Erro!", description: "Erro ao criar múltiplas instâncias passadas!" },
+                    });
                     if (!newPastInstances) throw new Error("no multiple past instances create response");
 
                     set({
                         pastInstances: [...newPastInstances, ...get().pastInstances],
                     });
 
-                    toast.dismiss(loadingToastId);
-                    toast.success(`${newPastInstances.length} instâncias passadas criadas com sucesso!`);
                     return true;
                 } catch (error) {
-                    console.error("Error creating multiple past instances:", error);
-                    toast.error("Erro ao criar múltiplas instâncias passadas!");
+                    log.error(
+                        { err: error, operation: "createMultiplePastInstances" },
+                        "Error creating multiple past instances",
+                    );
+                    toast.error({ title: "Erro!", description: "Erro ao criar múltiplas instâncias passadas!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
             upsertMultiplePastInstances: async (classroomId, pastInstancesData) => {
-                let loadingToastId;
                 try {
                     // Validating classroom id
                     if (!classroomId) throw new Error("no classroom id provided");
 
                     // Validating if array is provided
                     if (!pastInstancesData || pastInstancesData.length === 0) {
-                        toast.error("Nenhuma instância passada foi fornecida!");
+                        toast.error({ title: "Erro!", description: "Nenhuma instância passada foi fornecida!" });
                         throw new Error("No past instances data provided");
                     }
 
@@ -179,20 +194,30 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     // Validating if all items have required fields
                     for (const pastInstanceData of pastInstancesData) {
                         if (!pastInstanceData.classroom_id || !pastInstanceData.meeting_id || !pastInstanceData.uuid) {
-                            toast.error("Dados obrigatórios estão faltando em uma ou mais instâncias!");
+                            toast.error({
+                                title: "Erro!",
+                                description: "Dados obrigatórios estão faltando em uma ou mais instâncias!",
+                            });
                             throw new Error(
                                 "Missing required fields: classroom_id, meeting_id, or uuid in one or more instances",
                             );
                         }
                     }
 
-                    loadingToastId = toast.loading(`Processando ${pastInstancesData.length} instâncias passadas...`);
-
-                    // Upsert instances, preserving user data like justifications
-                    const upsertedPastInstances = await upsertMultiplePastInstances(
-                        classroomId,
-                        pastInstancesData,
-                        { preserveUserData: true }, // Preserve justifications and other user data
+                    const upsertedPastInstances = await toast.promise(
+                        upsertMultiplePastInstances(
+                            classroomId,
+                            pastInstancesData,
+                            { preserveUserData: true }, // Preserve justifications and other user data
+                        ),
+                        {
+                            loading: { title: `Processando ${pastInstancesData.length} instâncias passadas...` },
+                            success: {
+                                title: "Sucesso!",
+                                description: `${pastInstancesData.length} instâncias passadas processadas com sucesso!`,
+                            },
+                            error: { title: "Erro!", description: "Erro ao processar múltiplas instâncias passadas!" },
+                        },
                     );
                     if (!upsertedPastInstances) throw new Error("no multiple past instances upsert response");
 
@@ -223,29 +248,28 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         pastInstances: [...mergedInstances, ...filteredInstances],
                     });
 
-                    toast.dismiss(loadingToastId);
-                    toast.success(`${upsertedPastInstances.length} instâncias passadas processadas com sucesso!`);
                     return true;
                 } catch (error) {
-                    console.error("Error upserting multiple past instances:", error);
-                    toast.error("Erro ao processar múltiplas instâncias passadas!");
+                    log.error(
+                        { err: error, operation: "upsertMultiplePastInstances" },
+                        "Error upserting multiple past instances",
+                    );
+                    toast.error({ title: "Erro!", description: "Erro ao processar múltiplas instâncias passadas!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
             updatePastInstanceById: async (pastInstanceId, updates) => {
-                let loadingToastId: string | number | undefined;
                 try {
                     if (!pastInstanceId || !updates) {
                         throw new Error("id and updates fields are required");
                     }
 
-                    loadingToastId = toast.loading("Atualizando instância passada...");
-                    const updatedPastInstance = await updatePastInstanceById(pastInstanceId, updates);
+                    const updatedPastInstance = await toast.promise(updatePastInstanceById(pastInstanceId, updates), {
+                        loading: { title: "Atualizando instância passada..." },
+                        success: { title: "Sucesso!", description: "Instância passada atualizada com sucesso!" },
+                        error: { title: "Erro!", description: "Erro ao atualizar a instância passada!" },
+                    });
                     if (!updatedPastInstance) throw new Error("no update past instance response");
 
                     set({
@@ -254,29 +278,25 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         ),
                     });
 
-                    toast.dismiss(loadingToastId);
-                    toast.success("Instância passada atualizada com sucesso!");
                     return true;
                 } catch (error) {
-                    console.error("Error updating past instance:", error);
-                    toast.error("Erro ao atualizar a instância passada!");
+                    log.error({ err: error, operation: "updatePastInstanceById" }, "Error updating past instance");
+                    toast.error({ title: "Erro!", description: "Erro ao atualizar a instância passada!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
             updatePastInstanceByUuid: async (uuid, updates) => {
-                let loadingToastId: string | number | undefined;
                 try {
                     if (!uuid || !updates) {
                         throw new Error("uuid and updates fields are required");
                     }
 
-                    loadingToastId = toast.loading("Atualizando instância passada...");
-                    const updatedPastInstance = await updatePastInstanceByUuid(uuid, updates);
+                    const updatedPastInstance = await toast.promise(updatePastInstanceByUuid(uuid, updates), {
+                        loading: { title: "Atualizando instância passada..." },
+                        success: { title: "Sucesso!", description: "Instância passada atualizada com sucesso!" },
+                        error: { title: "Erro!", description: "Erro ao atualizar a instância passada!" },
+                    });
                     if (!updatedPastInstance) throw new Error("no update past instance response");
 
                     set({
@@ -285,26 +305,18 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         ),
                     });
 
-                    toast.dismiss(loadingToastId);
-                    toast.success("Instância passada atualizada com sucesso!");
                     return true;
                 } catch (error) {
-                    console.error("Error updating past instance by UUID:", error);
-                    toast.error("Erro ao atualizar a instância passada!");
+                    log.error({ err: error, operation: "updatePastInstanceByUuid" }, "Error updating past instance by UUID");
+                    toast.error({ title: "Erro!", description: "Erro ao atualizar a instância passada!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
             refreshInstanceData: async (instanceId, uuid, account) => {
-                let loadingToastId: string | number | undefined;
                 try {
-                    // Check instanceId, uuid and account
                     if (!instanceId || !uuid || !account) {
-                        toast.error("Dados obrigatórios estão faltando!");
+                        toast.error({ title: "Erro!", description: "Dados obrigatórios estão faltando!" });
                         throw new Error("Missing required fields: instanceId, uuid, or account");
                     }
 
@@ -314,19 +326,17 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     // Find the instance in the current state
                     const currentInstance = currentState.pastInstances.find((instance) => instance.id === instanceId);
                     if (!currentInstance) {
-                        toast.error("Instância não encontrada no estado atual!");
+                        toast.error({ title: "Erro!", description: "Instância não encontrada no estado atual!" });
                         throw new Error("Instance not found in current state");
                     }
 
                     // fetch new participants and poll results data from Zoom API
-                    const loadingToast = toast.loading("Buscando novos dados da instancia na API do Zoom...");
                     const zoomAPIStore = useZoomAPIStore.getState();
                     const [newParticipants, newPollResults] = await Promise.all([
                         zoomAPIStore.getAllParticipantsByMeetingIdFromAPI(account, uuid),
                         zoomAPIStore.getAllPollResultsByMeetingIdFromAPI(account, uuid),
                     ]);
-                    toast.dismiss(loadingToast);
-                    toast.success("Dados buscados na API do Zoom!");
+                    toast.success({ title: "Sucesso!", description: "Dados buscados na API do Zoom!" });
 
                     // Check if there's any new data to update
                     const hasNewParticipants = newParticipants && newParticipants.length > 0;
@@ -351,22 +361,27 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     const isInstanceUpToDate = participantsUpToDate && pollResultsUpToDate;
 
                     if (!hasNewParticipants && !hasNewPollResults) {
-                        toast.error("Nenhum novo dado encontrado na API do Zoom!");
+                        toast.error({ title: "Erro!", description: "Nenhum novo dado encontrado na API do Zoom!" });
                         return false;
                     }
 
                     if (isInstanceUpToDate) {
-                        toast.info("Os dados da instância já estão atualizados!");
+                        toast.info({ title: "Informação!", description: "Os dados da instância já estão atualizados!" });
                         return true;
                     }
 
-                    //  Update the instance on Supabase
-                    loadingToastId = toast.loading("Atualizando os dados da instância...");
-                    const updatedPastInstance = await updatePastInstanceById(instanceId, {
-                        participants: newParticipants,
-                        poll_results: newPollResults,
-                        synchronized_at: new Date().toISOString(),
-                    });
+                    const updatedPastInstance = await toast.promise(
+                        updatePastInstanceById(instanceId, {
+                            participants: newParticipants,
+                            poll_results: newPollResults,
+                            synchronized_at: new Date().toISOString(),
+                        }),
+                        {
+                            loading: { title: "Atualizando dados da instância passada..." },
+                            success: { title: "Sucesso!", description: "Dados da instância passada atualizados com sucesso!" },
+                            error: { title: "Erro!", description: "Erro ao atualizar os dados da instância passada!" },
+                        },
+                    );
 
                     if (!updatedPastInstance) {
                         throw new Error("Failed to update past instance");
@@ -379,17 +394,11 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         ),
                     });
 
-                    toast.dismiss(loadingToast);
-                    toast.success("Dados da instância atualizados com sucesso!");
                     return true;
                 } catch (error) {
-                    console.error("Error refreshing instance data:", error);
-                    toast.error("Erro ao atualizar dados da instância!");
+                    log.error({ err: error, operation: "refreshInstanceData" }, "Error refreshing instance data");
+                    toast.error({ title: "Erro!", description: "Erro ao atualizar dados da instância!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
@@ -400,14 +409,11 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     account: ZoomAccountT;
                 }>,
             ) => {
-                let loadingToastId: string | number | undefined;
                 try {
                     if (!instances || instances.length === 0) {
-                        toast.error("Nenhuma instância fornecida para atualização!");
+                        toast.error({ title: "Erro!", description: "Nenhuma instância fornecida para atualização!" });
                         return false;
                     }
-
-                    loadingToastId = toast.loading(`Atualizando dados de ${instances.length} instâncias...`);
 
                     const zoomAPIStore = useZoomAPIStore.getState();
                     const updatePromises = instances.map(async ({ instanceId, uuid, account }) => {
@@ -418,11 +424,18 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         ]);
 
                         // Atualizar a instância no banco de dados
-                        const updatedPastInstance = await updatePastInstanceById(instanceId, {
-                            participants: newParticipants,
-                            poll_results: newPollResults,
-                            synchronized_at: new Date().toISOString(),
-                        });
+                        const updatedPastInstance = await toast.promise(
+                            updatePastInstanceById(instanceId, {
+                                participants: newParticipants,
+                                poll_results: newPollResults,
+                                synchronized_at: new Date().toISOString(),
+                            }),
+                            {
+                                loading: { title: "Atualizando dados da instância..." },
+                                success: { title: "Sucesso!", description: "Dados da instância atualizados com sucesso!" },
+                                error: { title: "Erro!", description: "Erro ao atualizar dados da instância!" },
+                            },
+                        );
 
                         return updatedPastInstance;
                     });
@@ -441,18 +454,19 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                         });
                     }
 
-                    toast.dismiss(loadingToastId);
-                    toast.success(`Todas as ${updatedInstances.length} instâncias foram atualizadas com sucesso!`);
+                    toast.success({
+                        title: "Sucesso!",
+                        description: `Todas as ${updatedInstances.length} instâncias foram atualizadas com sucesso!`,
+                    });
 
                     return true;
                 } catch (error) {
-                    console.error("Error refreshing multiple instances data:", error);
-                    toast.error("Erro ao atualizar dados das instâncias!");
+                    log.error(
+                        { err: error, operation: "refreshMultipleInstancesData" },
+                        "Error refreshing multiple instances data",
+                    );
+                    toast.error({ title: "Erro!", description: "Erro ao atualizar dados das instâncias!" });
                     return false;
-                } finally {
-                    if (loadingToastId !== undefined) {
-                        toast.dismiss(loadingToastId);
-                    }
                 }
             },
 
@@ -467,11 +481,17 @@ export const useZoomMeetingPastInstanceStore = create<ZoomMeetingPastInstanceSta
                     set({
                         pastInstances: get().pastInstances.filter((pastInstance) => pastInstance.id !== pastInstanceId),
                     });
-                    toast.success("Instância passada deletada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Instância passada deletada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error deleting past instance:", error);
-                    toast.error("Erro ao deletar instância passada. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao deletar instância passada. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });

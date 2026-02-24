@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Trash2, Link as LinkIcon, Loader2, CheckCircle, AlertCircleIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -129,16 +129,14 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
         if (urlRegex.test(url)) {
             setLinks([...links, { url: url }]);
             setUrl("");
-            sileo.success({
+            toast.success({
                 title: "Link anexado com sucesso!",
                 description: `O link "${url}" foi anexado com sucesso!`,
-                position: "top-right",
             });
         } else {
-            sileo.error({
+            toast.error({
                 title: "Link inválido!",
                 description: "Por favor, insira um link válido!",
-                position: "top-right",
             });
         }
     };
@@ -146,9 +144,8 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
     const handleRemoveLink = (index: number) => {
         if (index < links.length) {
             setLinks(links.filter((_, i) => i !== index));
-            sileo.success({
+            toast.success({
                 title: "Link removido com sucesso!",
-                position: "top-right",
             });
         }
     };
@@ -165,9 +162,8 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
 
         // Validations
         if (project.project_type === "end_module_project" && !currentDelivery) {
-            sileo.error({
+            toast.error({
                 title: "Selecione sua Squad!",
-                position: "top-right",
             });
             scrollToRef(squadRef);
             return;
@@ -175,20 +171,18 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
 
         // Para projetos finais, pelo menos um membro é obrigatório
         if (project.project_type === "end_module_project" && selectedMemberIds.length === 0) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao selecionar membros!",
                 description: "Por favor, selecione pelo menos um membro da equipe.",
-                position: "top-right",
             });
             scrollToRef(membersRef);
             return;
         }
 
         if (links.length === 0) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao adicionar links!",
                 description: "Por favor, anexe pelo menos um link do seu projeto para realizar a entrega.",
-                position: "top-right",
             });
             scrollToRef(linksRef);
             return;
@@ -224,10 +218,9 @@ const ProjectDeliveryModal = ({ project, classroomId, isOpen, onClose, currentDe
                 { err: error, operation: currentDelivery ? "update_project_delivery" : "create_project_delivery" },
                 "Error submitting project delivery",
             );
-            sileo.error({
+            toast.error({
                 title: "Erro ao entregar projeto!",
                 description: `Erro ao ${currentDelivery ? "atualizar" : "criar"} entrega`,
-                position: "top-right",
             });
         } finally {
             setIsLoading(false);

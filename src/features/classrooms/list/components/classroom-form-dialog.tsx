@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -69,13 +69,13 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
                 if (data.icon !== currentClassroom.icon) updates.icon = data.icon;
 
                 await updateClassroomAsync(currentClassroom.id, updates);
-                sileo.success({
+                toast.success({
                     title: "Turma editada com sucesso!",
                     description: `As informações da ${currentClassroom.name} foram atualizadas.`,
                 });
             } else {
                 await createClassroomAsync(data);
-                sileo.success({
+                toast.success({
                     title: "Turma criada com sucesso!",
                     description: `A turma ${data.name} foi criada com sucesso.`,
                 });
@@ -83,7 +83,7 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
 
             handleSetModalOpen(false);
         } catch {
-            sileo.error({
+            toast.error({
                 title: "Erro ao processar a turma",
                 description: `Erro ao ${currentClassroom ? "editar" : "criar"} a turma!`,
             });

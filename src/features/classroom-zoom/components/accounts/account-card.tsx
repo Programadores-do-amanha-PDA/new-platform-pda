@@ -26,7 +26,7 @@ const ZoomAccountCard = ({
   const [currentAccount, setCurrentAccount] = useState<ZoomAccountT | null>(
     null
   );
-  const { deleteAccount, updateAccount } = useZoomAccountStore();
+  const { deleteZoomAccount, updateZoomAccount } = useZoomAccountStore();
 
   return (
     <li className="p-4 border rounded-lg max-w-sm w-96 h-max flex justify-between gap-4 bg-background shadow">
@@ -88,14 +88,14 @@ const ZoomAccountCard = ({
       <DeleteConfirmationDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        onConfirm={() => deleteAccount(account.id)}
+        onConfirm={() => deleteZoomAccount(account.id)}
         description="Essa ação não pode ser desfeita. Isso EXCLUIRÁ PERMANENTEMENTE os dados da CONTA e removerá todos os dados de REUNIÕES, PRESENÇAS e RESPOSTAS (KPI) atreladas a conta."
       />
 
       <EditAccountDialog
         currentAccount={currentAccount}
         handleSetCurrentAccount={setCurrentAccount}
-        updateAccount={updateAccount}
+        updateZoomAccount={updateZoomAccount}
       />
     </li>
   );

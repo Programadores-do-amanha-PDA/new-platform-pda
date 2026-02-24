@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -56,7 +56,7 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         e.preventDefault();
 
         if (!title.trim()) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar módulo",
                 description: "O título é obrigatório!",
             });
@@ -64,7 +64,7 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         }
 
         if (!dateRange?.from) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar módulo",
                 description: "A data de início é obrigatória!",
             });
@@ -76,7 +76,7 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         try {
             const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
             if (!currentConfig) {
-                sileo.error({
+                toast.error({
                     title: "Erro ao salvar módulo",
                     description: "Configuração não encontrada!",
                 });
@@ -111,14 +111,14 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
 
             if (success) {
                 handleClose();
-                sileo.success({
+                toast.success({
                     title: currentModule ? "Módulo atualizado" : "Módulo criado",
                     description: currentModule ? "Módulo atualizado com sucesso!" : "Módulo criado com sucesso!",
                 });
             }
         } catch (error) {
             log.error({ err: error, operation: "saveModule" }, "Error saving module");
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar módulo",
                 description: "Ocorreu um erro ao salvar o módulo!",
             });

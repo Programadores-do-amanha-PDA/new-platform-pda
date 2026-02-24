@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -192,10 +192,9 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
 
     const onSubmit = async (data: CorrectionFormT) => {
         if (data.rulesSelected.length !== rulesLabels.length) {
-            sileo.error({
+            toast.error({
                 title: "Erro ao salvar correção",
                 description: `É preciso selecionar uma regra de cada Métrica! (${data.rulesSelected.length}/${rulesLabels.length})`,
-                position: "top-right",
             });
             return;
         }
@@ -230,10 +229,9 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                     );
                 } catch (error) {
                     log.error({ err: error, operation: "create_correction" }, "Error creating correction");
-                    sileo.error({
+                    toast.error({
                         title: "Erro ao salvar correção",
                         description: "Ocorreu um erro ao processar a solicitação. Tente novamente mais tarde!",
-                        position: "top-right",
                     });
                 } finally {
                     setLoading(false);
@@ -248,18 +246,16 @@ const CorrectionForm = ({ classroomId, selectedDelivery, handleClose, project }:
                 if (Object.keys(changedFields).length > 0) {
                     await updateCorrection(currentCorrection.id, changedFields, selectedDelivery?.classroom_id || classroomId);
                 } else {
-                    sileo.info({
+                    toast.info({
                         title: "Nenhuma alteração detectada",
                         description: "Não foram feitas alterações na correção.",
-                        position: "top-right",
                     });
                 }
             } catch (error) {
                 log.error({ err: error, operation: "update_correction" }, "Error updating correction");
-                sileo.error({
+                toast.error({
                     title: "Erro ao atualizar correção",
                     description: "Ocorreu um erro ao processar a solicitação. Tente novamente mais tarde!",
-                    position: "top-right",
                 });
             } finally {
                 setLoading(false);

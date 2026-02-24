@@ -1,8 +1,9 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { getCoodeshAssessmentsByAPI } from "../api/assessments";
 import { CoodeshAssessmentPayload } from "../types";
+import { logger } from "@/lib/logger";
 
 interface CoodeshAPIAssessmentState {
     apiAssessments: CoodeshAssessmentPayload[];
@@ -19,6 +20,8 @@ const initialState: CoodeshAPIAssessmentState = {
     apiAssessments: [],
     loading: false,
 };
+
+const log = logger.child({ module: "CoodeshAPIAssessmentStore" });
 
 export const useCoodeshAPIAssessmentStore = create<CoodeshAPIAssessmentState & CoodeshAPIAssessmentActions>()(
     devtools(
@@ -43,8 +46,14 @@ export const useCoodeshAPIAssessmentStore = create<CoodeshAPIAssessmentState & C
 
                     return true;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao buscar avaliações! Tente novamente mais tarde!");
+                    log.error(
+                        { err: error, operation: "getCoodeshAssessmentsByAPI" },
+                        "Error fetching assessments from Coodesh API",
+                    );
+                    toast.error({
+                        title: "Erro!",
+                        description: "Ocorreu um erro ao buscar as avaliações. Tente novamente mais tarde!",
+                    });
                     set({ loading: false });
                     return false;
                 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Mail, Loader2 } from "lucide-react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export default function BulkUsersCredentialsButton({ selectedUsers, onComplete }
 
     const handleSend = async () => {
         if (selectedUsers.length === 0) {
-            sileo.error({ title: "Erro ao enviar credenciais", description: "Nenhum usuário selecionado! Tente novamente." });
+            toast.error({ title: "Erro ao enviar credenciais", description: "Nenhum usuário selecionado! Tente novamente." });
             return;
         }
 
@@ -104,13 +104,13 @@ export default function BulkUsersCredentialsButton({ selectedUsers, onComplete }
 
         // Show summary notification
         if (successCount > 0) {
-            sileo.success({ title: "Emails enviados", description: `${successCount} email(s) enviado(s) com sucesso!` });
+            toast.success({ title: "Emails enviados", description: `${successCount} email(s) enviado(s) com sucesso!` });
         }
         if (errorCount > 0) {
-            sileo.error({ title: "Erro ao enviar emails", description: `${errorCount} email(s) falharam ao enviar.` });
+            toast.error({ title: "Erro ao enviar emails", description: `${errorCount} email(s) falharam ao enviar.` });
         }
         if (skippedCount > 0) {
-            sileo.warning({ title: "Usuários pulados", description: `${skippedCount} usuário(s) pulado(s) (sem turmas).` });
+            toast.info({ title: "Usuários pulados", description: `${skippedCount} usuário(s) pulado(s) (sem turmas).` });
         }
 
         onComplete?.();

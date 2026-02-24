@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 import { Upload, X, FileCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,18 +34,16 @@ const FileInput = ({ id, label, onChange }: FileInputProps) => {
             reader.onload = (event) => {
                 onChange((event.target?.result as string) || "");
                 setSelectedFileName(file.name);
-                sileo.success({
+                toast.success({
                     title: "Arquivo carregado com sucesso!",
                     description: `O arquivo "${file.name}" foi carregado com sucesso!`,
-                    position: "top-right",
                 });
             };
             reader.readAsText(file);
         } else {
-            sileo.error({
+            toast.error({
                 title: "Arquivo inválido",
                 description: "Selecione um arquivo CSV válido e tente novamente.",
-                position: "top-right",
             });
         }
     };
@@ -109,7 +107,7 @@ const FileUploadStage = ({
                 <FileInput id="actionPlanFile" label="Plano de ação (Opcional)" onChange={setActionPlansCsv} />
             </div>
 
-            <DialogFooter className="!flex flex-row! justify-end gap-2">
+            <DialogFooter className="flex! flex-row! justify-end gap-2">
                 <DialogClose>
                     <Button variant="outline" className="font-semibold text-muted-foreground">
                         Cancelar

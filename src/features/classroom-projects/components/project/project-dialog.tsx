@@ -1,12 +1,11 @@
 "use client";
 
-// Global imports
 import { useState, type JSX } from "react";
 import { LoaderCircle, Pen, Plus, AlertCircle } from "lucide-react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { DateRange } from "react-day-picker";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -74,7 +73,7 @@ const ProjectDialog = ({ classroom_id, currentProject }: ProjectDialogPropsT): J
             await handleProjectSubmission(formData, classroom_id, currentProject, createProject, updateProject);
             handleOpenChange(false);
         } catch (error) {
-            // Error is already handled in handleProjectSubmission with sileo
+            // Error is already handled in handleProjectSubmission with toast
             // Additional client-side validation errors can be handled here
             log.error(
                 { err: error, operation: currentProject?.id ? "update_project" : "create_project" },
@@ -94,12 +93,12 @@ const ProjectDialog = ({ classroom_id, currentProject }: ProjectDialogPropsT): J
         const errorCount = Object.keys(errors).length;
 
         if (errorCount > 1) {
-            sileo.error({
+            toast.error({
                 title: "Erros no formulário",
                 description: `Por favor, corrija os ${errorCount} erros no formulário.`,
             });
         } else if (errorCount === 1) {
-            sileo.error({
+            toast.error({
                 title: "Erro no formulário",
                 description: "Por favor, corrija o erro no formulário.",
             });

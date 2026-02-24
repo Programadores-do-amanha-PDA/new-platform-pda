@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { ClassroomSetting } from "./types";
 import { logger } from "@/lib/logger";
@@ -62,9 +62,7 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                         },
                     }));
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn({ err: error, operation: "setSettingByClassroomId" }, "Error on set setting by classroom");
-                    }
+                    log.warn({ err: error, operation: "setSettingByClassroomId" }, "Error on set setting by classroom");
                 }
             },
 
@@ -82,12 +80,10 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
 
                     get().setSettingByClassroomId({ classroomId, setting: settingResponse });
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn(
-                            { err: error, classroomId, operation: "fetchSettingByClassroomId" },
-                            "Error fetching setting by classroom",
-                        );
-                    }
+                    log.warn(
+                        { err: error, classroomId, operation: "fetchSettingByClassroomId" },
+                        "Error fetching setting by classroom",
+                    );
                 } finally {
                     set({ loading: false });
                 }
@@ -102,11 +98,9 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
 
                     return settingResponse;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn({ err: error, id, operation: "getSettingById" }, "Error fetching setting by ID:");
-                    }
+                    log.warn({ err: error, id, operation: "getSettingById" }, "Error fetching setting by ID:");
 
-                    toast.error("Erro ao buscar a configuração. Tente novamente mais tarde!");
+                    toast.error({ title: "Erro ao buscar a configuração", description: "Tente novamente mais tarde!" });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -124,46 +118,40 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
 
                     get().setSettingByClassroomId({ classroomId: settingData.classroom_id, setting: newSetting });
 
-                    toast.success("Configuração criada com sucesso!");
+                    toast.success({
+                        title: "Configuração criada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn({ err: error, settingData, operation: "createNewSetting" }, "Error creating setting");
-                    }
+                    log.warn({ err: error, settingData, operation: "createNewSetting" }, "Error creating setting");
 
-                    toast.error("Erro ao criar nova configuração. Tente novamente mais tarde!");
+                    toast.error({ title: "Erro ao criar nova configuração", description: "Tente novamente mais tarde!" });
                     return false;
                 }
             },
 
             updateClassroomSettingById: async ({ id, updates }) => {
-                let loadingToastId;
                 try {
                     if (!id || !updates || Object.keys(updates).length === 0) {
                         throw new Error("id and updates fields are required");
                     }
 
-                    loadingToastId = toast.loading("Atualizando a configuração...");
-                    const updatedSetting = await updateClassroomSettingById({ id, updates });
+                    const updatedSetting = await toast.promise(updateClassroomSettingById({ id, updates }), {
+                        loading: { title: "Atualizando a configuração..." },
+                        success: { title: "Configuração atualizada com sucesso!" },
+                        error: { title: "Erro ao atualizar a configuração", description: "Tente novamente mais tarde!" },
+                    });
                     if (!updatedSetting) throw new Error("no update setting response");
 
                     get().setSettingByClassroomId({ classroomId: updatedSetting.classroom_id, setting: updatedSetting });
 
-                    toast.success("Configuração atualizada com sucesso!");
                     return true;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn(
-                            { err: error, id, updates, operation: "updateClassroomSettingById" },
-                            "Error updating setting",
-                        );
-                    }
+                    log.warn({ err: error, id, updates, operation: "updateClassroomSettingById" }, "Error updating setting");
 
-                    toast.error("Erro ao atualizar a configuração. Tente novamente mais tarde!");
+                    toast.error({ title: "Erro ao atualizar a configuração", description: "Tente novamente mais tarde!" });
 
                     return false;
-                } finally {
-                    if (loadingToastId) toast.dismiss(loadingToastId);
                 }
             },
 
@@ -184,14 +172,12 @@ export const useClassroomSettingStore = create<ClassroomSettingState & Classroom
                         return { settingsByClassroom: remainingSettingsByClassroom };
                     });
 
-                    toast.success("configuração deletada com sucesso!");
+                    toast.success({ title: "Configuração deletada com sucesso!" });
                     return true;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn({ err: error, id, operation: "deleteSetting" }, "Error deleting setting");
-                    }
+                    log.warn({ err: error, id, operation: "deleteSetting" }, "Error deleting setting");
 
-                    toast.error("Erro ao deletar configuração. Tente novamente mais tarde!");
+                    toast.error({ title: "Erro ao deletar configuração", description: "Tente novamente mais tarde!" });
                     return false;
                 }
             },

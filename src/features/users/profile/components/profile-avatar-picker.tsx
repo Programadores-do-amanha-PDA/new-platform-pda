@@ -4,7 +4,7 @@
 import { Camera, Trash } from "lucide-react";
 import { ChangeEvent, useReducer } from "react";
 import { Area, Point } from "react-easy-crop";
-import { sileo } from "sileo";
+import { toast } from "@/lib/toast";
 
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -98,10 +98,9 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
             }
         } catch (error) {
             log.error({ err: error, operation: "crop_image" }, "Error cropping image");
-            sileo.error({
+            toast.error({
                 title: "Erro ao processar a imagem",
                 description: "Tente novamente.",
-                position: "top-right",
             });
         }
     };
@@ -118,15 +117,13 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
 
             if (userProfile?.avatar_url) {
                 await updateUserAvatar(userId, base64Image);
-                sileo.success({
+                toast.success({
                     title: "Imagem de perfil atualizada com sucesso!",
-                    position: "top-right",
                 });
             } else {
                 await uploadUserAvatar(userId, base64Image);
-                sileo.success({
+                toast.success({
                     title: "Imagem de perfil adicionada com sucesso!",
-                    position: "top-right",
                 });
             }
 
@@ -135,9 +132,8 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
             log.error({ err: error, operation: "upload_avatar" }, "Error uploading avatar");
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao salvar a imagem. Tente novamente mais tarde!";
-            sileo.error({
+            toast.error({
                 title: errorMessage,
-                position: "top-right",
             });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });
@@ -159,17 +155,15 @@ export const ProfileAvatarPicker = ({ userProfile, onUpdateUser }: ProfileAvatar
             }
 
             onUpdateUser();
-            sileo.success({
+            toast.success({
                 title: "Imagem de perfil removida com sucesso!",
-                position: "top-right",
             });
         } catch (error) {
             log.error({ err: error, operation: "delete_avatar" }, "Error deleting avatar");
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao remover a imagem. Tente novamente mais tarde!";
-            sileo.error({
+            toast.error({
                 title: errorMessage,
-                position: "top-right",
             });
         } finally {
             dispatch({ type: "SET_LOADING", payload: false });

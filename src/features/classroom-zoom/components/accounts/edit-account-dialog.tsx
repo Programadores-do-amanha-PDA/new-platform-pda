@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import { sileo } from "sileo";
+
+import { useState } from "react";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,65 +14,60 @@ import { ZoomAccountT } from "../../types/accounts";
 export default function EditAccountDialog({
     currentAccount,
     handleSetCurrentAccount,
-    updateAccount,
+    updateZoomAccount,
 }: {
     currentAccount: ZoomAccountT | null;
     handleSetCurrentAccount: (account: ZoomAccountT | null) => void;
-    updateAccount: (accountId: string, updates: Partial<ZoomAccountT>) => Promise<boolean>;
+    updateZoomAccount: (accountId: string, updates: Partial<ZoomAccountT>) => Promise<boolean>;
 }) {
     const [loading, setLoading] = useState(false);
-    const [accountData, setAccountData] = useState<Partial<ZoomAccountT>>({
-        account_id: "",
-        client_id: "",
-        client_secret: "",
+    const [accountData, setAccountData] = useState<Partial<ZoomAccountT>>(() => {
+        if (currentAccount) {
+            return {
+                account_id: currentAccount.account_id || "",
+                client_id: currentAccount.client_id || "",
+                client_secret: currentAccount.client_secret || "",
+            };
+        }
+        return {};
     });
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
 
-        try {
-            const { account_id, client_id, client_secret } = accountData;
+        const { account_id, client_id, client_secret } = accountData;
 
-            if (!account_id || !client_id || !client_secret || !currentAccount?.id) {
-                sileo.error({ title: "Erro ao atualizar conta", description: "Por favor, preencha todos os campos." });
-                return;
-            }
-
-            sileo.info({
-                title: "Atualizando informações de conta...",
-                description: "Aguarde enquanto as informações da conta são atualizadas.",
+        if (!account_id || !client_id || !client_secret || !currentAccount?.id) {
+            toast.error({
+                title: "Erro ao atualizar conta",
+                description: "Por favor, preencha todos os campos.",
             });
-            const success = await updateAccount(currentAccount.id, {
+            return;
+        }
+
+        const success = await toast.promise(
+            updateZoomAccount(currentAccount.id, {
                 account_id,
                 client_id,
                 client_secret,
-            });
+            }),
+            {
+                loading: { title: "Atualizando conta..." },
+                success: { title: "Conta atualizada!" },
+                error: { title: "Erro!", description: "Ocorreu um erro ao atualizar a conta. Tente novamente mais tarde." },
+            },
+        );
 
-            if (!success) throw new Error("no account updated");
+        if (!success) throw new Error("no account updated");
 
-            sileo.success({ title: "Conta atualizada!", description: "A conta foi atualizada com sucesso." });
-            handleSetCurrentAccount(null);
-        } catch (error) {
-            console.error(error);
-            sileo.error({
-                title: "Erro ao atualizar conta",
-                description: "Ocorreu um erro ao atualizar a conta. Tente novamente mais tarde.",
-            });
-        } finally {
-            setLoading(false);
-        }
+        toast.success({
+            title: "Conta atualizada!",
+            description: "A conta foi atualizada com sucesso.",
+        });
+        handleSetCurrentAccount(null);
+        setLoading(false);
     };
-
-    useEffect(() => {
-        if (currentAccount) {
-            setAccountData({
-                account_id: currentAccount.account_id || "",
-                client_id: currentAccount.client_id || "",
-                client_secret: currentAccount.client_secret || "",
-            });
-        }
-    }, [currentAccount]);
 
     const handleSetOpen = (v: boolean) => {
         if (v === false) {
