@@ -86,7 +86,7 @@ export const RequestResetPasswordByEmail = () => {
     };
 
     return (
-        <div className="flex flex-col gap-8 mx-auto w-full max-w-sm">
+        <div className="flex flex-col gap-8 mx-auto w-full max-w-md bg-white backdrop-blur-sm rounded-lg p-6 [@media(min-width:1100px)]:p-0">
             <div className="flex justify-start items-start w-full">
                 <Link
                     href="/sign-in"

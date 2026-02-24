@@ -111,7 +111,7 @@ export const EmailConfirmationForm = () => {
     };
 
     return (
-        <div className="w-full max-w-sm mx-auto flex flex-col gap-8">
+        <div className="w-full max-w-xl mx-auto flex flex-col gap-8 bg-white backdrop-blur-sm rounded-lg p-6 [@media(min-width:1100px)]:p-0">
             <div className="w-full flex items-start justify-start">
                 <Link
                     href="/sign-in"
