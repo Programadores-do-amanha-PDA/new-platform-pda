@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Loader2, Clock, AlertCircleIcon, ArrowLeft } from "lucide-react";
 
 import { useCooldownManager } from "@/hooks/cooldown-manager";
@@ -87,7 +87,10 @@ export const EmailConfirmationForm = () => {
 
             if (isSent) {
                 startCooldown(data.email);
-                toast.success("Email de confirmação enviado com sucesso!");
+                toast.success({
+                    title: "Email de confirmação enviado com sucesso!",
+                    description: `Verifique sua caixa de entrada para ${data.email}.`,
+                });
             } else {
                 throw new Error("Não foi possível enviar o email");
             }
@@ -95,7 +98,11 @@ export const EmailConfirmationForm = () => {
             console.error("Erro ao reenviar confirmação:", error);
             const errorMessage = error instanceof Error ? error.message : "Erro ao enviar email. Tente novamente.";
 
-            toast.error(errorMessage);
+            toast.error({
+                title: "Erro ao enviar email",
+                description: errorMessage,
+            });
+
             setError("root", {
                 type: "manual",
                 message: errorMessage,

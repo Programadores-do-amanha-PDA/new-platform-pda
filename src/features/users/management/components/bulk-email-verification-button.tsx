@@ -13,7 +13,7 @@ import {
 import { resendEmailSignupConfirmationToMultipleUsers } from "@/features/auth/shared/actions";
 import { MailCheck, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Profile } from "../../profile/types/profile";
 
 interface BulkEmailVerificationButtonProps {
@@ -27,7 +27,10 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
 
     const handleSendEmailVerification = async () => {
         if (selectedUsers.length === 0) {
-            toast.error("Nenhum usuário selecionado");
+            toast.error({
+                title: "Nenhum usuário selecionado",
+                description: "Por favor, selecione pelo menos um usuário para enviar o email de verificação.",
+            });
             return;
         }
 
@@ -37,7 +40,10 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
             const emails = selectedUsers.map((user) => user.email).filter(Boolean) as string[];
 
             if (emails.length === 0) {
-                toast.error("Nenhum email válido encontrado nos usuários selecionados");
+                toast.error({
+                    title: "Nenhum email válido encontrado",
+                    description: "Nenhum email válido encontrado nos usuários selecionados",
+                });
                 return;
             }
 
@@ -49,16 +55,25 @@ export default function BulkEmailVerificationButton({ selectedUsers, onComplete 
             const { successful, failed, total } = results;
 
             if (failed.length === 0) {
-                toast.success(`Email de verificação enviado para ${successful} usuário(s) com sucesso!`);
+                toast.success({
+                    title: "Email de verificação enviado",
+                    description: `Email de verificação enviado para ${successful} usuário(s) com sucesso!`,
+                });
             } else {
-                toast.warning(`${successful} emails enviados com sucesso, ${failed} falharam de ${total} total`);
+                toast.info({
+                    title: "Erro ao enviar emails de verificação",
+                    description: `${successful} emails enviados com sucesso, ${failed} falharam de ${total} total`,
+                });
             }
 
             setIsOpen(false);
             onComplete?.();
         } catch (error) {
             console.error("Error sending email verification emails:", error);
-            toast.error("Erro inesperado ao enviar emails de verificação");
+            toast.error({
+                title: "Erro inesperado",
+                description: "Erro inesperado ao enviar emails de verificação",
+            });
         } finally {
             setIsLoading(false);
         }

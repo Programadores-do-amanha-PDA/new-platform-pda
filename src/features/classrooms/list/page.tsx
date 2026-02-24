@@ -1,10 +1,12 @@
 "use client";
-import { useState, useMemo } from "react";
-import { useClassroomStore } from "./store";
+
 import { Input } from "@/components/ui/input";
-import ClassroomFormDialog from "./components/classroom-form-dialog";
-import ClassroomCard from "./components/classroom-card";
 import PermissionGuard from "@/components/shared/permission-guard";
+
+import ClassroomCard from "./components/classroom-card";
+import ClassroomFormDialog from "./components/classroom-form-dialog";
+import { useClassroomListData } from "./use-classroom-list-data";
+import { Suspense } from "react";
 
 const classroomStatusLabels = {
     created: "Criado",
@@ -13,20 +15,7 @@ const classroomStatusLabels = {
 };
 
 const ClassroomsPage = () => {
-    const [searchQuery, setSearchQuery] = useState("");
-
-    const { classrooms } = useClassroomStore();
-
-    const displayedClassrooms = useMemo(() => {
-        let filtered = classrooms;
-
-        // Filtro por busca no título
-        if (searchQuery.trim()) {
-            filtered = filtered.filter((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-        }
-
-        return filtered;
-    }, [classrooms, searchQuery]);
+    const { searchQuery, setSearchQuery, displayedClassrooms } = useClassroomListData();
 
     return (
         <div className="flex flex-col gap-6 px-2 py-4 w-full h-max overflow-hidden">
@@ -42,15 +31,13 @@ const ClassroomsPage = () => {
                 </PermissionGuard>
             </header>
 
-            <ul className="flex flex-wrap items-start gap-4 px-2 pb-4 w-full h-full overflow-y-auto">
-                {displayedClassrooms.length === 0 && (
-                    <p className="w-full h-full font-semibold text-lg text-center">Nenhuma turma encontrada</p>
-                )}
-
-                {displayedClassrooms.map((classroom) => (
-                    <ClassroomCard key={classroom.id} classroom={classroom} classroomStatusLabels={classroomStatusLabels} />
-                ))}
-            </ul>
+            <Suspense fallback={<p className="w-full h-full font-semibold text-lg text-center">Carregando turmas...</p>}>
+                <ul className="flex flex-wrap items-start gap-4 px-2 pb-4 w-full h-full overflow-y-auto">
+                    {displayedClassrooms.map((classroom) => (
+                        <ClassroomCard key={classroom.id} classroom={classroom} classroomStatusLabels={classroomStatusLabels} />
+                    ))}
+                </ul>
+            </Suspense>
         </div>
     );
 };

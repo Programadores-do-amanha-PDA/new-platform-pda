@@ -25,6 +25,7 @@ import { Classroom } from "@/features/classrooms/types";
 import { ProfileWithRelations } from "../types/user";
 import UserModalData from "../components/user-modal-data";
 import { Profile } from "../../profile/types/profile";
+import { getFirstLastInitials } from "@/utils";
 
 interface UseUsersColumnsProps {
     readonly excludeRoles?: Role[];
@@ -36,13 +37,13 @@ interface UseUsersColumnsProps {
  * Actions cell component for user table rows.
  * Extracted to a separate component to properly use React hooks for state management.
  */
-function UserActionsCell({ 
-    user, 
-    excludeRoles, 
-    deleteUser 
-}: { 
-    user: ProfileWithRelations; 
-    excludeRoles?: Role[]; 
+function UserActionsCell({
+    user,
+    excludeRoles,
+    deleteUser,
+}: {
+    user: ProfileWithRelations;
+    excludeRoles?: Role[];
     deleteUser: (params: { id: string }) => void;
 }) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -81,9 +82,9 @@ function UserActionsCell({
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
-            <UserModalData 
-                mode="edit" 
-                currentUser={user} 
+            <UserModalData
+                mode="edit"
+                currentUser={user}
                 excludeRoles={excludeRoles}
                 open={editDialogOpen}
                 onOpenChange={setEditDialogOpen}
@@ -135,13 +136,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                 cell: ({ row }) => (
                     <div className="flex justify-center items-center w-full">
                         <Avatar className="group relative">
-                            <AvatarFallback>
-                                {row.original.full_name
-                                    .split(" ")
-                                    .filter((word, i) => i < 2)
-                                    .map((word) => word[0].toUpperCase())
-                                    .join("") || "U"}
-                            </AvatarFallback>
+                            <AvatarFallback>{getFirstLastInitials(row.original.full_name)}</AvatarFallback>
                             <AvatarImage src={row.original.avatar_url || ""} />
                             <div
                                 className={cn(
@@ -400,13 +395,7 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
             {
                 id: "actions",
                 enableHiding: false,
-                cell: ({ row }) => (
-                    <UserActionsCell 
-                        user={row.original} 
-                        excludeRoles={excludeRoles} 
-                        deleteUser={deleteUser}
-                    />
-                ),
+                cell: ({ row }) => <UserActionsCell user={row.original} excludeRoles={excludeRoles} deleteUser={deleteUser} />,
             },
         ];
     }, [deleteUser, excludeRoles]);
@@ -452,9 +441,9 @@ export function useUsersColumns({ excludeRoles, classrooms, deleteUser }: UseUse
                     const { enrollments } = row.original;
                     return (
                         <div className="flex flex-wrap gap-1 justify-center w-full align-center">
-                            {enrollments?.map((enrollment, i) => (
+                            {enrollments?.map((enrollment) => (
                                 <TooltipWrapper
-                                    key={`${i}-${enrollment.short_id}`}
+                                    key={`enrollment-${enrollment.short_id}`}
                                     title={classrooms?.find((c) => c.id === enrollment.classroom_id)?.name || ""}
                                 >
                                     <Badge variant="outline" className="text-muted-foreground font-semibold">

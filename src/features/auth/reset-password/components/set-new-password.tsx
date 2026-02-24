@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Loader2, AlertCircleIcon, Lock } from "lucide-react";
 
 import { logger } from "@/lib/logger";
@@ -65,7 +65,10 @@ export const SetNewPassword = () => {
                     type: "manual",
                     message: errorMessage,
                 });
-                toast.error(errorMessage);
+                toast.error({
+                    title: "Erro ao redefinir a senha",
+                    description: errorMessage,
+                });
                 return;
             }
 
@@ -73,15 +76,16 @@ export const SetNewPassword = () => {
                 throw new Error("Failed to update user password");
             }
 
-            toast.success("Senha redefinida com sucesso!");
+            toast.success({
+                title: "Senha redefinida com sucesso!",
+            });
             router.push("/sign-in");
         } catch (error) {
             log.error({ err: error, operation: "set_new_password" }, "Error setting new password");
-            setError("root", {
-                type: "manual",
-                message: "Erro ao redefinir a senha. Tente novamente.",
+            toast.error({
+                title: "Erro ao redefinir a senha",
+                description: "Ocorreu um erro ao redefinir a senha. Tente novamente.",
             });
-            toast.error("Erro ao redefinir a senha. Tente novamente.");
         }
     };
 

@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AuthUser, UserMetadata } from "@supabase/supabase-js";
-import { toast } from "sonner";
-import { LoaderCircle, Sparkles, X, CheckCircle, AlertCircle } from "lucide-react";
+import { toast } from "@/lib/toast";
+import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -79,9 +79,7 @@ const UserModalData = ({ mode, currentUser, excludeRoles, open: controlledOpen, 
                 fullName: currentUser?.full_name || "",
                 email: currentUser.email || "",
                 password: "",
-                userRole: usersRoles[currentUser.id as string] 
-                    || (currentUser as ProfileWithRelations).user_role?.role 
-                    || "",
+                userRole: usersRoles[currentUser.id as string] || (currentUser as ProfileWithRelations).user_role?.role || "",
                 enrollments:
                     classrooms && classrooms.length > 0
                         ? enrollmentsByUserId[currentUser.id as string]?.map((enrollment) => enrollment.classroom_id) || []
@@ -125,25 +123,23 @@ const UserModalData = ({ mode, currentUser, excludeRoles, open: controlledOpen, 
     const handleGeneratePassword = () => {
         const newPassword = generateRandomPassword();
         setValue("password", newPassword);
-        toast.success("Senha gerada com sucesso!", {
+        toast.success({
+            title: "Senha gerada com sucesso!",
             description: "Uma nova senha segura foi gerada automaticamente.",
-            icon: <CheckCircle className="size-4" />,
         });
     };
 
     const showSuccessToast = (message: string, description?: string) => {
-        toast.success(message, {
+        toast.success({
+            title: message,
             description,
-            icon: <CheckCircle className="size-4" />,
-            duration: 4000,
         });
     };
 
     const showErrorToast = (message: string, description?: string) => {
-        toast.error(message, {
+        toast.error({
+            title: message,
             description,
-            icon: <AlertCircle className="size-4" />,
-            duration: 5000,
         });
     };
 
@@ -229,9 +225,8 @@ const UserModalData = ({ mode, currentUser, excludeRoles, open: controlledOpen, 
             }
 
             // Handle role updates
-            const currentUserRole = usersRoles[currentUser.id as string] 
-                || (currentUser as ProfileWithRelations).user_role?.role 
-                || "";
+            const currentUserRole =
+                usersRoles[currentUser.id as string] || (currentUser as ProfileWithRelations).user_role?.role || "";
 
             if (!currentUserRole && data.userRole) {
                 const roleSuccess = await addUserRole({ userId, role: data.userRole as Role });

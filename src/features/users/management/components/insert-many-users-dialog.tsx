@@ -1,6 +1,10 @@
-import React, { ChangeEvent, useState } from "react";
+"use client";
+
+import { ChangeEvent, useState } from "react";
 import Papa from "papaparse";
 import generatePassword from "generate-password";
+import { toast } from "@/lib/toast";
+import { LoaderCircle, Sparkles, X } from "lucide-react";
 
 import {
     Dialog,
@@ -12,24 +16,23 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { LoaderCircle, Sparkles, X } from "lucide-react";
-import { toast } from "sonner";
-import { ClassroomCombobox } from "./classroom-combobox";
-import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
 import { Classroom } from "@/features/classrooms/types";
 import { useUsersStore } from "@/features/users/management";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { REGEX_FOR_EMAIL_VALIDATION, REGEX_FOR_PASSWORD_VALIDATION } from "@/utils/regex/user-regex-validations";
+
+import { cn } from "@/lib/utils";
 import { rolesLabelsOptions } from "@/features/auth/access-control/utils";
 import BadgeSelector from "@/components/shared/badge-selector";
-import { cn } from "@/lib/utils";
 import { Role } from "@/features/auth/access-control/types";
 import { Enrollment, useEnrollmentsManagementStore } from "@/features/enrollments";
 import { useUserRolesManagementStore } from "@/features/auth/access-control/stores/user-role/user-roles-management";
-import { User } from "@supabase/supabase-js";
+import { ClassroomCombobox } from "./classroom-combobox";
+import { AdminUserAttributes } from "../types";
 
 interface UserData {
     name: string;
@@ -164,7 +167,7 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                 if (!REGEX_FOR_EMAIL_VALIDATION.test(user.email)) throw "Invalid email";
                 if (!REGEX_FOR_PASSWORD_VALIDATION.test(user.password)) throw "Invalid password";
 
-                const data: Partial<User> & { password: string } = {
+                const data: AdminUserAttributes = {
                     email: user.email,
                     password: user.password,
                     user_metadata: {
@@ -197,14 +200,20 @@ const InsertManyUsersDialog = ({ excludeRoles, classrooms }: InsertManyUsersDial
                 console.error("Error", error);
                 switch (error) {
                     case "role assign error":
-                        toast.error("Erro ao atribuir o cargo!");
+                        toast.error({
+                            title: "Erro ao atribuir o cargo!",
+                            description: `O usuário ${user.email} foi criado, mas ocorreu um erro ao atribuir o cargo. Tente atribuir o cargo manualmente!`,
+                        });
                         setUsers((prevUsers) =>
                             prevUsers.map((u) => (u.email === user.email ? { ...u, status: "warning" } : u)),
                         );
                         break;
 
                     default:
-                        toast.error("Erro ao criar usuário! Tente novamente mais tarde.");
+                        toast.error({
+                            title: "Erro ao criar usuário!",
+                            description: `Ocorreu um erro ao criar o usuário ${user.email}. Tente novamente mais tarde.`,
+                        });
 
                         setUsers((prevUsers) => prevUsers.map((u) => (u.email === user.email ? { ...u, status: "error" } : u)));
                         break;

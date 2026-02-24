@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { logger } from "@/lib/logger";
 
@@ -162,12 +162,12 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                 try {
                     if (!userId) {
                         log.warn({ operation: "addUserRole" }, "User ID is required");
-                        toast.error("O ID do usuário é obrigatório.");
+                        toast.error({ title: "Erro!", description: "O ID do usuário é obrigatório." });
                         return false;
                     }
                     if (!role) {
                         log.warn({ operation: "addUserRole" }, "Role is required");
-                        toast.error("O cargo é obrigatório.");
+                        toast.error({ title: "Erro!", description: "O cargo é obrigatório." });
                         return false;
                     }
 
@@ -183,13 +183,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         },
                     });
 
-                    toast.success("Cargo adicionado com sucesso!");
+                    toast.success({ title: "Cargo adicionado com sucesso!" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, role, operation: "addUserRole" }, "Error adding user role");
                     }
-                    toast.error("Falha ao adicionar o cargo ao usuário.");
+                    toast.error({ title: "Erro!", description: "Falha ao adicionar o cargo ao usuário." });
                     return false;
                 }
             },
@@ -204,12 +204,12 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                 try {
                     if (!userId) {
                         log.warn({ operation: "updateUserRole" }, "User ID is required");
-                        toast.error("O ID do usuário é obrigatório.");
+                        toast.error({ title: "Erro!", description: "O ID do usuário é obrigatório." });
                         return false;
                     }
                     if (!role) {
                         log.warn({ operation: "updateUserRole" }, "Role is required");
-                        toast.error("O cargo é obrigatório.");
+                        toast.error({ title: "Erro!", description: "O cargo é obrigatório." });
                         return false;
                     }
 
@@ -225,13 +225,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                         },
                     });
 
-                    toast.success("Cargo atualizado com sucesso!");
+                    toast.success({ title: "Cargo atualizado com sucesso!" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, role, operation: "updateUserRole" }, "Error updating user role");
                     }
-                    toast.error("Falha ao atualizar o cargo do usuário.");
+                    toast.error({ title: "Erro!", description: "Falha ao atualizar o cargo do usuário." });
                     return false;
                 }
             },
@@ -245,7 +245,7 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                 try {
                     if (!userId) {
                         log.warn({ operation: "deleteUserRole" }, "User ID is required");
-                        toast.error("User ID is required.");
+                        toast.error({ title: "Erro!", description: "O ID do usuário é obrigatório." });
                         return false;
                     }
 
@@ -257,13 +257,13 @@ export const useUserRolesManagementStore = create<UserRolesManagementStore>()(
                     const updatedRoles = Object.fromEntries(Object.entries(usersRoles).filter(([key]) => key !== userId));
                     set({ usersRoles: updatedRoles });
 
-                    toast.success("Cargo removido com sucesso!");
+                    toast.success({ title: "Cargo removido com sucesso!" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, userId, operation: "deleteUserRole" }, "Error deleting user role");
                     }
-                    toast.error("Falha ao remover o cargo do usuário.");
+                    toast.error({ title: "Erro!", description: "Falha ao remover o cargo do usuário." });
                     return false;
                 }
             },

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { getAllJobsWithApplications, getAllCuratedJobs, createJob, updateJob, deleteJob } from "../actions/jobs";
 import {
@@ -45,7 +45,10 @@ export const useJobStore = create<IJobState & IJobActions>()(
                     return true;
                 } catch (error) {
                     console.error("Error fetching jobs:", error);
-                    toast.error("Erro ao buscar as vagas. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao buscar as vagas",
+                        description: "Ocorreu um erro ao buscar as vagas. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -63,7 +66,10 @@ export const useJobStore = create<IJobState & IJobActions>()(
                     return true;
                 } catch (error) {
                     console.error("Error fetching curated jobs:", error);
-                    toast.error("Erro ao buscar as vagas curadas. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao buscar as vagas curadas",
+                        description: "Ocorreu um erro ao buscar as vagas curadas. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -78,11 +84,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                     if (!jobCreated) throw new Error("Failed to create job");
 
                     set({ jobs: [...get().jobs, jobCreated] });
-                    toast.success("Vaga criada com sucesso!");
+                    toast.success({
+                        title: "Vaga criada com sucesso",
+                        description: "A vaga foi criada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error creating job:", error);
-                    toast.error("Erro ao criar a vaga. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao criar a vaga",
+                        description: "Ocorreu um erro ao criar a vaga. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -98,11 +110,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                     set({
                         jobs: get().jobs.map((job) => (job.id === jobId ? jobUpdated : job)),
                     });
-                    toast.success("Vaga atualizada com sucesso!");
+                    toast.success({
+                        title: "Vaga atualizada com sucesso",
+                        description: "A vaga foi atualizada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error updating job:", error);
-                    toast.error("Erro ao editar vaga. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao editar vaga",
+                        description: "Ocorreu um erro ao editar a vaga. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -125,11 +143,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                         jobs: get().jobs.map((job) => (job.id === jobId ? jobUpdated : job)),
                     });
 
-                    toast.success("Vaga aprovada com sucesso!");
+                    toast.success({
+                        title: "Vaga aprovada com sucesso",
+                        description: "A vaga foi aprovada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error curating job:", error);
-                    toast.error("Erro ao aprovar vaga. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao aprovar vaga",
+                        description: "Ocorreu um erro ao aprovar a vaga. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -152,11 +176,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                         jobs: get().jobs.map((job) => (job.id === jobId ? jobUpdated : job)),
                     });
 
-                    toast.success("Vaga reenviada à curadoria com sucesso!");
+                    toast.success({
+                        title: "Vaga reenviada à curadoria com sucesso",
+                        description: "A vaga foi reenviada à curadoria com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error resending job to curation:", error);
-                    toast.error("Erro ao reenviar vaga à curadoria. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao reenviar vaga à curadoria",
+                        description: "Ocorreu um erro ao reenviar a vaga à curadoria. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -178,11 +208,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                         jobs: get().jobs.map((job) => (job.id === jobId ? jobUpdated : job)),
                     });
 
-                    toast.success("Vaga marcada como enviada ao Discord com sucesso!");
+                    toast.success({
+                        title: "Vaga marcada como enviada ao Discord com sucesso",
+                        description: "A vaga foi marcada como enviada ao Discord com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error marking job as on Discord:", error);
-                    toast.error("Erro ao marcar vaga como enviada ao Discord. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao marcar vaga como enviada ao Discord",
+                        description: "Ocorreu um erro ao marcar a vaga como enviada ao Discord. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -205,11 +241,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                         jobs: get().jobs.map((job) => (job.id === jobId ? jobUpdated : job)),
                     });
 
-                    toast.success("Vaga arquivada com sucesso!");
+                    toast.success({
+                        title: "Vaga arquivada com sucesso",
+                        description: "A vaga foi arquivada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error archiving job:", error);
-                    toast.error("Erro ao arquivar a vaga. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao arquivar a vaga",
+                        description: "Ocorreu um erro ao arquivar a vaga. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -222,11 +264,17 @@ export const useJobStore = create<IJobState & IJobActions>()(
                     if (!response) throw new Error("Failed to delete job");
 
                     set({ jobs: get().jobs.filter((job) => job.id !== jobId) });
-                    toast.success("Vaga deletada com sucesso!");
+                    toast.success({
+                        title: "Vaga deletada com sucesso",
+                        description: "A vaga foi deletada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error deleting job:", error);
-                    toast.error("Erro ao deletar vaga. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao deletar vaga",
+                        description: "Ocorreu um erro ao deletar a vaga. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },

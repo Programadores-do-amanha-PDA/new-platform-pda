@@ -2,10 +2,10 @@ import Stack from "@/components/Stack";
 import Image from "next/image";
 
 const CARDS = [
-    { img: "/auth/pda-students.jpg", description: "Card 1" },
-    { img: "/auth/pda-students-2.webp", description: "Card 2" },
-    { img: "/auth/pda-students-3.webp", description: "Card 3" },
-    { img: "/auth/pda-students-4.webp", description: "Card 4" },
+    { id: 1, img: "/auth/pda-students.jpg", description: "Card 1" },
+    { id: 2, img: "/auth/pda-students-2.webp", description: "Card 2" },
+    { id: 3, img: "/auth/pda-students-3.webp", description: "Card 3" },
+    { id: 4, img: "/auth/pda-students-4.webp", description: "Card 4" },
 ];
 
 export const SidePdaLogo = () => {
@@ -17,9 +17,9 @@ export const SidePdaLogo = () => {
                         randomRotation={true}
                         sensitivity={200}
                         mobileBreakpoint={768}
-                        cards={CARDS.map((card, i) => (
+                        cards={CARDS.map((card) => (
                             <figure
-                                key={"card-" + i}
+                                key={`card-${card.id}`}
                                 className="relative w-full h-full flex flex-col rounded-lg overflow-hidden bg-red-50"
                             >
                                 <Image

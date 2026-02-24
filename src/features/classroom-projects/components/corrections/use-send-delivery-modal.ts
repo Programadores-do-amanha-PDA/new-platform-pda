@@ -1,5 +1,5 @@
 import { useReducer } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import axios from "axios";
 
 import { useUsersStore } from "@/features/users/management";
@@ -191,7 +191,10 @@ export const useSendDeliveryModal = ({ deliveries, corrections, project, setClos
 
     const handleContinue = () => {
         if (deliveriesSelected.length === 0) {
-            toast.error("Selecione pelo menos um estudante!");
+            toast.error({
+                title: "Erro!",
+                description: "Selecione pelo menos um estudante!",
+            });
             return;
         }
         dispatch({ type: "GO_TO_STEP", payload: 1 });
@@ -199,7 +202,10 @@ export const useSendDeliveryModal = ({ deliveries, corrections, project, setClos
 
     const handleSubmit = async () => {
         if (deliveriesSelected.length === 0) {
-            toast.error("Selecione pelo menos um estudante!");
+            toast.error({
+                title: "Erro!",
+                description: "Selecione pelo menos um estudante!",
+            });
             return;
         }
 
@@ -217,7 +223,9 @@ export const useSendDeliveryModal = ({ deliveries, corrections, project, setClos
         const successfulDeliveries: string[] = [];
         let hasErrors = false;
 
-        toast.info("Enviando e-mails de feedback...");
+        toast.info({
+            title: "Enviando e-mails de feedback...",
+        });
 
         for (const deliveryMember of deliveriesSelected) {
             const deliveryKey = `${deliveryMember.deliveryId}-${deliveryMember.email}`;
@@ -285,13 +293,20 @@ export const useSendDeliveryModal = ({ deliveries, corrections, project, setClos
         }
 
         if (hasErrors && successfulDeliveries.length > 0) {
-            toast.warning(
-                `${successfulDeliveries.length} e-mails enviados com sucesso. Alguns falharam - verifique os detalhes.`,
-            );
+            toast.info({
+                title: "Aviso!",
+                description: `${successfulDeliveries.length} e-mails enviados com sucesso. Alguns falharam - verifique os detalhes.`,
+            });
         } else if (hasErrors && successfulDeliveries.length === 0) {
-            toast.error("Nenhum e-mail pôde ser enviado. Verifique os detalhes e tente novamente.");
+            toast.error({
+                title: "Erro!",
+                description: "Nenhum e-mail pôde ser enviado. Verifique os detalhes e tente novamente.",
+            });
         } else {
-            toast.success("Todos os e-mails foram enviados com sucesso!");
+            toast.success({
+                title: "Sucesso!",
+                description: "Todos os e-mails foram enviados com sucesso!",
+            });
         }
 
         dispatch({ type: "SET_SENDING", payload: false });

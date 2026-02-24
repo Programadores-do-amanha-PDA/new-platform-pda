@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ColumnDef } from "@tanstack/react-table";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import {
     ArrowDown,
     ArrowUp,
@@ -17,7 +17,6 @@ import {
     RotateCw,
     Siren,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -30,8 +29,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 
+import { cn } from "@/lib/utils";
+import { DeleteConfirmationButton } from "@/components/shared/delete-confirmation-dialog";
 import { MeetingDataTable } from "../components/meetings/meeting/meeting-data-table";
 import PastInstancieDialog from "../components/meetings/meeting/past-instancie-dialog";
 import { useZoomAccountStore } from "../stores/accounts";
@@ -40,10 +40,10 @@ import { useZoomMeetingPastInstanceStore } from "../stores/past-instances";
 import { ZoomMeetingOccurrenceT, ZoomMeeting, ZoomMeetingParticipant } from "../types/meetings";
 import { ZoomMeetingPastInstance } from "../types/past-instances";
 
-type MeetingOccurrence = ZoomMeetingOccurrenceT & {
+interface MeetingOccurrence extends ZoomMeetingOccurrenceT {
     topic: string | undefined;
     meeting_id: string | null;
-};
+}
 
 type MeetingPastInstance = ZoomMeetingPastInstance & {
     topic: string | undefined;
@@ -499,42 +499,63 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
     const handleRefreshNewMeetingData = async () => {
         setIsRefreshingNewMeetingData(true);
 
-        try {
-            if (!currentMeeting) throw new Error("Meeting not found");
-
-            const account = accounts.find((account) => account.id === currentMeeting.account_id);
-            if (!account) return;
-
-            await refreshAndAddOnlyNewPastInstances(currentMeeting, account);
-        } catch {
-            toast.error("Erro ao atualizar a reunião!");
-        } finally {
-            setIsRefreshingNewMeetingData(false);
+        if (!currentMeeting) {
+            toast.error({
+                title: "Reunião não encontrada",
+                description: "Não foi possível encontrar a reunião para atualizar os dados.",
+            });
+            return;
         }
+
+        const account = accounts.find((account) => account.id === currentMeeting.account_id);
+        if (!account) return;
+
+        await toast.promise(refreshAndAddOnlyNewPastInstances(currentMeeting, account), {
+            loading: { title: "Atualizando dados da reunião..." },
+            success: {
+                title: "Dados atualizados com sucesso!",
+                description: "Os dados da reunião foram atualizados com sucesso.",
+            },
+            error: { title: "Erro ao atualizar dados", description: "Não foi possível atualizar os dados da reunião." },
+        });
+
+        setIsRefreshingNewMeetingData(false);
     };
 
     const handleRefreshAllMeetingData = async () => {
         setIsRefreshingAllMeetingData(true);
 
-        try {
-            if (!currentMeeting) throw new Error("Meeting not found");
-
-            const account = accounts.find((account) => account.id === currentMeeting.account_id);
-            if (!account) return;
-
-            await refreshAndUpdateMeeting(currentMeeting, account);
-        } catch {
-            toast.error("Erro ao atualizar a reunião!");
-        } finally {
-            setIsRefreshingAllMeetingData(false);
+        if (!currentMeeting) {
+            toast.error({
+                title: "Reunião não encontrada",
+                description: "Não foi possível encontrar a reunião para atualizar os dados.",
+            });
+            return;
         }
+
+        const account = accounts.find((account) => account.id === currentMeeting.account_id);
+        if (!account) return;
+
+        await toast.promise(refreshAndUpdateMeeting(currentMeeting, account), {
+            loading: { title: "Atualizando dados da reunião..." },
+            success: {
+                title: "Dados atualizados com sucesso!",
+                description: "Os dados da reunião foram atualizados com sucesso.",
+            },
+            error: { title: "Erro ao atualizar dados", description: "Não foi possível atualizar os dados da reunião." },
+        });
+
+        setIsRefreshingAllMeetingData(false);
     };
 
     const handleRefreshInstanceData = useMemo(
         () => async (instanceId: string, uuid: string) => {
             const account = accounts.find((account) => account.id === currentMeeting.account_id);
             if (!account) {
-                toast.error("Conta não encontrada!");
+                toast.error({
+                    title: "Conta não encontrada",
+                    description: "Não foi possível encontrar a conta associada à reunião.",
+                });
                 return;
             }
 
@@ -546,7 +567,13 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
     const handleOpenDialog = useMemo(
         () => (instancieId: string) => {
             const instancie = pastInstances.find((p) => p.id === instancieId);
-            if (!instancie) return toast.error("Instância não encontrada!");
+            if (!instancie) {
+                toast.error({
+                    title: "Instância não encontrada",
+                    description: "Não foi possível encontrar a instância associada à reunião.",
+                });
+                return;
+            }
             setSelectedInstancie(instancie);
             setIsDialogOpen(true);
         },
@@ -563,41 +590,29 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
         [currentMeeting],
     );
 
-    const meetingPastInstances = useMemo(
-        () =>
-            pastInstances
-                ?.filter(Boolean)
-                .filter((p) => p.meeting_id === currentMeeting?.id)
-                ?.map((pastInstance) => {
-                    const participantGroups = new Map<string, ZoomMeetingParticipant>();
+    const meetingPastInstances = pastInstances
+        ?.filter(Boolean)
+        .filter((p) => p.meeting_id === currentMeeting?.id)
+        ?.map((pastInstance) => {
+            const participantGroups = new Map<string, ZoomMeetingParticipant>();
 
-                    pastInstance?.participants?.forEach((participant: ZoomMeetingParticipant) => {
-                        const existing = participantGroups.get(participant.user_email);
-                        if (!existing) {
-                            participantGroups.set(participant.user_email, participant);
-                        }
-                    });
+            pastInstance?.participants?.forEach((participant: ZoomMeetingParticipant) => {
+                const existing = participantGroups.get(participant.user_email);
+                if (!existing) {
+                    participantGroups.set(participant.user_email, participant);
+                }
+            });
 
-                    return {
-                        ...pastInstance,
-                        topic: currentMeeting?.topic,
-                        duration: currentMeeting?.duration,
-                        participants: Array.from(participantGroups.values()),
-                        updatePastInstanceById,
-                        handleOpenDialog,
-                        handleRefreshInstanceData,
-                    };
-                }),
-        [
-            currentMeeting?.duration,
-            currentMeeting?.id,
-            currentMeeting?.topic,
-            handleOpenDialog,
-            handleRefreshInstanceData,
-            pastInstances,
-            updatePastInstanceById,
-        ],
-    );
+            return {
+                ...pastInstance,
+                topic: currentMeeting?.topic,
+                duration: currentMeeting?.duration,
+                participants: Array.from(participantGroups.values()),
+                updatePastInstanceById,
+                handleOpenDialog,
+                handleRefreshInstanceData,
+            };
+        });
 
     const currentMeetingOccurrences = meetingOccurrences || [];
     const currentMeetingPastInstances = meetingPastInstances || [];
@@ -676,7 +691,7 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
 
                     {meetingOccurrences &&
                         meetingOccurrences?.filter(
-                            (m) => new Date(m.start_time).getTime() + m.duration * 60 * 1000 < Date.now(),
+                            (m) => new Date(m.start_time).getTime() + m.duration * 60 * 1000 < new Date().getTime(),
                         )?.length > 0 && (
                             <Alert variant={"destructive"}>
                                 <Siren className="size-4" />
@@ -687,7 +702,9 @@ export default function ZoomRecurrenceMeetingPage({ currentMeeting }: { currentM
                                     Foram encontrados{" "}
                                     {
                                         meetingOccurrences?.filter(
-                                            (m) => new Date(m.start_time).getTime() + m.duration * 60 * 1000 < Date.now(),
+                                            (m) =>
+                                                new Date(m.start_time).getTime() + m.duration * 60 * 1000 <
+                                                new Date().getTime(),
                                         ).length
                                     }{" "}
                                     instancias desatualizadas, atualize (re-sincronize) os dados desta reunião.

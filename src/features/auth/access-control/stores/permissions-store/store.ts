@@ -1,11 +1,17 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { logger } from "@/lib/logger";
 import { Role, Permission, RolesLabels } from "../../types";
 import { PermissionsState, PermissionsActions } from "./types";
-import { getAllRolePermissionsAsync, getPermissionsByRoleAsync, insertRolePermissionAsync, deleteRolePermission, deleteAllPermissionsForRoleAsync } from "../../actions/role-permissions";
+import {
+    getAllRolePermissionsAsync,
+    getPermissionsByRoleAsync,
+    insertRolePermissionAsync,
+    deleteRolePermission,
+    deleteAllPermissionsForRoleAsync,
+} from "../../actions/role-permissions";
 
 const log = logger.child({ module: "PermissionsStore" });
 
@@ -64,7 +70,10 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                     if (error instanceof Error) {
                         log.warn({ err: error, operation: "fetchAllRolePermissions" }, "Error fetching all role permissions");
                     }
-                    toast.error("Falha ao buscar permissões de todos os cargos.");
+                    toast.error({
+                        title: "Erro ao buscar permissões",
+                        description: "Ocorreu um erro ao buscar permissões de todos os cargos.",
+                    });
                     set({ allRolePermissions: [] });
                     return false;
                 } finally {
@@ -103,7 +112,10 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                             "Error fetching permissions for role",
                         );
                     }
-                    toast.error(`Falha ao buscar permissões para o cargo ${role}.`);
+                    toast.error({
+                        title: `Erro!`,
+                        description: `Ocorreu um erro ao buscar permissões para o cargo ${role}.`,
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -149,7 +161,10 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                             "Error fetching permissions for all roles",
                         );
                     }
-                    toast.error("Falha ao buscar permissões para todos os cargos.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Ocorreu um erro ao buscar permissões para todos os cargos.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -181,7 +196,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                         },
                     }));
 
-                    toast.success("Permissão adicionada ao cargo com sucesso.");
+                    toast.success({ title: "Permissão adicionada ao cargo com sucesso" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
@@ -190,7 +205,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                             "Error adding permission to role",
                         );
                     }
-                    toast.error("Falha ao adicionar permissão ao cargo.");
+                    toast.error({ title: "Falha ao adicionar permissão ao cargo" });
                     return false;
                 } finally {
                     set({ operationLoading: false });
@@ -222,7 +237,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                         },
                     }));
 
-                    toast.success("Permissão removida do cargo com sucesso.");
+                    toast.success({ title: "Permissão removida do cargo com sucesso" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
@@ -231,7 +246,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                             "Error removing permission from role",
                         );
                     }
-                    toast.error("Falha ao remover permissão do cargo.");
+                    toast.error({ title: "Falha ao remover permissão do cargo" });
                     return false;
                 } finally {
                     set({ operationLoading: false });
@@ -262,7 +277,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                         },
                     }));
 
-                    toast.success("Todas as permissões removidas do cargo com sucesso.");
+                    toast.success({ title: "Todas as permissões removidas do cargo com sucesso" });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
@@ -271,7 +286,7 @@ export const usePermissionsStore = create<PermissionsState & PermissionsActions>
                             "Error removing all permissions from role",
                         );
                     }
-                    toast.error("Falha ao remover todas as permissões do cargo.");
+                    toast.error({ title: "Falha ao remover todas as permissões do cargo" });
                     return false;
                 } finally {
                     set({ operationLoading: false });

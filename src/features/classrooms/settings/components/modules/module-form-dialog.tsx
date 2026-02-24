@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { DateRange } from "react-day-picker";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -18,6 +18,7 @@ import { DateIntervalPicker } from "@/components/shared/date-interval";
 
 import { ClassModules } from "../../types";
 import { useClassroomSettingStore } from "../../store";
+import { logger } from "@/lib/logger";
 
 interface ModuleFormDialogProps {
     configId: string;
@@ -25,6 +26,8 @@ interface ModuleFormDialogProps {
     onClose?: () => void;
     trigger?: React.ReactNode;
 }
+
+const log = logger.child({ module: "ModuleFormDialog" });
 
 export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: ModuleFormDialogProps) => {
     const [open, setOpen] = useState(false);
@@ -53,12 +56,18 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         e.preventDefault();
 
         if (!title.trim()) {
-            toast.error("Título é obrigatório!");
+            toast.error({
+                title: "Erro ao salvar módulo",
+                description: "O título é obrigatório!",
+            });
             return;
         }
 
         if (!dateRange?.from) {
-            toast.error("Data de início é obrigatória!");
+            toast.error({
+                title: "Erro ao salvar módulo",
+                description: "A data de início é obrigatória!",
+            });
             return;
         }
 
@@ -67,7 +76,10 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         try {
             const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
             if (!currentConfig) {
-                toast.error("Configuração não encontrada!");
+                toast.error({
+                    title: "Erro ao salvar módulo",
+                    description: "Configuração não encontrada!",
+                });
                 return;
             }
 
@@ -99,11 +111,17 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
 
             if (success) {
                 handleClose();
-                toast.success(currentModule ? "Módulo atualizado com sucesso!" : "Módulo criado com sucesso!");
+                toast.success({
+                    title: currentModule ? "Módulo atualizado" : "Módulo criado",
+                    description: currentModule ? "Módulo atualizado com sucesso!" : "Módulo criado com sucesso!",
+                });
             }
         } catch (error) {
-            console.error("Error saving module:", error);
-            toast.error("Erro ao salvar módulo!");
+            log.error({ err: error, operation: "saveModule" }, "Error saving module");
+            toast.error({
+                title: "Erro ao salvar módulo",
+                description: "Ocorreu um erro ao salvar o módulo!",
+            });
         } finally {
             setLoading(false);
         }
@@ -151,4 +169,3 @@ export const ModuleFormDialog = ({ configId, currentModule, onClose, trigger }: 
         </Dialog>
     );
 };
-

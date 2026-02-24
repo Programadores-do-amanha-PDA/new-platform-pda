@@ -98,9 +98,9 @@ const AllProjectsPage = () => {
 
                     return getClosingDateTime(a) - getClosingDateTime(b);
                   })
-                  .map((project, i) => (
+                  .map((project) => (
                     <ProjectCard
-                      key={`project-${i}`}
+                      key={`project-${project.id}`}
                       project={project}
                       expansive={true}
                       classroomId={classroom_id}

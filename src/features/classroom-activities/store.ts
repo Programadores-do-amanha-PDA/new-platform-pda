@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { logger } from "@/lib/logger";
 import {
@@ -55,17 +55,26 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     if (!id) throw new Error("Required ID field is missing");
                     set({ loading: true });
 
-                    const activityById = await getActivityById({ id });
+                    const activityById = await toast.promise(getActivityById({ id }), {
+                        loading: {
+                            title: "Carregando atividade...",
+                        },
+                        success: {
+                            title: "Atividade carregada com sucesso!",
+                        },
+                        error: {
+                            title: "Erro!",
+                            description: "Erro ao carregar atividade. Tente novamente mais tarde!",
+                        },
+                    });
+
                     if (!activityById) throw new Error("no activity by ID");
 
                     return activityById;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.warn(
-                            { err: error, activityId: id, operation: "getActivityById" },
-                            "Error on getting activity by id",
-                        );
-                    }
+                    log.error({ err: error, activityId: id, operation: "getActivityById" }, "Error on getting activity by id");
+
+                    toast.error({ title: "Erro!", description: "Erro ao carregar atividade. Tente novamente mais tarde!" });
                     return null;
                 } finally {
                     set({ loading: false });
@@ -75,11 +84,22 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
             createActivity: async ({ activityData }) => {
                 try {
                     if (!activityData.classroom_id) {
-                        toast.error("o ID da turma é obrigatório!");
+                        toast.error({ title: "Erro!", description: "o ID da turma é obrigatório!" });
                         throw new Error("Missing required field: classroom_id");
                     }
 
-                    const newActivity = await createActivity({ activityData });
+                    const newActivity = await toast.promise(createActivity({ activityData }), {
+                        loading: {
+                            title: "Criando atividade...",
+                        },
+                        success: {
+                            title: "Atividade criada com sucesso!",
+                        },
+                        error: {
+                            title: "Erro!",
+                            description: "Erro ao criar atividade. Tente novamente mais tarde!",
+                        },
+                    });
                     if (!newActivity) throw new Error("no activity create response");
 
                     set((prev) => {
@@ -89,38 +109,48 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                     });
 
                     log.info({ newActivity }, "New activity created");
-                    toast.success("Atividade criada com sucesso!");
 
                     return newActivity;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.error({ err: error, activityData, operation: "createActivity" }, "Error creating activity:");
-                    }
+                    log.error({ err: error, activityData, operation: "createActivity" }, "Error creating activity:");
 
-                    toast.error("Erro ao criar nova atividade. Tente novamente mais tarde!");
+                    toast.error({ title: "Erro!", description: "Erro ao criar nova atividade. Tente novamente mais tarde!" });
                     return false;
                 }
             },
 
             createMultipleActivities: async ({ activitiesData }) => {
-                let loadingToastId;
                 try {
                     if (!activitiesData || activitiesData.length === 0) {
-                        toast.error("Nenhuma atividade foi fornecida!");
-                        throw new Error("No activities data provided");
+                        toast.error({ title: "Erro!", description: "Nenhuma atividade foi fornecida!" });
+                        return false;
                     }
 
                     // Validate required fields
                     for (const activityData of activitiesData) {
                         if (!activityData.classroom_id) {
-                            toast.error("ID da turma está faltando em uma ou mais atividades!");
-                            throw new Error("The required classroom ID field is missing in one or more activities.");
+                            toast.error({
+                                title: "Erro!",
+                                description: "ID da turma está faltando em uma ou mais atividades!",
+                            });
+                            return false;
                         }
                     }
 
-                    loadingToastId = toast.loading(`Criando ${activitiesData.length} atividades...`);
+                    const newActivities = await toast.promise(createMultipleActivities({ activitiesData }), {
+                        loading: {
+                            title: `Criando ${activitiesData.length} atividades...`,
+                        },
+                        success: {
+                            title: "Atividades criadas com sucesso!",
+                            description: `${activitiesData.length} atividades criadas com sucesso!`,
+                        },
+                        error: {
+                            title: "Erro!",
+                            description: "Erro ao criar múltiplas atividades. Tente novamente mais tarde!",
+                        },
+                    });
 
-                    const newActivities = await createMultipleActivities({ activitiesData });
                     if (!newActivities) throw new Error("no multiple activities create response");
 
                     set((prev) => {
@@ -129,10 +159,8 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         return { activities: prevActivitiesWithNewActivities };
                     });
 
-                    toast.dismiss(loadingToastId);
                     log.info({ newActivities }, "New activities created");
 
-                    toast.success(`${newActivities.length} atividades criadas com sucesso!`);
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
@@ -142,10 +170,8 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         );
                     }
 
-                    toast.error("Erro ao criar múltiplas atividades!");
+                    toast.error({ title: "Erro!", description: "Erro ao criar múltiplas atividades!" });
                     return false;
-                } finally {
-                    if (loadingToastId) toast.dismiss(loadingToastId);
                 }
             },
 
@@ -155,9 +181,19 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         throw new Error("id and updates fields are required");
                     }
 
-                    const loadingToastId = toast.loading("Atualizando atividade...");
-                    const updatedActivity = await updateActivityById({ id, updates });
-                    if (!updatedActivity) throw new Error("no update activity response");
+                    const updatedActivity = await toast.promise(updateActivityById({ id, updates }), {
+                        loading: {
+                            title: "Atualizando atividade...",
+                        },
+                        success: {
+                            title: "Atividade atualizada com sucesso!",
+                        },
+                        error: {
+                            title: "Erro!",
+                            description: "Erro ao atualizar atividade!",
+                        },
+                    });
+                    if (!updatedActivity) throw new Error("no updated activity returned");
 
                     set((prev) => {
                         const updatedActivities = prev.activities.map((activity) =>
@@ -170,10 +206,7 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         };
                     });
 
-                    toast.dismiss(loadingToastId);
-                    toast.success("Atividade atualizada com sucesso!");
-
-                    return updateActivityById;
+                    return updatedActivity;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error(
@@ -182,7 +215,7 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         );
                     }
 
-                    toast.error("Erro ao atualizar a atividade!");
+                    toast.error({ title: "Erro!", description: "Erro ao atualizar a atividade!" });
                     return false;
                 }
             },
@@ -191,7 +224,18 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                 try {
                     if (!id) throw new Error("activity id is required to delete");
 
-                    const isActivityDeleted = await deleteActivityById({ id });
+                    const isActivityDeleted = await toast.promise(deleteActivityById({ id }), {
+                        loading: {
+                            title: "Deletando atividade...",
+                        },
+                        success: {
+                            title: "Atividade deletada com sucesso!",
+                        },
+                        error: {
+                            title: "Erro!",
+                            description: "Erro ao deletar atividade!",
+                        },
+                    });
                     if (!isActivityDeleted) throw new Error("no delete activity response");
 
                     set((prev) => {
@@ -203,14 +247,11 @@ export const useActivityStore = create<ActivityStoreState & ActivityActions>()(
                         };
                     });
 
-                    toast.success("Atividade deletada com sucesso!");
-
                     return true;
                 } catch (error) {
-                    if (error instanceof Error) {
-                        log.error({ err: error, activityId: id, operation: "deleteActivityById" }, "Error deleting activity");
-                    }
-                    toast.error("Erro ao deletar atividade. Tente novamente mais tarde!");
+                    log.error({ err: error, activityId: id, operation: "deleteActivityById" }, "Error deleting activity");
+
+                    toast.error({ title: "Erro!", description: "Erro ao deletar atividade. Tente novamente mais tarde!" });
 
                     return false;
                 }

@@ -1,1 +1,1 @@
-export { default } from "@/components/layouts/dashboard/classrooms/classroom-default-layout";
+export { default } from "@/components/layouts/classroom-default-layout";

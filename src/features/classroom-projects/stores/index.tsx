@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { getAllProjectsByClassroomId, createClassroomProject, updateClassroomProjectById, deleteProjectById } from "../actions";
 import { ClassroomProject } from "../types/projects/project";
+import { logger } from "@/lib/logger";
 
-export interface ClassroomProjectStoreStateT {
+const log = logger.child({ module: "ClassroomProjectStore" });
+
+interface ClassroomProjectStoreStateT {
     projects: ClassroomProject[];
     loading: boolean;
 }
@@ -40,8 +43,11 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     set({ projects: allProjects });
                     return true;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao carregar projetos. Tente novamente mais tarde.");
+                    log.error({ err: error, operation: "get_all_projects_by_classroom_id" }, "Error fetching projects");
+                    toast.error({
+                        title: "Erro ao carregar projetos",
+                        description: "Ocorreu um erro ao carregar os projetos. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -58,11 +64,14 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     set({
                         projects: [...get().projects, projectCreated],
                     });
-                    toast.success("Projeto criado com sucesso!");
+                    toast.success({ title: "Projeto criado!", description: "O projeto foi criado com sucesso." });
                     return true;
                 } catch (error) {
-                    console.error(error);
-                    toast.error("Erro ao criar projeto. Tente novamente mais tarde.");
+                    log.error({ err: error, operation: "create_project" }, "Error creating project");
+                    toast.error({
+                        title: "Erro ao criar projeto",
+                        description: "Ocorreu um erro ao criar o projeto. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -79,11 +88,14 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                             project.id === updatedProject.id ? updatedProject : project,
                         ),
                     });
-                    toast.success("Projeto atualizado com sucesso!");
+                    toast.success({ title: "Projeto atualizado!", description: "O projeto foi atualizado com sucesso." });
                     return true;
                 } catch (error) {
-                    console.error("Error updating project:", error);
-                    toast.error("Erro ao atualizar projeto. Tente novamente mais tarde.");
+                    log.error({ err: error, operation: "update_project" }, "Error updating project");
+                    toast.error({
+                        title: "Erro ao atualizar projeto",
+                        description: "Erro ao atualizar projeto. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -96,11 +108,14 @@ export const useClassroomProjectStore = create<ClassroomProjectStoreStateT & Cla
                     set({
                         projects: get().projects.filter((project) => project.id !== id),
                     });
-                    toast.success("Projeto deletado com sucesso!");
+                    toast.success({ title: "Projeto deletado!", description: "O projeto foi deletado com sucesso." });
                     return true;
                 } catch (error) {
-                    console.error("Error deleting project:", error);
-                    toast.error("Erro ao deletar projeto. Tente novamente mais tarde.");
+                    log.error({ err: error, operation: "delete_project" }, "Error deleting project");
+                    toast.error({
+                        title: "Erro ao deletar projeto",
+                        description: "Ocorreu um erro ao deletar o projeto. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },

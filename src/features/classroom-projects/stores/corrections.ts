@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import {
     getAllCorrectionsByProjectId,
@@ -105,7 +105,10 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao carregar correções. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -134,7 +137,10 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao carregar correções. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -161,7 +167,10 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao carregar correções. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao carregar correções. Tente novamente mais tarde.",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -190,11 +199,17 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                             },
                         }));
                     }
-                    toast.success("Correção criada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Correção criada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error(error);
-                    toast.error("Erro ao criar correção. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao criar correção. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -218,11 +233,17 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                             ),
                         },
                     }));
-                    toast.success("Correção atualizada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Correção atualizada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error updating correction:", error);
-                    toast.error("Erro ao atualizar correção. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao atualizar correção. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },
@@ -242,11 +263,17 @@ export const useClassroomProjectCorrectionsStore = create<CorrectionState & Corr
                             [classroomId]: currentCorrections.filter((correction) => correction.id !== id),
                         },
                     }));
-                    toast.success("Correção deletada com sucesso!");
+                    toast.success({
+                        title: "Sucesso!",
+                        description: "Correção deletada com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     console.error("Error deleting correction:", error);
-                    toast.error("Erro ao deletar correção. Tente novamente mais tarde.");
+                    toast.error({
+                        title: "Erro!",
+                        description: "Erro ao deletar correção. Tente novamente mais tarde.",
+                    });
                     return false;
                 }
             },

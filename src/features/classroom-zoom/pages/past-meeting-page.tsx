@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDownIcon, FolderX, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -212,19 +212,21 @@ export default function ZoomPastMeetingPage({ currentMeeting }: { currentMeeting
     const handleRefreshMeeting = async () => {
         setIsUpdating(true);
 
-        try {
-            if (!currentMeeting) throw new Error("Meeting not found");
+        if (!currentMeeting) toast.error({ title: "Erro!", description: "Reunião não encontrada!" });
 
-            const account = accounts.find((account) => account.id === currentMeeting.account_id);
-            if (!account) return;
+        const account = accounts.find((account) => account.id === currentMeeting.account_id);
+        if (!account) return;
 
-            await refreshAndUpdateMeeting(currentMeeting, account);
+        await toast.promise(refreshAndUpdateMeeting(currentMeeting, account), {
+            loading: { title: "Atualizando reunião..." },
+            success: { title: "Reunião atualizada com sucesso!" },
+            error: {
+                title: "Erro ao atualizar reunião",
+                description: "Ocorreu um erro ao atualizar a reunião. Tente novamente mais tarde.",
+            },
+        });
 
-            setIsUpdating(false);
-        } catch {
-            toast.error("Erro ao atualizar a reunião!");
-            setIsUpdating(false);
-        }
+        setIsUpdating(false);
     };
 
     const currentPollResults = currentMeeting.poll_results || [];

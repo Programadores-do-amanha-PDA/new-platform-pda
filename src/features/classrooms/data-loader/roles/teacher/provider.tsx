@@ -76,7 +76,7 @@ export function TeacherClassroomDataLoader({ children, classroomId }: Readonly<C
             projectStore.getAllProjectsByClassroomId(classroomId),
             deliveryStore.getAllDeliveriesByClassroomId(classroomId),
             correctionStore.getAllCorrectionsByClassroomId(classroomId),
-            zoomAccountStore.getAllAccounts(classroomId),
+            zoomAccountStore.getAllZoomAccounts(classroomId),
             zoomMeetingStore.getAllMeetings(classroomId),
             zoomMeetingPastInstanceStore.getAllPastInstancesByClassroom(classroomId),
             classroomActivityStore.fetchAllActivitiesByClassroom({ classroomId }),

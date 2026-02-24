@@ -3,7 +3,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Separator } from "@/components/ui/separator";
@@ -58,7 +58,10 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
             const userData = buildUserUpdateData({ formData: data, currentUser });
 
             if (Object.keys(userData).length === 0) {
-                toast.info("Nenhuma alteração foi feita.");
+                toast.info({
+                    title: "Nenhuma alteração foi feita",
+                    description: "Nenhuma alteração foi feita nos dados do usuário.",
+                });
                 return;
             }
 
@@ -68,10 +71,16 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
                 throw new Error("Falha ao atualizar dados do usuário");
             }
 
-            toast.success("Sucesso ao editar seus dados!");
+            toast.success({
+                title: "Sucesso ao editar seus dados",
+                description: "Os dados do usuário foram atualizados com sucesso!",
+            });
 
             if (isValueChanged({ currentValue: data.email, newValue: currentUser.email })) {
-                toast.info("Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!");
+                toast.info({
+                    title: "Alteração de email pendente",
+                    description: "Para concluir a troca de E-mail confirme a troca usando o email atual ou o novo e-mail!",
+                });
             }
 
             onUpdateUser();
@@ -81,7 +90,7 @@ export const ProfileDataTabs = ({ currentUser, onUpdateUser }: Readonly<ProfileD
             const errorMessage =
                 error instanceof Error ? error.message : "Erro ao atualizar seus dados! Tente novamente mais tarde.";
 
-            toast.error(errorMessage);
+            toast.error({ title: "Erro ao atualizar perfil", description: errorMessage });
             setError("root", {
                 type: "manual",
                 message: errorMessage,

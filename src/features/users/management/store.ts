@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 import { logger } from "@/lib/logger";
 
@@ -93,7 +93,10 @@ export const useUsersStore = create<UsersState & UsersActions>()(
                     if (error instanceof Error) {
                         log.warn({ err: error, operation: "fetchAllUsersWithProfiles" }, "Error fetching users with profiles");
                     }
-                    toast.error("Erro ao buscar usuários. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao buscar usuários",
+                        description: "Ocorreu um erro ao buscar os usuários. Tente novamente mais tarde!",
+                    });
                     return false;
                 } finally {
                     set({ loading: false });
@@ -128,14 +131,20 @@ export const useUsersStore = create<UsersState & UsersActions>()(
                     set((state) => ({
                         users: [...state.users, { ...data.profile }],
                     }));
-                    toast.success("Novo usuário criado com sucesso!");
+                    toast.success({
+                        title: "Novo usuário criado com sucesso",
+                        description: "O usuário foi criado com sucesso!",
+                    });
 
                     return userResponse.id;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, operation: "createNewUser" }, "Error creating new user");
                     }
-                    toast.error("Erro ao criar novo usuário!");
+                    toast.error({
+                        title: "Erro ao criar novo usuário",
+                        description: "Ocorreu um erro ao criar o usuário. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -165,13 +174,19 @@ export const useUsersStore = create<UsersState & UsersActions>()(
                             return profile;
                         }),
                     }));
-                    toast.success("Usuário atualizado com sucesso!");
+                    toast.success({
+                        title: "Usuário atualizado com sucesso",
+                        description: "O usuário foi atualizado com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, operation: "updateUser" }, "Error updating user");
                     }
-                    toast.error("Erro ao atualizar o usuário!");
+                    toast.error({
+                        title: "Erro ao atualizar usuário",
+                        description: "Ocorreu um erro ao atualizar o usuário. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },
@@ -191,13 +206,19 @@ export const useUsersStore = create<UsersState & UsersActions>()(
                     set((state) => ({
                         users: state.users.filter((profile) => profile.id !== id),
                     }));
-                    toast.success("Usuário deletado com sucesso!");
+                    toast.success({
+                        title: "Usuário deletado com sucesso",
+                        description: "O usuário foi deletado com sucesso!",
+                    });
                     return true;
                 } catch (error) {
                     if (error instanceof Error) {
                         log.error({ err: error, operation: "deleteUser" }, "Error deleting user");
                     }
-                    toast.error("Erro ao deletar usuário. Tente novamente mais tarde!");
+                    toast.error({
+                        title: "Erro ao deletar usuário",
+                        description: "Ocorreu um erro ao deletar o usuário. Tente novamente mais tarde!",
+                    });
                     return false;
                 }
             },

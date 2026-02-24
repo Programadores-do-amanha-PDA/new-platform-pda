@@ -34,10 +34,10 @@ export default function NavMain({
     <SidebarGroup>
       <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item, i) =>
+        {items.map((item) =>
           item.items && item.items?.length > 0 ? (
             <Collapsible
-              key={`sidebar-item-${i}`}
+              key={`sidebar-item-${item.title}`}
               asChild
               defaultOpen={
                 path.split("/").includes(item?.ref || "") ? true : false
@@ -81,7 +81,7 @@ export default function NavMain({
               </SidebarMenuItem>
             </Collapsible>
           ) : (
-            <SidebarMenuItem key={`sidebar-item-${i}`}>
+            <SidebarMenuItem key={`sidebar-item-${item.title}`}>
               <SidebarMenuButton
                 tooltip={item.title}
                 onClick={() => router.push(item.url)}

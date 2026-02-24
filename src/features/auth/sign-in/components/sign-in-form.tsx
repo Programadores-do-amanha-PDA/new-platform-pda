@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -47,7 +47,10 @@ export const SignInForm = () => {
             const response = await signInWithEmailAndPassword(data);
 
             if (response.error && response.confirmation) {
-                toast.error("Confirme seu email para continuar.");
+                toast.error({
+                    title: "Confirme seu email",
+                    description: "Para continuar, confirme seu email clicando no link que enviamos para sua caixa de entrada.",
+                });
                 router.push(`/email-confirmation?email=${encodeURIComponent(data.email)}`);
                 return;
             }
@@ -58,14 +61,19 @@ export const SignInForm = () => {
                     type: "manual",
                     message: response.message || "Credenciais inválidas",
                 });
-                toast.error("Email ou senha incorretos.");
+                toast.error({
+                    title: "Erro de autenticação",
+                    description: "Credenciais inválidas. Verifique seu email e senha e tente novamente.",
+                });
                 return;
             }
 
             // Login bem-sucedido
             if (!response.error && response.data?.session) {
                 updateAuthState({ session: response.data.session });
-                toast.success("Login realizado com sucesso!");
+                toast.success({
+                    title: "Login realizado com sucesso!",
+                });
                 router.push("/dashboard");
                 return;
             }
@@ -74,12 +82,11 @@ export const SignInForm = () => {
             throw new Error(response.message || "Erro desconhecido");
         } catch (error) {
             console.error("Erro no login:", error);
-            const errorMessage = error instanceof Error ? error.message : "Erro ao fazer login. Verifique suas credenciais.";
+            const errorMessage = error instanceof Error ? error.message : "Verifique se suas credenciais estão corretas.";
 
-            toast.error(errorMessage);
-            setError("root", {
-                type: "manual",
-                message: errorMessage,
+            toast.error({
+                title: "Erro ao fazer login",
+                description: errorMessage,
             });
         }
     };

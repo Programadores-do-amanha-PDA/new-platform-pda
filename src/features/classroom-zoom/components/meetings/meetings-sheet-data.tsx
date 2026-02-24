@@ -3,8 +3,9 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { ArrowUpLeft, LoaderCircle, Search } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -97,8 +98,12 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
         setIsAddingMeeting(meeting.id);
         const account = classroomZoomAccounts.find((account) => account.id === meeting.account_id);
         if (!account) return;
-        toast.info("Pegando informações da reunião...");
-        await createMeeting(account, meeting);
+
+        await toast.promise(createMeeting(account, meeting), {
+            loading: { title: "Adicionando reunião..." },
+            success: { title: "Reunião adicionada!" },
+            error: { title: "Erro!", description: "Ocorreu um erro ao adicionar a reunião. Tente novamente mais tarde." },
+        });
         setIsAddingMeeting(null);
     };
 
@@ -139,8 +144,8 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
                                 </SelectItem>
                                 <SelectGroup>
                                     <SelectLabel>Contas Zoom</SelectLabel>
-                                    {classroomZoomAccounts.map((account, i) => (
-                                        <SelectItem key={`zoom-account-key-${i}`} value={account.id}>
+                                    {classroomZoomAccounts.map((account) => (
+                                        <SelectItem key={`zoom-account-key-${account.id}`} value={account.id}>
                                             {account.me?.display_name || account.me?.email}
                                         </SelectItem>
                                     ))}
@@ -153,7 +158,7 @@ const MeetingsSheetData = ({ classroomId }: { classroomId: string }) => {
                         <ul className="flex flex-col gap-4 p-2 h-full overflow-y-auto">
                             {filteredMeetings.map((meeting: ZoomMeeting) => (
                                 <MeetingsSheetDataItem
-                                    key={meeting.uuid}
+                                    key={`zoom-meeting-key-${meeting.uuid}`}
                                     meeting={meeting}
                                     isAddingMeeting={isAddingMeeting}
                                     handleAddMeeting={handleAddMeeting}

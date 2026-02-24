@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { LoaderCircle } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -17,26 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+import { Classroom } from "@/features/classrooms/types";
+import { IconPicker, IconName } from "@/components/ui/icon-picker";
+import { useClassroomStore } from "../store";
 import ClassroomPeriodSelector from "./classroom-period-selector";
 import ClassroomStatusSelector from "./classroom-status-selector";
-import { Classroom } from "@/features/classrooms/types";
-import { useClassroomStore } from "../store";
-import { IconPicker, IconName } from "@/components/ui/icon-picker";
-
-const classroomFormSchema = z.object({
-    name: z
-        .string()
-        .min(1, "Nome é obrigatório")
-        .min(2, "Nome deve ter pelo menos 2 caracteres")
-        .max(50, "Nome deve ter no máximo 50 caracteres"),
-    period: z.enum(["morning", "afternoon", "evening"]).nullable(),
-    status: z.enum(["created", "active", "finished"], {
-        message: "Status é obrigatório",
-    }),
-    icon: z.string().min(1, "Ícone é obrigatório"),
-});
-
-type ClassroomFormData = z.infer<typeof classroomFormSchema>;
+import { ClassroomFormData, classroomFormSchema } from "../utils";
 
 const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroom }) => {
     const [loading, setLoading] = useState<boolean>(false);
@@ -82,15 +69,24 @@ const ClassroomFormDialog = ({ currentClassroom }: { currentClassroom?: Classroo
                 if (data.icon !== currentClassroom.icon) updates.icon = data.icon;
 
                 await updateClassroomAsync(currentClassroom.id, updates);
-                toast.success("Turma editada com sucesso!");
+                toast.success({
+                    title: "Turma editada com sucesso!",
+                    description: `As informações da ${currentClassroom.name} foram atualizadas.`,
+                });
             } else {
                 await createClassroomAsync(data);
-                toast.success("Turma criada com sucesso!");
+                toast.success({
+                    title: "Turma criada com sucesso!",
+                    description: `A turma ${data.name} foi criada com sucesso.`,
+                });
             }
 
             handleSetModalOpen(false);
         } catch {
-            toast.error(`Erro ao ${currentClassroom ? "editar" : "criar"} a turma!`);
+            toast.error({
+                title: "Erro ao processar a turma",
+                description: `Erro ao ${currentClassroom ? "editar" : "criar"} a turma!`,
+            });
         } finally {
             setLoading(false);
         }

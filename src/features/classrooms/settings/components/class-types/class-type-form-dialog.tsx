@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Color, { ColorLike } from "color";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { Info, Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
     const { updateClassroomSettingById, settingsByClassroom } = useClassroomSettingStore();
 
     const isEditing = !!currentClassType;
+    // Dialog should be open if user opened it or if currentClassType is provided
+    const isDialogOpen = open || !!currentClassType;
 
     const form = useForm<ClassTypesFormData>({
         resolver: zodResolver(ClassTypesSchema),
@@ -79,7 +81,6 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
 
     useEffect(() => {
         if (currentClassType) {
-            setOpen(true);
             form.reset({
                 title: currentClassType.title,
                 presenceCalcType: currentClassType.presence_calc_type,
@@ -98,49 +99,50 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
         }
     }, [currentClassType, form]);
 
-    const handleOpenChange = (open: boolean) => {
-        if (!open) {
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
             form.reset();
             setIsSubmitting(false);
             setOpen(false);
             onClose?.();
-        } else {
-            setOpen(true);
-            if (!currentClassType) {
-                form.reset({
-                    title: "",
-                    presenceCalcType: "bySingleMeeting",
-                    limits: [
-                        {
-                            id: crypto.randomUUID(),
-                            title: "Presença",
-                            key: "P",
-                            color: "#21a041",
-                            min: 60,
-                            max: undefined,
-                            allowJustification: false,
-                        },
-                        {
-                            id: crypto.randomUUID(),
-                            title: "Presença Parcial",
-                            key: "PP",
-                            color: "#e0de62",
-                            min: 30,
-                            max: 60,
-                            allowJustification: true,
-                        },
-                        {
-                            id: crypto.randomUUID(),
-                            title: "Falta",
-                            key: "F",
-                            color: "#e94040",
-                            min: 0,
-                            max: 30,
-                            allowJustification: true,
-                        },
-                    ],
-                });
-            }
+            return;
+        }
+
+        setOpen(true);
+        if (!currentClassType) {
+            form.reset({
+                title: "",
+                presenceCalcType: "bySingleMeeting",
+                limits: [
+                    {
+                        id: crypto.randomUUID(),
+                        title: "Presença",
+                        key: "P",
+                        color: "#21a041",
+                        min: 60,
+                        max: undefined,
+                        allowJustification: false,
+                    },
+                    {
+                        id: crypto.randomUUID(),
+                        title: "Presença Parcial",
+                        key: "PP",
+                        color: "#e0de62",
+                        min: 30,
+                        max: 60,
+                        allowJustification: true,
+                    },
+                    {
+                        id: crypto.randomUUID(),
+                        title: "Falta",
+                        key: "F",
+                        color: "#e94040",
+                        min: 0,
+                        max: 30,
+                        allowJustification: true,
+                    },
+                ],
+            });
         }
     };
 
@@ -161,30 +163,26 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
 
     const handleColorChange = useCallback(
         (index: number, colorValue: ColorLike) => {
-            try {
-                // Handle different color formats that might come from ColorPicker
-                let hex: string;
+            // Handle different color formats that might come from ColorPicker
+            let hex: string;
 
-                if (Array.isArray(colorValue)) {
-                    // If it's an RGBA array
-                    const [r, g, b, a] = colorValue;
-                    const color = Color.rgb(r, g, b, a || 1);
-                    hex = color.hex();
-                } else if (typeof colorValue === "string") {
-                    // If it's already a string (hex, rgb, etc.)
-                    hex = Color(colorValue).hex();
-                } else if (colorValue && typeof colorValue === "object") {
-                    // If it's an object with color properties
-                    hex = Color(colorValue).hex();
-                } else {
-                    return; // Invalid color format
-                }
-
-                // Update the form field
-                form.setValue(`limits.${index}.color`, hex);
-            } catch (error) {
-                console.error("Error processing color:", error);
+            if (Array.isArray(colorValue)) {
+                // If it's an RGBA array
+                const [r, g, b, a] = colorValue;
+                const color = Color.rgb(r, g, b, a || 1);
+                hex = color.hex();
+            } else if (typeof colorValue === "string") {
+                // If it's already a string (hex, rgb, etc.)
+                hex = Color(colorValue).hex();
+            } else if (colorValue && typeof colorValue === "object") {
+                // If it's an object with color properties
+                hex = Color(colorValue).hex();
+            } else {
+                return; // Invalid color format
             }
+
+            // Update the form field
+            form.setValue(`limits.${index}.color`, hex);
         },
         [form],
     );
@@ -192,74 +190,75 @@ export const ClassTypeFormDialog = ({ currentClassType, configId, onClose, onSuc
     const onSubmit = async (data: ClassTypesFormData) => {
         setIsSubmitting(true);
 
-        try {
-            // Get current classroom config
-            const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
-            if (!currentConfig) {
-                toast.error("Configuração não encontrada!");
-                return;
-            }
+        // Get current classroom config
+        const currentConfig = Object.values(settingsByClassroom).find((config) => config.id === configId);
+        if (!currentConfig) {
+            toast.error({
+                title: "Erro ao salvar tipo de aula",
+                description: "A configuração da turma não foi encontrada!",
+            });
+            return;
+        }
 
-            // Update class types in the config
-            const updatedClassTypes = [...(currentConfig.class_types || [])];
+        // Update class types in the config
+        const updatedClassTypes = [...(currentConfig.class_types || [])];
 
-            if (isEditing && currentClassType) {
-                // Update existing class type
-                const index = updatedClassTypes.findIndex((ct) => ct.id === currentClassType.id);
-                if (index !== -1) {
-                    updatedClassTypes[index] = {
-                        ...currentClassType,
-                        title: data.title,
-                        presence_calc_type: data.presenceCalcType,
-                        limits: data.limits.map((limit) => ({
-                            ...limit,
-                            is_presence: limit.isPresence,
-                            allow_justification: limit.allowJustification,
-                            max: limit.max === 0 ? undefined : limit.max,
-                        })),
-                        updated_at: new Date().toISOString(),
-                    };
-                }
-            } else {
-                const newClassType: ClassTypes = {
-                    id: crypto.randomUUID(),
+        if (isEditing && currentClassType) {
+            // Update existing class type
+            const index = updatedClassTypes.findIndex((ct) => ct.id === currentClassType.id);
+            if (index !== -1) {
+                updatedClassTypes[index] = {
+                    ...currentClassType,
                     title: data.title,
                     presence_calc_type: data.presenceCalcType,
                     limits: data.limits.map((limit) => ({
+                        ...limit,
                         is_presence: limit.isPresence,
                         allow_justification: limit.allowJustification,
-                        ...limit,
                         max: limit.max === 0 ? undefined : limit.max,
                     })),
-                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
                 };
-                updatedClassTypes.push(newClassType);
             }
+        } else {
+            const newClassType: ClassTypes = {
+                id: crypto.randomUUID(),
+                title: data.title,
+                presence_calc_type: data.presenceCalcType,
+                limits: data.limits.map((limit) => ({
+                    is_presence: limit.isPresence,
+                    allow_justification: limit.allowJustification,
+                    ...limit,
+                    max: limit.max === 0 ? undefined : limit.max,
+                })),
+                created_at: new Date().toISOString(),
+            };
+            updatedClassTypes.push(newClassType);
+        }
 
-            const result = await updateClassroomSettingById({
+        const result = await toast.promise(
+            updateClassroomSettingById({
                 id: currentConfig.id,
                 updates: {
                     class_types: updatedClassTypes,
                 },
-            });
+            }),
+            {
+                loading: { title: "Salvando tipo de aula..." },
+                success: { title: "Tipo de aula salvo com sucesso!" },
+                error: { title: "Erro ao salvar tipo de aula", description: "Tente novamente mais tarde!" },
+            },
+        );
 
-            if (result) {
-                toast.success(isEditing ? "Tipo de aula atualizado com sucesso!" : "Tipo de aula criado com sucesso!");
-                onSuccess?.();
-                handleOpenChange(false);
-            } else {
-                toast.error("Erro ao salvar tipo de aula");
-            }
-        } catch (error) {
-            console.error("Error saving class type:", error);
-            toast.error("Erro ao salvar tipo de aula");
-        } finally {
-            setIsSubmitting(false);
+        if (result) {
+            onSuccess?.();
+            handleOpenChange(false);
         }
+        setIsSubmitting(false);
     };
 
     return (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={isDialogOpen} onOpenChange={handleOpenChange}>
             {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
 
             <DialogContent className="flex flex-col w-full max-w-2xl h-full max-h-[90vh] overflow-hidden">
