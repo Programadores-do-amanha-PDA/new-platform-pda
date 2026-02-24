@@ -17,7 +17,7 @@ const EmailConfirmationFormFallback = () => {
 
 export default function EmailConfirmationPage() {
     return (
-        <div className="w-full h-full flex gap-6 bg-muted p-6 md:p-10">
+        <div className="w-full h-full flex gap-6 p-6 md:p-10">
             <div className="flex h-full w-full flex-col justify-center items-center gap-6">
                 <Suspense fallback={<EmailConfirmationFormFallback />}>
                     <EmailConfirmationForm />
